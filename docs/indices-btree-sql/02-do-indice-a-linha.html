@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 · Do índice à linha — Índices B-tree em SQL</title>
+<meta name="description" content="Lição 2: index scan, bitmap heap scan e index-only scan. Porque é que a segunda metade do trabalho — ir buscar as linhas à tabela — é a que custa.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/indices-btree-sql/02-do-indice-a-linha.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Índices B-tree</a> <span aria-hidden="true">›</span> Lição 2
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta nucleo">Lição 2 · núcleo</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>Do índice à linha</h1>
+    <p class="subtitulo">O índice diz-te <em>onde</em> está a linha. Ir buscá-la é a outra metade do trabalho —
+    e é quase sempre a metade cara. Há três formas de a fazer, e o <code>EXPLAIN</code> diz qual foi.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>No fim consegues <strong>distinguir <code>Index Scan</code>, <code>Bitmap Heap Scan</code> e
+    <code>Index Only Scan</code> num plano</strong>, dizer porque é que o planeador escolheu aquele, e —
+    dada uma query lenta servida por índice — decidir se vale a pena transformá-la num index-only scan
+    e <em>medir</em> se resultou.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+    <div class="caixa dica">
+      <span class="titulo">⭐ De memória, antes de ler</span>
+      <p>Falhar aqui é informação útil, não fracasso.</p>
+    </div>
+    <ol>
+      <li>O que está guardado numa folha da B-tree?
+        <details class="solucao"><summary>Resposta</summary><p>A <strong>chave</strong> e um <strong>ponteiro</strong> para a linha na tabela (o TID: página X, posição Y). As restantes colunas não estão lá.</p></details>
+      </li>
+      <li>Um índice com <code>level = 2</code> custa quantas leituras para localizar uma chave?
+        <details class="solucao"><summary>Resposta</summary><p>Três — níveis 2, 1 e 0. Medimos exatamente <code>Buffers: shared read=3</code> no <code>Bitmap Index Scan</code>.</p></details>
+      </li>
+      <li>Na moeda do planeador, ler 3000 páginas ao calhas custa mais ou menos do que ler 8348 em sequência?
+        <details class="solucao"><summary>Resposta</summary><p><strong>Mais:</strong> 3000 × 4 = 12 000 contra 8348 × 1 = 8348. É esta conta que decide se um índice é usado — e é o coração da <a href="03-seletividade.html">lição 3</a>.</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>O problema: o índice está ordenado, a tabela não</h3>
+    <p>As folhas dão-te os TIDs por <strong>ordem de chave</strong>. Mas as linhas estão na tabela por
+    <strong>ordem de inserção</strong>. Logo, percorrer as folhas por ordem e ir buscando cada linha significa
+    saltar pela tabela ao calhas — e a lição 0 já disse quanto isso custa: 4× por página.</p>
+    <p>É daqui que saem as três estratégias. Todas resolvem o mesmo problema; diferem em <em>como</em>.</p>
+
+    <h3>1 · <code>Index Scan</code> — uma linha de cada vez</h3>
+    <p>Percorre as folhas por ordem e, para cada TID, vai imediatamente à tabela buscar a linha.</p>
+    <ul>
+      <li><strong>Bom quando</strong> há poucas linhas, ou quando a ordem do índice é útil por si
+      (<code>ORDER BY</code>, <code>LIMIT</code>) — devolve já ordenado, sem custo de arranque.</li>
+      <li><strong>Mau quando</strong> há muitas linhas dispersas: cada uma é um salto, e a mesma página da tabela
+      pode ser visitada várias vezes.</li>
+    </ul>
+
+    <h3>2 · <code>Bitmap Heap Scan</code> — recolher primeiro, ler depois</h3>
+    <p>Duas fases, e a segunda é onde está a esperteza:</p>
+    <ol>
+      <li><strong><code>Bitmap Index Scan</code></strong>: percorre o índice e, em vez de ir à tabela, constrói um
+      mapa de bits das <em>páginas</em> que vai precisar.</li>
+      <li><strong><code>Bitmap Heap Scan</code></strong>: lê essas páginas <strong>por ordem física crescente</strong>,
+      cada uma <strong>uma só vez</strong>.</li>
+    </ol>
+    <p>Trocou-se acesso aleatório por acesso quase sequencial. Foi por isto que o plano da lição 1 apareceu como
+    <code>Bitmap Heap Scan</code> e não <code>Index Scan</code>: 20 linhas em 20 páginas diferentes valem mais lidas
+    por ordem.</p>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ <code>Recheck Cond</code> não é desconfiança</span>
+      <p>No plano aparece quase sempre <code>Recheck Cond</code>. O mapa de bits pode degradar-se: se as páginas
+      forem tantas que não caiba um bit por linha (<code>work_mem</code> esgotado), o Postgres passa a marcar
+      páginas <em>inteiras</em>. Aí lê a página e tem de voltar a aplicar a condição linha a linha. Quando o mapa é
+      exato, o <code>EXPLAIN</code> diz <code>Heap Blocks: exact=N</code>; quando degradou, diz
+      <code>lossy=N</code> — e <strong>ver <code>lossy</code> é um sinal concreto de que aumentar
+      <code>work_mem</code> pode ajudar</strong>.</p>
+    </div>
+
+    <h3>3 · <code>Index Only Scan</code> — não ir à tabela de todo</h3>
+    <p>Se <strong>todas</strong> as colunas que a query precisa estão no índice, não é preciso ir buscar a linha:
+    a resposta está na folha. Deixa de haver segunda metade.</p>
+    <p>Só que há uma complicação, e é ela que torna esta a parte da lição que mais gente percebe mal:</p>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ O índice não sabe se a linha é visível para ti</span>
+      <p>O Postgres é multiversão: uma linha apagada ou atualizada continua fisicamente na tabela até o
+      <code>VACUUM</code> passar, e a informação sobre <em>quem a pode ver</em> está na <strong>tabela</strong>,
+      não no índice. Então um index-only scan teria de ir à tabela na mesma — o que anularia a ideia toda.</p>
+      <p>A saída é o <strong>visibility map</strong>: um bitmap minúsculo, com dois bits por página da tabela, que
+      marca as páginas onde <em>todas</em> as linhas são visíveis para toda a gente. Se a página estiver marcada,
+      o índice chega. Se não estiver, é preciso ir lá — e isso aparece no plano como
+      <strong><code>Heap Fetches</code></strong>.</p>
+    </div>
+
+    <p>Daqui sai a consequência prática mais importante desta lição: <strong>um index-only scan numa tabela com
+    escrita recente e sem <code>VACUUM</code> deixa de ser «only»</strong>. O plano continua a dizer
+    <code>Index Only Scan</code> — é o <code>Heap Fetches</code> que denuncia. Vais medir isso já a seguir.</p>
+
+    <figure>
+      <svg viewBox="0 0 570 240" role="img" aria-labelledby="t-tres d-tres">
+        <title id="t-tres">As três formas de chegar da folha do índice à linha da tabela</title>
+        <desc id="d-tres">Três colunas lado a lado. Index Scan salta do índice para a tabela linha a linha.
+        Bitmap Heap Scan constrói primeiro um mapa de páginas e depois lê as páginas por ordem. Index Only Scan
+        responde a partir do índice e consulta apenas o visibility map.</desc>
+
+        <text class="svg-texto" x="10"  y="16" font-weight="700">Index Scan</text>
+        <text class="svg-texto" x="200" y="16" font-weight="700">Bitmap Heap Scan</text>
+        <text class="svg-texto" x="410" y="16" font-weight="700">Index Only Scan</text>
+
+        <rect class="svg-realce" x="10"  y="30" width="150" height="26" rx="4"/>
+        <rect class="svg-realce" x="200" y="30" width="170" height="26" rx="4"/>
+        <rect class="svg-realce" x="410" y="30" width="150" height="26" rx="4"/>
+        <text class="svg-suave" x="85"  y="47" text-anchor="middle">folhas do índice</text>
+        <text class="svg-suave" x="285" y="47" text-anchor="middle">folhas do índice</text>
+        <text class="svg-suave" x="485" y="47" text-anchor="middle">folhas do índice</text>
+
+        <rect class="svg-caixa" x="200" y="80" width="170" height="26" rx="4"/>
+        <text class="svg-suave" x="285" y="97" text-anchor="middle">mapa de páginas</text>
+
+        <rect class="svg-caixa" x="410" y="80" width="150" height="26" rx="4"/>
+        <text class="svg-suave" x="485" y="97" text-anchor="middle">visibility map</text>
+
+        <rect class="svg-caixa" x="10"  y="140" width="150" height="40" rx="4"/>
+        <rect class="svg-caixa" x="200" y="140" width="170" height="40" rx="4"/>
+        <text class="svg-suave" x="85"  y="165" text-anchor="middle">tabela</text>
+        <text class="svg-suave" x="285" y="165" text-anchor="middle">tabela</text>
+        <text class="svg-suave" x="485" y="165" text-anchor="middle">(não vai à tabela)</text>
+
+        <g class="svg-traco">
+          <path d="M30 56 L 26 136" marker-end="url(#s2)"/>
+          <path d="M65 56 L 118 136" marker-end="url(#s2)"/>
+          <path d="M100 56 L 45 136" marker-end="url(#s2)"/>
+          <path d="M135 56 L 140 136" marker-end="url(#s2)"/>
+          <path d="M285 56 V 76" marker-end="url(#s2)"/>
+          <path d="M285 106 V 136" marker-end="url(#s2)"/>
+          <path d="M485 56 V 76" marker-end="url(#s2)"/>
+        </g>
+        <text class="svg-suave" x="10"  y="205">saltos ao calhas,</text>
+        <text class="svg-suave" x="10"  y="221">página repetida</text>
+        <text class="svg-suave" x="200" y="205">ordem física, cada</text>
+        <text class="svg-suave" x="200" y="221">página uma só vez</text>
+        <text class="svg-suave" x="410" y="205">só se a página não</text>
+        <text class="svg-suave" x="410" y="221">estiver marcada → Heap Fetches</text>
+        <defs><marker id="s2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/></marker></defs>
+      </svg>
+      <figcaption>A diferença entre as três está toda na seta do meio: quantas vezes se toca na tabela, e por que ordem.</figcaption>
+    </figure>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>Vamos fazer um index-only scan, parti-lo de propósito, e repará-lo — medindo em cada passo.</p>
+
+    <h3>Passo 1 — pedir só o que está no índice</h3>
+    <p>Porquê isto primeiro: é a condição necessária. Se a query pedir uma coluna que não está no índice, não há
+    conversa possível.</p>
+<pre><code>EXPLAIN (ANALYZE, BUFFERS) SELECT cliente_id FROM encomendas WHERE cliente_id = 42;</code></pre>
+<pre><code>Index Only Scan using idx_cliente on encomendas (actual time=0.029..0.029 rows=20)
+  Heap Fetches: 0
+  Buffers: shared hit=4
+Execution Time: 0.044 ms</code></pre>
+    <p><strong>4 páginas</strong> e <code>Heap Fetches: 0</code>. Três são os níveis da árvore; a quarta é a
+    meta-página do índice. A tabela não foi tocada.</p>
+
+    <h3>Passo 2 — pedir uma coluna a mais e ver o plano mudar</h3>
+    <p>Porquê agora: para mostrar que não é a query nem o índice que mudam de natureza — muda <em>uma coluna</em>
+    na lista do <code>SELECT</code>.</p>
+<pre><code>EXPLAIN (ANALYZE, BUFFERS) SELECT cliente_id, total_cents FROM encomendas WHERE cliente_id = 42;</code></pre>
+<pre><code>Bitmap Heap Scan on encomendas (actual time=0.012..0.053 rows=20)
+  Buffers: shared hit=23
+  -&gt;  Bitmap Index Scan on idx_cliente (actual time=0.006..0.006 rows=20)
+        Buffers: shared hit=3</code></pre>
+    <p>De 4 páginas para <strong>23</strong>. <code>total_cents</code> não está no índice, logo foi preciso ir
+    buscar as 20 linhas a 20 páginas da tabela. Uma coluna no <code>SELECT</code> multiplicou o I/O por seis.</p>
+
+    <h3>Passo 3 — partir o index-only scan de propósito</h3>
+    <p>Porquê: porque em produção isto acontece sozinho, e quem nunca o viu não o reconhece.</p>
+<pre><code>UPDATE encomendas SET total_cents = total_cents WHERE cliente_id = 42;
+EXPLAIN (ANALYZE, BUFFERS) SELECT cliente_id FROM encomendas WHERE cliente_id = 42;</code></pre>
+<pre><code>Index Only Scan using idx_cliente on encomendas (actual time=0.104..0.107 rows=20)
+  Heap Fetches: 40
+  Buffers: shared hit=25
+Execution Time: 0.122 ms</code></pre>
+    <div class="caixa critico">
+      <span class="titulo">🔴 Continua a dizer «Index Only Scan» e já não é</span>
+      <p>4 páginas → <strong>25</strong>. <code>Heap Fetches: 0</code> → <strong>40</strong>. O <code>UPDATE</code>
+      criou versões novas das linhas, as páginas afetadas deixaram de estar marcadas como todas-visíveis, e o
+      index-only scan teve de ir à tabela — 40 vezes para 20 linhas, porque ficaram lá as duas versões de cada uma.</p>
+      <p>Repara que um <code>UPDATE</code> que <em>não mudou nenhum valor</em> (<code>total_cents = total_cents</code>)
+      foi suficiente. O nome do nó no plano manteve-se. <strong>É o <code>Heap Fetches</code> que diz a verdade,
+      não o título do nó.</strong></p>
+    </div>
+
+    <h3>Passo 4 — reparar</h3>
+<pre><code>VACUUM (ANALYZE) encomendas;
+EXPLAIN (ANALYZE, BUFFERS) SELECT cliente_id FROM encomendas WHERE cliente_id = 42;</code></pre>
+<pre><code>Index Only Scan using idx_cliente on encomendas (actual time=0.022..0.023 rows=20)
+  Heap Fetches: 0
+  Buffers: shared hit=4
+Execution Time: 0.035 ms</code></pre>
+    <p>O <code>VACUUM</code> voltou a marcar as páginas no visibility map. Quanto da tabela está marcado
+    vê-se assim:</p>
+<pre><code>SELECT relpages, relallvisible, round(100.0*relallvisible/relpages,1) AS pct
+FROM pg_class WHERE relname = 'encomendas';
+
+ relpages | relallvisible |  pct
+----------+---------------+-------
+     8348 |          8328 |  99.8</code></pre>
+    <p>Quando esta percentagem cai, os index-only scans dessa tabela degradam-se em silêncio. É um número que vale
+    a pena olhar antes de culpar a query.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p><strong>Dado.</strong> Índice sobre <code>encomendas (pais)</code>. A query é
+      <code>SELECT pais, count(*) FROM encomendas GROUP BY pais</code>.</p>
+      <p><strong>Passo 1 (completa).</strong> Que colunas precisa a query? ______ .
+      Estão todas no índice? ______ .</p>
+      <p><strong>Passo 2 (dado).</strong> O plano é <code>Index Only Scan</code> com <code>Heap Fetches: 0</code>.</p>
+      <p><strong>Passo 3 (completa).</strong> Agora a query passa a
+      <code>SELECT pais, sum(total_cents) FROM encomendas GROUP BY pais</code>.
+      O plano ainda pode ser index-only? ______ Porquê? ______</p>
+      <p><strong>Passo 4 (completa).</strong> Que índice tornaria a segunda query index-only? E que preço é que isso tem?</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 1:</strong> só <code>pais</code> — o <code>count(*)</code> não precisa de ler colunas,
+        só de contar entradas. Está no índice. Por isso index-only.</p>
+        <p><strong>Passo 3:</strong> <strong>não.</strong> <code>sum(total_cents)</code> precisa dos valores de
+        <code>total_cents</code>, que não estão num índice sobre <code>(pais)</code>. Tem de ir à tabela buscar
+        cada linha.</p>
+        <p><strong>Passo 4:</strong> um índice que <em>cubra</em> as duas colunas, e há duas formas:</p>
+        <ul>
+          <li><code>CREATE INDEX ON encomendas (pais, total_cents);</code> — as duas fazem parte da chave.</li>
+          <li><code>CREATE INDEX ON encomendas (pais) INCLUDE (total_cents);</code> — <code>total_cents</code>
+          viaja só nas folhas, sem entrar na ordenação. É mais pequeno e não sugere procuras que não serve.</li>
+        </ul>
+        <p><strong>O preço:</strong> o índice fica maior (mais bytes por entrada → mais páginas → mais I/O para o
+        percorrer) e <strong>cada escrita em <code>total_cents</code> passa a ter de o atualizar</strong>. Um
+        índice de cobertura troca custo de leitura por custo de escrita e espaço — a conta faz-se na
+        <a href="06-o-custo-do-outro-lado.html">lição 6</a>.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns da lição 2, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>«Diz <code>Index Only Scan</code>, logo não vai à tabela»</td>
+            <td>Dar a query por resolvida ao ler o nome do nó, sem olhar para mais nada</td>
+            <td>O nome do nó é a <em>estratégia</em>; <code>Heap Fetches</code> é o <em>resultado</em>.
+            Com <code>Heap Fetches: 40</code> foi à tabela 40 vezes. Sempre que leres «Index Only», procura logo essa linha</td>
+          </tr>
+          <tr>
+            <td>«<code>Bitmap Heap Scan</code> é pior que <code>Index Scan</code>»</td>
+            <td>Tentar forçar <code>Index Scan</code> por parecer «mais direto»</td>
+            <td>O bitmap existe precisamente para ser melhor quando há muitas linhas dispersas: lê cada página uma
+            vez e por ordem física. O planeador escolhe-o quando a conta lhe dá vantagem</td>
+          </tr>
+          <tr>
+            <td>«<code>Recheck Cond</code> significa que algo correu mal»</td>
+            <td>Alarme ao ver a palavra no plano</td>
+            <td>Aparece em quase todos os bitmap scans e é normal. O que merece atenção é
+            <code>Heap Blocks: lossy=N</code>, que indica mapa degradado por falta de <code>work_mem</code></td>
+          </tr>
+          <tr>
+            <td>«Cobrir mais colunas é sempre bom»</td>
+            <td><code>INCLUDE</code> com meia tabela lá dentro</td>
+            <td>Cada coluna coberta engorda o índice e acrescenta trabalho a <em>cada escrita</em>. Cobre-se o que
+            uma query quente precisa, não tudo o que possa vir a dar jeito</td>
+          </tr>
+          <tr>
+            <td>«O <code>VACUUM</code> é só para libertar espaço»</td>
+            <td>Índices-only lentos sem explicação aparente</td>
+            <td>É também o que mantém o <em>visibility map</em> atualizado. Sem ele, os index-only scans
+            degradam-se sem que o plano mude de nome</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — ler três planos</h3>
+      <p>Para cada excerto, diz qual das três estratégias foi usada e <strong>quantas páginas da tabela</strong> foram lidas:</p>
+      <ol>
+        <li><code>Index Only Scan … Heap Fetches: 0 … Buffers: shared hit=4</code></li>
+        <li><code>Bitmap Heap Scan … Heap Blocks: exact=20 … Buffers: shared hit=23</code></li>
+        <li><code>Index Only Scan … Heap Fetches: 40 … Buffers: shared hit=25</code></li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <ol>
+          <li>Index-only a sério. <strong>Zero</strong> páginas da tabela; as 4 são todas do índice.</li>
+          <li>Bitmap. <strong>20</strong> páginas da tabela (<code>exact=20</code>), mais 3 do índice = 23.</li>
+          <li>Index-only <em>degradado</em>. Foi à tabela 40 vezes; das 25 páginas, 3 ou 4 são do índice e o resto
+          da tabela. Diagnóstico: falta <code>VACUUM</code>, ou a tabela tem escrita constante e o visibility map
+          nunca fica em dia.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: construir um índice de cobertura</h3>
+      <p>Faz com que <code>SELECT cliente_id, criada_em FROM encomendas WHERE cliente_id = 42</code> seja
+      index-only. Mede antes e depois com <code>BUFFERS</code>. Depois responde: o índice que criaste serve
+      <em>também</em> <code>SELECT cliente_id, total_cents FROM encomendas WHERE cliente_id = 42</code>? Porquê?</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>CREATE INDEX idx_cob ON encomendas (cliente_id, criada_em);
+EXPLAIN (ANALYZE, BUFFERS) SELECT cliente_id, criada_em FROM encomendas WHERE cliente_id = 42;</code></pre>
+        <p>Corrido em Postgres 17.11, o plano passa a <code>Index Only Scan using idx_cob</code> com
+        <code>Heap Fetches: 0</code> — contra as 23 páginas do bitmap scan anterior.</p>
+        <p><strong>Não serve a segunda query.</strong> <code>total_cents</code> não está no índice, logo volta a
+        ser preciso ir à tabela. É a limitação central da cobertura: ela é <em>por conjunto de colunas</em>, não
+        por tabela. Cobrir tudo resolveria tudo — e transformaria o índice numa segunda cópia da tabela, com todo o
+        custo de escrita que isso traz (<a href="06-o-custo-do-outro-lado.html">lição 6</a>).</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — reproduzir a degradação e explicá-la</h3>
+      <p>Reproduz o passo 3 do exemplo trabalhado: parte um index-only scan com um <code>UPDATE</code> que não muda
+      valor nenhum. Depois explica <strong>porque é que <code>Heap Fetches</code> foi 40 e não 20</strong>, se as
+      linhas são 20.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>Porque o Postgres não altera linhas no sítio: um <code>UPDATE</code> escreve uma <strong>versão
+        nova</strong> e deixa a antiga lá até ao <code>VACUUM</code>. Ficaram duas versões de cada uma das 20
+        linhas, e o índice ganhou entradas a apontar para ambas.</p>
+        <p>Ao percorrer o índice, o scan encontra 40 ponteiros. Como as páginas envolvidas deixaram de estar
+        marcadas no visibility map, tem de ir à tabela verificar <em>cada um</em> — e é só lá que descobre que
+        metade aponta para versões que já não deve devolver. Daí 40 <code>Heap Fetches</code> para 20 linhas.</p>
+        <p>⭐ A lição maior: em Postgres, uma tabela com muitos <code>UPDATE</code>s tem índices com entradas a mais
+        e um visibility map desatualizado. Os dois efeitos empurram na mesma direção, e nenhum aparece no nome do
+        nó do plano.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <div class="quiz" data-quiz="btree-02">
+      <ol class="perguntas">
+
+        <li class="pergunta">
+          <p class="enunciado">O plano diz <code>Index Only Scan</code> e <code>Heap Fetches: 12000</code>. O que está a acontecer?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="c1" value="a" data-certa="false"><span class="rotulo">O índice está corrompido</span></label>
+              <p class="explicacao" hidden>Nada aqui indica corrupção. Heap Fetches alto é um comportamento normal e previsto do mecanismo de visibilidade — não um defeito do índice.</p></li>
+            <li class="opcao"><label><input type="radio" name="c1" value="b" data-certa="true"><span class="rotulo">As páginas não estão marcadas como todas-visíveis, e o scan está a ir à tabela na mesma</span></label>
+              <p class="explicacao" hidden>Certo. O nome do nó descreve a estratégia tentada; Heap Fetches revela o que aconteceu de facto. Causas típicas: escrita recente sem VACUUM, ou uma tabela com atualização constante em que o visibility map nunca fica em dia.</p></li>
+            <li class="opcao"><label><input type="radio" name="c1" value="c" data-certa="false"><span class="rotulo">A query pede colunas que não estão no índice</span></label>
+              <p class="explicacao" hidden>Se pedisse, o planeador nem teria escolhido um Index Only Scan — teria escolhido um Index Scan ou um Bitmap Heap Scan. A cobertura das colunas é condição para o plano ser sequer considerado.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Porque é que o <code>Bitmap Heap Scan</code> lê as páginas por ordem física?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="c2" value="a" data-certa="false"><span class="rotulo">Para devolver as linhas ordenadas</span></label>
+              <p class="explicacao" hidden>É o oposto: a ordem física não tem relação com a ordem das chaves, e por isso um Bitmap Heap Scan <em>destrói</em> a ordenação do índice. Se a query tiver ORDER BY, será preciso um Sort a seguir — e é uma das razões pelas quais o planeador prefere um Index Scan quando há ORDER BY com LIMIT.</p></li>
+            <li class="opcao"><label><input type="radio" name="c2" value="b" data-certa="true"><span class="rotulo">Para transformar saltos aleatórios em leitura quase sequencial, e tocar cada página uma só vez</span></label>
+              <p class="explicacao" hidden>Certo — e vale as duas coisas: leitura sequencial custa 4× menos por página na moeda do planeador, e uma página com várias linhas que interessam é lida uma vez em vez de várias.</p></li>
+            <li class="opcao"><label><input type="radio" name="c2" value="c" data-certa="false"><span class="rotulo">Porque o índice já está ordenado por posição física</span></label>
+              <p class="explicacao" hidden>O índice está ordenado por <em>chave</em>, não por posição física. É precisamente esse desencontro entre as duas ordens que cria o problema que o bitmap resolve.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Ver <code>Heap Blocks: lossy=5000</code> no plano sugere o quê?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="c3" value="a" data-certa="false"><span class="rotulo">Que 5000 linhas foram perdidas</span></label>
+              <p class="explicacao" hidden>Nenhuma linha se perde — o resultado é sempre correto. «Lossy» refere-se à precisão do mapa de bits interno, não aos dados devolvidos: por isso existe o Recheck, que reaplica a condição.</p></li>
+            <li class="opcao"><label><input type="radio" name="c3" value="b" data-certa="true"><span class="rotulo">Que o mapa de bits não coube em memória e passou a marcar páginas inteiras — aumentar work_mem pode ajudar</span></label>
+              <p class="explicacao" hidden>Certo. É um dos poucos sinais do EXPLAIN que aponta diretamente para um parâmetro concreto. Com o mapa degradado, o Recheck passa a ter de filtrar todas as linhas das páginas marcadas.</p></li>
+            <li class="opcao"><label><input type="radio" name="c3" value="c" data-certa="false"><span class="rotulo">Que o índice precisa de REINDEX</span></label>
+              <p class="explicacao" hidden>Não há relação. O mapa de bits é construído em memória no momento da execução; o estado do índice em disco não o afeta.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Tens <code>CREATE INDEX ON encomendas (cliente_id)</code>. Qual destas pode ser index-only?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="c4" value="a" data-certa="false"><span class="rotulo">SELECT * FROM encomendas WHERE cliente_id = 42</span></label>
+              <p class="explicacao" hidden>O <code>*</code> pede todas as colunas, e o índice só tem cliente_id. É a forma mais rápida de garantir que nenhum plano index-only é possível — e uma boa razão para evitar SELECT * em queries quentes.</p></li>
+            <li class="opcao"><label><input type="radio" name="c4" value="b" data-certa="true"><span class="rotulo">SELECT count(*) FROM encomendas WHERE cliente_id = 42</span></label>
+              <p class="explicacao" hidden>Certo. <code>count(*)</code> não precisa de ler colunas — só de contar entradas que satisfazem a condição, e a condição é sobre a coluna indexada. Tudo o que é preciso está nas folhas (desde que o visibility map coopere).</p></li>
+            <li class="opcao"><label><input type="radio" name="c4" value="c" data-certa="false"><span class="rotulo">SELECT cliente_id, estado FROM encomendas WHERE cliente_id = 42</span></label>
+              <p class="explicacao" hidden><code>estado</code> não está no índice, por isso é preciso ir à tabela buscá-lo. Tornava-se index-only com um índice sobre (cliente_id, estado) ou com (cliente_id) INCLUDE (estado).</p></li>
+            <li class="opcao"><label><input type="radio" name="c4" value="d" data-certa="false"><span class="rotulo">SELECT max(total_cents) FROM encomendas WHERE cliente_id = 42</span></label>
+              <p class="explicacao" hidden>O max precisa dos valores de total_cents, que não estão neste índice. Repara que <em>qual</em> é a função agregada importa: count(*) não lê colunas, max(coluna) lê.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Uma query com <code>ORDER BY criada_em LIMIT 10</code> tem índice sobre <code>criada_em</code>. Porque é que o planeador tende a preferir <code>Index Scan</code> a <code>Bitmap Heap Scan</code>?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="c5" value="a" data-certa="false"><span class="rotulo">Porque o Index Scan lê menos páginas no total</span></label>
+              <p class="explicacao" hidden>Em geral não lê — é precisamente por ler mais, em saltos, que o bitmap existe. A vantagem aqui não está no total lido, mas em <em>quando</em> as primeiras linhas ficam disponíveis.</p></li>
+            <li class="opcao"><label><input type="radio" name="c5" value="b" data-certa="true"><span class="rotulo">Porque devolve já ordenado e pode parar à décima linha, enquanto o bitmap tem de recolher tudo antes de devolver o que quer que seja</span></label>
+              <p class="explicacao" hidden>Certo, e liga-se diretamente ao custo de arranque da lição 0: o bitmap tem de construir o mapa completo antes da primeira linha sair, e ainda perde a ordenação pelo caminho. Com LIMIT pequeno, o Index Scan lê dez linhas e acaba.</p></li>
+            <li class="opcao"><label><input type="radio" name="c5" value="c" data-certa="false"><span class="rotulo">Porque bitmap scans não funcionam com ORDER BY</span></label>
+              <p class="explicacao" hidden>Funcionam — só que o resultado sai por ordem física, o que obriga a um Sort por cima. É mais caro, não impossível; a diferença é de custo, não de capacidade.</p></li>
+          </ul>
+        </li>
+
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="f1">Explica a diferença entre «o índice encontrou a linha» e «a base de dados leu a linha», e
+      porque é que a segunda parte é quase sempre a cara.
+        <span class="pista">Sem usar «TID», «heap», «bitmap» nem «visibility map». Uma analogia com um catálogo e
+        um armazém costuma funcionar — mas diz também <em>onde</em> a analogia parte.</span>
+      </label>
+      <textarea id="f1" data-pergunta="Encontrar a linha vs ler a linha, e porque a segunda parte é cara"></textarea>
+    </div>
+    <div class="aberta">
+      <label for="f2">Um colega diz que a query dele está resolvida porque o plano já diz <code>Index Only Scan</code>.
+      O que lhe perguntas a seguir, e porquê?
+        <span class="pista">Uma pergunta só. Escolhe a que mais depressa distingue «resolvido» de «parece resolvido».</span>
+      </label>
+      <textarea id="f2" data-pergunta="Que pergunta fazer a quem diz que o Index Only Scan resolve tudo"></textarea>
+    </div>
+
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p class="accoes"><button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button></p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/indices-btree-sql/respostas/AAAA-MM-DD.md</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li>A folha dá o <strong>ponteiro</strong>; ir buscar a linha é a outra metade, e normalmente a cara.</li>
+      <li><strong><code>Index Scan</code></strong>: linha a linha, mantém a ordem — bom com <code>LIMIT</code>.
+      <strong><code>Bitmap Heap Scan</code></strong>: recolhe as páginas e lê-as por ordem física, uma vez cada.</li>
+      <li><strong><code>Index Only Scan</code></strong>: não vai à tabela — <em>se</em> todas as colunas estiverem
+      no índice <em>e</em> as páginas estiverem marcadas no visibility map.</li>
+      <li>🔴 <strong><code>Heap Fetches</code> é que diz a verdade</strong>, não o nome do nó. Sobe com escrita
+      recente e desce com <code>VACUUM</code>.</li>
+      <li>Cobrir colunas (<code>INCLUDE</code>) compra leituras com <strong>escritas e espaço</strong>.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>Documentação do PostgreSQL 17 — <em>Index-Only Scans and Covering Indexes</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/indexes-index-only-scans.html">indexes-index-only-scans.html</a>
+        — fonte primária para o visibility map, o papel do <code>VACUUM</code> e a cláusula <code>INCLUDE</code>.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>Visibility Map</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/storage-vm.html">storage-vm.html</a>
+        — <strong>o que saltar:</strong> é curtíssimo; lê-se inteiro em dois minutos.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>Using EXPLAIN</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/using-explain.html">using-explain.html</a>
+        — a secção sobre bitmap scans explica <code>exact</code> e <code>lossy</code>.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Todos os planos desta lição</strong> foram corridos em <strong>PostgreSQL 17.11</strong> sobre a
+        tabela de <a href="preparar.sql">preparar.sql</a>, incluindo a degradação por <code>UPDATE</code> e a
+        recuperação por <code>VACUUM</code>. <span class="verificado">✅ Corrido a 2026-09-15</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="01-btree-por-dentro.html">← 1 · A B-tree por dentro</a> ·
+      <a href="index.html">↑ Índice do curso</a> ·
+      <a href="03-seletividade.html">3 · Seletividade →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var alvos = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    campo.hidden = false;
+
+    function normalizar(s) {
+      // Sem acentos: procurar "indices" tem de encontrar "índices".
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    alvos.forEach(function (el) { el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || "")); });
+
+    function filtrar() {
+      var q = normalizar(campo.value.trim());
+      var visiveis = 0;
+      alvos.forEach(function (el) {
+        var mostra = !q || el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+      if (contador) {
+        contador.textContent = q
+          ? visiveis + " de " + alvos.length + (visiveis === 1 ? " tópico" : " tópicos")
+          : alvos.length + (alvos.length === 1 ? " tópico" : " tópicos");
+      }
+      if (vazio) { vazio.hidden = visiveis !== 0; }
+    }
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

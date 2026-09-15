@@ -1,0 +1,15 @@
+# Nada de pessoal no repositório público.
+# Diagnósticos que precisem de contexto pessoal vivem aqui e não são publicados:
+topicos/*/PRIVADO.md
+topicos/**/privado/
+
+# Ferramentas
+node_modules/
+package-lock.json
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+
+# Saída temporária dos validadores
+.validar/

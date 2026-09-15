@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Folha de consulta — Índices B-tree em SQL</title>
+<meta name="description" content="Folha de consulta imprimível: o que ler num plano, a ordem de decisão do diagnóstico, e os números medidos.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/indices-btree-sql/folha.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra nao-imprimir">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Índices B-tree</a> <span aria-hidden="true">›</span> folha</p>
+  <button class="botao principal" type="button" onclick="window.print()">Imprimir</button>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <main id="conteudo">
+    <h1>Índices B-tree — folha de consulta</h1>
+    <p class="subtitulo nao-imprimir">Só o que se consulta. As explicações estão nas
+    <a href="index.html">lições</a> — uma folha que explica deixa de caber numa folha.</p>
+
+    <h2 id="diagnostico">Ordem de diagnóstico de uma query lenta</h2>
+    <ol>
+      <li><code>EXPLAIN (ANALYZE, BUFFERS)</code> — <strong>nunca sem <code>BUFFERS</code></strong>.
+      Num <code>UPDATE</code>/<code>DELETE</code>: <code>BEGIN; … ROLLBACK;</code></li>
+      <li><strong><code>rows=</code> vs <code>actual rows=</code></strong> — desencontro de ordens de grandeza?
+      → <code>ANALYZE</code> antes de mais nada.</li>
+      <li><strong>Multiplicar por <code>loops=</code></strong> antes de concluir seja o que for.</li>
+      <li><strong>Onde está o tempo</strong> — o nó cujo <code>actual time</code> final é próximo do total e cujos
+      filhos são muito mais rápidos. (Os tempos são acumulados: o próprio é a diferença.)</li>
+      <li><strong>Trabalho desperdiçado</strong> — <code>Rows Removed by Filter</code>, <code>Heap Fetches</code>,
+      <code>Sort Method: external merge</code>, <code>Batches &gt; 1</code>, <code>lossy=</code>.</li>
+      <li><strong>Páginas</strong> — <code>Buffers</code>. É o único número estável entre execuções.</li>
+    </ol>
+
+    <h2 id="sinais">Sinais do plano → o que fazer</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Sinais do plano e correções, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>No plano</th><th>Significa</th><th>Fazer</th></tr></thead>
+        <tbody>
+          <tr><td><code>rows=</code> muito ≠ <code>actual rows=</code></td><td>Estatísticas cegas</td><td><code>ANALYZE</code>; se a coluna for desequilibrada, <code>SET STATISTICS 500</code></td></tr>
+          <tr><td><code>Heap Fetches</code> alto</td><td>Index-only a ir à tabela na mesma</td><td><code>VACUUM</code>; ver <code>relallvisible/relpages</code></td></tr>
+          <tr><td><code>Buffers</code> do índice ≈ tamanho do índice</td><td>Índice <em>varrido</em>, não procurado</td><td>Ordem das colunas: falta o prefixo mais à esquerda</td></tr>
+          <tr><td><code>Rows Removed by Filter</code> grande</td><td>Leu para deitar fora</td><td>Índice — provavelmente <strong>parcial</strong></td></tr>
+          <tr><td><code>Sort Method: external merge Disk:</code></td><td>Ordenou em disco</td><td><code>work_mem</code> (é <strong>por operação</strong>); ou índice com a ordem certa; ou <code>LIMIT</code></td></tr>
+          <tr><td><code>Batches: &gt; 1</code> num <code>Hash</code></td><td>Dispersão não coube em memória</td><td><code>work_mem</code></td></tr>
+          <tr><td><code>Heap Blocks: lossy=</code></td><td>Bitmap degradado</td><td><code>work_mem</code></td></tr>
+          <tr><td><code>Planning Time</code> &gt; <code>Execution Time</code></td><td>Planear custa mais que executar</td><td><code>PREPARE</code>; menos índices para o planeador considerar</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="ordem">Ordem das colunas de um índice composto</h2>
+    <ol>
+      <li><strong>Igualdade (<code>=</code>) primeiro.</strong></li>
+      <li><strong>Intervalo ou <code>ORDER BY</code> a seguir</strong> — e no fim, porque depois de um intervalo as
+      colunas seguintes deixam de estar ordenadas.</li>
+      <li><strong>Seletividade só para desempatar.</strong></li>
+    </ol>
+    <p><strong>Prefixo mais à esquerda:</strong> <code>(a,b,c)</code> serve <code>a</code> · <code>(a,b)</code> ·
+    <code>(a,b,c)</code>. Não serve nada que não fixe <code>a</code>.<br>
+    <strong>Redundância:</strong> <code>(a,b)</code> torna um índice só em <code>(a)</code> desnecessário — apaga-se.</p>
+
+    <h2 id="serve">O que um B-tree serve (e não serve)</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Operações servidas por um índice B-tree, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Serve</th><th>Não serve</th></tr></thead>
+        <tbody>
+          <tr><td><code>=</code> <code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code>, <code>BETWEEN</code>, <code>IN</code></td><td><code>LIKE '%x'</code> (sem âncora no início)</td></tr>
+          <tr><td><code>IS NULL</code>, <code>IS NOT NULL</code></td><td><code>f(coluna) = ?</code> — salvo índice de expressão</td></tr>
+          <tr><td><code>LIKE 'abc%'</code>, <code>~ '^abc'</code> (padrão constante, ancorado)</td><td>Procurar por <code>b</code> num índice <code>(a,b)</code></td></tr>
+          <tr><td><code>ORDER BY</code> pela coluna indexada; <code>MIN</code>/<code>MAX</code></td><td>Desigualdade <code>&lt;&gt;</code> / <code>!=</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="comandos">Comandos</h2>
+<pre><code>-- ver o plano sem executar um DELETE/UPDATE
+BEGIN; EXPLAIN (ANALYZE, BUFFERS) DELETE ...; ROLLBACK;
+
+-- testar um índice sem o deixar (CREATE INDEX é transacional)
+BEGIN; CREATE INDEX t ON ...; EXPLAIN (ANALYZE, BUFFERS) ...; ROLLBACK;
+-- em produção com escrita: CREATE INDEX CONCURRENTLY (não é transacional)
+
+-- índices nunca usados
+SELECT indexrelname, idx_scan, pg_size_pretty(pg_relation_size(indexrelid))
+FROM pg_stat_user_indexes WHERE relname = 't' ORDER BY idx_scan;
+SELECT stats_reset FROM pg_stat_database WHERE datname = current_database();
+
+-- estatísticas de uma coluna
+SELECT attname, n_distinct, most_common_vals, correlation
+FROM pg_stats WHERE tablename = 't';
+
+-- tamanhos
+SELECT pg_size_pretty(pg_table_size('t')), pg_size_pretty(pg_indexes_size('t'));
+SELECT relpages, reltuples, relallvisible FROM pg_class WHERE relname = 't';
+
+-- altura da B-tree  (CREATE EXTENSION pageinspect;)
+SELECT level FROM bt_metap('idx');    -- folhas = nível 0, logo level=2 são 3 níveis
+
+-- diagnóstico: forçar e comparar. NUNCA deixar ligado.
+SET enable_seqscan = off;  SET enable_nestloop = off;  RESET ALL;
+
+-- parcial e de expressão
+CREATE INDEX ON t (col) WHERE estado = 'pendente';
+CREATE INDEX ON t ((lower(email)));        -- a função tem de ser IMMUTABLE
+                                           -- e a query tem de usar a expressão IGUAL</code></pre>
+
+    <h2 id="custos">Constantes de custo (omissão)</h2>
+    <p><code>seq_page_cost</code> 1 · <code>random_page_cost</code> 4 (SSD: ~1.1) ·
+    <code>cpu_tuple_cost</code> 0.01 · <code>cpu_operator_cost</code> 0.0025 ·
+    <code>cpu_index_tuple_cost</code> 0.005 · página 8 kB</p>
+    <p><strong>Seq Scan com filtro:</strong>
+    <code>relpages×1 + reltuples×0.01 + reltuples×0.0025</code></p>
+
+    <h2 id="numeros">Números medidos (Postgres 17.11, tabela de 1 000 000 de linhas)</h2>
+    <p>🔴 São <strong>desta</strong> máquina e <strong>desta</strong> tabela. Servem de ordem de grandeza, nunca
+    de regra. Mede os teus.</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Números medidos, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Medição</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td>Tabela: 1 M linhas</td><td>8348 páginas, 65 MB</td></tr>
+          <tr><td>Altura da B-tree (1 M linhas)</td><td>3 níveis → 3 leituras para localizar</td></tr>
+          <tr><td>Sem índice vs com índice (20 linhas)</td><td>8348 → 23 páginas; 15 ms → 0,075 ms</td></tr>
+          <tr><td>Index-only vs bitmap (mesma query)</td><td>4 → 23 páginas (uma coluna a mais no <code>SELECT</code>)</td></tr>
+          <tr><td>Deduplicação ligada vs desligada</td><td>7600 kB vs 21 MB</td></tr>
+          <tr><td><strong>Limiar índice→Seq Scan</strong> (correlação ≈ 0)</td><td><strong>~50%</strong> (rpc=4) · <strong>~60%</strong> (rpc=1.1). <em>Não são 20%</em></td></tr>
+          <tr><td>1% das linhas <em>dispersas</em></td><td>8359 páginas — o mesmo que ler tudo</td></tr>
+          <tr><td>1% das linhas <em>contíguas</em></td><td>118 páginas</td></tr>
+          <tr><td>Ordem errada num índice composto</td><td>1003 páginas vs 4 — <strong>250×</strong></td></tr>
+          <tr><td><code>INSERT</code> 200 k: 0 vs 4 índices</td><td>182 ms vs 1232 ms — <strong>6,8×</strong></td></tr>
+          <tr><td>Índice parcial (2% das linhas)</td><td>384 kB vs 6904 kB — <strong>18×</strong></td></tr>
+          <tr><td>Estatísticas cegas à distribuição</td><td>estimou 1789, eram 801 000 — <strong>448×</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="sqlite">SQLite — o mesmo, noutro vocabulário</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Equivalências entre Postgres e SQLite, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Postgres</th><th>SQLite</th></tr></thead>
+        <tbody>
+          <tr><td><code>EXPLAIN (ANALYZE, BUFFERS)</code></td><td><code>EXPLAIN QUERY PLAN</code> (sem tempos nem páginas)</td></tr>
+          <tr><td><code>Seq Scan</code></td><td><code>SCAN t</code></td></tr>
+          <tr><td><code>Index Scan</code></td><td><code>SEARCH t USING INDEX i (col=?)</code></td></tr>
+          <tr><td><code>Index Only Scan</code></td><td><code>USING COVERING INDEX</code></td></tr>
+          <tr><td>⚠️ índice varrido sem prefixo</td><td><code>SCAN t USING COVERING INDEX i</code> — <strong><code>SCAN</code>, não <code>SEARCH</code></strong></td></tr>
+          <tr><td><code>ANALYZE</code></td><td><code>ANALYZE</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="rodape">
+      <p>professor · <a href="index.html">Índices B-tree em SQL</a> · medido a 2026-09-15 em PostgreSQL 17.11.
+      Se esta folha divergir das lições, <strong>as lições mandam</strong>.</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var alvos = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    campo.hidden = false;
+
+    function normalizar(s) {
+      // Sem acentos: procurar "indices" tem de encontrar "índices".
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    alvos.forEach(function (el) { el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || "")); });
+
+    function filtrar() {
+      var q = normalizar(campo.value.trim());
+      var visiveis = 0;
+      alvos.forEach(function (el) {
+        var mostra = !q || el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+      if (contador) {
+        contador.textContent = q
+          ? visiveis + " de " + alvos.length + (visiveis === 1 ? " tópico" : " tópicos")
+          : alvos.length + (alvos.length === 1 ? " tópico" : " tópicos");
+      }
+      if (vazio) { vazio.hidden = visiveis !== 0; }
+    }
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

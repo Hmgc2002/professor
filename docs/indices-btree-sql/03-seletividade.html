@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 · Seletividade, estatísticas e correlação — Índices B-tree em SQL</title>
+<meta name="description" content="Lição 3: porque é que o planeador ignora o teu índice. Estatísticas, seletividade, correlação física, e o limiar real medido — que não é 20%.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/indices-btree-sql/03-seletividade.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Índices B-tree</a> <span aria-hidden="true">›</span> Lição 3
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta nucleo">Lição 3 · núcleo</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>Seletividade, estatísticas e correlação</h1>
+    <p class="subtitulo">«Criei o índice e o Postgres não o usa.» Quase sempre ele tem razão — e quando não tem,
+    a causa tem nome e mede-se.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>No fim consegues, perante um índice que não está a ser usado, <strong>decidir entre as três causas
+    possíveis</strong> — o planeador ter razão, as estatísticas estarem erradas, ou a query impedir o uso do índice —
+    e <strong>dizer qual é, com um comando de cada vez</strong>. E consegues medir na tua máquina o limiar a partir
+    do qual deixa de compensar, em vez de citar uma percentagem que alguém escreveu num blogue.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+    <div class="caixa dica">
+      <span class="titulo">⭐ De memória, antes de ler</span>
+      <p>A terceira pergunta é de duas lições atrás — o espaçamento é de propósito.</p>
+    </div>
+    <ol>
+      <li>Que número no plano revela que um <code>Index Only Scan</code> foi afinal à tabela?
+        <details class="solucao"><summary>Resposta</summary><p><code>Heap Fetches</code>. O nome do nó não muda; esse número sim.</p></details>
+      </li>
+      <li>Porque é que o <code>Bitmap Heap Scan</code> lê as páginas por ordem física?
+        <details class="solucao"><summary>Resposta</summary><p>Para trocar saltos aleatórios (4× mais caros) por leitura quase sequencial, e tocar cada página <strong>uma só vez</strong>.</p></details>
+      </li>
+      <li>Qual é a fórmula do custo de um <code>Seq Scan</code> com um filtro simples?
+        <details class="solucao"><summary>Resposta</summary><p><code>relpages × 1 + reltuples × 0.01 + reltuples × 0.0025</code>. Na tabela de treino: 8348 + 10 000 + 2500 = 20 848.</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>O planeador está a fazer uma aposta</h3>
+    <p>Para decidir entre índice e varredura, o planeador precisa de saber <strong>quantas linhas a query vai
+    devolver</strong> — e precisa de o saber <em>antes</em> de a executar. Não pode contar; tem de estimar.
+    Estima a partir de estatísticas que o <code>ANALYZE</code> recolheu de uma <strong>amostra</strong> da tabela e
+    guardou em <code>pg_stats</code>.</p>
+
+    <p>Três colunas dessa tabela explicam quase tudo o que acontece nesta lição:</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Estatísticas que o planeador usa, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Estatística</th><th>O que é</th><th>Para que serve</th></tr></thead>
+        <tbody>
+          <tr><td><code>n_distinct</code></td><td>Quantos valores diferentes há. Negativo = fração das linhas (−1 = todos distintos)</td><td>Estimar quantas linhas devolve um <code>=</code> num valor qualquer</td></tr>
+          <tr><td><code>most_common_vals</code> / <code>_freqs</code></td><td>Os valores mais frequentes e a fração de cada</td><td>Estimar bem os valores <em>desequilibrados</em> — sem isto, 97% e 1% seriam tratados da mesma maneira</td></tr>
+          <tr><td><code>correlation</code></td><td>De −1 a 1: o quanto a ordem dos valores acompanha a ordem física das linhas na tabela</td><td>Estimar quantas <em>páginas</em> distintas é preciso visitar — a peça que quase toda a gente esquece</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Seletividade não é a mesma coisa que agrupamento</h3>
+    <p>Esta é a ideia que separa perceber de decorar, e por isso vale a pena isolá-la:</p>
+    <div class="caixa dica">
+      <span class="titulo">⭐ Duas perguntas diferentes</span>
+      <p><strong>Seletividade:</strong> que <em>fração das linhas</em> a condição deixa passar.<br>
+      <strong>Agrupamento (correlação):</strong> essas linhas estão <em>juntas</em> em poucas páginas, ou espalhadas por todas?</p>
+      <p>Um índice só poupa I/O se as duas responderem bem. <strong>1% das linhas espalhadas por 100% das páginas
+      não poupa nada</strong> — e é exatamente o que medimos na lição 1 com <code>estado = 'cancelada'</code>.</p>
+    </div>
+
+    <p>Daí a conta que o planeador faz, e que é a tradução da lição 0:</p>
+    <ul>
+      <li><strong>Seq Scan:</strong> todas as páginas, em sequência → <code>relpages × 1</code></li>
+      <li><strong>Índice:</strong> altura da árvore + páginas distintas a visitar, algumas ao calhas →
+      <code>~páginas_visitadas × (1 a 4)</code></li>
+    </ul>
+    <p>O índice ganha enquanto <em>páginas visitadas × fator de dispersão</em> for menor que <em>relpages</em>.
+    Não há percentagem nenhuma nesta frase — há uma comparação entre dois números que dependem dos dados.</p>
+
+    <div class="caixa correcao">
+      <span class="titulo">⚠️ Corrigido a 2026-09-15 — a regra dos «20%» não sobreviveu à medição</span>
+      <p>A primeira versão desta lição dizia: <em>«o Postgres deixa de usar o índice quando a query devolve mais
+      de cerca de 20% das linhas»</em>. É um número que circula muito e que eu escrevi de memória, sem fonte.</p>
+      <p><strong>Está errado.</strong> Medido na tabela de treino, em Postgres 17.11 com os valores por omissão:
+      numa coluna com correlação ≈ 0, o planeador continuou a usar o índice até <strong>50%</strong> das linhas,
+      e só trocou para <code>Seq Scan</code> a partir de <strong>52%</strong>. Com
+      <code>random_page_cost = 1.1</code> (o valor típico para SSD), ainda usava o índice a <strong>60%</strong>.</p>
+      <p>Porquê a correção e não um número novo: <strong>qualquer número que eu escrevesse aqui seria o da minha
+      máquina.</strong> O limiar é consequência de <code>random_page_cost</code>, do tamanho da tabela, da
+      correlação da coluna e da largura das linhas. O que esta lição ensina é a <em>medi-lo</em> — E1 faz isso —
+      e não a decorá-lo.</p>
+    </div>
+
+    <h3>As três causas, e como se distinguem</h3>
+    <p>Quando um índice não é usado, é uma destas. Por esta ordem de probabilidade:</p>
+    <ol>
+      <li><strong>O planeador tem razão.</strong> A query devolve grande parte das linhas, ou a tabela é pequena.
+      Diagnóstico: comparar os custos dos dois planos. Se o <code>Seq Scan</code> é mesmo mais barato, acabou.</li>
+      <li><strong>As estatísticas estão erradas.</strong> A estimativa <code>rows=</code> está muito longe do
+      <code>actual rows=</code>. Diagnóstico: <code>EXPLAIN ANALYZE</code> e comparar os dois números.
+      Correção: <code>ANALYZE</code>.</li>
+      <li><strong>A query impede o uso do índice.</strong> Função sobre a coluna, tipos que não batem certo,
+      <code>LIKE '%x'</code>. Diagnóstico: olhar para o <code>WHERE</code>. Correção: reescrever, ou índice de
+      expressão (<a href="06-o-custo-do-outro-lado.html">lição 6</a>).</li>
+    </ol>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>Um índice que não é usado. Vamos descobrir porquê, sem adivinhar.</p>
+
+    <h3>Passo 1 — confirmar que o índice existe e a query não o usa</h3>
+    <p>Porquê primeiro: mais vezes do que parece, o índice não está na coluna que se julga.</p>
+<pre><code>CREATE INDEX idx_estado ON encomendas (estado);
+ANALYZE encomendas;
+EXPLAIN (ANALYZE) SELECT * FROM encomendas WHERE estado = 'entregue';</code></pre>
+<pre><code>Seq Scan on encomendas (cost=0.00..20848.00 rows=969633 width=36)
+                       (actual time=0.004..38.078 rows=970000 loops=1)
+  Filter: (estado = 'entregue'::text)
+  Rows Removed by Filter: 30000</code></pre>
+
+    <h3>Passo 2 — comparar a estimativa com a realidade <em>antes</em> de culpar o planeador</h3>
+    <p>Porquê agora: é o teste que separa a causa 2 das outras duas, e faz-se num relance.</p>
+    <p><code>rows=969633</code> estimadas contra <code>rows=970000</code> reais. Erro de 0,04%.
+    <strong>As estatísticas estão excelentes.</strong> A causa 2 está eliminada.</p>
+
+    <h3>Passo 3 — perguntar se o planeador tem razão</h3>
+    <p>A query devolve <strong>97%</strong> da tabela. Ler 97% das linhas através de um índice significa visitar
+    praticamente todas as páginas, e ainda por cima em saltos, pagando a subida e descida da árvore por cima.
+    O <code>Seq Scan</code> lê as mesmas páginas, em sequência, sem índice nenhum pelo meio.</p>
+    <p>Podemos forçar e medir, em vez de argumentar:</p>
+<pre><code>SET enable_seqscan = off;
+EXPLAIN (ANALYZE) SELECT * FROM encomendas WHERE estado = 'entregue';
+RESET enable_seqscan;</code></pre>
+    <div class="caixa ok">
+      <span class="titulo">✅ O planeador tinha razão</span>
+      <p>Forçado a usar o índice, o plano fica <em>mais</em> caro — que é a resposta que queríamos. Repara na
+      técnica: <code>enable_seqscan = off</code> não é uma correção, <strong>é um instrumento de diagnóstico</strong>.
+      Serve para perguntar «e se?», nunca para deixar em produção.</p>
+    </div>
+
+    <h3>Passo 4 — o mesmo índice, com um valor diferente</h3>
+    <p>Porquê este passo: porque mostra que a pergunta «este índice serve?» está mal formulada. O índice é o mesmo;
+    o que muda é <em>o valor procurado</em>.</p>
+<pre><code>EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM encomendas WHERE estado = 'cancelada';</code></pre>
+<pre><code>Index Scan using idx_estado on encomendas (actual rows=10000)
+  Buffers: shared hit=8348 read=11</code></pre>
+    <p>Agora usa o índice — mas olha para o número de páginas: <strong>8348</strong>, exatamente as mesmas que o
+    <code>Seq Scan</code> leria. As 10 000 linhas «canceladas» (1% da tabela!) estão espalhadas por praticamente
+    todas as páginas.</p>
+    <p>Ficou mais rápido (6 ms contra 15) porque devolve 97 vezes menos linhas e poupa o trabalho de CPU de filtrar
+    e transportar as outras. <strong>Não poupou I/O nenhum.</strong> Se a tabela não coubesse em memória, este
+    plano não teria sido melhor.</p>
+    <p>A causa está em <code>pg_stats</code>:</p>
+<pre><code>SELECT attname, n_distinct, most_common_vals, round(correlation::numeric,3)
+FROM pg_stats WHERE tablename = 'encomendas' AND attname IN ('estado','id');</code></pre>
+<pre><code>  attname   | n_distinct |       most_common_vals        | correlacao
+------------+------------+-------------------------------+------------
+ estado     |          3 | {entregue,pendente,cancelada} |      0.940
+ id         |         -1 |                               |      1.000</code></pre>
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Correlação alta sem agrupamento — a armadilha deste exemplo</span>
+      <p><code>estado</code> tem correlação 0,940, que parece ótimo, e no entanto as linhas estão espalhadas.
+      Porquê? Porque a correlação mede se a <em>ordem</em> dos valores acompanha a ordem física — e com apenas
+      <strong>três</strong> valores distintos, um padrão cíclico (uma «cancelada» a cada 100 linhas) dá correlação
+      alta e agrupamento nenhum.</p>
+      <p>Lição: <strong>a correlação é um indício, não uma prova.</strong> A prova é o <code>BUFFERS</code>.
+      É por isso que este curso insiste em medir em vez de inferir de uma estatística.</p>
+    </div>
+
+    <h3>Passo 5 — o caso em que o planeador se engana mesmo</h3>
+    <p>Até agora ele teve razão. Vamos construir o caso em que não tem, para saberes reconhecê-lo:</p>
+<pre><code>CREATE TABLE enviesada (id bigint, v integer);
+INSERT INTO enviesada SELECT i, i%1000 FROM generate_series(1,1000000) i;
+CREATE INDEX ON enviesada(v);
+ANALYZE enviesada;
+-- v=7 é 1/1000 das linhas. Estatísticas certas:
+EXPLAIN (ANALYZE) SELECT * FROM enviesada WHERE v = 7;</code></pre>
+<pre><code>Bitmap Heap Scan (cost=12.13..2546.64 rows=994) (actual rows=1000)   &lt;- ótimo</code></pre>
+<pre><code>-- agora 800 000 linhas novas, TODAS com v=7, e ninguém corre ANALYZE:
+INSERT INTO enviesada SELECT 2000000+i, 7 FROM generate_series(1,800000) i;
+EXPLAIN (ANALYZE) SELECT * FROM enviesada WHERE v = 7;</code></pre>
+<pre><code>Bitmap Heap Scan (cost=22.29..4582.60 rows=1789) (actual rows=801000)</code></pre>
+    <div class="caixa critico">
+      <span class="titulo">🔴 Estimou 1789. Eram 801 000. Erro de 448 vezes.</span>
+      <p>Com uma estimativa destas, todas as decisões a jusante ficam erradas: o planeador escolhe um bitmap scan
+      convencido de que vai buscar mil linhas, dimensiona memória para mil, e num <code>JOIN</code> escolheria um
+      <em>nested loop</em> que se repete 801 000 vezes em vez de uma junção por dispersão.</p>
+<pre><code>ANALYZE enviesada;
+EXPLAIN (ANALYZE) SELECT * FROM enviesada WHERE v = 7;
+
+Bitmap Heap Scan (cost=8898.32..28605.57 rows=798180) (actual rows=801000)   &lt;- 0,35% de erro</code></pre>
+      <p>Um <code>ANALYZE</code> resolveu. É por isto que a comparação <code>rows=</code> contra
+      <code>actual rows=</code> é a <strong>primeira coisa a olhar</strong> em qualquer plano.</p>
+    </div>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ Uma subtileza que me surpreendeu ao medir</span>
+      <p>Se só o <em>tamanho</em> da tabela mudar (linhas novas com a mesma distribuição), o planeador aguenta-se
+      surpreendentemente bem sem <code>ANALYZE</code>: ele não confia cegamente no <code>relpages</code> guardado,
+      consulta o tamanho real do ficheiro e escala a estimativa. Numa tabela que cresceu 2000× sem
+      <code>ANALYZE</code>, a estimativa ficou a menos de 10% do valor real.</p>
+      <p>O que ele <strong>não</strong> corrige é a <em>distribuição</em>. Por isso o caso perigoso não é «a tabela
+      cresceu» — é «a mistura de valores mudou»: uma coluna de estado que passou a ter um valor dominante, uma
+      importação que carregou tudo com a mesma data, um <code>tenant_id</code> novo que ficou com metade das linhas.</p>
+    </div>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <div class="exercicio">
+      <h3>Completa o diagnóstico</h3>
+      <p><strong>Dado.</strong> Tabela <code>eventos</code>, 20 000 000 de linhas, índice em <code>tipo</code>.
+      A query <code>SELECT * FROM eventos WHERE tipo = 'erro'</code> faz <code>Seq Scan</code> e demora 40 s.</p>
+      <p><strong>Passo 1 (dado).</strong> <code>EXPLAIN ANALYZE</code> mostra
+      <code>rows=1000000 … actual rows=1200</code>.</p>
+      <p><strong>Passo 2 (completa).</strong> Qual das três causas é? ______ Como se vê? ______</p>
+      <p><strong>Passo 3 (completa).</strong> Que comando corres? ______</p>
+      <p><strong>Passo 4 (dado).</strong> Corres, e a estimativa passa a <code>rows=1150</code>. O plano muda para
+      <code>Bitmap Heap Scan</code> e a query demora 80 ms.</p>
+      <p><strong>Passo 5 (completa).</strong> Terminaste? O que verificas a seguir para isto não voltar?</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2:</strong> causa 2, <strong>estatísticas erradas</strong>. Vê-se no desencontro entre
+        <code>rows=1000000</code> e <code>actual rows=1200</code> — um fator de ~830. O planeador escolheu
+        <code>Seq Scan</code> de forma perfeitamente racional <em>dada a informação que tinha</em>: se fossem mesmo
+        um milhão de linhas em vinte milhões, a varredura seria a escolha certa.</p>
+        <p><strong>Passo 3:</strong> <code>ANALYZE eventos;</code></p>
+        <p><strong>Passo 5:</strong> não terminaste. Duas coisas:</p>
+        <ul>
+          <li><strong>Porque é que as estatísticas estavam assim?</strong> Provavelmente o
+          <em>autovacuum</em> não está a chegar a esta tabela — tabelas grandes com escrita constante batem nos
+          limiares por omissão tarde demais. Vê-se em
+          <code>SELECT last_analyze, last_autoanalyze FROM pg_stat_user_tables WHERE relname='eventos';</code></li>
+          <li><strong>Se a coluna for desequilibrada</strong> (um <code>tipo</code> raríssimo entre milhões),
+          aumentar a resolução da amostra ajuda a manter a estimativa boa:
+          <code>ALTER TABLE eventos ALTER COLUMN tipo SET STATISTICS 500;</code> seguido de <code>ANALYZE</code>.</li>
+        </ul>
+        <p>Corrigir o sintoma e não a causa garante que voltas a esta query daqui a um mês.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns da lição 3, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>«Acima de ~20% das linhas o índice deixa de ser usado»</td>
+            <td>Citar uma percentagem fixa; decidir sem medir</td>
+            <td>Medido nesta tabela: o índice foi usado até <strong>50%</strong>, e até <strong>60%</strong> com
+            <code>random_page_cost=1.1</code>. O limiar depende da dispersão, do parâmetro e da tabela. Mede-se (E1)</td>
+          </tr>
+          <tr>
+            <td>«Poucas linhas devolvidas ⇒ o índice poupa I/O»</td>
+            <td>Surpresa quando 1% das linhas lê a tabela toda</td>
+            <td>Seletividade e agrupamento são coisas diferentes. 1% espalhado por 100% das páginas não poupa
+            página nenhuma — confirma-se no <code>BUFFERS</code></td>
+          </tr>
+          <tr>
+            <td>«O planeador está errado»</td>
+            <td>Chegar aí antes de comparar <code>rows=</code> com <code>actual rows=</code></td>
+            <td>Na maioria dos casos ele está certo, ou está a decidir bem com números maus. A distinção faz-se em
+            dois segundos e evita horas</td>
+          </tr>
+          <tr>
+            <td>«<code>enable_seqscan = off</code> corrigiu o problema»</td>
+            <td>Aparecer em código de aplicação ou em configuração do servidor</td>
+            <td>É um instrumento de <em>diagnóstico</em>: serve para perguntar «e se?». Deixá-lo ligado esconde a
+            causa e estraga todos os outros planos da sessão</td>
+          </tr>
+          <tr>
+            <td>«Correlação alta ⇒ linhas agrupadas»</td>
+            <td>Confiar na estatística sem olhar para o <code>BUFFERS</code></td>
+            <td>Com poucos valores distintos, um padrão cíclico dá correlação alta e dispersão total —
+            <code>estado</code> tem 0,940 e lê as 8348 páginas</td>
+          </tr>
+          <tr>
+            <td>«A tabela cresceu, logo as estatísticas estão obsoletas»</td>
+            <td>Correr <code>ANALYZE</code> por reflexo, sem olhar para o desencontro</td>
+            <td>O planeador corrige a <em>escala</em> pelo tamanho real do ficheiro. O que o cega é a
+            <em>distribuição</em> ter mudado</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E1 — código que corre: mede o limiar da <em>tua</em> máquina</h3>
+      <p>Em vez de decorar uma percentagem, descobre a tua. Corre isto e encontra o valor de <code>X</code> em que
+      o plano muda de índice para <code>Seq Scan</code>:</p>
+<pre><code>-- total_cents vai de 100 a 50000; a fração é (X-100)/49900
+EXPLAIN SELECT * FROM encomendas WHERE total_cents &lt; 25000;   -- ~50%
+EXPLAIN SELECT * FROM encomendas WHERE total_cents &lt; 26000;   -- ~52%</code></pre>
+      <p>Depois repete com <code>SET random_page_cost = 1.1;</code> e explica a diferença.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>Medido em Postgres 17.11, valores por omissão:</p>
+        <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Limiar medido, tabela rolável na horizontal">
+          <table>
+            <thead><tr><th>Fração das linhas</th><th><code>random_page_cost</code> = 4</th><th><code>random_page_cost</code> = 1.1</th></tr></thead>
+            <tbody>
+              <tr><td>50%</td><td>Bitmap Heap Scan</td><td>Bitmap Heap Scan</td></tr>
+              <tr><td>52%</td><td><strong>Seq Scan</strong></td><td>Index Scan</td></tr>
+              <tr><td>60%</td><td>Seq Scan</td><td><strong>Index Scan</strong></td></tr>
+              <tr><td>80%</td><td>Seq Scan</td><td>Seq Scan</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Porquê a diferença:</strong> <code>random_page_cost</code> é o preço de uma leitura ao calhas.
+        Baixá-lo de 4 para 1,1 torna os saltos quase tão baratos como a leitura sequencial, e o índice passa a
+        ganhar em mais casos. Num SSD isso corresponde melhor à realidade do que o 4, que foi calibrado para discos
+        com braço mecânico.</p>
+        <p>🔴 <strong>O que este exercício ensina:</strong> não há «o limiar do Postgres». Há o limiar <em>desta</em>
+        tabela, com <em>esta</em> dispersão, neste servidor, com esta configuração. Qualquer pessoa que te dê uma
+        percentagem fixa está a descrever a máquina dela.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — três queries, três causas</h3>
+      <p>Cada uma destas faz <code>Seq Scan</code> apesar de haver índice em <code>criada_em</code>. Diz qual das
+      três causas é, e como a confirmas com <strong>um</strong> comando:</p>
+      <ol>
+        <li><code>SELECT * FROM encomendas WHERE date_part('year', criada_em) = 2025;</code></li>
+        <li><code>SELECT * FROM encomendas WHERE criada_em &gt; '2023-01-01';</code></li>
+        <li>Uma tabela onde acabaste de inserir 5 milhões de linhas com datas todas do mesmo dia.</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <ol>
+          <li><strong>Causa 3 — a query impede.</strong> A função destrói a ordenação de que a árvore depende:
+          não há intervalo contíguo de <code>date_part(...)</code> nas folhas, que guardam
+          <code>criada_em</code>. Confirma-se reescrevendo como intervalo:
+          <code>WHERE criada_em &gt;= '2025-01-01' AND criada_em &lt; '2026-01-01'</code> — se o plano mudar, era isso.</li>
+          <li><strong>Causa 1 — o planeador tem razão.</strong> Todas as datas da tabela são posteriores a
+          2023-01-01, logo a condição devolve 100% das linhas. Confirma-se com
+          <code>SELECT count(*) FROM encomendas WHERE criada_em &gt; '2023-01-01';</code> comparado com o total.</li>
+          <li><strong>Causa 2 — estatísticas erradas.</strong> A distribuição mudou radicalmente e o
+          <code>ANALYZE</code> ainda não passou. Confirma-se com <code>EXPLAIN ANALYZE</code>: o desencontro entre
+          <code>rows=</code> e <code>actual rows=</code> vai ser enorme.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — o caso que parece contraditório</h3>
+      <p>Duas queries na mesma tabela, com o mesmo índice, devolvendo o <strong>mesmo número de linhas</strong>
+      (10 000 em 1 000 000). Uma lê 8359 páginas; a outra lê 118. Como é isto possível, e que estatística o prevê?</p>
+      <p>Constrói o caso na base de treino e mede-o.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>Possível porque o que decide é <strong>onde estão</strong> as linhas, não quantas são.</p>
+        <ul>
+          <li><code>WHERE estado = 'cancelada'</code> — 10 000 linhas, uma a cada 100, espalhadas por todas as
+          páginas → <strong>8359 páginas</strong>.</li>
+          <li><code>WHERE id BETWEEN 1 AND 10000</code> — 10 000 linhas <em>consecutivas</em>, e como
+          <code>id</code> foi inserido por ordem crescente, estão em páginas contíguas → <strong>~90 páginas</strong>
+          (10 000 linhas ÷ ~120 linhas por página).</li>
+        </ul>
+        <p>Medido em Postgres 17.11:</p>
+<pre><code>EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM encomendas WHERE id BETWEEN 1 AND 10000;
+  Index Scan using encomendas_pkey ... Buffers: shared hit=7 read=111   (118 páginas, 2,0 ms)
+
+EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM encomendas WHERE estado = 'cancelada';
+  Index Scan using idx_estado ... Buffers: shared hit=2764 read=5595   (8359 páginas, 18,8 ms)</code></pre>
+        <p><strong>A estatística que o prevê é <code>correlation</code></strong>: 1,000 para <code>id</code>
+        (ordem perfeita) contra um valor sem significado útil para <code>estado</code>.</p>
+        <p>⭐ E é daqui que sai a razão de existir o comando <code>CLUSTER</code>, que reordena fisicamente a tabela
+        segundo um índice. Não o damos neste curso — mas agora sabes que problema é que ele resolve, e que o preço
+        é reescrever a tabela inteira e a ordem degradar-se outra vez com as escritas seguintes.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <div class="quiz" data-quiz="btree-03">
+      <ol class="perguntas">
+
+        <li class="pergunta">
+          <p class="enunciado">Qual é a <strong>primeira</strong> coisa a olhar num <code>EXPLAIN ANALYZE</code> de uma query lenta?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="d1" value="a" data-certa="false"><span class="rotulo">O custo total do nó de topo</span></label>
+              <p class="explicacao" hidden>O custo é uma unidade arbitrária e não se compara com nada fora deste plano. Serve ao planeador para escolher, não a ti para diagnosticar.</p></li>
+            <li class="opcao"><label><input type="radio" name="d1" value="b" data-certa="true"><span class="rotulo">O desencontro entre <code>rows=</code> (estimado) e <code>actual rows=</code> (real)</span></label>
+              <p class="explicacao" hidden>Certo. Se estiverem próximos, o planeador decidiu com boa informação e o problema é outro. Se estiverem afastados por ordens de grandeza, todas as decisões a jusante são suspeitas — e a correção costuma ser um ANALYZE, não um índice novo.</p></li>
+            <li class="opcao"><label><input type="radio" name="d1" value="c" data-certa="false"><span class="rotulo">Se aparece Seq Scan</span></label>
+              <p class="explicacao" hidden>O Seq Scan pode ser a escolha certa. Reagir ao nome do nó antes de olhar para as estimativas leva a criar índices que nunca serão usados.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Uma query devolve 1% das linhas usando índice, e o <code>BUFFERS</code> mostra que leu <em>todas</em> as páginas da tabela. O que se passa?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="d2" value="a" data-certa="false"><span class="rotulo">O índice está mal construído</span></label>
+              <p class="explicacao" hidden>O índice fez o trabalho dele: localizou as linhas em três leituras. O problema está do outro lado — onde essas linhas estão fisicamente na tabela.</p></li>
+            <li class="opcao"><label><input type="radio" name="d2" value="b" data-certa="true"><span class="rotulo">As linhas estão espalhadas por praticamente todas as páginas — seletividade boa, agrupamento mau</span></label>
+              <p class="explicacao" hidden>Certo, e é a ideia central da lição. Um índice poupa I/O quando as linhas que interessam estão <em>juntas</em>. 1% das linhas distribuído uniformemente toca em todas as páginas e não poupa nenhuma.</p></li>
+            <li class="opcao"><label><input type="radio" name="d2" value="c" data-certa="false"><span class="rotulo">Falta correr ANALYZE</span></label>
+              <p class="explicacao" hidden>As estatísticas influenciam a <em>escolha</em> do plano, não quantas páginas as linhas ocupam. Mesmo com estatísticas perfeitas, linhas espalhadas continuam espalhadas.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Alguém afirma: «acima de 20% das linhas o Postgres não usa índices». O que respondes?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="d3" value="a" data-certa="false"><span class="rotulo">Que está certo, é o limiar documentado</span></label>
+              <p class="explicacao" hidden>Não existe limiar documentado. A documentação descreve um modelo de custos; a percentagem a que o resultado vira é uma consequência dos dados e da configuração, e não está escrita em lado nenhum porque não é uma constante.</p></li>
+            <li class="opcao"><label><input type="radio" name="d3" value="b" data-certa="true"><span class="rotulo">Que não há percentagem fixa: depende da dispersão das linhas, de <code>random_page_cost</code> e do tamanho da tabela — e que se mede</span></label>
+              <p class="explicacao" hidden>Certo. Medido nesta tabela: índice usado até 50% com os valores por omissão, e até 60% com random_page_cost=1.1. Quem cita uma percentagem está a descrever a máquina dele — como esta lição também estava, antes de ser corrigida.</p></li>
+            <li class="opcao"><label><input type="radio" name="d3" value="c" data-certa="false"><span class="rotulo">Que o limiar é 50%</span></label>
+              <p class="explicacao" hidden>Troca um número decorado por outro. Os 50% são o que foi medido nesta tabela, nesta máquina, nesta coluna — e mudaram para 60% só com um parâmetro diferente. O que se leva desta lição é o método, não o valor.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Para que serve <code>SET enable_seqscan = off</code>?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="d4" value="a" data-certa="false"><span class="rotulo">Para forçar o uso de índices em produção</span></label>
+              <p class="explicacao" hidden>É o uso que causa mais estragos. Afeta todas as queries da sessão, esconde a causa verdadeira, e quando os dados mudarem vais ter planos maus sem perceber porquê.</p></li>
+            <li class="opcao"><label><input type="radio" name="d4" value="b" data-certa="true"><span class="rotulo">Para diagnosticar: comparar o custo real dos dois planos e ver se o planeador tinha razão</span></label>
+              <p class="explicacao" hidden>Certo. É uma pergunta — «e se ele fosse obrigado a usar o índice?» — e a resposta diz-te se o problema é a decisão dele ou a informação que ele tinha. Depois faz-se RESET.</p></li>
+            <li class="opcao"><label><input type="radio" name="d4" value="c" data-certa="false"><span class="rotulo">Para desativar varreduras sequenciais permanentemente</span></label>
+              <p class="explicacao" hidden>Nem sequer o consegue fazer: o nome engana, e o efeito real é atribuir ao Seq Scan um custo enorme. Se não houver alternativa nenhuma, o Postgres usa-o na mesma.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">A coluna <code>estado</code> tem <code>correlation = 0.940</code>. Que se conclui?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="d5" value="a" data-certa="false"><span class="rotulo">Que as linhas com o mesmo estado estão agrupadas em poucas páginas</span></label>
+              <p class="explicacao" hidden>É a conclusão natural e está errada aqui — medimos 8348 páginas para 1% das linhas. Com apenas três valores distintos e um padrão cíclico, obtém-se correlação alta sem agrupamento nenhum.</p></li>
+            <li class="opcao"><label><input type="radio" name="d5" value="b" data-certa="true"><span class="rotulo">Pouco, sozinha: com poucos valores distintos a correlação engana. A prova é o <code>BUFFERS</code></span></label>
+              <p class="explicacao" hidden>Certo. A correlação é um indício que o planeador usa, não uma garantia que tu possas usar. É por isto que este curso insiste em medir com BUFFERS em vez de inferir a partir de uma estatística.</p></li>
+            <li class="opcao"><label><input type="radio" name="d5" value="c" data-certa="false"><span class="rotulo">Que a tabela precisa de CLUSTER</span></label>
+              <p class="explicacao" hidden>Pode vir a precisar, mas não é isso que este número diz — e decidir com base nele levaria a reescrever a tabela inteira sem saber se resolve. A decisão faz-se medindo as páginas visitadas pela query concreta que está lenta.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Inseriste 10 milhões de linhas numa tabela, com a <strong>mesma</strong> distribuição de valores de antes, e não correste <code>ANALYZE</code>. Qual é o risco maior?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="d6" value="a" data-certa="false"><span class="rotulo">O planeador vai achar que a tabela continua pequena e escolher mal</span></label>
+              <p class="explicacao" hidden>É o que quase toda a gente espera, e medi-lo mostra outra coisa: o planeador consulta o tamanho real do ficheiro e escala a estimativa a partir dele. Numa tabela que cresceu 2000× sem ANALYZE, a estimativa ficou a menos de 10% do real.</p></li>
+            <li class="opcao"><label><input type="radio" name="d6" value="b" data-certa="true"><span class="rotulo">Pequeno, neste caso — o perigoso é a <em>distribuição</em> mudar, não o tamanho</span></label>
+              <p class="explicacao" hidden>Certo. A escala corrige-se sozinha; a mistura de valores não. Os casos que magoam são uma importação que carrega tudo com a mesma data, um estado que passa a dominar, ou um tenant novo com metade das linhas — aí a estimativa pode errar por centenas de vezes.</p></li>
+            <li class="opcao"><label><input type="radio" name="d6" value="c" data-certa="false"><span class="rotulo">Os índices ficam corrompidos</span></label>
+              <p class="explicacao" hidden>Os índices são atualizados de forma síncrona com cada inserção — é exatamente por isso que as escritas custam mais com índices, como se vê na lição 6. Não há relação com ANALYZE, que só recolhe estatísticas.</p></li>
+          </ul>
+        </li>
+
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="f1">Explica porque é que «esta query só devolve 1% da tabela» não chega para saber se um índice
+      vai ajudar. O que é que falta perguntar?
+        <span class="pista">Sem usar «seletividade», «correlação» nem «página». Uma analogia com procurar coisas
+        numa casa costuma resultar.</span>
+      </label>
+      <textarea id="f1" data-pergunta="Porque é que 1% das linhas não chega para saber se o índice ajuda"></textarea>
+    </div>
+    <div class="aberta">
+      <label for="f2">Esta lição foi corrigida à vista: dizia «20%» e o número estava errado. O que é que isso te
+      diz sobre afirmações com números que leres por aí — incluindo nas lições seguintes?
+        <span class="pista">Não é uma pergunta retórica. Diz o que vais fazer de diferente a seguir.</span>
+      </label>
+      <textarea id="f2" data-pergunta="O que a correção dos 20% me diz sobre números sem fonte"></textarea>
+    </div>
+
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p class="accoes"><button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button></p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/indices-btree-sql/respostas/AAAA-MM-DD.md</code>.</p>
+    </div>
+
+    <div class="caixa ok">
+      <span class="titulo">✅ Fim do núcleo</span>
+      <p>Com as lições 0 a 3 já consegues diagnosticar o caso mais comum: ler um plano, perceber porque é que um
+      índice foi ou não usado, e decidir o que fazer. <strong>Parar aqui é um fim honesto.</strong></p>
+      <p>Antes de continuares, faz duas coisas: entrega as respostas e importa o
+      <a href="revisao.ics">revisao.ics</a>. No ritmo de uma hora por semana, o que decide se isto fica sabido é o
+      calendário, não a velocidade a que leste.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li>O planeador <strong>estima</strong> quantas linhas saem, a partir de estatísticas amostradas por <code>ANALYZE</code>.</li>
+      <li><strong>Seletividade ≠ agrupamento.</strong> 1% das linhas espalhadas por 100% das páginas não poupa I/O.</li>
+      <li>🔴 <strong>Não há percentagem fixa</strong> a partir da qual o índice deixa de ser usado. Medido aqui:
+      50% com os valores por omissão, 60% com <code>random_page_cost=1.1</code>.</li>
+      <li>Três causas para um índice não ser usado: o planeador tem razão · estatísticas erradas · a query impede.
+      Distinguem-se comparando <code>rows=</code> com <code>actual rows=</code>.</li>
+      <li><code>enable_seqscan=off</code> é <strong>diagnóstico</strong>, nunca correção. E a correlação é indício,
+      não prova — a prova é o <code>BUFFERS</code>.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>Documentação do PostgreSQL 17 — <em>How the Planner Uses Statistics</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/planner-stats-details.html">planner-stats-details.html</a>
+        — fonte primária: faz as contas de seletividade passo a passo, com <code>most_common_vals</code> e
+        histogramas. <strong>Porquê:</strong> é o texto que transforma o planeador de magia em aritmética.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>pg_stats</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/view-pg-stats.html">view-pg-stats.html</a>
+        — o significado exato de <code>n_distinct</code> (incluindo os valores negativos) e de
+        <code>correlation</code>. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>Planner Cost Constants</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/runtime-config-query.html#RUNTIME-CONFIG-QUERY-CONSTANTS">runtime-config-query.html</a>
+        — <code>random_page_cost</code> e a nota sobre armazenamento sem partes móveis.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Todas as medições desta lição</strong> — incluindo o limiar de 50%/52%, o erro de estimativa de
+        448× e o comportamento com <code>random_page_cost=1.1</code> — foram corridas em
+        <strong>PostgreSQL 17.11</strong> sobre <a href="preparar.sql">preparar.sql</a>.
+        <span class="verificado">✅ Corrido a 2026-09-15</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="02-do-indice-a-linha.html">← 2 · Do índice à linha</a> ·
+      <a href="index.html">↑ Índice do curso</a> ·
+      <a href="04-indices-compostos.html">4 · Índices compostos →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var alvos = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    campo.hidden = false;
+
+    function normalizar(s) {
+      // Sem acentos: procurar "indices" tem de encontrar "índices".
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    alvos.forEach(function (el) { el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || "")); });
+
+    function filtrar() {
+      var q = normalizar(campo.value.trim());
+      var visiveis = 0;
+      alvos.forEach(function (el) {
+        var mostra = !q || el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+      if (contador) {
+        contador.textContent = q
+          ? visiveis + " de " + alvos.length + (visiveis === 1 ? " tópico" : " tópicos")
+          : alvos.length + (alvos.length === 1 ? " tópico" : " tópicos");
+      }
+      if (vazio) { vazio.hidden = visiveis !== 0; }
+    }
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

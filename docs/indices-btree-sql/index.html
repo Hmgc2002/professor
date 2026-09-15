@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Índices B-tree em SQL — professor</title>
+<meta name="description" content="Curso completo sobre índices B-tree em Postgres e SQLite: mecanismo, diagnóstico de queries lentas e desenho de esquemas. Sete lições com exercícios, quiz e revisão espaçada.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/indices-btree-sql/index.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> Índices B-tree em SQL</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta página</h2>
+    <ol>
+      <li><a href="#conseguir">O que vais conseguir fazer</a></li>
+      <li><a href="#nao-e">O que este curso não é</a></li>
+      <li><a href="#assumi">O que assumi</a></li>
+      <li><a href="#mapa">O mapa</a></li>
+      <li><a href="#plano">O plano no tempo</a></li>
+      <li><a href="#preparar">Preparar o ambiente</a></li>
+      <li><a href="#fim">No fim do tópico</a></li>
+      <li><a href="#fases">Nota das fases</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta nucleo">pronto</span> <span class="etiqueta">7 lições</span>
+       <span class="etiqueta">Postgres 17 · SQLite</span></p>
+    <h1>Índices B-tree em SQL</h1>
+    <p class="subtitulo">Porque é que um índice acelera umas queries e outras não — e como decidir, com números,
+    em vez de por hábito. Todos os planos, tamanhos e tempos deste curso foram <strong>medidos</strong> numa base
+    de treino que tu podes reproduzir em dois comandos.</p>
+
+    <h2 id="conseguir">O que vais conseguir fazer no fim</h2>
+    <ul>
+      <li><strong>Calcular</strong> à mão o custo que o Postgres atribui a uma varredura sequencial, e conferir que
+      bate certo com o <code>EXPLAIN</code>.</li>
+      <li><strong>Prever</strong> quantas leituras de página custa localizar um valor num índice, a partir do número
+      de linhas e do <em>fanout</em>.</li>
+      <li><strong>Distinguir</strong> <code>Index Scan</code>, <code>Bitmap Heap Scan</code> e
+      <code>Index Only Scan</code> num plano, e dizer porque é que o planeador escolheu aquele.</li>
+      <li><strong>Diagnosticar</strong> um índice que não está a ser usado: decidir entre as três causas possíveis
+      e confirmar qual é, com um comando de cada vez.</li>
+      <li><strong>Decidir</strong> a ordem das colunas de um índice composto e justificá-la.</li>
+      <li><strong>Ler</strong> um plano de vinte linhas e dizer, em menos de um minuto, onde está o tempo.</li>
+      <li><strong>Defender</strong> a decisão de <em>não</em> criar um índice, com números.</li>
+    </ul>
+
+    <h2 id="nao-e">O que este curso não é</h2>
+    <ul>
+      <li><strong>Não ensina SQL.</strong> Parte do princípio que escreves a query; o problema é ela ser lenta.</li>
+      <li><strong>Não cobre índices que não sejam B-tree</strong> — GIN, GiST, BRIN, hash, SP-GiST. Pesquisa
+      textual, JSON e geometria precisam deles e ficam de fora. Se vierem a ser precisos, serão um tópico próprio
+      (<code>indices-nao-btree-sql</code>), não uma lição acrescentada a este.</li>
+      <li><strong>Não cobre particionamento, réplicas nem <em>sharding</em>.</strong> A fronteira é o ponto em que
+      a resposta deixa de ser «que índice?» e passa a ser «que arquitetura?» — algures acima das dezenas de milhões
+      de linhas.</li>
+      <li><strong>Não cobre afinação do servidor</strong> além dos parâmetros que mudam decisões de índice
+      (<code>random_page_cost</code>, <code>work_mem</code>). <code>shared_buffers</code>, WAL e <em>checkpoints</em>
+      ficam de fora.</li>
+      <li><strong>Não cobre o MySQL/InnoDB a sério.</strong> O índice agrupado do InnoDB muda o mecanismo o
+      suficiente para merecer tratamento próprio, e fingir que é igual seria pior do que não falar dele.</li>
+    </ul>
+
+    <h2 id="assumi">O que assumi</h2>
+    <p>Do <a href="https://github.com/Hmgc2002/professor/blob/main/topicos/indices-btree-sql/DIAGNOSTICO.md">diagnóstico</a>.
+    Cada pressuposto traz <strong>o que muda se estiver errado</strong> — se algum não bater contigo, diz, porque há
+    lições que mudam por causa disso.</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Pressupostos do curso, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Assumi que…</th><th>De onde veio</th><th>Se estiver errado…</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>⚠️ <strong>O critério de sucesso</strong>: dado um esquema, uma query e o seu plano, dizes que índice falta e o que esperas que mude — sem consultar</td>
+            <td><strong>Assunção declarada.</strong> Eram cinco perguntas no diagnóstico e usei quatro; esta não cheguei a fazer</td>
+            <td>Muda o <a href="teste.html">teste de domínio</a> e os exercícios de diagnóstico das lições 3 e 5</td>
+          </tr>
+          <tr>
+            <td>Escreves JOINs e agregações sem esforço, mas índice é caixa preta</td>
+            <td>Resposta do diagnóstico</td>
+            <td>Se souberes mais, salta a lição 0 e começa na 1. Se souberes menos, a lição 0 tem de crescer</td>
+          </tr>
+          <tr>
+            <td>Postgres é o principal; SQLite é a alternativa para estudar sem servidor à mão</td>
+            <td>Resposta do diagnóstico</td>
+            <td>Se for MySQL, muda bastante: o InnoDB agrupa a tabela pelo índice primário, e a lição 2 (do índice à linha) tem de ser reescrita</td>
+          </tr>
+          <tr>
+            <td>Tabelas até alguns milhões de linhas</td>
+            <td>Assunção declarada</td>
+            <td>Acima disso entram particionamento e outras estratégias, que este curso não cobre</td>
+          </tr>
+          <tr>
+            <td>~1 hora por semana, sem prazo</td>
+            <td>Resposta do diagnóstico</td>
+            <td>É o que justifica a divisão em núcleo e extensão, e o que torna o <a href="revisao.ics">calendário de revisão</a> a peça central em vez de um acessório</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="mapa">O mapa</h2>
+    <p>A lição 0 existe porque o diagnóstico disse «índices quase zero»: sem a noção de página e de custo, tudo o
+    resto vira regras decoradas. Não é uma nota de rodapé — é por onde se começa.</p>
+
+    <figure>
+      <svg viewBox="0 0 580 260" role="img" aria-labelledby="t-mapa d-mapa">
+        <title id="t-mapa">Mapa das sete lições e as suas dependências</title>
+        <desc id="d-mapa">As lições 0 a 3 formam o núcleo, em cadeia: páginas e custo, a B-tree por dentro, do
+        índice à linha, e seletividade. Da lição 3 partem as três lições de extensão: índices compostos, ler o
+        EXPLAIN, e o custo do outro lado. A tabela seguinte repete esta informação em texto.</desc>
+
+        <text class="svg-suave" x="6" y="14">NÚCLEO — depois destas quatro já consegues diagnosticar o caso comum</text>
+        <rect class="svg-realce" x="6"   y="24" width="128" height="44" rx="5"/>
+        <rect class="svg-realce" x="150" y="24" width="128" height="44" rx="5"/>
+        <rect class="svg-realce" x="294" y="24" width="128" height="44" rx="5"/>
+        <rect class="svg-realce" x="438" y="24" width="128" height="44" rx="5"/>
+        <text class="svg-texto" x="70"  y="43" text-anchor="middle">0 · páginas</text>
+        <text class="svg-suave" x="70"  y="58" text-anchor="middle">e custo</text>
+        <text class="svg-texto" x="214" y="43" text-anchor="middle">1 · a B-tree</text>
+        <text class="svg-suave" x="214" y="58" text-anchor="middle">por dentro</text>
+        <text class="svg-texto" x="358" y="43" text-anchor="middle">2 · do índice</text>
+        <text class="svg-suave" x="358" y="58" text-anchor="middle">à linha</text>
+        <text class="svg-texto" x="502" y="43" text-anchor="middle">3 · seletividade</text>
+        <text class="svg-suave" x="502" y="58" text-anchor="middle">e estatísticas</text>
+        <g class="svg-traco">
+          <path d="M134 46 H142" marker-end="url(#sm)"/>
+          <path d="M278 46 H286" marker-end="url(#sm)"/>
+          <path d="M422 46 H430" marker-end="url(#sm)"/>
+        </g>
+
+        <path class="svg-traco" stroke-dasharray="5 4" d="M502 68 V 104" marker-end="url(#sm)"/>
+        <text class="svg-suave" x="6" y="124">EXTENSÃO — desenho de esquemas e diagnóstico de casos difíceis</text>
+        <rect class="svg-caixa" x="6"   y="136" width="170" height="44" rx="5"/>
+        <rect class="svg-caixa" x="200" y="136" width="170" height="44" rx="5"/>
+        <rect class="svg-caixa" x="394" y="136" width="172" height="44" rx="5"/>
+        <text class="svg-texto" x="91"  y="155" text-anchor="middle">4 · índices compostos</text>
+        <text class="svg-suave" x="91"  y="170" text-anchor="middle">ordem das colunas</text>
+        <text class="svg-texto" x="285" y="155" text-anchor="middle">5 · ler o EXPLAIN</text>
+        <text class="svg-suave" x="285" y="170" text-anchor="middle">diagnóstico a sério</text>
+        <text class="svg-texto" x="480" y="155" text-anchor="middle">6 · o custo do outro lado</text>
+        <text class="svg-suave" x="480" y="170" text-anchor="middle">escritas, parciais, expressão</text>
+        <g class="svg-traco">
+          <path d="M176 158 H192" marker-end="url(#sm)"/>
+          <path d="M370 158 H386" marker-end="url(#sm)"/>
+        </g>
+
+        <rect class="svg-caixa" x="150" y="206" width="280" height="38" rx="5"/>
+        <text class="svg-texto" x="290" y="230" text-anchor="middle">teste de domínio · flashcards · revisão</text>
+        <path class="svg-traco" stroke-dasharray="5 4" d="M290 180 V 202" marker-end="url(#sm)"/>
+        <defs><marker id="sm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/></marker></defs>
+      </svg>
+      <figcaption>As quatro do núcleo são uma cadeia: cada uma precisa da anterior. As três de extensão partem
+      todas da lição 3 e podem ser feitas por qualquer ordem.</figcaption>
+    </figure>
+
+    <h2 id="plano">O plano no tempo</h2>
+    <p>Distribuído por ~1 hora por semana, que foi o ritmo declarado. Sete semanas para tudo; quatro para um ponto
+    de chegada honesto.</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Plano das lições por semana, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Semana</th><th>Lição</th><th>Depende de</th><th>O que passas a conseguir fazer</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><a href="00-paginas-e-custo.html">0 · Páginas, custo e o que o planeador minimiza</a> <span class="etiqueta nucleo">núcleo</span></td><td>—</td><td>Calcular o custo de um <code>Seq Scan</code> à mão</td></tr>
+          <tr><td>2</td><td><a href="01-btree-por-dentro.html">1 · A B-tree por dentro</a> <span class="etiqueta nucleo">núcleo</span></td><td>lição 0</td><td>Prever quantas leituras custa localizar um valor</td></tr>
+          <tr><td>3</td><td><a href="02-do-indice-a-linha.html">2 · Do índice à linha</a> <span class="etiqueta nucleo">núcleo</span></td><td>lição 1</td><td>Distinguir as três estratégias de acesso num plano</td></tr>
+          <tr><td>4</td><td><a href="03-seletividade.html">3 · Seletividade, estatísticas e correlação</a> <span class="etiqueta nucleo">núcleo</span></td><td>lição 2</td><td>Descobrir porque é que um índice não está a ser usado</td></tr>
+          <tr><td colspan="4"><strong>Fim do núcleo.</strong> Entrega as respostas, importa o <a href="revisao.ics">revisao.ics</a>, e decide se continuas agora ou mais tarde.</td></tr>
+          <tr><td>5</td><td><a href="04-indices-compostos.html">4 · Índices compostos e a ordem das colunas</a> <span class="etiqueta extensao">extensão</span></td><td>lição 3</td><td>Desenhar um índice composto e justificar a ordem</td></tr>
+          <tr><td>6</td><td><a href="05-ler-o-explain.html">5 · Ler o <code>EXPLAIN</code> a sério</a> <span class="etiqueta extensao">extensão</span></td><td>lição 3</td><td>Encontrar onde está o tempo num plano grande</td></tr>
+          <tr><td>7</td><td><a href="06-o-custo-do-outro-lado.html">6 · O custo do outro lado</a> <span class="etiqueta extensao">extensão</span></td><td>lição 3</td><td>Defender a decisão de não indexar, com números</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="preparar">Preparar o ambiente</h2>
+    <p>Os exercícios correm mesmo. Precisas da base de treino — 1 000 000 de linhas, ~87 MB, cria-se em segundos:</p>
+<pre><code>createdb treino_indices
+psql -d treino_indices -f preparar.sql</code></pre>
+    <p>O ficheiro é <a href="preparar.sql">preparar.sql</a>. Precisas também de:</p>
+<pre><code>psql -d treino_indices -c "CREATE EXTENSION IF NOT EXISTS pageinspect;"</code></pre>
+    <div class="caixa dica">
+      <span class="titulo">⭐ Sem Postgres à mão?</span>
+      <p>A maior parte dos exercícios tem variante SQLite, indicada em cada lição. O que muda é o vocabulário —
+      <code>EXPLAIN QUERY PLAN</code> em vez de <code>EXPLAIN ANALYZE</code>, <code>SCAN</code> e
+      <code>SEARCH</code> em vez de <code>Seq Scan</code> e <code>Index Scan</code>, <code>USING COVERING INDEX</code>
+      em vez de <code>Index Only Scan</code>. O mecanismo é o mesmo.</p>
+      <p>⚠️ O que o SQLite <strong>não</strong> te dá: contagem de páginas (<code>BUFFERS</code>), estatísticas de
+      distribuição visíveis, e a distinção entre <code>Index Scan</code> e <code>Bitmap Heap Scan</code>. As lições
+      3 e 5 perdem bastante sem Postgres.</p>
+    </div>
+
+    <h2 id="fim">No fim do tópico</h2>
+    <ul>
+      <li><a href="folha.html">Folha de consulta</a> — imprimível em A4, só o que se consulta.</li>
+      <li><a href="teste.html">Teste de domínio</a> — intercalado, sem soluções à vista. A entrega vai para correção.</li>
+      <li><a href="flashcards.csv">Flashcards</a> (CSV para o Anki, <code>frente;verso;etiqueta</code>).</li>
+      <li><a href="revisao.ics">Calendário de revisão</a> (.ics) — +1, +3, +7, +21 e +60 dias.
+      🔴 <strong>Importa-o antes de começares</strong>, não depois. Num ritmo de uma hora por semana, é o que
+      decide se isto fica sabido.</li>
+      <li><strong>Projeto:</strong> pega numa base de dados tua, corre a auditoria de índices da lição 6, e escreve
+      uma decisão fundamentada por cada índice que propões criar ou apagar. É o exercício que junta tudo.</li>
+    </ul>
+
+    <h2 id="fases">Nota das fases</h2>
+    <p>O que cada fase do processo encontrou. Está aqui porque é isto que distingue um curso que passou pelo
+    processo de um que parece ter passado.</p>
+
+    <h3>Fase 0 — Verificar</h3>
+    <p><strong>Procurei</strong> em <code>docs/</code> e <code>topicos/</code> por: «b-tree», «índice», «index»,
+    «query», «lenta», «desempenho», «seletividade»; no <code>INDICE.md</code>; e com
+    <code>git log -S "b-tree"</code>.</p>
+    <p><strong>Encontrei:</strong> nada. Este é o primeiro tópico do repositório, que tinha zero <em>commits</em>.
+    Não há pré-requisitos por cobrir noutro tópico nem vizinhos com que declarar fronteira — a fronteira declarada
+    acima é, por agora, contra tópicos que <em>não existem</em> e que ficam nomeados para quando existirem
+    (<code>indices-nao-btree-sql</code>, e um sobre o InnoDB).</p>
+    <p><strong>Fontes primárias localizadas:</strong> a documentação do PostgreSQL 17 (tipos de índice,
+    multicolumn, index-only scans, visibility map, parciais, de expressão, volatilidade de funções, uso do EXPLAIN,
+    constantes de custo, estatísticas do planeador). Uma fonte secundária identificada como tal: <em>Use The Index,
+    Luke!</em>.</p>
+
+    <h3>Fase 1 — Criar</h3>
+    <p>Sete lições, folha, teste, flashcards e calendário. Decisões tomadas durante a escrita:</p>
+    <ul>
+      <li><strong>Núcleo e extensão</strong> (D-011), por causa da tensão entre «as três coisas» e 1h/semana.</li>
+      <li><strong>Uma base de treino única</strong> para o curso inteiro, em vez de exemplos avulsos: permite que
+      os números de uma lição sejam comparáveis com os da seguinte.</li>
+      <li><strong>Postgres 17.11 instalado de propósito</strong> para poder correr tudo. Sem isso, metade das
+      afirmações deste curso seria de memória.</li>
+    </ul>
+
+    <h3>Fase 2 — Aprofundar</h3>
+    <p>O que a Fase 1 errou:</p>
+    <ul>
+      <li>🔴 <strong>A lição 3 afirmava que «o Postgres deixa de usar o índice acima de ~20% das linhas».</strong>
+      Número redondo, escrito de memória, sem fonte. Medido: o índice foi usado até <strong>50%</strong>, e até
+      <strong>60%</strong> com <code>random_page_cost=1.1</code>. A correção ficou
+      <a href="03-seletividade.html#mecanismo">à vista na lição</a>, e a lição passou a ensinar a <em>medir</em> o
+      limiar em vez de o decorar.</li>
+      <li><strong>A lição 1 tinha «Recuperar» antes de «Objetivo»</strong>, contra a ordem fixada no
+      <code>PROCESSO.md</code>. Trocado.</li>
+      <li><strong>Faltava o caso em que seletividade e agrupamento divergem.</strong> A lição 1 explicava a
+      estrutura e saltava direto para «o índice é rápido». Acrescentado o exercício E3, que mostra 1% das linhas a
+      ler 8359 páginas — e que prepara a lição 3 em vez de a repetir.</li>
+      <li><strong>A lição 2 não explicava porque é que <code>Heap Fetches</code> era 40 para 20 linhas.</strong>
+      Ficava o número sem o mecanismo (duas versões por linha, à espera de <code>VACUUM</code>). Acrescentado.</li>
+    </ul>
+
+    <h3>Fase 3 — Validar</h3>
+    <p>Resolvi todos os exercícios e o teste do zero, corri todo o código, e conferi cada afirmação factual contra
+    a documentação aberta na altura. O que isso apanhou:</p>
+    <ul>
+      <li>🔴 <strong>O <code>preparar.sql</code> não corria.</strong> <code>i * 7919</code> estoura os 32 bits por
+      volta da linha 271 000: <code>ERROR: integer out of range</code>. Corrigido com <code>i::bigint</code>.
+      Um erro invisível a ler e imediato a correr.</li>
+      <li>🔴 <strong>O índice de expressão da lição 6 não podia ser criado.</strong>
+      <code>date_part('year', criada_em)</code> sobre <code>timestamptz</code> dá
+      <code>ERROR: functions in index expression must be marked IMMUTABLE</code>, porque depende do fuso da sessão.
+      Eu tinha-o escrito como exemplo que funcionava. Passou a ser o exemplo <em>central</em> da lição, com o erro,
+      a causa e a correção — ficou melhor do que a versão que eu pensava estar certa.</li>
+      <li><strong>Três números inventados, substituídos por medições:</strong> a ordenação em disco da lição 5
+      («~35000kB» → 15792kB), a memória do quicksort («~100MB» → 79342kB), e as páginas do E3 da lição 3
+      («~90» → 118).</li>
+      <li><strong>O custo de escrita da lição 4 estava sobrestimado.</strong> Dizia «16× mais lento», medido numa
+      tabela criada com <code>INCLUDING ALL</code> — que trazia a chave primária e contaminava a comparação.
+      Medição controlada: <strong>6,8×</strong>. Corrigido nas duas lições onde aparecia.</li>
+      <li><strong>Uma medição minha estava mal feita</strong> e quase entrou no curso: comparei as duas ordens de
+      um índice composto sem apagar o outro índice, o planeador escolheu o bom nos dois casos, e o resultado deu
+      «não há diferença». A diferença real é de <strong>250×</strong>. O aviso ficou escrito no enunciado do
+      exercício, para não acontecer a quem o repetir.</li>
+      <li><strong>Descoberta que contrariou o que eu ia escrever:</strong> o planeador <em>não</em> fica perdido
+      quando a tabela cresce sem <code>ANALYZE</code> — corrige a escala pelo tamanho real do ficheiro. O que o
+      cega é a <em>distribuição</em> mudar. A lição 3 foi reescrita para dizer isto, com a demonstração do erro de
+      448×.</li>
+      <li>⚠️ <strong>O que ficou por validar:</strong> a verificação de acessibilidade automática
+      (<code>axe-core</code>) não correu nesta máquina — o Chrome do puppeteer vem sem assinatura e o macOS mata-o.
+      O <code>validar.sh</code> avisa e diz como resolver. As páginas foram verificadas manualmente nos dois temas e
+      a 400 px.</li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="../index.html">Todos os tópicos</a> · <a href="../metodo.html">Porque é que as lições têm esta forma</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var alvos = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    campo.hidden = false;
+
+    function normalizar(s) {
+      // Sem acentos: procurar "indices" tem de encontrar "índices".
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    alvos.forEach(function (el) { el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || "")); });
+
+    function filtrar() {
+      var q = normalizar(campo.value.trim());
+      var visiveis = 0;
+      alvos.forEach(function (el) {
+        var mostra = !q || el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+      if (contador) {
+        contador.textContent = q
+          ? visiveis + " de " + alvos.length + (visiveis === 1 ? " tópico" : " tópicos")
+          : alvos.length + (alvos.length === 1 ? " tópico" : " tópicos");
+      }
+      if (vazio) { vazio.hidden = visiveis !== 0; }
+    }
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

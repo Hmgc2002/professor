@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O método — professor</title>
+<meta name="description" content="Porque é que as lições deste repositório têm esta forma: as seis técnicas com evidência que as desenham, o que é convenção, e o que fica deliberadamente de fora.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/metodo.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="index.html">professor</a> <span aria-hidden="true">›</span> o método</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta página</h2>
+    <ol>
+      <li><a href="#porque">Porque é que isto importa</a></li>
+      <li><a href="#recuperacao">Prática de recuperação</a></li>
+      <li><a href="#espacamento">Repetição espaçada</a></li>
+      <li><a href="#intercalacao">Intercalação</a></li>
+      <li><a href="#exemplo-trabalhado">Exemplo trabalhado</a></li>
+      <li><a href="#desvanecimento">Desvanecimento</a></li>
+      <li><a href="#dificuldades">Dificuldades desejáveis</a></li>
+      <li><a href="#elaboracao">Elaboração</a></li>
+      <li><a href="#mapa-seccoes">Onde cada técnica vive</a></li>
+      <li><a href="#convencao">O que é convenção</a></li>
+      <li><a href="#fora">O que fica de fora</a></li>
+      <li><a href="#fontes">Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <h1>O método</h1>
+    <p class="subtitulo">Porque é que uma lição aqui tem a forma que tem. Nenhuma das onze secções é gosto:
+    cada uma corresponde a uma técnica com evidência, e as que não têm evidência não entram — mesmo as populares.</p>
+
+    <h2 id="porque">Porque é que isto importa</h2>
+    <p>As técnicas de estudo que <em>parecem</em> funcionar e as que <em>funcionam</em> são conjuntos quase disjuntos.
+    Reler e sublinhar produzem uma sensação forte de domínio e pouca retenção; testar-se e espaçar produzem a sensação
+    oposta — esforço, hesitação, a impressão de estar a correr mal — e retêm muito mais. O nome disto é
+    <a href="#dificuldades">dificuldade desejável</a>, e é a razão pela qual as soluções deste site estão todas
+    fechadas dentro de <code>&lt;details&gt;</code> e não à vista.</p>
+
+    <p>Na revisão de Dunlosky e colegas (2013), que classificou dez técnicas de estudo por utilidade, só duas ficaram
+    no escalão mais alto: <strong>praticar com testes</strong> e <strong>distribuir a prática no tempo</strong>.
+    Sublinhar e reler ficaram no escalão mais baixo. Este repositório é, em boa medida, uma tentativa de tornar as duas
+    primeiras difíceis de evitar.</p>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ O que isto não é</span>
+      <p>Não sou psicólogo cognitivo e esta página não é uma revisão de literatura. É a justificação das escolhas de
+      desenho deste repositório, com as fontes primárias identificadas para poderes discordar com base nelas.
+      Onde uma escolha é <a href="#convencao">convenção e não evidência</a>, está dito.</p>
+    </div>
+
+    <h2 id="recuperacao">Prática de recuperação</h2>
+    <p><strong>O mecanismo:</strong> o ato de puxar informação da memória altera a memória — torna-a mais fácil de
+    puxar da próxima vez. Reler não faz isso: percorre o material outra vez, mas a operação é de reconhecimento,
+    não de recuperação, e é a recuperação que consolida.</p>
+    <p>Roediger e Karpicke (2006) puseram estudantes a ler textos e depois ou a <em>reestudá-los</em> ou a
+    <em>fazer testes de evocação livre sem feedback</em>. Cinco minutos depois, quem reestudou saiu-se melhor.
+    Numa semana depois, a ordem inverteu-se, e com folga. É o resultado que melhor resume o problema: o que
+    funciona a curto prazo engana sobre o que funciona a prazo.</p>
+    <p><strong>Onde vive aqui:</strong> a secção <em>Recuperar</em> no início de cada lição (com respostas escondidas,
+    de propósito), o quiz, e o teste de domínio no fim.</p>
+
+    <h2 id="espacamento">Repetição espaçada</h2>
+    <p><strong>O mecanismo:</strong> a mesma quantidade de estudo distribuída por várias sessões retém mais do que
+    concentrada numa. O esquecimento parcial entre sessões não é desperdício — é ele que torna a recuperação seguinte
+    trabalhosa, e portanto útil.</p>
+    <p>Cepeda e colegas (2006) sintetizaram centenas de comparações: a prática distribuída ganha à concentrada, e o
+    intervalo ótimo cresce com o tempo até ao teste. Quanto mais longe quiseres reter, mais espaçado deve ser.</p>
+    <p><strong>Onde vive aqui:</strong> o ficheiro <code>revisao.ics</code> de cada tópico, e o facto de o plano
+    distribuir as lições por semanas em vez de as empilhar.</p>
+
+    <h2 id="intercalacao">Intercalação</h2>
+    <p><strong>O mecanismo:</strong> praticar em blocos (<em>todos</em> os exercícios do tipo A, depois <em>todos</em>
+    os do tipo B) permite resolver sem escolher a estratégia — já se sabe qual é, porque é a do bloco. Misturar os
+    tipos obriga a fazer a pergunta que conta num problema real: <em>que espécie de problema é este?</em></p>
+    <p>Rohrer e Taylor (2007) mostraram-no a baralhar problemas de matemática: durante a prática, o grupo intercalado
+    saiu-se <em>pior</em>; no teste, saiu-se melhor. Outra vez a sensação a apontar para o lado errado.</p>
+    <p><strong>Onde vive aqui:</strong> o <em>teste de domínio</em> de cada tópico é intercalado de propósito
+    (as perguntas não seguem a ordem das lições), e o comando <code>/rever</code> gera sessões que misturam tópicos
+    diferentes.</p>
+
+    <h2 id="exemplo-trabalhado">Exemplo trabalhado</h2>
+    <p><strong>O mecanismo:</strong> para quem ainda não tem o esquema do problema, atirar-se a resolvê-lo gasta a
+    memória de trabalho em tentativa-e-erro — esforço a mais na busca, a menos na estrutura. Estudar uma resolução
+    completa liberta essa capacidade para ver <em>como</em> a resolução se organiza.</p>
+    <p>Sweller e Cooper (1985) compararam estudar exemplos resolvidos com resolver os problemas equivalentes em
+    álgebra, e os exemplos ganharam — em tempo gasto e em desempenho posterior.</p>
+    <p><strong>Onde vive aqui:</strong> a secção <em>Exemplo trabalhado</em>, com a regra de que o raciocínio de cada
+    passo é explícito. Um exemplo que mostra o que se fez sem dizer porquê não é um exemplo trabalhado: é uma solução.</p>
+
+    <h2 id="desvanecimento">Desvanecimento (fading)</h2>
+    <p><strong>O mecanismo:</strong> o exemplo trabalhado ajuda no início e estorva depois — quando o esquema já
+    existe, ver tudo resolvido rouba a prática. A transição não deve ser abrupta: retiram-se passos um a um, do fim
+    para o princípio, até só restar o enunciado.</p>
+    <p>Renkl e Atkinson (2003) descrevem exatamente este procedimento de desvanecimento e porque é que ele
+    supera o salto direto de «ver exemplos» para «resolver sozinho».</p>
+    <p><strong>Onde vive aqui:</strong> a secção <em>Exemplo com lacunas</em>, logo a seguir ao exemplo trabalhado,
+    com mais lacunas a cada lição que passa.</p>
+
+    <h2 id="dificuldades">Dificuldades desejáveis</h2>
+    <p><strong>O mecanismo:</strong> Bjork (1994) chamou <em>desirable difficulties</em> às condições que pioram o
+    desempenho durante o treino e melhoram a retenção depois dele. Recuperar em vez de reler, espaçar em vez de
+    concentrar, intercalar em vez de blocar — são todas a mesma família. A consequência prática é desconfortável:
+    <strong>a sensação de estar a aprender bem é um mau indicador de estar a aprender bem</strong>.</p>
+    <p><strong>Onde vive aqui:</strong> soluções fechadas por defeito, perguntas de recuperação antes do texto,
+    quiz que explica <em>todas</em> as opções em vez de dizer só se acertaste. E na ausência de barras de progresso
+    e de medalhas: são gratificação imediata onde é precisamente o desconforto que está a fazer o trabalho.</p>
+
+    <h2 id="elaboracao">Elaboração</h2>
+    <p><strong>O mecanismo:</strong> explicar porquê, ligar ao que já se sabe e reformular por palavras próprias
+    obriga a construir relações que a leitura passiva não constrói. O caso extremo é tentar explicar a alguém que não
+    sabe: os buracos aparecem imediatamente, porque não se pode contorná-los com o jargão.</p>
+    <p><strong>Onde vive aqui:</strong> a secção <em>Explica por palavras tuas</em>, com a instrução de não usar os
+    termos técnicos da lição — quem precisa deles ainda não tem o mecanismo, tem o vocabulário. É também a resposta
+    que eu corrijo com mais atenção, porque é a que revela conceções erradas que um quiz de escolha múltipla deixa
+    passar.</p>
+
+    <h2 id="mapa-seccoes">Onde cada técnica vive</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Correspondência entre secções da lição e técnicas, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Secção da lição</th><th>Técnica</th><th>O que se perde ao cortá-la</th></tr></thead>
+        <tbody>
+          <tr><td>2. Recuperar</td><td><a href="#recuperacao">Recuperação</a> + <a href="#espacamento">espaçamento</a></td><td>A revisão do material antigo deixa de acontecer, e só se dá por isso no teste</td></tr>
+          <tr><td>4. Exemplo trabalhado</td><td><a href="#exemplo-trabalhado">Exemplo trabalhado</a></td><td>Quem ainda não tem o esquema gasta a sessão a adivinhar</td></tr>
+          <tr><td>5. Exemplo com lacunas</td><td><a href="#desvanecimento">Desvanecimento</a></td><td>O salto de «vi resolver» para «resolve sozinho» fica demasiado grande</td></tr>
+          <tr><td>7. Praticar (soluções fechadas)</td><td><a href="#dificuldades">Dificuldade desejável</a></td><td>Ler a solução dá a sensação de perceber sem a aprendizagem</td></tr>
+          <tr><td>8. Quiz (explica todas as opções)</td><td><a href="#recuperacao">Recuperação</a> + <a href="#elaboracao">elaboração</a></td><td>Acertar por eliminação passa a contar como saber</td></tr>
+          <tr><td>9. Explica por palavras tuas</td><td><a href="#elaboracao">Elaboração</a></td><td>As conceções erradas sobrevivem escondidas atrás do jargão</td></tr>
+          <tr><td>Teste de domínio</td><td><a href="#intercalacao">Intercalação</a></td><td>Treina-se a reconhecer o capítulo, não o problema</td></tr>
+          <tr><td><code>revisao.ics</code></td><td><a href="#espacamento">Espaçamento</a></td><td>O curso fica aprendido durante duas semanas e esquecido durante o resto</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="convencao">O que é convenção e não evidência</h2>
+    <p>Marcar isto importa: uma escolha arbitrária apresentada como resultado experimental é uma forma pequena de
+    mentira, e depois ninguém a questiona.</p>
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Convenções, não resultados</span>
+      <ul>
+        <li><strong>Os intervalos +1, +3, +7, +21 e +60 dias</strong> do <code>revisao.ics</code>. A evidência sustenta
+        <em>espaçar</em> e <em>expandir</em> o intervalo; estes números concretos são uma escolha prática que dá cinco
+        revisões em dois meses, não um ótimo calculado. Se um tópico pedir outra coisa, muda-se.</li>
+        <li><strong>A ordem exata das onze secções.</strong> Recuperar antes de ler tem razão de ser; que os erros
+        comuns venham depois do exemplo com lacunas e não antes é arrumação.</li>
+        <li><strong>Cinco linhas no resumo, 5 a 10 perguntas no quiz.</strong> Limites para forçar escolha, não medidas.</li>
+        <li><strong>Três níveis de dificuldade</strong> nos exercícios (●○○ a ●●●). Arrumação.</li>
+      </ul>
+    </div>
+
+    <h2 id="fora">O que fica deliberadamente de fora</h2>
+    <div class="caixa critico">
+      <span class="titulo">🔴 Estilos de aprendizagem</span>
+      <p>A ideia de que cada pessoa aprende melhor num «canal» próprio — visual, auditivo, cinestésico — e de que o
+      ensino deve ser adaptado a esse canal <strong>não tem apoio empírico</strong>. Pashler, McDaniel, Rohrer e Bjork
+      (2008) procuraram estudos com o desenho capaz de a testar (atribuir pessoas de estilos diferentes a instruções
+      diferentes e ver se cada uma se sai melhor com a «sua») e praticamente não encontraram nenhum; os poucos com o
+      desenho certo contradizem a hipótese.</p>
+      <p>Por isso não vais encontrar aqui «se és visual, vê o diagrama; se és auditivo, ouve». O diagrama está lá
+      quando <em>a coisa</em> é espacial — o que manda é a natureza do material, não um perfil do leitor.</p>
+    </div>
+    <p>Fora ficam também, pelas mesmas razões: sublinhar e reler como método principal (escalão mais baixo em Dunlosky
+    et al.), sequências de medalhas e ofensivas diárias, e qualquer afirmação sobre percentagens de retenção do tipo
+    «retemos 10% do que lemos e 90% do que fazemos» — essa pirâmide circula há décadas sem fonte primária que a sustente.</p>
+
+    <h2 id="fontes">Fontes</h2>
+    <p class="verificado">🌐 Todas verificadas a 2026-09-15: autores, ano, revista, volume e páginas confirmados na
+    página do editor ou no registo do PubMed. As afirmações resumidas acima são minhas; os artigos são a origem dos
+    resultados, não das minhas palavras.</p>
+    <ul class="fontes">
+      <li>Roediger, H. L., &amp; Karpicke, J. D. (2006). <em>Test-Enhanced Learning: Taking Memory Tests Improves
+        Long-Term Retention.</em> Psychological Science, 17(3), 249–255.
+        <a href="https://doi.org/10.1111/j.1467-9280.2006.01693.x">doi:10.1111/j.1467-9280.2006.01693.x</a>
+        — <strong>porquê:</strong> é a demonstração mais limpa de que testar bate reestudar a prazo. Se leres só um, lê este.</li>
+      <li>Cepeda, N. J., Pashler, H., Vul, E., Wixted, J. T., &amp; Rohrer, D. (2006). <em>Distributed Practice in
+        Verbal Recall Tasks: A Review and Quantitative Synthesis.</em> Psychological Bulletin, 132(3), 354–380.
+        <a href="https://doi.org/10.1037/0033-2909.132.3.354">doi:10.1037/0033-2909.132.3.354</a>
+        — <strong>o que saltar:</strong> é uma síntese quantitativa densa; a discussão final chega para o essencial.</li>
+      <li>Rohrer, D., &amp; Taylor, K. (2007). <em>The shuffling of mathematics problems improves learning.</em>
+        Instructional Science, 35(6), 481–498.
+        <a href="https://doi.org/10.1007/s11251-007-9015-8">doi:10.1007/s11251-007-9015-8</a>
+        — <strong>porquê:</strong> mostra a inversão entre desempenho na prática e desempenho no teste, que é o ponto todo.</li>
+      <li>Sweller, J., &amp; Cooper, G. A. (1985). <em>The Use of Worked Examples as a Substitute for Problem Solving
+        in Learning Algebra.</em> Cognition and Instruction, 2(1), 59–89.
+        <a href="https://doi.org/10.1207/s1532690xci0201_3">doi:10.1207/s1532690xci0201_3</a></li>
+      <li>Renkl, A., &amp; Atkinson, R. K. (2003). <em>Structuring the Transition From Example Study to Problem Solving
+        in Cognitive Skill Acquisition: A Cognitive Load Perspective.</em> Educational Psychologist, 38(1), 15–22.
+        <a href="https://doi.org/10.1207/S15326985EP3801_3">doi:10.1207/S15326985EP3801_3</a>
+        — <strong>porquê:</strong> é daqui que vem a secção «exemplo com lacunas».</li>
+      <li>Bjork, R. A. (1994). <em>Memory and metamemory considerations in the training of human beings.</em>
+        In J. Metcalfe &amp; A. Shimamura (Eds.), <em>Metacognition: Knowing about Knowing</em> (pp. 185–205). MIT Press.
+        — <strong>porquê:</strong> é o capítulo que dá nome às «dificuldades desejáveis» e o que melhor explica porque
+        é que a nossa intuição sobre o próprio progresso é má.</li>
+      <li>Pashler, H., McDaniel, M., Rohrer, D., &amp; Bjork, R. (2008). <em>Learning Styles: Concepts and Evidence.</em>
+        Psychological Science in the Public Interest, 9(3), 105–119.
+        <a href="https://doi.org/10.1111/j.1539-6053.2009.01038.x">doi:10.1111/j.1539-6053.2009.01038.x</a>
+        — <strong>porquê:</strong> a secção sobre o desenho experimental necessário é a parte útil, e explica porque é
+        que «mas eu sinto que aprendo melhor assim» não é evidência.</li>
+      <li>Dunlosky, J., Rawson, K. A., Marsh, E. J., Nathan, M. J., &amp; Willingham, D. T. (2013). <em>Improving
+        Students' Learning With Effective Learning Techniques: Promising Directions From Cognitive and Educational
+        Psychology.</em> Psychological Science in the Public Interest, 14(1), 4–58.
+        <a href="https://doi.org/10.1177/1529100612453266">doi:10.1177/1529100612453266</a>
+        — <strong>o que saltar:</strong> são 55 páginas sobre dez técnicas. As tabelas-resumo de cada técnica e a
+        secção final de recomendações chegam; o resto é para quem quiser discutir metodologia.</li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">Todos os tópicos</a> · O processo de escrita está em <code>PROCESSO.md</code>, no repositório.</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var alvos = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    campo.hidden = false;
+
+    function normalizar(s) {
+      // Sem acentos: procurar "indices" tem de encontrar "índices".
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    alvos.forEach(function (el) { el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || "")); });
+
+    function filtrar() {
+      var q = normalizar(campo.value.trim());
+      var visiveis = 0;
+      alvos.forEach(function (el) {
+        var mostra = !q || el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+      if (contador) {
+        contador.textContent = q
+          ? visiveis + " de " + alvos.length + (visiveis === 1 ? " tópico" : " tópicos")
+          : alvos.length + (alvos.length === 1 ? " tópico" : " tópicos");
+      }
+      if (vazio) { vazio.hidden = visiveis !== 0; }
+    }
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

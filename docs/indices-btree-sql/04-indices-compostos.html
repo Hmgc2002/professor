@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4 · Índices compostos e a ordem das colunas — Índices B-tree em SQL</title>
+<meta name="description" content="Lição 4: a regra do prefixo mais à esquerda, porque a ordem das colunas decide tudo, e o plano que diz o nome do índice mas lê 250 vezes mais páginas.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/indices-btree-sql/04-indices-compostos.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Índices B-tree</a> <span aria-hidden="true">›</span> Lição 4
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta extensao">Lição 4 · extensão</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>Índices compostos e a ordem das colunas</h1>
+    <p class="subtitulo">As mesmas duas colunas, por ordens diferentes, dão índices com utilidades diferentes.
+    E o plano de execução esconde a diferença melhor do que devia.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>No fim consegues, <strong>dado um conjunto de queries, decidir a ordem das colunas de um índice composto</strong>
+    e justificar a escolha. E consegues reconhecer, num plano que <em>menciona</em> o teu índice, se ele está
+    mesmo a ser aproveitado ou apenas a ser varrido do princípio ao fim.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+    <ol>
+      <li>Que estrutura têm as folhas de uma B-tree, e o que guardam?
+        <details class="solucao"><summary>Resposta</summary><p>Estão <strong>ordenadas por chave</strong> e ligadas em cadeia; guardam a chave e o ponteiro (TID) para a linha.</p></details>
+      </li>
+      <li>Porque é que <code>WHERE date_part('year', criada_em) = 2025</code> não usa um índice em <code>criada_em</code>?
+        <details class="solucao"><summary>Resposta</summary><p>A função destrói a ordenação: os valores de <code>date_part(...)</code> não formam um intervalo contíguo nas folhas, que guardam <code>criada_em</code>.</p></details>
+      </li>
+      <li>Qual é a primeira coisa a olhar num <code>EXPLAIN ANALYZE</code>?
+        <details class="solucao"><summary>Resposta</summary><p>O desencontro entre <code>rows=</code> e <code>actual rows=</code>.</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>Um índice composto é uma lista telefónica</h3>
+    <p>Um índice sobre <code>(apelido, nome)</code> ordena primeiro por apelido e, dentro de cada apelido, por nome.
+    É exatamente uma lista telefónica — e a analogia leva-te longe:</p>
+    <ul>
+      <li>Procurar «Silva» → fácil: estão todos juntos.</li>
+      <li>Procurar «Silva, Ana» → fácil: dentro dos Silva, os nomes estão ordenados.</li>
+      <li>Procurar toda a gente chamada «Ana», de qualquer apelido → <strong>tens de ler a lista inteira</strong>.
+      As Anas estão espalhadas por todos os apelidos.</li>
+    </ul>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ A regra do prefixo mais à esquerda</span>
+      <p>Um índice sobre <code>(a, b, c)</code> serve procuras por <code>a</code>, por <code>(a, b)</code> e por
+      <code>(a, b, c)</code>. <strong>Não serve</strong> procuras que não fixem <code>a</code>.</p>
+      <p>O porquê é a ordenação, não uma regra arbitrária: sem fixar <code>a</code>, os valores de <code>b</code>
+      que te interessam não formam um <em>intervalo contíguo</em> nas folhas — e percorrer um intervalo contíguo é
+      a única coisa que uma B-tree sabe fazer depressa.</p>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 560 175" role="img" aria-labelledby="t-comp d-comp">
+        <title id="t-comp">Ordenação de um índice composto (cliente_id, estado)</title>
+        <desc id="d-comp">Entradas ordenadas primeiro por cliente_id e depois por estado. As entradas do cliente 42
+        estão todas juntas num bloco contíguo; as entradas com estado igual a cancelada estão dispersas por todo o índice.</desc>
+        <text class="svg-suave" x="6" y="14">folhas de um índice sobre (cliente_id, estado) — ordenadas por cliente_id, depois por estado</text>
+        <g class="svg-mono" font-size="11">
+          <rect class="svg-caixa" x="6"   y="26" width="88" height="24" rx="3"/>
+          <rect class="svg-caixa" x="100" y="26" width="88" height="24" rx="3"/>
+          <rect class="svg-realce" x="194" y="26" width="88" height="24" rx="3"/>
+          <rect class="svg-realce" x="288" y="26" width="88" height="24" rx="3"/>
+          <rect class="svg-caixa" x="382" y="26" width="88" height="24" rx="3"/>
+          <rect class="svg-caixa" x="476" y="26" width="78" height="24" rx="3"/>
+          <text class="svg-mono" x="50"  y="42" text-anchor="middle">41,cancel</text>
+          <text class="svg-mono" x="144" y="42" text-anchor="middle">41,entreg</text>
+          <text class="svg-mono" x="238" y="42" text-anchor="middle">42,cancel</text>
+          <text class="svg-mono" x="332" y="42" text-anchor="middle">42,entreg</text>
+          <text class="svg-mono" x="426" y="42" text-anchor="middle">43,cancel</text>
+          <text class="svg-mono" x="515" y="42" text-anchor="middle">43,entr</text>
+        </g>
+        <path class="svg-traco" stroke-width="2" d="M194 62 H376"/>
+        <text class="svg-texto" x="194" y="80">WHERE cliente_id = 42 → bloco contíguo ✔</text>
+        <g class="svg-traco" stroke-width="2" stroke-dasharray="4 4">
+          <path d="M6 104 H94"/><path d="M194 104 H282"/><path d="M382 104 H470"/>
+        </g>
+        <text class="svg-texto" x="6" y="126">WHERE estado = 'cancelada' → disperso por todo o índice ✘</text>
+        <text class="svg-suave" x="6" y="152">Trocar a ordem para (estado, cliente_id) inverte exatamente qual das duas é contígua.</text>
+      </svg>
+      <figcaption>A ordem das colunas decide qual das procuras fica contígua — e só a contígua é barata.</figcaption>
+    </figure>
+
+    <h3>Como escolher a ordem</h3>
+    <p>Três critérios, por ordem de importância:</p>
+    <ol>
+      <li><strong>A coluna usada com igualdade (<code>=</code>) vem primeiro.</strong> Fixar um valor exato deixa o
+      resto do índice ordenado e utilizável. Uma coluna usada com intervalo (<code>&gt;</code>, <code>BETWEEN</code>)
+      «gasta» a ordenação: depois dela, as colunas seguintes já não estão ordenadas dentro do que sobrou.</li>
+      <li><strong>Depois, a coluna do intervalo ou do <code>ORDER BY</code>.</strong> É aí que a cadeia de folhas
+      compensa.</li>
+      <li><strong>A seletividade decide empates</strong>, e só empates. É o critério que mais gente usa primeiro,
+      e é o menos importante dos três.</li>
+    </ol>
+    <p>Daí o padrão que resolve a maioria dos casos reais — <code>(igualdade, intervalo)</code>:
+    <code>(cliente_id, criada_em)</code> para «as encomendas deste cliente, das mais recentes para as mais antigas».</p>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Um índice composto não substitui dois índices — nem o contrário</span>
+      <p><code>(a, b)</code> serve as procuras por <code>a</code>, portanto <strong>torna um índice separado em
+      <code>a</code> redundante</strong> (e esse deve ser removido — ocupa espaço e custa em cada escrita).
+      Mas <strong>não</strong> serve as procuras só por <code>b</code>: para essas, ou crias um índice em
+      <code>b</code>, ou aceitas que não há.</p>
+    </div>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>Vamos criar o índice com a ordem errada e ver o que o plano diz — porque o que ele diz é enganador.</p>
+
+    <h3>Passo 1 — criar a ordem errada, de propósito</h3>
+    <p>A query que nos interessa é <code>WHERE cliente_id = 42</code>. Criamos o índice ao contrário:</p>
+<pre><code>CREATE INDEX idx_ec ON encomendas (estado, cliente_id);
+ANALYZE encomendas;
+EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM encomendas WHERE cliente_id = 42;</code></pre>
+<pre><code>Index Scan using idx_ec on encomendas  (actual time=0.040..1.887 rows=20 loops=1)
+  Index Cond: (cliente_id = 42)
+  Buffers: shared hit=1 read=1002
+Execution Time: 1.901 ms</code></pre>
+
+    <div class="caixa critico">
+      <span class="titulo">🔴 Lê com atenção: isto parece bom e não é</span>
+      <p>O plano diz <code>Index Scan</code>. Diz o <strong>nome do índice</strong>. Até diz
+      <code>Index Cond: (cliente_id = 42)</code>. Quem olhe de relance dá a query por resolvida.</p>
+      <p>Mas olha para os <code>Buffers</code>: <strong>1003 páginas</strong>. O índice inteiro tem ~1005.
+      <strong>Ele varreu o índice do princípio ao fim</strong>, a testar <code>cliente_id = 42</code> em cada
+      entrada — porque sem fixar <code>estado</code> (a primeira coluna) não há bloco contíguo onde descer.</p>
+      <p>Fez isso porque continua a compensar face à alternativa: varrer 1005 páginas de índice é melhor do que
+      varrer 8348 páginas de tabela. É um plano racional e péssimo ao mesmo tempo.</p>
+    </div>
+
+    <h3>Passo 2 — a ordem certa, a mesma query</h3>
+<pre><code>DROP INDEX idx_ec;
+CREATE INDEX idx_ce ON encomendas (cliente_id, estado);
+ANALYZE encomendas;
+EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM encomendas WHERE cliente_id = 42;</code></pre>
+<pre><code>Bitmap Heap Scan on encomendas  (actual time=0.015..0.015 rows=20 loops=1)
+  Buffers: shared hit=1 read=3
+  -&gt;  Bitmap Index Scan on idx_ce  (actual time=0.010..0.010 rows=20 loops=1)
+        Index Cond: (cliente_id = 42)
+        Buffers: shared read=3</code></pre>
+
+    <div class="caixa ok">
+      <span class="titulo">✅ 4 páginas contra 1003. 0,015 ms contra 1,9 ms.</span>
+      <p><strong>250 vezes menos I/O</strong>, com as mesmas duas colunas, o mesmo tamanho de índice
+      (8048 kB contra 8056 kB) e a mesma query. Só mudou a ordem na declaração do índice.</p>
+    </div>
+
+    <h3>Passo 3 — a lição que fica</h3>
+    <p>O nome do nó e o nome do índice no plano <strong>não dizem se o índice está a ser aproveitado</strong>.
+    O sinal está nos <code>Buffers</code>: se o número de páginas lidas do índice se aproxima do tamanho total do
+    índice, ele está a ser <em>varrido</em>, não <em>procurado</em>.</p>
+<pre><code>-- quantas páginas tem o índice, para comparar:
+SELECT pg_relation_size('idx_ce') / 8192 AS paginas_do_indice;</code></pre>
+    <p>É o mesmo padrão da lição 2, noutra roupagem: aí era <code>Index Only Scan</code> com
+    <code>Heap Fetches</code> alto; aqui é <code>Index Scan</code> com <code>Buffers</code> alto.
+    <strong>O nome descreve a intenção; os números descrevem o que aconteceu.</strong></p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p><strong>Dado.</strong> Estas três queries são as quentes de uma aplicação:</p>
+      <ol>
+        <li><code>WHERE cliente_id = ? ORDER BY criada_em DESC LIMIT 20</code></li>
+        <li><code>WHERE cliente_id = ? AND estado = 'pendente'</code></li>
+        <li><code>WHERE criada_em &gt;= ? AND criada_em &lt; ?</code></li>
+      </ol>
+      <p><strong>Passo 1 (completa).</strong> Que coluna aparece com <code>=</code> em mais queries? ______</p>
+      <p><strong>Passo 2 (completa).</strong> Índice para a query 1: <code>(______, ______)</code>. Porquê esta ordem? ______</p>
+      <p><strong>Passo 3 (dado).</strong> Esse índice também serve a query 2, embora só parcialmente.</p>
+      <p><strong>Passo 4 (completa).</strong> Porque é que serve «parcialmente»? O que é que o Postgres tem de fazer a mais?</p>
+      <p><strong>Passo 5 (completa).</strong> A query 3 é servida por esse índice? Se não, o que crias?</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 1:</strong> <code>cliente_id</code> — com <code>=</code> nas queries 1 e 2.</p>
+        <p><strong>Passo 2:</strong> <code>(cliente_id, criada_em)</code>. A igualdade primeiro fixa um bloco
+        contíguo; dentro dele, <code>criada_em</code> está ordenado, portanto o <code>ORDER BY … DESC LIMIT 20</code>
+        lê a cadeia de folhas ao contrário e <strong>para à vigésima</strong>, sem ordenar nada.</p>
+        <p><strong>Passo 4:</strong> na query 2, o índice localiza o bloco do cliente (talvez 20 entradas) mas
+        <code>estado</code> não está no índice, logo tem de ir buscar cada linha à tabela e filtrar
+        <code>estado = 'pendente'</code> lá. Com ~20 linhas por cliente, é irrelevante. Se fossem 50 000 por
+        cliente, valeria a pena <code>(cliente_id, estado, criada_em)</code> — que continua a servir a query 1,
+        porque <code>(cliente_id)</code> continua a ser prefixo.</p>
+        <p><strong>Passo 5:</strong> <strong>não serve</strong> — a query 3 não fixa <code>cliente_id</code>, e sem
+        o prefixo não há bloco contíguo. Cria-se <code>(criada_em)</code>. É o exemplo de duas necessidades
+        genuinamente diferentes que precisam mesmo de dois índices: não há ordem única que sirva as três.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns da lição 4, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>«O plano diz o nome do índice, logo está bem»</td>
+            <td>Dar a query por resolvida sem olhar para os <code>Buffers</code></td>
+            <td>Um índice pode ser <em>varrido</em> inteiro. Compara as páginas lidas com
+            <code>pg_relation_size(indice)/8192</code>: se forem próximas, não houve procura</td>
+          </tr>
+          <tr>
+            <td>«A coluna mais seletiva vai primeiro»</td>
+            <td>Ordenar por <code>n_distinct</code> sem olhar para as queries</td>
+            <td>Primeiro vem a coluna usada com <code>=</code>. A seletividade só decide empates — um índice
+            perfeitamente ordenado por seletividade pode não servir query nenhuma</td>
+          </tr>
+          <tr>
+            <td>«Um índice por coluna do <code>WHERE</code>»</td>
+            <td>Cinco índices de coluna única numa tabela com escrita</td>
+            <td>Um composto com a ordem certa serve mais casos e custa menos nas escritas. E
+            <code>(a,b)</code> torna o índice em <code>(a)</code> redundante — esse deve ser apagado</td>
+          </tr>
+          <tr>
+            <td>«A coluna do intervalo pode ir no meio»</td>
+            <td><code>(cliente_id, criada_em, estado)</code> com intervalo em <code>criada_em</code> e igualdade em <code>estado</code></td>
+            <td>Depois de um intervalo, as colunas seguintes deixam de estar ordenadas dentro do resultado.
+            <code>estado</code> passa a ser filtro, não procura. A ordem útil seria
+            <code>(cliente_id, estado, criada_em)</code></td>
+          </tr>
+          <tr>
+            <td>«Inverter a ordem só afeta o desempenho um bocadinho»</td>
+            <td>Não testar a ordem alternativa</td>
+            <td>Medido aqui: <strong>250×</strong> na mesma query, com índices do mesmo tamanho</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — quais é que este índice serve?</h3>
+      <p>Índice sobre <code>(pais, estado, criada_em)</code>. Para cada condição, diz se é servida por procura
+      (descida à árvore), por varrimento do índice, ou não é servida de todo:</p>
+      <ol>
+        <li><code>WHERE pais = 'PT'</code></li>
+        <li><code>WHERE pais = 'PT' AND estado = 'pendente'</code></li>
+        <li><code>WHERE estado = 'pendente'</code></li>
+        <li><code>WHERE pais = 'PT' AND criada_em &gt; '2025-01-01'</code></li>
+        <li><code>WHERE pais = 'PT' AND estado = 'pendente' ORDER BY criada_em</code></li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <ol>
+          <li><strong>Procura.</strong> Prefixo exato.</li>
+          <li><strong>Procura.</strong> Prefixo de duas colunas.</li>
+          <li><strong>Não é servida por procura.</strong> Falta o prefixo <code>pais</code>. Na prática o planeador
+          pode varrer o índice inteiro se isso for melhor que varrer a tabela — e aí o plano <em>menciona</em> o
+          índice sem o estar a aproveitar. É o caso do exemplo trabalhado.</li>
+          <li><strong>Procura parcial.</strong> Desce por <code>pais</code>; dentro desse bloco, <code>estado</code>
+          é a coluna seguinte e não está fixa, portanto <code>criada_em</code> não está ordenado no que sobrou.
+          A data passa a ser filtro aplicado às entradas, não intervalo percorrido.</li>
+          <li><strong>Procura, e o melhor caso dos cinco.</strong> Fixa as duas primeiras por igualdade; dentro
+          desse bloco <code>criada_em</code> está ordenado, logo o <code>ORDER BY</code> sai de graça.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: reproduzir os 250×</h3>
+      <p>Na base de treino, cria os dois índices (um de cada vez — com ambos presentes o planeador escolhe o bom e
+      o efeito desaparece) e mede a mesma query com <code>BUFFERS</code>. Depois compara as páginas lidas com o
+      tamanho total do índice.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>DROP INDEX IF EXISTS idx_ce, idx_ec;
+CREATE INDEX idx_ec ON encomendas (estado, cliente_id);
+ANALYZE encomendas;
+EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM encomendas WHERE cliente_id = 42;
+SELECT pg_relation_size('idx_ec')/8192 AS paginas_do_indice;</code></pre>
+        <p>Medido em Postgres 17.11: <code>Buffers: shared hit=1 read=1002</code> contra um índice de ~1005
+        páginas — <strong>leu-o praticamente todo</strong>. Com <code>(cliente_id, estado)</code>: 4 páginas.</p>
+        <p>⚠️ <strong>A armadilha da experiência</strong> (e a razão do aviso no enunciado): se deixares os dois
+        índices criados, o planeador escolhe o bom e não vês diferença nenhuma. Foi o que me aconteceu à primeira
+        vez que corri isto — a medição deu 4 páginas para os dois casos e quase escrevi que não havia diferença.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — desenhar para três queries com um orçamento de dois índices</h3>
+      <p>Uma tabela <code>mensagens (id, conversa_id, autor_id, criada_em, lida, corpo)</code>, com escrita
+      intensa. Três queries quentes:</p>
+      <ol>
+        <li><code>WHERE conversa_id = ? ORDER BY criada_em DESC LIMIT 50</code> (abrir uma conversa)</li>
+        <li><code>WHERE autor_id = ? AND lida = false</code> (por ler, de um autor)</li>
+        <li><code>SELECT count(*) WHERE conversa_id = ? AND lida = false</code> (badge de não lidas)</li>
+      </ol>
+      <p>Propõe <strong>dois</strong> índices e justifica cada coluna e cada posição. Diz também o que sacrificaste.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>Uma proposta defensável:</p>
+        <ul>
+          <li><strong><code>(conversa_id, criada_em DESC)</code></strong> — serve a query 1 por inteiro:
+          igualdade primeiro, ordenação a seguir, e o <code>LIMIT 50</code> para logo à quinquagésima entrada.
+          Serve também a query 3 <em>parcialmente</em>: localiza o bloco da conversa, mas tem de ir à tabela
+          verificar <code>lida</code> em cada linha.</li>
+          <li><strong><code>(autor_id, lida)</code></strong> — serve a query 2. As duas são igualdades, e
+          <code>autor_id</code> vem primeiro por ser muito mais seletiva (o critério 3, que aqui decide o empate
+          entre duas igualdades).</li>
+        </ul>
+        <p><strong>O que se sacrificou:</strong> a query 3 não fica ótima. Um índice
+        <code>(conversa_id, lida)</code> resolveria-a — mas em vez de o acrescentar, pergunta-se primeiro:</p>
+        <ul>
+          <li>Um índice <strong>parcial</strong> <code>(conversa_id) WHERE lida = false</code> seria muito mais
+          pequeno (só as não lidas) e serviria a query 3 melhor do que um índice completo —
+          <a href="06-o-custo-do-outro-lado.html">lição 6</a>.</li>
+          <li>Ou cobrir: <code>(conversa_id, criada_em DESC) INCLUDE (lida)</code> torna a query 3 index-only sem
+          criar índice novo — ao preço de engordar o primeiro.</li>
+        </ul>
+        <p>⭐ O enunciado dizia «escrita intensa», e é isso que justifica o orçamento apertado. Cada índice é
+        trabalho em <em>cada</em> <code>INSERT</code>: na base de treino, quatro índices tornaram um
+        <code>INSERT</code> de 100 000 linhas <strong>16 vezes mais lento</strong> (lição 6). Numa tabela de
+        mensagens, esse custo paga-se a cada mensagem enviada.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <div class="quiz" data-quiz="btree-04">
+      <ol class="perguntas">
+
+        <li class="pergunta">
+          <p class="enunciado">Índice sobre <code>(a, b)</code>. Qual destas <strong>não</strong> é servida por procura?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="e1" value="a" data-certa="false"><span class="rotulo">WHERE a = 1</span></label>
+              <p class="explicacao" hidden>É servida: <code>a</code> é o prefixo mais à esquerda, e todas as entradas com a=1 formam um bloco contíguo nas folhas.</p></li>
+            <li class="opcao"><label><input type="radio" name="e1" value="b" data-certa="false"><span class="rotulo">WHERE a = 1 AND b = 2</span></label>
+              <p class="explicacao" hidden>É servida, e é o caso ideal: fixa o prefixo completo e desce direto ao ponto.</p></li>
+            <li class="opcao"><label><input type="radio" name="e1" value="c" data-certa="true"><span class="rotulo">WHERE b = 2</span></label>
+              <p class="explicacao" hidden>Certo. Sem fixar <code>a</code>, as entradas com b=2 estão dispersas por todos os valores de <code>a</code> — não formam intervalo contíguo. Cuidado: o planeador pode varrer o índice inteiro e mencioná-lo no plano, o que engana quem só lê o nome do nó.</p></li>
+            <li class="opcao"><label><input type="radio" name="e1" value="d" data-certa="false"><span class="rotulo">WHERE a = 1 ORDER BY b</span></label>
+              <p class="explicacao" hidden>É servida, e bem: fixa <code>a</code> e, dentro desse bloco, <code>b</code> já está ordenado — a ordenação sai de graça.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">O plano diz <code>Index Scan using idx_x</code> e <code>Buffers: read=1002</code>. O índice tem 1005 páginas. O que aconteceu?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="e2" value="a" data-certa="false"><span class="rotulo">Procura normal; 1002 páginas é o esperado num índice grande</span></label>
+              <p class="explicacao" hidden>Uma procura custa a altura da árvore — 3 ou 4 páginas — independentemente do tamanho do índice. Mil páginas só acontecem a percorrer, não a descer.</p></li>
+            <li class="opcao"><label><input type="radio" name="e2" value="b" data-certa="true"><span class="rotulo">Varreu o índice quase todo: o filtro não bate no prefixo mais à esquerda</span></label>
+              <p class="explicacao" hidden>Certo. 1002 de 1005 páginas é um varrimento completo com filtro, não uma procura. Comparar as páginas lidas com pg_relation_size(indice)/8192 é o teste que distingue os dois casos — e o nome do nó não o distingue.</p></li>
+            <li class="opcao"><label><input type="radio" name="e2" value="c" data-certa="false"><span class="rotulo">O índice está inchado e precisa de REINDEX</span></label>
+              <p class="explicacao" hidden>Inchaço faria o índice ocupar mais páginas do que devia, mas não explicaria lê-las todas numa procura por um valor. O problema está na ordem das colunas face à query, não no estado do índice.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Queries: <code>WHERE cliente_id = ? AND criada_em &gt; ?</code>. Que ordem escolhes?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="e3" value="a" data-certa="true"><span class="rotulo">(cliente_id, criada_em) — a igualdade primeiro</span></label>
+              <p class="explicacao" hidden>Certo. A igualdade fixa um bloco contíguo e, dentro dele, criada_em fica ordenado, portanto o intervalo percorre-se pela cadeia de folhas. É o padrão (igualdade, intervalo), que resolve a maioria dos casos reais.</p></li>
+            <li class="opcao"><label><input type="radio" name="e3" value="b" data-certa="false"><span class="rotulo">(criada_em, cliente_id) — a data é mais seletiva</span></label>
+              <p class="explicacao" hidden>Pôr o intervalo primeiro «gasta» a ordenação: dentro do intervalo de datas, cliente_id não está ordenado, e passa a ser filtro aplicado a cada entrada em vez de procura. A seletividade é o critério menos importante dos três, não o primeiro.</p></li>
+            <li class="opcao"><label><input type="radio" name="e3" value="c" data-certa="false"><span class="rotulo">Tanto faz, as colunas são as mesmas</span></label>
+              <p class="explicacao" hidden>Medido nesta lição: 250 vezes de diferença em I/O, com índices praticamente do mesmo tamanho. A ordem é a decisão inteira num índice composto.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Tens <code>(cliente_id, estado)</code> e também um índice só sobre <code>(cliente_id)</code>. O que fazes?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="e4" value="a" data-certa="false"><span class="rotulo">Deixo ambos — mais índices, mais hipóteses para o planeador</span></label>
+              <p class="explicacao" hidden>O índice de coluna única não dá hipótese nenhuma que o composto já não dê: (cliente_id) é prefixo de (cliente_id, estado). O que ele acrescenta é espaço em disco e trabalho em cada INSERT, UPDATE e DELETE.</p></li>
+            <li class="opcao"><label><input type="radio" name="e4" value="b" data-certa="true"><span class="rotulo">Apago o de coluna única — é redundante, porque (cliente_id) é prefixo do composto</span></label>
+              <p class="explicacao" hidden>Certo. É das poucas otimizações que melhoram as escritas sem piorar nada nas leituras. Antes de apagar, vale confirmar o uso real em pg_stat_user_indexes — a única exceção seria o composto ser muito mais largo e o pequeno servir varrimentos completos.</p></li>
+            <li class="opcao"><label><input type="radio" name="e4" value="c" data-certa="false"><span class="rotulo">Apago o composto e fico com o simples</span></label>
+              <p class="explicacao" hidden>É a escolha ao contrário: o composto serve tudo o que o simples serve e ainda as procuras por (cliente_id, estado). Apagá-lo perde capacidade.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Porque é que a coluna de um intervalo deve ser a <strong>última</strong> do índice?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="e5" value="a" data-certa="false"><span class="rotulo">Porque intervalos são mais lentos que igualdades</span></label>
+              <p class="explicacao" hidden>Um intervalo servido por índice é barato — desce-se uma vez e percorre-se a cadeia de folhas. O problema não é o custo do intervalo em si, é o efeito dele sobre as colunas que venham a seguir.</p></li>
+            <li class="opcao"><label><input type="radio" name="e5" value="b" data-certa="true"><span class="rotulo">Porque depois de um intervalo as colunas seguintes já não estão ordenadas dentro do que sobrou</span></label>
+              <p class="explicacao" hidden>Certo. A ordenação é lexicográfica: só se mantém dentro de um valor fixo da coluna anterior. Um intervalo abrange muitos valores, e dentro dele a coluna seguinte reinicia a ordem em cada um — deixa de haver bloco contíguo para procurar.</p></li>
+            <li class="opcao"><label><input type="radio" name="e5" value="c" data-certa="false"><span class="rotulo">Porque o Postgres só suporta um intervalo por índice</span></label>
+              <p class="explicacao" hidden>Não existe tal limitação declarada. Podes ter condições de intervalo em várias colunas; o que acontece é que só a primeira delas é usada para delimitar a procura, e as outras viram filtro.</p></li>
+          </ul>
+        </li>
+
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="f1">Explica a regra do prefixo mais à esquerda usando uma analogia que <strong>não</strong> seja a
+      lista telefónica, e diz onde a tua analogia parte.
+        <span class="pista">Escolher uma analogia nova obriga a perceber o mecanismo; repetir a do texto não obriga a nada.</span>
+      </label>
+      <textarea id="f1" data-pergunta="A regra do prefixo mais à esquerda, com uma analogia minha"></textarea>
+    </div>
+    <div class="aberta">
+      <label for="f2">Porque é que ver o nome do teu índice no plano não significa que ele esteja a ser aproveitado?
+      Que número confirmas, e contra o quê o comparas?
+        <span class="pista">Esta ideia já apareceu na lição 2 com outro nome. Se conseguires dizer qual era, melhor.</span>
+      </label>
+      <textarea id="f2" data-pergunta="Porque ver o nome do índice no plano não chega"></textarea>
+    </div>
+
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p class="accoes"><button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button></p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/indices-btree-sql/respostas/AAAA-MM-DD.md</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li><strong>Prefixo mais à esquerda:</strong> <code>(a,b,c)</code> serve <code>a</code>, <code>(a,b)</code>,
+      <code>(a,b,c)</code> — e não serve nada que não fixe <code>a</code>.</li>
+      <li><strong>Ordem:</strong> igualdade primeiro, intervalo ou <code>ORDER BY</code> a seguir, seletividade só
+      para desempatar.</li>
+      <li>Depois de um intervalo, as colunas seguintes deixam de estar ordenadas — por isso o intervalo vai no fim.</li>
+      <li>🔴 <strong>O nome do índice no plano não prova nada.</strong> Compara os <code>Buffers</code> com
+      <code>pg_relation_size(indice)/8192</code>: próximos = varrimento, não procura.</li>
+      <li><code>(a,b)</code> torna o índice em <code>(a)</code> <strong>redundante</strong> — apaga-se, e as
+      escritas agradecem.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>Documentação do PostgreSQL 17 — <em>Multicolumn Indexes</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/indexes-multicolumn.html">indexes-multicolumn.html</a>
+        — fonte primária para o comportamento do prefixo e para o limite de 32 colunas por índice.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>Indexes and ORDER BY</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/indexes-ordering.html">indexes-ordering.html</a>
+        — quando é que <code>DESC</code> e <code>NULLS FIRST</code> na declaração do índice valem a pena.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Leitura recomendada</strong> — Markus Winand,
+        <a href="https://use-the-index-luke.com/sql/where-clause/the-equals-operator/concatenated-keys">«Concatenated Keys»</a>.
+        <strong>Porquê:</strong> é o tratamento mais completo da ordem das colunas que conheço, com o caso do
+        intervalo bem explicado. <strong>O que saltar:</strong> as secções de Oracle.
+        Fonte secundária. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Todas as medições</strong> (1003 páginas contra 4; 8056 kB contra 8048 kB) foram corridas em
+        <strong>PostgreSQL 17.11</strong> sobre <a href="preparar.sql">preparar.sql</a>, com um índice de cada vez.
+        <span class="verificado">✅ Corrido a 2026-09-15</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="03-seletividade.html">← 3 · Seletividade</a> ·
+      <a href="index.html">↑ Índice do curso</a> ·
+      <a href="05-ler-o-explain.html">5 · Ler o EXPLAIN →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var alvos = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    campo.hidden = false;
+
+    function normalizar(s) {
+      // Sem acentos: procurar "indices" tem de encontrar "índices".
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    alvos.forEach(function (el) { el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || "")); });
+
+    function filtrar() {
+      var q = normalizar(campo.value.trim());
+      var visiveis = 0;
+      alvos.forEach(function (el) {
+        var mostra = !q || el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+      if (contador) {
+        contador.textContent = q
+          ? visiveis + " de " + alvos.length + (visiveis === 1 ? " tópico" : " tópicos")
+          : alvos.length + (alvos.length === 1 ? " tópico" : " tópicos");
+      }
+      if (vazio) { vazio.hidden = visiveis !== 0; }
+    }
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

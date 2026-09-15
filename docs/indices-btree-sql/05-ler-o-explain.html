@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5 · Ler o EXPLAIN a sério — Índices B-tree em SQL</title>
+<meta name="description" content="Lição 5: ler um plano de execução real de dentro para fora, a armadilha de loops, e um método de diagnóstico que não é adivinhar.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/indices-btree-sql/05-ler-o-explain.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Índices B-tree</a> <span aria-hidden="true">›</span> Lição 5
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta extensao">Lição 5 · extensão</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>Ler o <code>EXPLAIN</code> a sério</h1>
+    <p class="subtitulo">Até aqui olhámos para planos de uma linha. Um plano real tem vinte, aninha-se, e tem pelo
+    menos uma armadilha de leitura que engana toda a gente na primeira vez.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>No fim consegues <strong>pegar num plano de execução de vinte linhas e dizer, em menos de um minuto, onde
+    está o tempo</strong> — e distinguir um nó que é lento por natureza de um que é lento por uma estimativa errada
+    a montante.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+    <ol>
+      <li>Um plano diz <code>Index Scan using idx_x</code> com <code>Buffers: read=1002</code>, e o índice tem 1005 páginas. Bom ou mau?
+        <details class="solucao"><summary>Resposta</summary><p><strong>Mau:</strong> varreu o índice quase todo. O filtro não bate no prefixo mais à esquerda.</p></details>
+      </li>
+      <li>Que estatística prevê quantas <em>páginas</em> distintas um índice vai obrigar a visitar?
+        <details class="solucao"><summary>Resposta</summary><p><code>correlation</code>, em <code>pg_stats</code> — mas é indício, não prova. A prova é o <code>BUFFERS</code>.</p></details>
+      </li>
+      <li>Qual é a diferença entre <code>EXPLAIN</code> e <code>EXPLAIN ANALYZE</code>?
+        <details class="solucao"><summary>Resposta</summary><p><code>EXPLAIN</code> só mostra o plano e as estimativas. <code>EXPLAIN ANALYZE</code> <strong>executa mesmo a query</strong> e acrescenta os valores reais.</p></details>
+      </li>
+    </ol>
+
+    <div class="caixa critico">
+      <span class="titulo">🔴 <code>EXPLAIN ANALYZE</code> executa a query</span>
+      <p>Com um <code>UPDATE</code>, <code>DELETE</code> ou <code>INSERT</code>, ele <strong>faz a alteração</strong>.
+      Para ver o plano sem a executar, envolve numa transação e desfaz:</p>
+<pre><code>BEGIN;
+EXPLAIN (ANALYZE) DELETE FROM encomendas WHERE estado = 'cancelada';
+ROLLBACK;</code></pre>
+    </div>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>Lê-se de dentro para fora, e de baixo para cima</h3>
+    <p>Um plano é uma árvore escrita com indentação. Cada nó recebe linhas dos filhos, faz o seu trabalho e entrega
+    ao pai. O nó mais indentado é o que corre primeiro; o de topo é o último.</p>
+
+    <h3>Os números de cada nó</h3>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Campos de um nó do plano, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Campo</th><th>O que diz</th><th>O que denuncia</th></tr></thead>
+        <tbody>
+          <tr><td><code>rows=</code> vs <code>actual rows=</code></td><td>Estimado vs real</td><td>Desencontro de ordens de grandeza → estatísticas ou correlações mal estimadas</td></tr>
+          <tr><td><code>loops=</code></td><td>Quantas vezes o nó correu</td><td>🔴 <code>actual time</code> e <code>rows</code> são <strong>por execução</strong>. O total é × <code>loops</code></td></tr>
+          <tr><td><code>actual time=x..y</code></td><td>x = até à primeira linha; y = até à última</td><td>É <strong>acumulado</strong>: inclui os filhos. O tempo próprio é y menos o y dos filhos</td></tr>
+          <tr><td><code>Rows Removed by Filter</code></td><td>Linhas lidas e deitadas fora</td><td>Um número grande é trabalho desperdiçado — candidato a índice</td></tr>
+          <tr><td><code>Heap Fetches</code></td><td>Idas à tabela num index-only scan</td><td>Visibility map desatualizado (lição 2)</td></tr>
+          <tr><td><code>Sort Method</code></td><td><code>quicksort</code> / <code>top-N heapsort</code> / <code>external merge</code></td><td><code>external merge Disk: NkB</code> = ordenou em disco → <code>work_mem</code> curto</td></tr>
+          <tr><td><code>Buffers: hit / read</code></td><td>Páginas vindas da cache / do disco</td><td>O verdadeiro medidor de I/O. <strong>Pede sempre <code>BUFFERS</code></strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ A armadilha do <code>loops</code></span>
+      <p><code>(actual time=0.001..0.001 rows=1 loops=10000)</code> parece o nó mais rápido do plano.
+      Na verdade correu <strong>dez mil vezes</strong>: devolveu 10 000 linhas no total e gastou ~10 ms, não 0,001 ms.</p>
+      <p>É o erro de leitura mais comum em planos com <code>Nested Loop</code>, e leva a procurar o problema no
+      sítio errado. <strong>Multiplica sempre por <code>loops</code> antes de concluir seja o que for.</strong></p>
+    </div>
+
+    <h3>O método, em quatro perguntas</h3>
+    <ol>
+      <li><strong>Onde está o tempo?</strong> Procura o nó cujo <code>actual time</code> final é próximo do total
+      <em>e</em> cujos filhos são muito mais rápidos. É esse que está a gastar.</li>
+      <li><strong>As estimativas batem certo?</strong> <code>rows=</code> contra <code>actual rows=</code>,
+      <em>lembrando o <code>loops</code></em>. Se não batem, corrige isso antes de mais nada.</li>
+      <li><strong>Há trabalho desperdiçado?</strong> <code>Rows Removed by Filter</code> grande,
+      <code>Heap Fetches</code> alto, <code>Sort Method: external merge</code>.</li>
+      <li><strong>Quantas páginas?</strong> <code>Buffers</code>. É o único número que não mente sobre I/O — e é
+      estável entre execuções, ao contrário do tempo.</li>
+    </ol>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>Um plano real, com junção, agregação e ordenação. Precisamos de uma segunda tabela:</p>
+<pre><code>CREATE TABLE clientes (id integer PRIMARY KEY, nome text NOT NULL, pais text NOT NULL);
+INSERT INTO clientes SELECT i, 'Cliente '||i, (ARRAY['PT','ES','FR','DE','BR'])[1+(i*13)%5]
+FROM generate_series(1,50000) i;
+CREATE INDEX idx_ce ON encomendas (cliente_id, estado);
+ANALYZE clientes; ANALYZE encomendas;</code></pre>
+<pre><code>EXPLAIN (ANALYZE, BUFFERS)
+SELECT c.nome, count(*) FROM clientes c
+JOIN encomendas e ON e.cliente_id = c.id
+WHERE c.pais = 'PT' AND e.estado = 'pendente'
+GROUP BY c.nome ORDER BY count(*) DESC LIMIT 10;</code></pre>
+<pre data-rotulo="Plano de execução completo, rolável na horizontal"><code>Limit  (actual time=12.404..12.406 rows=10 loops=1)
+  Buffers: shared hit=29347 read=1000
+  -&gt;  Sort  (actual time=12.404..12.405 rows=10 loops=1)
+        Sort Key: (count(*)) DESC
+        Sort Method: top-N heapsort  Memory: 25kB
+        -&gt;  HashAggregate  (actual time=12.342..12.378 rows=500 loops=1)
+              Group Key: c.nome
+              Batches: 1  Memory Usage: 241kB
+              -&gt;  Nested Loop  (actual time=0.013..11.774 rows=10000 loops=1)
+                    Buffers: shared hit=29344 read=1000
+                    -&gt;  Seq Scan on clientes c  (actual time=0.004..2.392 rows=10000 loops=1)
+                          Filter: (pais = 'PT'::text)
+                          Rows Removed by Filter: 40000
+                          Buffers: shared hit=319
+                    -&gt;  Index Only Scan using idx_ce on encomendas e
+                          (actual time=0.001..0.001 rows=1 loops=10000)
+                          Index Cond: ((cliente_id = c.id) AND (estado = 'pendente'))
+                          Heap Fetches: 24
+                          Buffers: shared hit=29025 read=1000
+Planning Time: 0.662 ms</code></pre>
+
+    <h3>Passo 1 — ler a estrutura antes de ler os números</h3>
+    <p>Porquê primeiro: sem saber a ordem de execução, os números não significam nada.</p>
+    <p>De dentro para fora: <code>Seq Scan</code> em <code>clientes</code> → para <strong>cada</strong> cliente
+    encontrado, um <code>Index Only Scan</code> em <code>encomendas</code> (é isso que um <code>Nested Loop</code>
+    faz) → agregar → ordenar → cortar aos 10.</p>
+
+    <h3>Passo 2 — onde está o tempo</h3>
+    <p>Total: 12,4 ms. O <code>Nested Loop</code> acaba aos 11,774 ms; o <code>Seq Scan</code> filho acaba aos
+    2,392. <strong>Cerca de 9,4 ms passam-se dentro do <code>Nested Loop</code></strong> — ou seja, nas
+    repetições do lado interno.</p>
+
+    <h3>Passo 3 — o nó «mais rápido» é o mais caro</h3>
+    <p>O <code>Index Only Scan</code> diz <code>actual time=0.001..0.001 rows=1</code>. Parece irrelevante.
+    Mas diz também <code>loops=10000</code>:</p>
+    <ul>
+      <li>Linhas devolvidas: 1 × 10 000 = <strong>10 000</strong> (bate com as do <code>Nested Loop</code>).</li>
+      <li>Tempo: ~0,001 × 10 000 ≈ <strong>10 ms</strong> — praticamente o tempo todo da query.</li>
+      <li>Páginas: <strong>30 025</strong>, num índice que tem cerca de mil. Foi lido 30 vezes, aos bocados.</li>
+    </ul>
+    <div class="caixa ok">
+      <span class="titulo">✅ Diagnóstico</span>
+      <p>O problema não é nenhum nó estar mal: é a query tocar em 10 000 clientes portugueses, um a um.
+      O <code>Seq Scan</code> em <code>clientes</code> também deitou fora 40 000 linhas
+      (<code>Rows Removed by Filter</code>) — um índice em <code>clientes(pais)</code> pouparia isso, mas são só
+      2,4 ms dos 12,4.</p>
+      <p>A correção com mais efeito seria <strong>trocar o <code>Nested Loop</code> por um <code>Hash Join</code></strong>:
+      ler as encomendas pendentes de uma vez (são 20 000) e juntá-las por dispersão, em vez de 10 000 descidas à
+      árvore. Se o planeador não o fizer sozinho, é sinal de estimativa errada — e volta-se à lição 3.</p>
+    </div>
+
+    <h3>Passo 4 — o que <em>não</em> é problema aqui</h3>
+    <p>Tão importante como encontrar: <code>Sort Method: top-N heapsort Memory: 25kB</code> — ordenou em memória e
+    só guardou 10 elementos, que é o comportamento ótimo com <code>LIMIT</code>. <code>Batches: 1</code> no
+    <code>HashAggregate</code> — coube em memória. <code>Heap Fetches: 24</code> em 10 000 execuções — o visibility
+    map está bom. <strong>Não se mexe no que está bem.</strong></p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <div class="exercicio">
+      <h3>Completa o diagnóstico</h3>
+<pre><code>Hash Join  (actual time=850.1..4210.7 rows=1200000 loops=1)
+  -&gt;  Seq Scan on pedidos  (actual time=0.01..310.2 rows=2000000 loops=1)
+  -&gt;  Hash  (actual time=849.8..849.8 rows=48000 loops=1)
+        Buckets: 4096  Batches: 16  Memory Usage: 3400kB
+        -&gt;  Seq Scan on artigos  (actual time=0.02..95.4 rows=48000 loops=1)
+              Filter: (ativo = true)
+              Rows Removed by Filter: 952000</code></pre>
+      <p><strong>Passo 1 (completa).</strong> Que nó corre primeiro? ______ Qual é o tempo total? ______</p>
+      <p><strong>Passo 2 (completa).</strong> O <code>Seq Scan on artigos</code> demorou 95 ms mas o
+      <code>Hash</code> acima dele acabou aos 850 ms. Onde foram os outros ~755 ms? ______</p>
+      <p><strong>Passo 3 (completa).</strong> Que campo denuncia a causa? ______ O que significa? ______</p>
+      <p><strong>Passo 4 (completa).</strong> Duas correções possíveis: ______ e ______</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 1:</strong> <code>Seq Scan on artigos</code> (o mais indentado). Total: 4210,7 ms.</p>
+        <p><strong>Passo 2:</strong> na construção da tabela de dispersão, que teve de ser feita <strong>por
+        partes</strong>.</p>
+        <p><strong>Passo 3:</strong> <code>Batches: 16</code>. Com <code>Batches: 1</code> a tabela cabe em
+        memória; 16 significa que não coube e o Postgres a partiu em 16 pedaços, escrevendo e relendo do disco —
+        e obrigando a percorrer o lado grande em vários passes. É a causa dos 755 ms e parte dos 3400 ms do join.</p>
+        <p><strong>Passo 4:</strong></p>
+        <ul>
+          <li><strong>Aumentar <code>work_mem</code></strong> na sessão. Se <code>Batches</code> passar a 1, era isso.</li>
+          <li><strong>Índice parcial em <code>artigos</code> com <code>WHERE ativo = true</code></strong>: os
+          <code>Rows Removed by Filter: 952000</code> dizem que 95% do que se leu foi deitado fora. Um índice
+          parcial evita ler os inativos de todo — <a href="06-o-custo-do-outro-lado.html">lição 6</a>.</li>
+        </ul>
+        <p>⭐ Repara que a leitura correta apontou para <code>work_mem</code> e para um índice <em>na tabela
+        pequena</em>. Quem olhasse só para «2 000 000 de linhas em <code>pedidos</code>» iria indexar a tabela
+        grande — que aqui não é o problema.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns da lição 5, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr><td>«Este nó é rápido: 0,001 ms»</td><td>Ignorar <code>loops=</code></td><td>Multiplica por <code>loops</code>. 0,001 × 10 000 = 10 ms, que era a query toda</td></tr>
+          <tr><td>«O nó de topo é o que demora»</td><td>Culpar o <code>Limit</code> ou o <code>Sort</code></td><td><code>actual time</code> é acumulado: inclui os filhos. O tempo próprio é a diferença</td></tr>
+          <tr><td>«<code>Planning Time</code> é irrelevante»</td><td>Nunca olhar para ele</td><td>Numa query de 0,5 ms com 1,5 ms de planeamento, o planeamento <em>é</em> o problema — e resolve-se com <code>PREPARE</code></td></tr>
+          <tr><td>Correr <code>EXPLAIN ANALYZE</code> num <code>DELETE</code></td><td>Descobrir tarde de mais</td><td>Ele executa. <code>BEGIN; … ROLLBACK;</code></td></tr>
+          <tr><td>Comparar tempos entre execuções</td><td>«Agora deu 2 ms, melhorou»</td><td>A segunda execução tem a cache quente. Compara <code>Buffers</code>, que é estável, não <code>Execution Time</code></td></tr>
+          <tr><td>Otimizar o nó mais chamativo</td><td>Indexar a tabela com mais linhas</td><td>Otimiza-se onde <em>está o tempo</em>. Muitas vezes é a tabela pequena, ou um <code>work_mem</code> curto</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — quanto tempo, afinal?</h3>
+      <p>Um nó diz <code>(actual time=0.003..0.004 rows=2 loops=45000)</code>. Quantas linhas produziu ao todo,
+      e quanto tempo gastou aproximadamente?</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>90 000 linhas</strong> (2 × 45 000) e <strong>~180 ms</strong> (0,004 × 45 000). Se a query
+        inteira demora 200 ms, este nó «de 0,004 ms» é 90% do tempo.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: provocar uma ordenação em disco</h3>
+      <p>Força um <code>Sort Method: external merge</code> na base de treino baixando o <code>work_mem</code>,
+      e depois repara-o. Mede os dois casos.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>SET work_mem = '64kB';
+EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM encomendas ORDER BY total_cents;
+-- Sort Method: external merge  Disk: 15792kB   (e cada worker paralelo o seu)
+
+SET work_mem = '256MB';
+EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM encomendas ORDER BY total_cents;
+-- Sort Method: quicksort  Memory: 79342kB
+RESET work_mem;</code></pre>
+        <p>O <code>Disk:</code> na primeira versão são ficheiros temporários escritos e relidos. Duas notas que
+        valem mais do que o exercício:</p>
+        <ul>
+          <li><code>work_mem</code> é <strong>por operação de ordenação ou dispersão</strong>, não por query nem por
+          ligação. Uma query com três <code>Sort</code>s e paralelismo pode usar várias vezes o valor configurado —
+          e é por isso que subi-lo globalmente é perigoso. Sobe-se na sessão, ou para a query.</li>
+          <li>Com um <code>LIMIT</code> pequeno o Postgres usa <code>top-N heapsort</code> e guarda só N elementos:
+          muitas ordenações «grandes» nunca precisam de memória nenhuma.</li>
+        </ul>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — diagnóstico completo</h3>
+      <p>Reproduz o exemplo trabalhado na tua base e responde com <strong>medições</strong>:</p>
+      <ol>
+        <li>Quantas páginas lê o <code>Index Only Scan</code> ao todo, e quantas páginas tem o índice?</li>
+        <li>Cria um índice em <code>clientes(pais)</code>. O plano muda? O tempo melhora quanto?</li>
+        <li>Força um <code>Hash Join</code> com <code>SET enable_nestloop = off</code>. Ficou melhor ou pior?
+        E o que é que isso te diz sobre a decisão do planeador?</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <ol>
+          <li>~30 025 páginas, num índice de ~1000. Foi percorrido ~30 vezes em fragmentos — normal num
+          <code>Nested Loop</code> com 10 000 iterações, e é aí que está o tempo.</li>
+          <li>O <code>Seq Scan on clientes</code> passa a <code>Bitmap Heap Scan</code> e poupa os
+          <code>Rows Removed by Filter: 40000</code>. Ganham-se ~2 ms em 12,4 — <strong>real mas pequeno</strong>.
+          É a lição de não otimizar o que salta à vista sem ver onde está o tempo.</li>
+          <li>Depende da tua máquina e da cache — e é esse o ponto do exercício. Se o <code>Hash Join</code> ficar
+          <em>melhor</em>, o planeador estava a subestimar o custo do <code>Nested Loop</code>, provavelmente por
+          estimativas de linhas; verifica <code>rows=</code> contra <code>actual rows=</code> em cada nó.
+          Se ficar <em>pior</em>, ele tinha razão. 🔴 Em qualquer dos casos, <code>RESET enable_nestloop;</code> —
+          é diagnóstico, não correção.</li>
+        </ol>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <div class="quiz" data-quiz="btree-05">
+      <ol class="perguntas">
+
+        <li class="pergunta">
+          <p class="enunciado">Um nó diz <code>(actual time=0.002..0.002 rows=1 loops=50000)</code>. Que fração de uma query de 120 ms é este nó?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="g1" value="a" data-certa="false"><span class="rotulo">Desprezável — 0,002 ms</span></label>
+              <p class="explicacao" hidden>É a leitura que a armadilha do loops provoca. Os tempos e as contagens de linhas são <em>por execução</em>; este nó correu cinquenta mil vezes.</p></li>
+            <li class="opcao"><label><input type="radio" name="g1" value="b" data-certa="true"><span class="rotulo">Cerca de 100 ms — mais de 80% da query</span></label>
+              <p class="explicacao" hidden>Certo: 0,002 × 50 000 = 100 ms. Multiplicar por loops antes de concluir é o hábito que distingue quem lê planos de quem os olha.</p></li>
+            <li class="opcao"><label><input type="radio" name="g1" value="c" data-certa="false"><span class="rotulo">Impossível saber sem o BUFFERS</span></label>
+              <p class="explicacao" hidden>O BUFFERS diz quanta I/O houve, que é informação diferente e também útil. Para a fração do tempo, actual time × loops chega.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado"><code>Sort Method: external merge  Disk: 240MB</code>. O que sugere?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="g2" value="a" data-certa="false"><span class="rotulo">Falta de espaço em disco</span></label>
+              <p class="explicacao" hidden>Não é um erro nem um aviso de espaço: é a descrição de uma estratégia. O Postgres ordenou usando ficheiros temporários porque a memória autorizada não chegava.</p></li>
+            <li class="opcao"><label><input type="radio" name="g2" value="b" data-certa="true"><span class="rotulo">A ordenação não coube em <code>work_mem</code> e foi para ficheiros temporários</span></label>
+              <p class="explicacao" hidden>Certo, e é dos poucos sinais que apontam diretamente para um parâmetro. Antes de o subir, porém, vale perguntar se a ordenação é necessária: um índice com a ordem certa pode eliminá-la, e um LIMIT pequeno transforma-a num top-N heapsort que quase não usa memória.</p></li>
+            <li class="opcao"><label><input type="radio" name="g2" value="c" data-certa="false"><span class="rotulo">Que falta um índice na coluna ordenada</span></label>
+              <p class="explicacao" hidden>Pode ser uma correção válida — mas não é o que este campo diz. Ele diz como a ordenação correu, não porque foi precisa. Confundir observação com diagnóstico leva a criar índices por reflexo.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Correste a query duas vezes: 40 ms e depois 2 ms. O que concluis?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="g3" value="a" data-certa="false"><span class="rotulo">Que o Postgres guardou o resultado em cache</span></label>
+              <p class="explicacao" hidden>O Postgres não tem cache de resultados de queries. O que ficou em cache foram as <em>páginas</em> lidas do disco, na shared_buffers e na cache do sistema operativo.</p></li>
+            <li class="opcao"><label><input type="radio" name="g3" value="b" data-certa="true"><span class="rotulo">Que a segunda execução encontrou as páginas em memória — compara <code>Buffers</code>, não tempos</span></label>
+              <p class="explicacao" hidden>Certo: vais ver read alto na primeira e hit alto na segunda, com a soma igual. Por isso a métrica estável para comparar duas versões de uma query é o total de buffers, não o Execution Time.</p></li>
+            <li class="opcao"><label><input type="radio" name="g3" value="c" data-certa="false"><span class="rotulo">Que a query melhorou e está resolvida</span></label>
+              <p class="explicacao" hidden>Nada mudou na query nem no plano. Em produção, com a cache ocupada por outros dados, voltarias aos 40 ms — e concluir «resolvido» é como se aprende a confiar em medições que não medem nada.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Num plano, o nó de topo diz <code>actual time=…..500</code> e o filho diz <code>…..480</code>. Quanto tempo gastou o nó de topo?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="g4" value="a" data-certa="false"><span class="rotulo">500 ms</span></label>
+              <p class="explicacao" hidden>500 ms é o tempo acumulado desde o início da query até o nó acabar — inclui tudo o que os filhos fizeram. Atribuí-lo ao nó de topo é culpar o Limit por trabalho que foi feito em baixo.</p></li>
+            <li class="opcao"><label><input type="radio" name="g4" value="b" data-certa="true"><span class="rotulo">Cerca de 20 ms — a diferença para o filho</span></label>
+              <p class="explicacao" hidden>Certo. Os tempos são acumulados, portanto o tempo próprio de um nó é o seu total menos o total dos filhos. É assim que se encontra onde o tempo está mesmo a ser gasto.</p></li>
+            <li class="opcao"><label><input type="radio" name="g4" value="c" data-certa="false"><span class="rotulo">980 ms — somam-se</span></label>
+              <p class="explicacao" hidden>Somar duplicaria: o tempo do filho já está contido no do pai. A operação certa é subtrair, não somar.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado"><code>Rows Removed by Filter: 952000</code> num <code>Seq Scan</code> que devolveu 48 000 linhas. O que sugere?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="g5" value="a" data-certa="false"><span class="rotulo">Que a query está errada e devolve linhas a mais</span></label>
+              <p class="explicacao" hidden>O resultado está correto — as 952 000 foram descartadas de propósito pelo filtro. O que o número mostra é o <em>custo</em> de as ter lido para as deitar fora, não um erro de lógica.</p></li>
+            <li class="opcao"><label><input type="radio" name="g5" value="b" data-certa="true"><span class="rotulo">Que 95% do que se leu foi deitado fora — candidato a índice, possivelmente parcial</span></label>
+              <p class="explicacao" hidden>Certo. É um dos sinais mais úteis do EXPLAIN: trabalho desperdiçado e mensurável. Se o filtro for sempre o mesmo (ativo = true), um índice parcial evita ler os outros de todo — e fica muito mais pequeno que um índice completo.</p></li>
+            <li class="opcao"><label><input type="radio" name="g5" value="c" data-certa="false"><span class="rotulo">Que as estatísticas estão desatualizadas</span></label>
+              <p class="explicacao" hidden>Este campo conta linhas mesmo descartadas durante a execução; não diz nada sobre a qualidade das estimativas. Isso vê-se comparando rows= com actual rows=.</p></li>
+          </ul>
+        </li>
+
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="f1">Explica a alguém como se encontra «onde está o tempo» num plano de execução, se os tempos são
+      todos acumulados e alguns nós correm milhares de vezes.
+        <span class="pista">Sem usar «nó», «acumulado» nem «loops». Descreve o procedimento que tu seguirias.</span>
+      </label>
+      <textarea id="f1" data-pergunta="Como encontrar onde está o tempo num plano"></textarea>
+    </div>
+    <div class="aberta">
+      <label for="f2">Porque é que comparar <code>Execution Time</code> entre duas execuções é enganador, e o que
+      usarias em vez disso?
+        <span class="pista">Diz também em que situação o tempo <em>é</em> a métrica certa.</span>
+      </label>
+      <textarea id="f2" data-pergunta="Porque comparar Execution Time engana"></textarea>
+    </div>
+
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p class="accoes"><button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button></p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/indices-btree-sql/respostas/AAAA-MM-DD.md</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li>Lê-se <strong>de dentro para fora</strong>. <code>actual time</code> é <strong>acumulado</strong>:
+      o tempo próprio é a diferença para os filhos.</li>
+      <li>🔴 <strong><code>loops=</code></strong>: tempo e linhas são por execução. Multiplica antes de concluir.</li>
+      <li>Quatro perguntas: onde está o tempo · as estimativas batem · há trabalho desperdiçado · quantas páginas.</li>
+      <li>Sinais que apontam para correções concretas: <code>Rows Removed by Filter</code> (índice, talvez parcial) ·
+      <code>Batches &gt; 1</code> e <code>external merge</code> (<code>work_mem</code>) ·
+      <code>Heap Fetches</code> (<code>VACUUM</code>) · <code>lossy</code> (<code>work_mem</code>).</li>
+      <li>Compara <strong><code>Buffers</code></strong> entre versões, nunca <code>Execution Time</code> — e
+      <code>EXPLAIN ANALYZE</code> num <code>DELETE</code> <strong>apaga mesmo</strong>.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>Documentação do PostgreSQL 17 — <em>Using EXPLAIN</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/using-explain.html">using-explain.html</a>
+        — fonte primária, incluindo o aviso explícito de que <code>ANALYZE</code> executa a query e a explicação de
+        que os tempos são acumulados e por execução. <strong>Porquê:</strong> é o texto mais útil da documentação
+        inteira. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>EXPLAIN</em> (referência do comando)</strong>.
+        <a href="https://www.postgresql.org/docs/17/sql-explain.html">sql-explain.html</a>
+        — todas as opções: <code>BUFFERS</code>, <code>SETTINGS</code>, <code>WAL</code>, <code>FORMAT JSON</code>.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>Resource Consumption</em> (<code>work_mem</code>)</strong>.
+        <a href="https://www.postgresql.org/docs/17/runtime-config-resource.html#GUC-WORK-MEM">runtime-config-resource.html</a>
+        — confirma que o limite é <strong>por operação</strong>, e não por query nem por ligação.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Ferramenta recomendada</strong> — <a href="https://explain.dalibo.com/">explain.dalibo.com</a>,
+        que desenha o plano e destaca os nós caros. <strong>Porquê:</strong> útil em planos grandes.
+        <strong>Aviso:</strong> colar planos de produção num site é enviar nomes de tabelas e de colunas para fora —
+        confirma a política da tua organização antes. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>O plano do exemplo trabalhado</strong> foi corrido em <strong>PostgreSQL 17.11</strong> sobre
+        <a href="preparar.sql">preparar.sql</a> mais a tabela <code>clientes</code> criada acima.
+        <span class="verificado">✅ Corrido a 2026-09-15</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="04-indices-compostos.html">← 4 · Índices compostos</a> ·
+      <a href="index.html">↑ Índice do curso</a> ·
+      <a href="06-o-custo-do-outro-lado.html">6 · O custo do outro lado →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var alvos = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    campo.hidden = false;
+
+    function normalizar(s) {
+      // Sem acentos: procurar "indices" tem de encontrar "índices".
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    alvos.forEach(function (el) { el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || "")); });
+
+    function filtrar() {
+      var q = normalizar(campo.value.trim());
+      var visiveis = 0;
+      alvos.forEach(function (el) {
+        var mostra = !q || el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+      if (contador) {
+        contador.textContent = q
+          ? visiveis + " de " + alvos.length + (visiveis === 1 ? " tópico" : " tópicos")
+          : alvos.length + (alvos.length === 1 ? " tópico" : " tópicos");
+      }
+      if (vazio) { vazio.hidden = visiveis !== 0; }
+    }
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

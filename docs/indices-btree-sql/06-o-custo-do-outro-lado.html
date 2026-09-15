@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6 · O custo do outro lado — Índices B-tree em SQL</title>
+<meta name="description" content="Lição 6: o que os índices cobram nas escritas e em espaço, índices parciais e de expressão, e como decidir não indexar.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/indices-btree-sql/06-o-custo-do-outro-lado.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Índices B-tree</a> <span aria-hidden="true">›</span> Lição 6
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta extensao">Lição 6 · extensão</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>O custo do outro lado</h1>
+    <p class="subtitulo">Cinco lições a ver o que um índice poupa. Esta é sobre o que ele cobra — e sobre as duas
+    ferramentas que reduzem a fatura: índices parciais e de expressão.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>No fim consegues <strong>defender a decisão de <em>não</em> criar um índice</strong> com números, identificar
+    os índices que uma base de dados tem a mais, e usar índices parciais e de expressão nos casos em que resolvem
+    mais barato do que um índice completo.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+    <ol>
+      <li>Que campo do <code>EXPLAIN</code> denuncia trabalho desperdiçado a filtrar linhas?
+        <details class="solucao"><summary>Resposta</summary><p><code>Rows Removed by Filter</code>.</p></details>
+      </li>
+      <li>Índice sobre <code>(a, b)</code>: torna redundante que outro índice?
+        <details class="solucao"><summary>Resposta</summary><p>Um índice só sobre <code>(a)</code> — <code>a</code> é prefixo do composto.</p></details>
+      </li>
+      <li>Porque é que um <code>Index Only Scan</code> pode ir à tabela na mesma?
+        <details class="solucao"><summary>Resposta</summary><p>Porque as páginas não estão marcadas como todas-visíveis no visibility map. Vê-se em <code>Heap Fetches</code>.</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>Um índice é uma estrutura a mais para manter</h3>
+    <p>Cada <code>INSERT</code> tem de inserir uma entrada em <strong>cada</strong> índice da tabela, no sítio certo
+    da árvore — o que pode obrigar a dividir páginas. Cada <code>UPDATE</code> de uma coluna indexada é, na prática,
+    uma remoção e uma inserção. Cada <code>DELETE</code> deixa entradas mortas até ao <code>VACUUM</code>.</p>
+    <p>Medido na base de treino (Postgres 17.11), a inserir 200 000 linhas numa tabela vazia:</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Custo de escrita com e sem índices, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Tabela</th><th>Índices</th><th>Tempo do <code>INSERT</code></th></tr></thead>
+        <tbody>
+          <tr><td><code>t_sem</code></td><td>0</td><td><strong>182 ms</strong></td></tr>
+          <tr><td><code>t_com</code></td><td>4</td><td><strong>1232 ms</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>6,8 vezes mais lento.</strong> E o espaço vai na mesma direção: no fim, a tabela ocupava 13 MB e os
+    índices 16 MB — <strong>os índices pesavam mais do que os dados</strong>.</p>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Este número é o teto, não a média</span>
+      <p>Um <code>INSERT</code> de 200 000 linhas de uma vez é o caso mais favorável à tabela sem índices. Numa
+      aplicação que insere uma linha de cada vez, o custo fixo por transação dilui a diferença, e o fator é menor.
+      O que se retém não é «6,8×» — é <strong>que existe um fator, que cresce com o número de índices, e que se
+      mede na tua carga.</strong></p>
+    </div>
+
+    <h3>Índices parciais: indexar só o que interessa</h3>
+    <p>Se as queries só procuram um subconjunto das linhas, só esse subconjunto precisa de estar no índice.</p>
+<pre><code>CREATE INDEX idx_pendentes ON encomendas (criada_em) WHERE estado = 'pendente';</code></pre>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Índice parcial comparado com completo, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Índice</th><th>Tamanho</th></tr></thead>
+        <tbody>
+          <tr><td><code>(estado)</code> — completo</td><td>6904 kB</td></tr>
+          <tr><td><code>(criada_em) WHERE estado = 'pendente'</code></td><td><strong>384 kB</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>18 vezes mais pequeno</strong>, porque só indexa 2% das linhas. E o ganho não é só espaço: as
+    97% de linhas «entregues» não tocam neste índice quando são inseridas.</p>
+    <p>O caso canónico é uma fila de trabalho: <code>WHERE processado = false</code>. A tabela cresce para sempre;
+    o índice fica do tamanho da fila.</p>
+
+    <h3>Índices de expressão: indexar o resultado de uma função</h3>
+    <p>A lição 3 mostrou que <code>WHERE lower(email) = ?</code> não usa um índice em <code>email</code>. A saída é
+    indexar a própria expressão:</p>
+<pre><code>CREATE INDEX idx_email_min ON clientes ((lower(email)));</code></pre>
+    <p>Duas condições, e ambas apanham gente desprevenida:</p>
+    <div class="caixa critico">
+      <span class="titulo">🔴 A função tem de ser <code>IMMUTABLE</code></span>
+      <p>Uma função só pode ser indexada se devolver <strong>sempre</strong> o mesmo resultado para a mesma entrada.
+      Encontrei isto ao escrever esta lição, a tentar indexar o ano de uma data:</p>
+<pre><code>CREATE INDEX idx_ano ON encomendas ((date_part('year', criada_em)));
+ERROR:  functions in index expression must be marked IMMUTABLE</code></pre>
+      <p>A causa: <code>criada_em</code> é <code>timestamptz</code>, e extrair o ano depende do <strong>fuso horário
+      da sessão</strong>. A mesma linha daria 2025 em Lisboa e 2024 em São Paulo — e um índice não pode depender de
+      quem o consulta. Confirma-se no catálogo: a função está marcada <code>s</code> (stable), não
+      <code>i</code> (immutable).</p>
+      <p>A correção é fixar o fuso, tornando a expressão determinística:</p>
+<pre><code>CREATE INDEX idx_ano ON encomendas ((date_part('year', criada_em AT TIME ZONE 'UTC')));</code></pre>
+    </div>
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ A query tem de usar <strong>exatamente</strong> a mesma expressão</span>
+      <p>Medido: com o índice acima, <code>WHERE date_part('year', criada_em AT TIME ZONE 'UTC') = 2025</code> usa-o
+      (11,8 ms). Mas <code>WHERE date_part('year', criada_em) = 2025</code> — sem o <code>AT TIME ZONE</code> —
+      volta a <code>Parallel Seq Scan</code> (31,4 ms). São expressões diferentes, e o planeador não as reconcilia.</p>
+      <p>É um índice fácil de criar e de deixar por usar sem ninguém dar conta.</p>
+    </div>
+
+    <h3>Como encontrar os índices a mais</h3>
+<pre><code>SELECT indexrelname, idx_scan, pg_size_pretty(pg_relation_size(indexrelid)) AS tamanho
+FROM pg_stat_user_indexes WHERE relname = 'encomendas' ORDER BY idx_scan;</code></pre>
+    <p><code>idx_scan = 0</code> quer dizer que o índice nunca foi usado <em>desde a última reposição das
+    estatísticas</em>. Antes de apagar, três cuidados:</p>
+    <ul>
+      <li><strong>Desde quando?</strong> <code>SELECT stats_reset FROM pg_stat_database WHERE datname = current_database();</code>
+      Zero scans desde ontem não diz nada.</li>
+      <li><strong>Serve uma restrição?</strong> Um índice que suporta uma chave primária ou única não se apaga —
+      apaga-se a restrição, se for isso que se quer.</li>
+      <li><strong>Só uma réplica o usa?</strong> As estatísticas são por servidor. Um índice sem uso no primário
+      pode ser o que segura os relatórios na réplica.</li>
+    </ul>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>Decidir se vale a pena um índice — com números, não com opinião.</p>
+    <p><strong>O caso:</strong> tabela <code>eventos</code>, 5000 <code>INSERT</code>s por minuto. Um relatório
+    diário corre <code>WHERE tipo = 'erro' AND criada_em &gt; ?</code> e demora 8 s. Alguém propõe
+    <code>CREATE INDEX ON eventos (tipo, criada_em)</code>.</p>
+
+    <h3>Passo 1 — quanto se ganha (medir, não estimar)</h3>
+    <p>Porquê primeiro: se o ganho for pequeno, a discussão acaba aqui.</p>
+<pre><code>BEGIN;
+CREATE INDEX idx_teste ON eventos (tipo, criada_em);
+EXPLAIN (ANALYZE, BUFFERS) SELECT ... ;
+ROLLBACK;   -- o índice desaparece com a transação</code></pre>
+    <p>⭐ A técnica vale por si: <strong><code>CREATE INDEX</code> é transacional em Postgres</strong>. Podes
+    experimentar um índice e desfazê-lo sem deixar rasto. (Numa tabela em produção com escrita, usa-se
+    <code>CREATE INDEX CONCURRENTLY</code> — que <em>não</em> é transacional, precisamente por não bloquear.)</p>
+    <p>Digamos que o relatório passa de 8 s para 40 ms. Ganho: ~8 s por dia.</p>
+
+    <h3>Passo 2 — quanto se perde</h3>
+    <p>5000 <code>INSERT</code>s/min = 7,2 milhões por dia. Se cada um custar mais 20 µs por causa do índice,
+    são <strong>144 s por dia</strong> de trabalho extra, espalhados por todas as escritas.</p>
+    <p>Este número mede-se, não se adivinha: insere-se um lote representativo com e sem o índice, como na tabela
+    acima. O que se está a comparar é <strong>8 s poupados uma vez contra 144 s gastos continuamente</strong>.</p>
+
+    <h3>Passo 3 — perguntar se há forma mais barata</h3>
+    <p>Porquê antes de decidir: a escolha raramente é «índice sim ou não». Aqui:</p>
+    <ul>
+      <li><strong>Índice parcial:</strong> <code>ON eventos (criada_em) WHERE tipo = 'erro'</code>. Se os erros
+      forem 1% dos eventos, o índice fica ~100× mais pequeno <em>e</em> os outros 99% dos
+      <code>INSERT</code>s não lhe tocam. O custo de escrita quase desaparece.</li>
+      <li><strong>Não indexar:</strong> se o relatório corre de madrugada e ninguém espera por ele, 8 s não são um
+      problema. «Lento» não é o mesmo que «problema».</li>
+      <li><strong>Materializar:</strong> se o relatório é sempre o mesmo, uma tabela-resumo atualizada uma vez por
+      dia resolve sem tocar no caminho de escrita.</li>
+    </ul>
+
+    <h3>Passo 4 — decidir e escrever porquê</h3>
+    <div class="caixa ok">
+      <span class="titulo">✅ Decisão: índice parcial</span>
+      <p>Porque dá quase todo o ganho de leitura com uma fração do custo de escrita. E porque, sendo pequeno, é
+      barato de manter e de apagar se as queries mudarem.</p>
+      <p>A parte que se esquece: <strong>escrever a razão onde alguém a encontre</strong> — numa migração, num
+      comentário. Daqui a um ano, quem vir um índice parcial estranho e não souber porquê, ou o apaga (e parte o
+      relatório) ou não lhe toca por medo (e nunca mais é revisto).</p>
+    </div>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <div class="exercicio">
+      <h3>Completa a auditoria</h3>
+      <p><strong>Dado.</strong> Tabela <code>sessoes</code>, escrita intensa, com estes índices:</p>
+      <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Índices a auditar, tabela rolável na horizontal">
+        <table>
+          <thead><tr><th>Índice</th><th><code>idx_scan</code></th><th>Tamanho</th></tr></thead>
+          <tbody>
+            <tr><td><code>sessoes_pkey (id)</code></td><td>4 100 000</td><td>210 MB</td></tr>
+            <tr><td><code>(utilizador_id)</code></td><td>890 000</td><td>180 MB</td></tr>
+            <tr><td><code>(utilizador_id, criada_em)</code></td><td>1 200 000</td><td>260 MB</td></tr>
+            <tr><td><code>(agente_utilizador)</code></td><td>0</td><td>340 MB</td></tr>
+            <tr><td><code>(expira_em)</code></td><td>52</td><td>190 MB</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Passo 1 (completa).</strong> Qual é redundante por definição, e porquê? ______</p>
+      <p><strong>Passo 2 (completa).</strong> Qual é o candidato mais óbvio a apagar? ______ O que confirmas antes? ______</p>
+      <p><strong>Passo 3 (completa).</strong> O de <code>expira_em</code> tem 52 usos. Apagas? ______ Porquê? ______</p>
+      <p><strong>Passo 4 (completa).</strong> Quanto espaço poupas, e o que ganhas além do espaço? ______</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 1:</strong> <code>(utilizador_id)</code> — é prefixo de
+        <code>(utilizador_id, criada_em)</code>, portanto tudo o que serve já é servido pelo composto.
+        180 MB e trabalho em cada escrita, a troco de nada.</p>
+        <p><strong>Passo 2:</strong> <code>(agente_utilizador)</code>: zero usos e o maior de todos, 340 MB.
+        Antes de apagar, confirma-se <code>stats_reset</code> (zero desde ontem não é zero), e se alguma réplica o
+        usa.</p>
+        <p><strong>Passo 3:</strong> <strong>Não, sem investigar.</strong> 52 usos podem ser um trabalho de limpeza
+        que corre uma vez por dia — e que sem o índice passa a varrer a tabela inteira. Um índice pouco usado pode
+        ser o que impede um incidente noturno. A pergunta certa não é «quantas vezes?», é <strong>«quem o usa, e o
+        que acontece sem ele?»</strong>.</p>
+        <p><strong>Passo 4:</strong> 520 MB (340 + 180). Além do espaço: <strong>duas árvores a menos para manter
+        em cada <code>INSERT</code></strong> numa tabela de escrita intensa, menos páginas a disputar a cache
+        (o que melhora <em>os outros</em> índices), e menos trabalho para o <code>VACUUM</code>.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns da lição 6, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr><td>«Um índice a mais não faz mal»</td><td>Dez índices numa tabela de escrita</td><td>Medido: 4 índices → <code>INSERT</code> 6,8× mais lento, e índices a pesar mais que a tabela</td></tr>
+          <tr><td>«<code>idx_scan = 0</code>, apaga-se»</td><td>Apagar sem ver <code>stats_reset</code></td><td>Zero desde ontem não é zero. E pode ser o índice de uma limpeza semanal, ou usado só na réplica</td></tr>
+          <tr><td>«Criei o índice de expressão, está resolvido»</td><td>Não verificar o plano depois</td><td>A query tem de usar a expressão <strong>literalmente igual</strong>. Medido: sem o <code>AT TIME ZONE</code>, volta a <code>Seq Scan</code></td></tr>
+          <tr><td>«Qualquer função pode ser indexada»</td><td><code>ERROR: functions in index expression must be marked IMMUTABLE</code></td><td>Só funções determinísticas. <code>now()</code>, <code>random()</code> e conversões dependentes de fuso ou de <em>locale</em> não servem</td></tr>
+          <tr><td>«Índices parciais são um caso de nicho»</td><td>Nunca os usar</td><td>Filas de trabalho, <em>soft deletes</em>, estados raros — são comuníssimos, e a poupança é grande (18× aqui)</td></tr>
+          <tr><td>«A query está lenta, logo precisa de índice»</td><td>Índice como primeira resposta</td><td>Às vezes a resposta é não indexar: um relatório noturno de 8 s pode não ser um problema. «Lento» ≠ «problema»</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — parcial ou completo?</h3>
+      <p>Para cada caso, diz se farias índice completo, parcial (com que condição), ou nenhum:</p>
+      <ol>
+        <li>Fila: <code>WHERE processado = false</code>, 0,1% das linhas, tabela cresce para sempre.</li>
+        <li><em>Soft delete</em>: quase todas as queries têm <code>WHERE apagado_em IS NULL</code>; 5% apagadas.</li>
+        <li><code>WHERE pais = ?</code>, cinco países com ~20% cada.</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <ol>
+          <li><strong>Parcial</strong>, <code>WHERE processado = false</code>. O caso canónico: o índice fica do
+          tamanho da fila em vez do tamanho da história, e as linhas já processadas deixam de lhe tocar.</li>
+          <li><strong>Parcial</strong>, <code>WHERE apagado_em IS NULL</code>, acrescentando as colunas que as
+          queries usam. Poupa só 5% do tamanho — mas o Postgres passa a poder usar o índice <em>sem</em> revalidar a
+          condição, porque ela faz parte da definição. O ganho é mais em planos do que em bytes.</li>
+          <li><strong>Provavelmente nenhum.</strong> 20% por país é pouco seletivo e, pela lição 3, se as linhas
+          estiverem dispersas o índice não poupa páginas. Mede-se com <code>BUFFERS</code> antes de decidir. Se
+          houvesse um país com 0,5%, um índice parcial só para esse faria sentido.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: mede o custo de escrita da <em>tua</em> máquina</h3>
+      <p>Não aceites o 6,8×. Mede o teu:</p>
+<pre><code>CREATE TABLE t_sem (LIKE encomendas);
+CREATE TABLE t_com (LIKE encomendas);
+CREATE INDEX ON t_com(cliente_id); CREATE INDEX ON t_com(estado);
+CREATE INDEX ON t_com(total_cents); CREATE INDEX ON t_com(cliente_id, criada_em);
+\timing on
+INSERT INTO t_sem SELECT * FROM encomendas LIMIT 200000;
+INSERT INTO t_com SELECT * FROM encomendas LIMIT 200000;
+SELECT pg_size_pretty(pg_table_size('t_com')), pg_size_pretty(pg_indexes_size('t_com'));
+DROP TABLE t_sem, t_com;</code></pre>
+      <p>Depois repete com <strong>um</strong> índice em vez de quatro. O custo cresce de forma proporcional?</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>Medido em Postgres 17.11: 182 ms sem índices, 1232 ms com quatro — <strong>6,8×</strong>.
+        Tabela 13 MB, índices 16 MB.</p>
+        <p>Com um índice o custo não é ¼ do de quatro: há um custo fixo por linha que não depende dos índices
+        (escrever na tabela, no WAL), e os índices variam bastante entre si — um sobre <code>estado</code>
+        (3 valores, muito deduplicado) é mais barato de manter do que um sobre <code>total_cents</code>
+        (50 000 valores distintos, entradas espalhadas por toda a árvore).</p>
+        <p>⭐ É por isso que a pergunta útil nunca é «quantos índices tenho?», mas <strong>«este índice, nesta
+        coluna, paga-se?»</strong>.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — o índice de expressão que não é usado</h3>
+      <p>Reproduz a armadilha: cria o índice sobre <code>date_part('year', criada_em)</code> e vê o erro. Corrige
+      com <code>AT TIME ZONE</code>. Depois mostra que a query <em>sem</em> o <code>AT TIME ZONE</code> não o usa.
+      Por fim: que solução é <strong>melhor</strong> do que o índice de expressão, para este caso concreto?</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>O erro e a correção estão no mecanismo, acima. Medido: com a expressão exata, 11,8 ms
+        (<code>Bitmap Index Scan on idx_ano</code>); sem o <code>AT TIME ZONE</code>, 31,4 ms
+        (<code>Parallel Seq Scan</code>).</p>
+        <p><strong>A solução melhor: não usar índice de expressão nenhum.</strong> Reescrever a query como intervalo
+        sobre a coluna:</p>
+<pre><code>WHERE criada_em &gt;= '2025-01-01' AND criada_em &lt; '2026-01-01'</code></pre>
+        <p>Porque é melhor:</p>
+        <ul>
+          <li>Usa um índice normal sobre <code>criada_em</code>, que provavelmente já existe e serve muitas outras
+          queries — em vez de mais uma árvore só para esta.</li>
+          <li>Não depende de quem escreve a query acertar na expressão exata.</li>
+          <li>Não tem o problema do fuso: a comparação é feita sobre o valor, não sobre uma extração dele.</li>
+        </ul>
+        <p>🔴 O índice de expressão é a ferramenta certa quando a expressão é <strong>irredutível</strong> —
+        <code>lower(email)</code> para comparações sem maiúsculas, por exemplo. Não é a ferramenta certa para
+        contornar uma query que podia ser reescrita como intervalo.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <div class="quiz" data-quiz="btree-06">
+      <ol class="perguntas">
+
+        <li class="pergunta">
+          <p class="enunciado"><code>CREATE INDEX ON t ((date_part('year', criada_em)))</code> onde <code>criada_em</code> é <code>timestamptz</code>. O que acontece?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="h1" value="a" data-certa="false"><span class="rotulo">Cria e funciona</span></label>
+              <p class="explicacao" hidden>Não chega a criar. Sobre timestamptz a extração do ano depende do fuso da sessão, e o Postgres recusa-se a indexar algo cujo resultado muda com quem pergunta.</p></li>
+            <li class="opcao"><label><input type="radio" name="h1" value="b" data-certa="true"><span class="rotulo">Falha: a função tem de ser IMMUTABLE</span></label>
+              <p class="explicacao" hidden>Certo: «functions in index expression must be marked IMMUTABLE». A mesma linha daria 2025 em Lisboa e 2024 em São Paulo. Corrige-se fixando o fuso com AT TIME ZONE 'UTC'.</p></li>
+            <li class="opcao"><label><input type="radio" name="h1" value="c" data-certa="false"><span class="rotulo">Cria, mas só é usado se a sessão estiver em UTC</span></label>
+              <p class="explicacao" hidden>Seria um comportamento pior do que a recusa — um índice que devolve resultados diferentes conforme o cliente é um índice que devolve resultados errados. Por isso a verificação é feita na criação, não no uso.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Um índice tem <code>idx_scan = 0</code> e ocupa 340 MB. Apagas?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="h2" value="a" data-certa="false"><span class="rotulo">Sim, imediatamente</span></label>
+              <p class="explicacao" hidden>O contador conta desde a última reposição das estatísticas. Se foram repostas ontem — ou se o servidor reiniciou —, zero não significa «nunca usado», significa «não usado desde ontem».</p></li>
+            <li class="opcao"><label><input type="radio" name="h2" value="b" data-certa="true"><span class="rotulo">Verifico primeiro <code>stats_reset</code>, se suporta uma restrição, e se alguma réplica o usa</span></label>
+              <p class="explicacao" hidden>Certo — três verificações rápidas que evitam apagar algo necessário. Feitas essas, um índice grande e genuinamente sem uso é dos poucos casos em que apagar melhora tudo: espaço, escritas, cache e VACUUM.</p></li>
+            <li class="opcao"><label><input type="radio" name="h2" value="c" data-certa="false"><span class="rotulo">Nunca se apagam índices</span></label>
+              <p class="explicacao" hidden>Índices acumulam-se ao longo dos anos — criados para queries que já não existem — e cada um cobra em todas as escritas. Nunca apagar é como nunca apagar código morto, mas com custo em tempo de execução.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Fila de trabalho: <code>WHERE processado = false</code>, 0,1% das linhas, tabela que cresce para sempre. Que índice?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="h3" value="a" data-certa="false"><span class="rotulo">Completo sobre (processado)</span></label>
+              <p class="explicacao" hidden>Funciona, mas indexa 100% das linhas para servir 0,1%. Cresce para sempre junto com a tabela, e cada linha já processada continua a ocupar espaço nele e a ter custado uma inserção.</p></li>
+            <li class="opcao"><label><input type="radio" name="h3" value="b" data-certa="true"><span class="rotulo">Parcial: <code>WHERE processado = false</code></span></label>
+              <p class="explicacao" hidden>Certo, e é o caso canónico do índice parcial. O índice fica do tamanho da fila, não do tamanho da história — e as linhas processadas deixam de lhe tocar.</p></li>
+            <li class="opcao"><label><input type="radio" name="h3" value="c" data-certa="false"><span class="rotulo">Nenhum — 0,1% é pouco para justificar</span></label>
+              <p class="explicacao" hidden>É ao contrário: 0,1% é excelente seletividade, exatamente onde um índice mais ganha. O problema de um índice completo aqui não é a seletividade, é o tamanho — e é isso que o parcial resolve.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Queres saber se um índice ajuda, sem o deixar criado. O que fazes?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="h4" value="a" data-certa="true"><span class="rotulo"><code>BEGIN; CREATE INDEX …; EXPLAIN ANALYZE …; ROLLBACK;</code></span></label>
+              <p class="explicacao" hidden>Certo: em Postgres o CREATE INDEX é transacional, portanto o ROLLBACK desfá-lo sem deixar rasto. Numa tabela em produção com escrita usa-se CREATE INDEX CONCURRENTLY, que não bloqueia — e que, precisamente por isso, não é transacional.</p></li>
+            <li class="opcao"><label><input type="radio" name="h4" value="b" data-certa="false"><span class="rotulo">Calculo o custo à mão a partir do tamanho do índice</span></label>
+              <p class="explicacao" hidden>Dá para estimar, mas falha justamente onde mais importa: a correlação física das linhas e o efeito da cache. A regra de casa deste curso é correr o que se escreve em vez de o julgar — e aqui correr é barato.</p></li>
+            <li class="opcao"><label><input type="radio" name="h4" value="c" data-certa="false"><span class="rotulo">Crio, meço e apago</span></label>
+              <p class="explicacao" hidden>Funciona e dá o mesmo resultado, mas se algo correr mal entre o criar e o apagar, o índice fica. A transação garante a limpeza mesmo que a sessão morra a meio.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Relatório noturno de 8 s numa tabela com 5000 <code>INSERT</code>s por minuto. Qual é a melhor primeira pergunta?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="h5" value="a" data-certa="false"><span class="rotulo">Que colunas indexar?</span></label>
+              <p class="explicacao" hidden>Pula a decisão que interessa. Assume que o índice vai ser criado e só discute a forma — quando o custo recai sobre 7,2 milhões de escritas por dia para poupar 8 segundos uma vez.</p></li>
+            <li class="opcao"><label><input type="radio" name="h5" value="b" data-certa="true"><span class="rotulo">Os 8 s são um problema para alguém?</span></label>
+              <p class="explicacao" hidden>Certo. «Lento» não é o mesmo que «problema». Se corre às 4 da manhã e ninguém espera, o índice cobra em todas as escritas do dia para resolver algo que não incomoda. Se alguém espera, aí sim vale a pena — e provavelmente um índice parcial.</p></li>
+            <li class="opcao"><label><input type="radio" name="h5" value="c" data-certa="false"><span class="rotulo">Quanto espaço tem o disco?</span></label>
+              <p class="explicacao" hidden>O espaço é o menor dos custos de um índice e o mais fácil de resolver. O custo que interessa é o trabalho acrescentado a cada uma das 7,2 milhões de escritas diárias.</p></li>
+          </ul>
+        </li>
+
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="f1">Explica a alguém que quer «indexar tudo por precaução» porque é que isso é má ideia.
+        <span class="pista">Usa números, não princípios. E não digas só «ocupa espaço» — o espaço é o menor dos custos.</span>
+      </label>
+      <textarea id="f1" data-pergunta="Porque indexar tudo por precaução é má ideia"></textarea>
+    </div>
+    <div class="aberta">
+      <label for="f2">Este curso acabou. Descreve, em cinco passos e por palavras tuas, o que farias perante uma
+      query lenta numa base de dados que não conheces.
+        <span class="pista">Esta é a resposta que mostra se o curso funcionou. Escreve-a sem consultar as lições —
+        e se te faltar um passo, deixa lá escrito que te faltou. Isso diz-me onde voltar.</span>
+      </label>
+      <textarea id="f2" data-pergunta="O meu método, em cinco passos, perante uma query lenta"></textarea>
+    </div>
+
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p class="accoes"><button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button></p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/indices-btree-sql/respostas/AAAA-MM-DD.md</code>.</p>
+    </div>
+
+    <div class="caixa ok">
+      <span class="titulo">✅ Acabaste o curso</span>
+      <p>Falta o que decide se fica sabido: o <a href="teste.html">teste de domínio</a> (intercalado, entrega-se
+      para correção) e o <a href="revisao.ics">revisao.ics</a> no calendário. A <a href="folha.html">folha de
+      consulta</a> imprime-se e fica ao lado do teclado.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li>Medido: 4 índices → <code>INSERT</code> <strong>6,8× mais lento</strong>; índices a ocupar
+      <strong>mais do que a tabela</strong> (16 MB contra 13 MB).</li>
+      <li><strong>Índices parciais</strong> (<code>WHERE …</code>) indexam só o subconjunto útil — 18× mais
+      pequenos aqui. Filas e <em>soft deletes</em> são o caso natural.</li>
+      <li><strong>Índices de expressão</strong> exigem função <code>IMMUTABLE</code> e que a query use a expressão
+      <strong>literalmente igual</strong>. Muitas vezes reescrever a query como intervalo é melhor.</li>
+      <li><code>pg_stat_user_indexes.idx_scan</code> encontra os índices a mais — mas confirma
+      <code>stats_reset</code>, restrições e réplicas antes de apagar.</li>
+      <li><code>BEGIN; CREATE INDEX; EXPLAIN ANALYZE; ROLLBACK;</code> testa um índice sem o deixar.
+      E 🔴 <strong>«lento» não é o mesmo que «problema»</strong>.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>Documentação do PostgreSQL 17 — <em>Partial Indexes</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/indexes-partial.html">indexes-partial.html</a>
+        — fonte primária. <strong>Porquê:</strong> os exemplos são bons e mostram o caso em que o índice parcial
+        <em>também</em> serve para impor unicidade condicional.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>Indexes on Expressions</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/indexes-expressional.html">indexes-expressional.html</a>
+        — e o aviso de que são mais caros de manter, porque a expressão é calculada em cada escrita.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>Function Volatility Categories</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/xfunc-volatility.html">xfunc-volatility.html</a>
+        — <code>IMMUTABLE</code>, <code>STABLE</code> e <code>VOLATILE</code>, e porque só a primeira pode ser
+        indexada. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>The Statistics Collector</em> (<code>pg_stat_user_indexes</code>)</strong>.
+        <a href="https://www.postgresql.org/docs/17/monitoring-stats.html">monitoring-stats.html</a>
+        — o significado de <code>idx_scan</code> e de <code>stats_reset</code>.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Todas as medições</strong> (182 ms contra 1232 ms; 13 MB contra 16 MB; 384 kB contra 6904 kB;
+        11,8 ms contra 31,4 ms) foram corridas em <strong>PostgreSQL 17.11</strong> sobre
+        <a href="preparar.sql">preparar.sql</a>. O erro de <code>IMMUTABLE</code> foi encontrado a escrever esta
+        lição, não previsto. <span class="verificado">✅ Corrido a 2026-09-15</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="05-ler-o-explain.html">← 5 · Ler o EXPLAIN</a> ·
+      <a href="index.html">↑ Índice do curso</a> ·
+      <a href="teste.html">Teste de domínio →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var alvos = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    campo.hidden = false;
+
+    function normalizar(s) {
+      // Sem acentos: procurar "indices" tem de encontrar "índices".
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    alvos.forEach(function (el) { el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || "")); });
+
+    function filtrar() {
+      var q = normalizar(campo.value.trim());
+      var visiveis = 0;
+      alvos.forEach(function (el) {
+        var mostra = !q || el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+      if (contador) {
+        contador.textContent = q
+          ? visiveis + " de " + alvos.length + (visiveis === 1 ? " tópico" : " tópicos")
+          : alvos.length + (alvos.length === 1 ? " tópico" : " tópicos");
+      }
+      if (vazio) { vazio.hidden = visiveis !== 0; }
+    }
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

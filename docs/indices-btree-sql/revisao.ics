@@ -1,0 +1,125 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//professor//indices-btree-sql//PT
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Revisão — Índices B-tree em SQL
+BEGIN:VEVENT
+UID:bd0d5796a1ed6bf3@professor.local
+DTSTAMP:20260915T120000Z
+DTSTART;VALUE=DATE:20261014
+DTEND;VALUE=DATE:20261015
+SUMMARY:Revisão +1 — a mais importante de todas
+DESCRIPTION:Revisão espaçada, +1 dias após o fim do núcleo.\n\n1. Sem 
+ abrir as lições: explica em voz alta porque é que 1% das linhas pode c
+ ustar o mesmo que 100%.\n2. Flashcards btree::l0 e btree::l1 (~14 cartõe
+ s).\n3. Corre um EXPLAIN (ANALYZE, BUFFERS) numa query tua e diz onde est
+ á o tempo antes de olhar.\n\nPágina: docs/indices-btree-sql/index.html\
+ nFlashcards: docs/indices-btree-sql/flashcards.csv\nFolha: docs/indices-b
+ tree-sql/folha.html\n\nDepois: regista uma linha em topicos/indices-btree
+ -sql/PROGRESSO.md.\nSe falhares em algo já dado como sabido, o intervalo
+  é curto demais - encurta-o.
+CATEGORIES:professor,revisão,indices-btree-sql
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +1 — a mais importante de todas - 30 a 40 minutos, 
+ sem consultar primeiro.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:af8b32e0c311abbe@professor.local
+DTSTAMP:20260915T120000Z
+DTSTART;VALUE=DATE:20261016
+DTEND;VALUE=DATE:20261017
+SUMMARY:Revisão +3 — as três estratégias de acesso
+DESCRIPTION:Revisão espaçada, +3 dias após o fim do núcleo.\n\n1. De m
+ emória: Index Scan, Bitmap Heap Scan, Index Only Scan - quando e porquê
+  cada uma.\n2. Flashcards btree::l2.\n3. Numa tabela tua: SELECT relallvi
+ sible, relpages FROM pg_class. Que fração está marcada?\n\nPágina: do
+ cs/indices-btree-sql/index.html\nFlashcards: docs/indices-btree-sql/flash
+ cards.csv\nFolha: docs/indices-btree-sql/folha.html\n\nDepois: regista um
+ a linha em topicos/indices-btree-sql/PROGRESSO.md.\nSe falhares em algo j
+ á dado como sabido, o intervalo é curto demais - encurta-o.
+CATEGORIES:professor,revisão,indices-btree-sql
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +3 — as três estratégias de acesso - 30 a 40 minu
+ tos, sem consultar primeiro.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2ccdc174274d699d@professor.local
+DTSTAMP:20260915T120000Z
+DTSTART;VALUE=DATE:20261020
+DTEND;VALUE=DATE:20261021
+SUMMARY:Revisão +7 — seletividade, e a armadilha dos 20%
+DESCRIPTION:Revisão espaçada, +7 dias após o fim do núcleo.\n\n1. Sem 
+ consultar: quais são as três causas de um índice não ser usado?\n2. F
+ lashcards btree::l3 - os mais importantes do curso.\n3. Repete o exercíc
+ io E1 da lição 3: mede o limiar da tua máquina. Deu o mesmo?\n\nPágin
+ a: docs/indices-btree-sql/index.html\nFlashcards: docs/indices-btree-sql/
+ flashcards.csv\nFolha: docs/indices-btree-sql/folha.html\n\nDepois: regis
+ ta uma linha em topicos/indices-btree-sql/PROGRESSO.md.\nSe falhares em a
+ lgo já dado como sabido, o intervalo é curto demais - encurta-o.
+CATEGORIES:professor,revisão,indices-btree-sql
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +7 — seletividade, e a armadilha dos 20% - 30 a 40 
+ minutos, sem consultar primeiro.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:462c229b8e6c96ab@professor.local
+DTSTAMP:20260915T120000Z
+DTSTART;VALUE=DATE:20261103
+DTEND;VALUE=DATE:20261104
+SUMMARY:Revisão +21 — intercalada, e o teste se ainda não foi feito
+DESCRIPTION:Revisão espaçada, +21 dias após o fim do núcleo.\n\n1. Faz
+  o teste de domínio se ainda não fizeste, ou refaz a parte 4 sem ver a 
+ entrega anterior.\n2. Flashcards: TODAS as etiquetas misturadas, não por
+  lição. A mistura é o ponto.\n3. Relê a correção anterior em topico
+ s/indices-btree-sql/correcoes/ e vê se repetiste algum erro.\n\nPágina:
+  docs/indices-btree-sql/index.html\nFlashcards: docs/indices-btree-sql/fl
+ ashcards.csv\nFolha: docs/indices-btree-sql/folha.html\n\nDepois: regista
+  uma linha em topicos/indices-btree-sql/PROGRESSO.md.\nSe falhares em alg
+ o já dado como sabido, o intervalo é curto demais - encurta-o.
+CATEGORIES:professor,revisão,indices-btree-sql
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +21 — intercalada, e o teste se ainda não foi feit
+ o - 30 a 40 minutos, sem consultar primeiro.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:8dbdbdfdd1126980@professor.local
+DTSTAMP:20260915T120000Z
+DTSTART;VALUE=DATE:20261212
+DTEND;VALUE=DATE:20261213
+SUMMARY:Revisão +60 — o que sobrou de verdade
+DESCRIPTION:Revisão espaçada, +60 dias após o fim do núcleo.\n\n1. Em 
+ cinco passos e de memória: o que fazes perante uma query lenta numa base
+  que não conheces?\n2. Compara com o que escreveste na pergunta final da
+  lição 6. Ficou melhor ou pior?\n3. Se falhares em algo de uma lição 
+ dada como dominada, o espaçamento foi curto: ajusta este ficheiro.\n\nP
+ ágina: docs/indices-btree-sql/index.html\nFlashcards: docs/indices-btree
+ -sql/flashcards.csv\nFolha: docs/indices-btree-sql/folha.html\n\nDepois: 
+ regista uma linha em topicos/indices-btree-sql/PROGRESSO.md.\nSe falhares
+  em algo já dado como sabido, o intervalo é curto demais - encurta-o.
+CATEGORIES:professor,revisão,indices-btree-sql
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +60 — o que sobrou de verdade - 30 a 40 minutos, se
+ m consultar primeiro.
+END:VALARM
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,13 @@
+{
+  "name": "professor",
+  "private": true,
+  "type": "module",
+  "description": "Ferramentas de validação. O site não depende disto: as páginas são autocontidas (DECISOES.md D-003).",
+  "scripts": {
+    "validar": "./validar.sh"
+  },
+  "devDependencies": {
+    "axe-core": "^4.10.2",
+    "puppeteer": "^23.10.4"
+  }
+}

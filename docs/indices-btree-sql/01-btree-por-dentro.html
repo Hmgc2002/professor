@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1 · A B-tree por dentro — Índices B-tree em SQL</title>
+<meta name="description" content="Lição 1: porque é que a procura num índice é logarítmica, o que é o fanout, e porque é que três leituras de página chegam para um milhão de linhas.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/indices-btree-sql/01-btree-por-dentro.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Índices B-tree</a> <span aria-hidden="true">›</span> Lição 1
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta nucleo">Lição 1 · núcleo</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>A B-tree por dentro</h1>
+    <p class="subtitulo">Porque é que três leituras de página chegam para encontrar uma linha entre um milhão —
+    e porque é que a árvore é larga e baixa em vez de alta e estreita.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>No fim consegues <strong>explicar porque é que a altura de uma B-tree cresce tão devagar</strong> —
+    e prevê-la: dado o número de linhas e quantas entradas cabem numa página, dizes quantas leituras de página
+    custa localizar um valor. E consegues confirmar essa previsão no <code>EXPLAIN</code>.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+    <div class="caixa dica">
+      <span class="titulo">⭐ Responde de memória antes de ler o resto</span>
+      <p>Custa, e é suposto custar. O esforço de puxar da memória é o que consolida —
+      <a href="../metodo.html#recuperacao">porquê</a>.</p>
+    </div>
+    <ol>
+      <li>Qual é a unidade que a base de dados lê do disco, e de que tamanho?
+        <details class="solucao"><summary>Resposta</summary><p>A <strong>página</strong>, de 8 kB por omissão em Postgres.</p></details>
+      </li>
+      <li>Na moeda do planeador, quantas leituras sequenciais «vale» uma leitura ao calhas, por omissão?
+        <details class="solucao"><summary>Resposta</summary><p>Quatro — <code>random_page_cost</code> = 4 contra <code>seq_page_cost</code> = 1.</p></details>
+      </li>
+      <li>A tabela de treino tem 8348 páginas. Uma query sem índice que devolve 1 linha lê quantas?
+        <details class="solucao"><summary>Resposta</summary><p>As 8348. É precisamente isto que um índice existe para evitar.</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>O problema que uma árvore resolve</h3>
+    <p>Se guardarmos as chaves numa lista ordenada, a procura binária encontra qualquer valor em log₂(n) passos —
+    para um milhão, 20 passos. Parece ótimo, até te lembrares da lição 0: <strong>cada passo dá um salto para uma
+    posição diferente</strong>, e cada salto é uma página. 20 páginas ao calhas custam 80 na moeda do planeador.
+    Melhor do que 8348, mas muito longe do que se consegue.</p>
+    <p>O problema é o «2» do log₂: uma comparação por leitura é um desperdício absurdo, porque a leitura trouxe
+    <strong>8 kB inteiros</strong> e nós usámos uma chave. Usar os 8 kB todos é a ideia inteira da B-tree.</p>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ A ideia numa frase</span>
+      <p>Uma B-tree é uma árvore de procura em que cada nó ocupa <strong>uma página inteira</strong> e contém
+      <strong>centenas</strong> de chaves. Não se divide o problema em 2 a cada leitura — divide-se em centenas.
+      A base do logaritmo deixa de ser 2 e passa a ser o número de chaves que cabem numa página.</p>
+    </div>
+
+    <p>Esse número chama-se <strong>fanout</strong> (grau de ramificação). Com um fanout de cerca de 240:</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Capacidade da árvore por número de níveis, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Níveis</th><th>Chaves alcançáveis (fanout ≈ 240)</th><th>Leituras de página para localizar uma</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>~240</td><td>1</td></tr>
+          <tr><td>2</td><td>~57 600</td><td>2</td></tr>
+          <tr><td>3</td><td>~13 800 000</td><td>3</td></tr>
+          <tr><td>4</td><td>~3 300 000 000</td><td>4</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>É por isto que as B-trees são <strong>largas e baixas</strong>. Uma tabela com três mil milhões de linhas
+    localiza um valor em quatro leituras. Na prática quase todas as tabelas com que trabalhas vivem em árvores de
+    três ou quatro níveis, e passar de um milhão para dez milhões de linhas <em>não</em> acrescenta um nível.</p>
+
+    <h3>Como está feita, por dentro</h3>
+    <p>Três tipos de página, e a diferença entre elas é o que guardam:</p>
+    <ul>
+      <li><strong>Folhas</strong> (nível 0) — as chaves todas, por ordem, cada uma com o <strong>ponteiro para a
+      linha na tabela</strong>. Esse ponteiro chama-se <em>TID</em> e é literalmente «página X, posição Y».</li>
+      <li><strong>Nós internos</strong> — não guardam dados: guardam <em>separadores</em>. «Valores até 4711 estão
+      por aqui; de 4711 para cima, por ali.» Servem só para dirigir o trânsito.</li>
+      <li><strong>Raiz</strong> — o nó interno do topo. É a única página cuja localização é fixa, e por isso está
+      quase sempre em memória: é lida em todas as procuras.</li>
+    </ul>
+
+    <figure>
+      <svg viewBox="0 0 580 250" role="img" aria-labelledby="t-bt d-bt">
+        <title id="t-bt">Estrutura de uma B-tree com três níveis</title>
+        <desc id="d-bt">No topo, uma página raiz com separadores. No meio, páginas internas com mais separadores.
+        Em baixo, páginas de folha com as chaves ordenadas e ponteiros para as linhas da tabela. As folhas estão
+        ainda ligadas entre si da esquerda para a direita, o que permite percorrer intervalos sem voltar ao topo.</desc>
+
+        <rect class="svg-realce" x="215" y="10" width="150" height="34" rx="5"/>
+        <text class="svg-mono" x="290" y="32" text-anchor="middle">raiz · 4 separadores</text>
+
+        <rect class="svg-caixa" x="30"  y="86" width="115" height="32" rx="5"/>
+        <rect class="svg-caixa" x="175" y="86" width="115" height="32" rx="5"/>
+        <rect class="svg-caixa" x="320" y="86" width="115" height="32" rx="5"/>
+        <rect class="svg-caixa" x="450" y="86" width="105" height="32" rx="5"/>
+        <text class="svg-suave" x="87"  y="107" text-anchor="middle">interna</text>
+        <text class="svg-suave" x="232" y="107" text-anchor="middle">interna</text>
+        <text class="svg-suave" x="377" y="107" text-anchor="middle">interna</text>
+        <text class="svg-suave" x="502" y="107" text-anchor="middle">interna</text>
+
+        <g>
+          <rect class="svg-caixa" x="16"  y="160" width="72" height="30" rx="4"/>
+          <rect class="svg-caixa" x="100" y="160" width="72" height="30" rx="4"/>
+          <rect class="svg-caixa" x="184" y="160" width="72" height="30" rx="4"/>
+          <rect class="svg-realce" x="268" y="160" width="72" height="30" rx="4"/>
+          <rect class="svg-caixa" x="352" y="160" width="72" height="30" rx="4"/>
+          <rect class="svg-caixa" x="436" y="160" width="72" height="30" rx="4"/>
+          <rect class="svg-caixa" x="520" y="160" width="46" height="30" rx="4"/>
+        </g>
+        <text class="svg-suave" x="52"  y="180" text-anchor="middle">folha</text>
+        <text class="svg-suave" x="304" y="180" text-anchor="middle">folha</text>
+        <text class="svg-suave" x="472" y="180" text-anchor="middle">folha</text>
+
+        <path class="svg-traco" d="M250 44 L 90 82" marker-end="url(#s1)"/>
+        <path class="svg-traco" d="M275 44 L 232 82" marker-end="url(#s1)"/>
+        <path class="svg-traco" d="M305 44 L 375 82" marker-end="url(#s1)"/>
+        <path class="svg-traco" d="M330 44 L 498 82" marker-end="url(#s1)"/>
+        <path class="svg-traco" d="M232 118 L 300 156" marker-end="url(#s1)"/>
+
+        <g class="svg-traco" stroke-dasharray="3 3">
+          <path d="M88 175 H100 M172 175 H184 M256 175 H268 M340 175 H352 M424 175 H436 M508 175 H520"/>
+        </g>
+        <text class="svg-suave" x="16" y="212">as folhas estão ligadas em cadeia →  percorrer um intervalo não volta ao topo</text>
+        <text class="svg-texto" x="16" y="238">Caminho de uma procura: raiz → interna → folha = <tspan font-weight="700">3 leituras de página</tspan></text>
+        <defs><marker id="s1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/></marker></defs>
+      </svg>
+      <figcaption>As setas a tracejado entre folhas são o que torna <code>BETWEEN</code> e <code>ORDER BY</code>
+      baratos: encontra-se o início e percorre-se em frente, sem voltar a subir.</figcaption>
+    </figure>
+
+    <h3>A parte que quase toda a gente esquece: as folhas estão ligadas</h3>
+    <p>Cada folha aponta para a folha seguinte. Isto muda o que um índice serve para fazer, porque deixa de ser só
+    «encontrar um valor»:</p>
+    <ul>
+      <li><strong>Intervalos</strong> (<code>BETWEEN</code>, <code>&gt;</code>, <code>&lt;</code>) — desce-se uma
+      vez até ao início e segue-se a cadeia.</li>
+      <li><strong>Ordenação</strong> — as chaves já estão por ordem, logo um <code>ORDER BY</code> pela coluna
+      indexada pode dispensar a ordenação inteira.</li>
+      <li><strong><code>LIKE 'abc%'</code></strong> — um prefixo fixo é um intervalo disfarçado
+      (tudo entre <code>'abc'</code> e <code>'abd'</code>). Já <code>LIKE '%abc'</code> não é intervalo nenhum,
+      e por isso nenhum índice B-tree o serve.</li>
+      <li><strong><code>MIN</code> / <code>MAX</code></strong> — são a primeira e a última entrada da cadeia.</li>
+    </ul>
+    <p>A documentação do PostgreSQL diz exatamente onde está a fronteira:</p>
+    <blockquote>
+      <p>«The optimizer can also use a B-tree index for queries involving the pattern matching operators
+      <code>LIKE</code> and <code>~</code> if the pattern is a constant and is anchored to the beginning of the
+      string» — <a href="https://www.postgresql.org/docs/17/indexes-types.html">PostgreSQL 17, <em>Index Types</em></a>.</p>
+    </blockquote>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>Vamos abrir uma B-tree a sério e contar-lhe os níveis. Precisas da extensão <code>pageinspect</code>, que
+    vem com o Postgres e serve exatamente para isto:</p>
+<pre><code>psql -d treino_indices
+CREATE EXTENSION IF NOT EXISTS pageinspect;
+CREATE INDEX idx_cliente ON encomendas (cliente_id);</code></pre>
+
+    <h3>Passo 1 — perguntar a altura antes de contar as páginas</h3>
+    <p>Porquê primeiro isto: a altura é o número que prevê o custo de uma procura. O tamanho do índice é
+    interessante, mas não é o que determina quantas leituras custa encontrar um valor.</p>
+<pre><code>SELECT level, root FROM bt_metap('idx_cliente');</code></pre>
+<pre><code> level | root
+-------+------
+     2 |  290</code></pre>
+    <p><code>level = 2</code> é o nível <em>da raiz</em>, e as folhas são o nível 0. Logo os níveis são
+    2, 1 e 0 — <strong>três</strong>. Cuidado com a armadilha de leitura: <code>level=2</code> não são dois níveis.</p>
+
+    <h3>Passo 2 — contar as páginas de cada nível</h3>
+    <p>Porquê agora: é isto que transforma «três níveis» de afirmação em coisa verificada, e mostra o fanout real.</p>
+<pre><code>SELECT s.btpo_level AS nivel, count(*) AS paginas, sum(s.live_items) AS entradas
+FROM generate_series(1, (pg_relation_size('idx_cliente')/8192)::int - 1) AS blk,
+     LATERAL bt_page_stats('idx_cliente', blk) AS s
+WHERE s.type IN ('r','i','l')
+GROUP BY 1 ORDER BY 1 DESC;</code></pre>
+<pre><code> nivel | paginas | entradas
+-------+---------+----------
+     2 |       1 |        4     &lt;- raiz
+     1 |       4 |      947     &lt;- internas (~237 separadores cada)
+     0 |     944 |    50943     &lt;- folhas</code></pre>
+
+    <p>Lê-se de cima para baixo: uma raiz com 4 separadores aponta para 4 páginas internas; essas contêm 947
+    separadores ao todo (~237 cada) que apontam para as 944 folhas. <strong>Esse ~237 é o fanout</strong> — e é ele
+    que explica porque é que três níveis chegam para milhões de linhas.</p>
+
+    <h3>Passo 3 — a surpresa: 50 943 entradas para 1 000 000 de linhas</h3>
+    <p>As folhas deviam ter uma entrada por linha da tabela. Têm 50 943 — e a tabela tem um milhão. Falta uma peça.</p>
+    <p>A peça é esta: a coluna <code>cliente_id</code> tem <strong>50 000 valores distintos</strong>, cada um
+    repetido ~20 vezes. Desde a versão 13, o Postgres <strong>deduplica</strong> entradas de índice iguais:
+    em vez de 20 entradas com a mesma chave, guarda uma chave e uma lista com os 20 ponteiros.</p>
+    <p>Pode confirmar-se desligando a deduplicação e comparando:</p>
+<pre><code>CREATE INDEX idx_nodedup ON encomendas (cliente_id) WITH (deduplicate_items = off);</code></pre>
+<pre><code>  indice   | tamanho | paginas | nivel_raiz
+-----------+---------+---------+------------
+ com dedup | 7600 kB |     950 |          2
+ sem dedup | 21 MB   |    2749 |          2</code></pre>
+    <div class="caixa ok">
+      <span class="titulo">✅ 2,8 vezes mais pequeno — e a altura não muda</span>
+      <p>A deduplicação poupa <em>espaço e I/O de varrimento</em>, não altura. Com fanouts destes, seria preciso um
+      índice quase 240 vezes maior para ganhar mais um nível.</p>
+    </div>
+
+    <h3>Passo 4 — confirmar as três leituras no <code>EXPLAIN</code></h3>
+    <p>A previsão é: localizar um valor custa 3 leituras de página no índice. O <code>BUFFERS</code> diz se acertámos.</p>
+<pre><code>EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM encomendas WHERE cliente_id = 42;</code></pre>
+<pre><code>Bitmap Heap Scan on encomendas  (actual time=0.016..0.055 rows=20 loops=1)
+  Recheck Cond: (cliente_id = 42)
+  Heap Blocks: exact=20
+  Buffers: shared hit=20 read=3
+  -&gt;  Bitmap Index Scan on idx_cliente  (actual time=0.010..0.010 rows=20 loops=1)
+        Index Cond: (cliente_id = 42)
+        Buffers: shared read=3            &lt;- três: raiz, interna, folha
+Execution Time: 0.075 ms</code></pre>
+    <p><strong>Três.</strong> Exatamente os três níveis. As outras 20 páginas (<code>hit=20</code>) são da
+    <em>tabela</em>, para ir buscar as 20 linhas — e é sobre essa segunda metade que é a
+    <a href="02-do-indice-a-linha.html">lição 2</a>.</p>
+    <p>Balanço: <strong>23 páginas</strong> em vez de 8348, e 0,075 ms em vez de 15. Duas ordens de grandeza, e
+    todas elas previsíveis a partir da estrutura.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p><strong>Passo 1 (dado).</strong> Um índice sobre uma tabela de 40 000 000 de linhas, coluna com valores
+      todos distintos. O fanout médio é 240.</p>
+      <p><strong>Passo 2 (completa).</strong> Quantos níveis precisa a árvore? Mostra a conta:</p>
+      <ul>
+        <li>2 níveis alcançam ______ chaves</li>
+        <li>3 níveis alcançam ______ chaves</li>
+        <li>4 níveis alcançam ______ chaves</li>
+        <li>Logo, são precisos ______ níveis</li>
+      </ul>
+      <p><strong>Passo 3 (dado).</strong> <code>bt_metap</code> devolve <code>level = 3</code>.</p>
+      <p><strong>Passo 4 (completa).</strong> Bate com a tua previsão? E quantas leituras de página custa
+      localizar um valor?</p>
+      <p><strong>Passo 5 (completa).</strong> A tabela cresce para 400 000 000 de linhas — 10×. Quantos níveis passa a ter?</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2:</strong> 240² = 57 600 · 240³ = 13 824 000 · 240⁴ = 3 317 760 000.
+        40 milhões não cabem em 3 níveis mas cabem folgadamente em 4 → <strong>4 níveis</strong>.</p>
+        <p><strong>Passo 4:</strong> <code>level = 3</code> com folhas no nível 0 significa níveis 3, 2, 1, 0 =
+        <strong>4 níveis</strong>. Bate. Custo de localização: <strong>4 leituras</strong>.</p>
+        <p><strong>Passo 5:</strong> continuam a ser <strong>4</strong>. 400 milhões ainda cabem nos 3,3 mil
+        milhões que 4 níveis alcançam. <em>Multiplicar as linhas por dez não acrescentou leitura nenhuma</em> —
+        é este o significado prático de «logarítmico», e é a razão pela qual um índice não «deixa de servir»
+        quando a tabela cresce.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns da lição 1, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>«A árvore é binária»</td>
+            <td>Calcular log₂(1 000 000) ≈ 20 e esperar 20 leituras</td>
+            <td>Cada nó é uma página com centenas de chaves. A base do logaritmo é o fanout (~240 aqui), não 2.
+            São 3 leituras, não 20 — e o «B» de B-tree nunca quis dizer <em>binary</em></td>
+          </tr>
+          <tr>
+            <td>«<code>level = 2</code> são dois níveis»</td>
+            <td>Prever 2 leituras e ver 3 no <code>BUFFERS</code></td>
+            <td>É o nível <em>da raiz</em>, e as folhas são o nível 0. <code>level = 2</code> → níveis 2, 1, 0 → três</td>
+          </tr>
+          <tr>
+            <td>«Quanto maior a tabela, mais fundo o índice, logo mais lento»</td>
+            <td>Receio de indexar tabelas grandes; «isto não escala»</td>
+            <td>De 1 milhão para 10 milhões a altura não muda. Só multiplicar por ~240 é que acrescenta um nível.
+            O que degrada com o tamanho é a <em>ida à tabela</em> buscar as linhas (lição 2), não a procura no índice</td>
+          </tr>
+          <tr>
+            <td>«O índice guarda as linhas»</td>
+            <td>Esperar que qualquer query servida por um índice não toque na tabela</td>
+            <td>A folha guarda a <strong>chave</strong> e um <strong>ponteiro</strong>. As outras colunas ficam na
+            tabela, e é preciso lá ir — salvo no <em>index-only scan</em>, lição 2</td>
+          </tr>
+          <tr>
+            <td>«<code>LIKE</code> nunca usa índice»</td>
+            <td>Descartar o índice sem olhar para o padrão</td>
+            <td><code>LIKE 'abc%'</code> é um intervalo e usa. <code>LIKE '%abc'</code> não é, e não usa —
+            a fronteira é a âncora no início, não o operador</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — quais destas o índice serve?</h3>
+      <p>Índice B-tree sobre <code>encomendas (criada_em)</code>. Para cada condição, diz se pode ser servida
+      pelo índice, <em>e porquê em termos da estrutura</em>:</p>
+      <ol>
+        <li><code>WHERE criada_em = '2025-01-01'</code></li>
+        <li><code>WHERE criada_em BETWEEN '2025-01-01' AND '2025-02-01'</code></li>
+        <li><code>WHERE date_part('year', criada_em) = 2025</code></li>
+        <li><code>ORDER BY criada_em DESC LIMIT 10</code></li>
+        <li><code>WHERE criada_em IS NULL</code></li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <ol>
+          <li><strong>Sim.</strong> Igualdade: desce-se até à folha.</li>
+          <li><strong>Sim.</strong> Intervalo: desce-se ao início e segue-se a cadeia das folhas.</li>
+          <li><strong>Não.</strong> O índice guarda <code>criada_em</code>, não
+          <code>date_part('year', criada_em)</code>. Aplicar uma função à coluna destrói a ordenação de que a
+          árvore depende — não há intervalo contíguo para percorrer. A correção é reescrever como intervalo
+          (<code>&gt;= '2025-01-01' AND &lt; '2026-01-01'</code>) ou criar um índice de expressão sobre a própria
+          função (lição 6).</li>
+          <li><strong>Sim, e é dos casos em que mais se ganha.</strong> As chaves já estão ordenadas: percorre-se a
+          cadeia ao contrário e para-se à décima, em vez de ordenar um milhão de linhas para deitar fora 999 990.</li>
+          <li><strong>Sim.</strong> A documentação é explícita: «an <code>IS NULL</code> or <code>IS NOT NULL</code>
+          condition on an index column can be used with a B-tree index». Os nulos têm posição definida na
+          ordenação, portanto formam um intervalo como qualquer outro.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: medir a tua própria árvore</h3>
+      <p>Na base de treino, descobre a altura do índice da chave primária (<code>encomendas_pkey</code>) e compara
+      com a de <code>idx_cliente</code>. Prevê <em>antes</em> se vão ser iguais ou diferentes, e porquê.
+      Depois explica o tamanho.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>Previsão razoável: a PK tem 1 000 000 de valores <strong>distintos</strong> e
+        <code>cliente_id</code> só 50 000, logo a PK precisa de mais entradas nas folhas. Mas 1 milhão ainda cabe
+        folgadamente em 3 níveis (240³ ≈ 13,8 milhões), portanto a <strong>altura deve ser a mesma</strong> e só o
+        <em>tamanho</em> deve diferir.</p>
+        <p>Corrido em Postgres 17.11:</p>
+<pre><code>SELECT pg_size_pretty(pg_relation_size('encomendas_pkey')) AS tam,
+       pg_relation_size('encomendas_pkey')/8192 AS paginas,
+       (SELECT level FROM bt_metap('encomendas_pkey')) AS nivel_raiz;
+
+  tam  | paginas | nivel_raiz
+-------+---------+------------
+ 21 MB |    2745 |          2</code></pre>
+        <p>Altura igual (3 níveis), tamanho 2,9× maior: 2745 páginas contra 950. E a explicação do tamanho é a
+        mesma da deduplicação — com valores todos distintos não há nada para deduplicar, por isso a PK ocupa
+        praticamente o mesmo que <code>idx_cliente</code> ocupava com a deduplicação desligada (2749 páginas).</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — a pergunta que separa perceber de decorar</h3>
+      <p>Um colega diz: «indexei a coluna <code>estado</code>, que só tem 3 valores possíveis. O índice tem 3 níveis
+      e localiza o valor em 3 leituras, logo a query vai ficar ~2800 vezes mais rápida do que ler as 8348 páginas.»</p>
+      <p>O raciocínio tem um erro. Onde, exatamente? (Não precisas de saber a lição 2 — precisas de pensar no que
+      está na folha.)</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>O erro é confundir <strong>localizar a chave</strong> com <strong>obter as linhas</strong>.</p>
+        <p>As 3 leituras chegam para chegar à folha onde começa <code>estado = 'pendente'</code>. Mas nessa folha
+        está uma <em>lista de ponteiros</em> — e com 3 valores distintos em 1 000 000 de linhas, o valor mais raro
+        ainda tem <strong>10 000 linhas</strong>. Cada uma está numa página da tabela que é preciso ir ler.
+        A conta verdadeira é 3 + (páginas da tabela que é preciso visitar), e a segunda parcela domina completamente.</p>
+        <p>Medido na base de treino, com <code>estado = 'cancelada'</code> (1% das linhas, 10 000 delas):</p>
+<pre><code>Index Scan using idx_estado on encomendas (actual rows=10000)
+  Buffers: shared hit=8348 read=11</code></pre>
+        <p><strong>8348 páginas da tabela</strong> — exatamente as mesmas que um <code>Seq Scan</code> leria.
+        As 10 000 linhas estão espalhadas por praticamente todas as páginas, por isso o índice localizou-as
+        depressa e não poupou I/O nenhum. Ganhou-se tempo (6 ms contra 15) por outra razão, não por se ler menos.</p>
+        <p>Esta é a diferença entre <em>seletividade</em> e <em>agrupamento físico</em>, e é o assunto da
+        <a href="03-seletividade.html">lição 3</a>. Se percebeste isto agora, essa lição vai parecer óbvia — e é
+        esse o objetivo.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <div class="quiz" data-quiz="btree-01">
+      <ol class="perguntas">
+
+        <li class="pergunta">
+          <p class="enunciado">Porque é que uma B-tree é «larga e baixa» em vez de «alta e estreita»?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="b1" value="a" data-certa="false"><span class="rotulo">Para gastar menos memória</span></label>
+              <p class="explicacao" hidden>Uma árvore larga não gasta menos memória — gasta a mesma ou mais por nó, já que cada nó é uma página inteira de 8 kB. O que ela minimiza é o número de páginas <em>lidas</em> por procura, que é coisa diferente.</p></li>
+            <li class="opcao"><label><input type="radio" name="b1" value="b" data-certa="true"><span class="rotulo">Porque cada leitura traz 8 kB, e cabem centenas de chaves nesse espaço — usar só uma seria desperdiçar a leitura</span></label>
+              <p class="explicacao" hidden>Certo. É a mesma ideia da lição 0 vista do outro lado: se a unidade de I/O é a página, o desenho ótimo é o que extrai o máximo de decisões de cada página lida. Daí o fanout de centenas e a base do logaritmo deixar de ser 2.</p></li>
+            <li class="opcao"><label><input type="radio" name="b1" value="c" data-certa="false"><span class="rotulo">Porque assim a árvore fica equilibrada</span></label>
+              <p class="explicacao" hidden>O equilíbrio é uma propriedade separada (o «B» costuma associar-se a <em>balanced</em>) e mantém-se independentemente do fanout — uma árvore binária também pode ser equilibrada. O que a largura resolve é o número de leituras, não o equilíbrio.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado"><code>bt_metap</code> devolve <code>level = 3</code>. Quantas leituras de página custa localizar uma chave?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="b2" value="a" data-certa="false"><span class="rotulo">3</span></label>
+              <p class="explicacao" hidden>É a armadilha de contagem mais comum desta lição. As folhas são o nível 0, portanto level=3 significa níveis 3, 2, 1 e 0 — quatro páginas no caminho, não três.</p></li>
+            <li class="opcao"><label><input type="radio" name="b2" value="b" data-certa="true"><span class="rotulo">4</span></label>
+              <p class="explicacao" hidden>Certo: níveis 3, 2, 1 e 0. O caminho desce da raiz até à folha e toca numa página por nível.</p></li>
+            <li class="opcao"><label><input type="radio" name="b2" value="c" data-certa="false"><span class="rotulo">Depende de quantas linhas a query devolve</span></label>
+              <p class="explicacao" hidden>Confunde localizar com recolher. Localizar a primeira chave custa sempre a altura da árvore. O que depende do número de linhas é o que vem a seguir: percorrer a cadeia de folhas e ir à tabela buscar cada linha.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Um índice tem 50 943 entradas nas folhas, mas a tabela tem 1 000 000 de linhas e o índice não é parcial. Porquê?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="b3" value="a" data-certa="false"><span class="rotulo">O índice está desatualizado e precisa de REINDEX</span></label>
+              <p class="explicacao" hidden>Um índice B-tree em Postgres é atualizado de forma síncrona com as escritas; não fica «para trás» em contagens. Um REINDEX aqui gastaria tempo e não mudaria nada.</p></li>
+            <li class="opcao"><label><input type="radio" name="b3" value="b" data-certa="true"><span class="rotulo">Deduplicação: chaves repetidas guardam-se uma vez, com uma lista de ponteiros</span></label>
+              <p class="explicacao" hidden>Certo. A coluna tem 50 000 valores distintos repetidos ~20 vezes cada. Desde o Postgres 13 isto comprime-se numa entrada por chave com uma lista de TIDs — na base de treino, 7600 kB contra 21 MB com a deduplicação desligada.</p></li>
+            <li class="opcao"><label><input type="radio" name="b3" value="c" data-certa="false"><span class="rotulo">Só as linhas visíveis são indexadas</span></label>
+              <p class="explicacao" hidden>É o contrário: o índice contém entradas para versões de linha que já nem estão visíveis (ainda não recolhidas pelo VACUUM). O índice nunca tem <em>menos</em> entradas por causa de visibilidade — e é precisamente por isso que um index-only scan tem de consultar o visibility map, na lição 2.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Qual destas <strong>não</strong> pode ser servida por um índice B-tree sobre <code>nome</code>?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="b4" value="a" data-certa="false"><span class="rotulo">WHERE nome LIKE 'Ana%'</span></label>
+              <p class="explicacao" hidden>Pode. Um prefixo fixo é um intervalo disfarçado: tudo entre 'Ana' e o valor imediatamente a seguir. A documentação do PostgreSQL diz isto explicitamente para padrões ancorados no início.</p></li>
+            <li class="opcao"><label><input type="radio" name="b4" value="b" data-certa="true"><span class="rotulo">WHERE nome LIKE '%Silva'</span></label>
+              <p class="explicacao" hidden>Certo. Sem âncora no início não há intervalo contíguo: os nomes terminados em «Silva» estão dispersos por toda a ordenação, e uma árvore ordenada não ajuda a encontrar coisas dispersas. Resolve-se com outras famílias de índice (trigramas com GIN), que este curso não cobre.</p></li>
+            <li class="opcao"><label><input type="radio" name="b4" value="c" data-certa="false"><span class="rotulo">WHERE nome IS NULL</span></label>
+              <p class="explicacao" hidden>Pode. Os nulos têm posição definida na ordenação do índice, logo formam um intervalo contíguo como outro qualquer — a documentação confirma-o em texto.</p></li>
+            <li class="opcao"><label><input type="radio" name="b4" value="d" data-certa="false"><span class="rotulo">ORDER BY nome LIMIT 20</span></label>
+              <p class="explicacao" hidden>Pode, e é dos casos com maior ganho: as chaves já estão ordenadas, portanto lê-se o início da cadeia de folhas e para-se à vigésima, em vez de ordenar a tabela inteira para deitar quase tudo fora.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">A tabela cresce de 1 para 10 milhões de linhas. O que acontece ao custo de <em>localizar</em> uma chave no índice?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="b5" value="a" data-certa="false"><span class="rotulo">Fica 10 vezes maior</span></label>
+              <p class="explicacao" hidden>Seria o comportamento de uma varredura, não de uma árvore. A procura é logarítmica: o custo acompanha o número de <em>níveis</em>, não o número de linhas.</p></li>
+            <li class="opcao"><label><input type="radio" name="b5" value="b" data-certa="true"><span class="rotulo">Fica praticamente igual — com fanout ~240, 10 milhões ainda cabem em 3 níveis</span></label>
+              <p class="explicacao" hidden>Certo: 240³ ≈ 13,8 milhões. Só ao multiplicar por ~240 é que se ganha um nível. É este o significado prático de «logarítmico», e a razão de um índice não «deixar de servir» quando a tabela cresce.</p></li>
+            <li class="opcao"><label><input type="radio" name="b5" value="c" data-certa="false"><span class="rotulo">Fica ~3,3 vezes maior (log de 10)</span></label>
+              <p class="explicacao" hidden>Esta opção aplica o logaritmo ao sítio errado. O logaritmo determina quantos <em>níveis</em> a árvore tem, e os níveis só mudam aos saltos (2, 3, 4…). Entre 1 e 13,8 milhões o número é o mesmo — o custo não sobe suavemente, mantém-se e depois dá um degrau.</p></li>
+          </ul>
+        </li>
+
+        <li class="pergunta">
+          <p class="enunciado">Para que serve a ligação entre folhas vizinhas?</p>
+          <ul class="opcoes">
+            <li class="opcao"><label><input type="radio" name="b6" value="a" data-certa="false"><span class="rotulo">Para reconstruir a árvore se a raiz se corromper</span></label>
+              <p class="explicacao" hidden>Não é um mecanismo de recuperação. A integridade em Postgres vem do WAL e das somas de verificação, não da topologia do índice.</p></li>
+            <li class="opcao"><label><input type="radio" name="b6" value="b" data-certa="true"><span class="rotulo">Para percorrer intervalos e ordenações sem voltar a subir à raiz</span></label>
+              <p class="explicacao" hidden>Certo. Desce-se uma vez até ao início do intervalo e segue-se em frente pela cadeia. É o que torna BETWEEN, &gt;, &lt;, ORDER BY e MIN/MAX baratos — e o que distingue um índice ordenado de uma tabela de dispersão, que faz igualdade e mais nada.</p></li>
+            <li class="opcao"><label><input type="radio" name="b6" value="c" data-certa="false"><span class="rotulo">Para permitir procuras em paralelo</span></label>
+              <p class="explicacao" hidden>O paralelismo em Postgres reparte trabalho entre processos por outros meios (por exemplo, Parallel Seq Scan ou Parallel Index Scan) e não depende desta ligação. A cadeia de folhas é sobre percorrer por ordem, não sobre repartir.</p></li>
+          </ul>
+        </li>
+
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="f1">Explica a alguém porque é que encontrar uma pessoa numa lista telefónica de um milhão de nomes
+      não custa um milhão de passos, nem sequer vinte.
+        <span class="pista">Sem usar «B-tree», «fanout», «logaritmo» nem «página». Se a analogia da lista telefónica
+        te parecer fraca a certa altura, diz <em>onde</em> parte — é aí que está a parte interessante.</span>
+      </label>
+      <textarea id="f1" data-pergunta="Porque é que encontrar um nome entre um milhão não custa um milhão de passos"></textarea>
+    </div>
+    <div class="aberta">
+      <label for="f2">Na tua própria base de dados (ou numa que conheças), qual é a coluna onde apostarias que um
+      índice já existe e não devia — ou não existe e devia? Diz porquê, em termos do que aprendeste hoje.
+        <span class="pista">Se ainda não tens como decidir, diz isso e diz que informação te falta. É uma resposta
+        melhor do que um palpite com ar de certeza.</span>
+      </label>
+      <textarea id="f2" data-pergunta="Uma coluna onde um índice falta ou está a mais, e porquê"></textarea>
+    </div>
+
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p class="accoes"><button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button></p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/indices-btree-sql/respostas/AAAA-MM-DD.md</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li>Cada nó da B-tree é <strong>uma página inteira</strong> com centenas de chaves: a base do logaritmo é o
+      <strong>fanout</strong> (~240 aqui), não 2.</li>
+      <li>Três níveis chegam para ~13 milhões de chaves. <strong>A altura quase nunca muda</strong> quando a tabela cresce.</li>
+      <li><code>bt_metap.level</code> é o nível <em>da raiz</em>; as folhas são 0. <code>level=2</code> → 3 níveis → 3 leituras.</li>
+      <li>As folhas guardam <strong>chave + ponteiro</strong> e estão <strong>ligadas em cadeia</strong> — daí
+      intervalos, <code>ORDER BY</code>, <code>MIN</code>/<code>MAX</code> e <code>LIKE 'abc%'</code> serem baratos.</li>
+      <li>Localizar a chave é a parte fácil e previsível. <strong>Ir buscar as linhas à tabela é a parte cara</strong> — lição 2.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>Documentação do PostgreSQL 17 — <em>Index Types</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/indexes-types.html">indexes-types.html</a>
+        — fonte primária para que operadores um índice B-tree serve, incluindo o texto exato sobre
+        <code>LIKE</code> ancorado e sobre <code>IS NULL</code>, ambos citados acima.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>B-Tree Deduplication</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/btree.html#BTREE-DEDUPLICATION">btree.html#BTREE-DEDUPLICATION</a>
+        — o mecanismo que explica as 50 943 entradas, e a opção <code>deduplicate_items</code>.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Documentação do PostgreSQL 17 — <em>pageinspect</em></strong>.
+        <a href="https://www.postgresql.org/docs/17/pageinspect.html">pageinspect.html</a>
+        — <strong>porquê:</strong> é a ferramenta que transforma esta lição de «acredita em mim» em «vai ver».
+        <strong>O que saltar:</strong> tudo o que não seja <code>bt_metap</code> e <code>bt_page_stats</code>,
+        a menos que estejas a depurar corrupção. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Leitura recomendada</strong> — Markus Winand, <em>Use The Index, Luke!</em>,
+        <a href="https://use-the-index-luke.com/sql/anatomy">capítulo «Anatomy of an SQL Index»</a>.
+        <strong>Porquê:</strong> é a melhor explicação visual da cadeia de folhas que conheço, e é agnóstica quanto
+        ao motor. <strong>O que saltar:</strong> os apartados específicos de Oracle e MySQL, se só usas Postgres.
+        Fonte secundária — o comportamento concreto confirma-se sempre na documentação do teu motor.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Todos os números desta lição</strong> foram medidos em <strong>PostgreSQL 17.11</strong> sobre a
+        tabela de <a href="preparar.sql">preparar.sql</a>. Na tua máquina o fanout e as contagens de páginas podem
+        diferir um pouco; a estrutura e as ordens de grandeza não.
+        <span class="verificado">✅ Corrido a 2026-09-15</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="00-paginas-e-custo.html">← 0 · Páginas e custo</a> ·
+      <a href="index.html">↑ Índice do curso</a> ·
+      <a href="02-do-indice-a-linha.html">2 · Do índice à linha →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var alvos = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    campo.hidden = false;
+
+    function normalizar(s) {
+      // Sem acentos: procurar "indices" tem de encontrar "índices".
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    alvos.forEach(function (el) { el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || "")); });
+
+    function filtrar() {
+      var q = normalizar(campo.value.trim());
+      var visiveis = 0;
+      alvos.forEach(function (el) {
+        var mostra = !q || el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+      if (contador) {
+        contador.textContent = q
+          ? visiveis + " de " + alvos.length + (visiveis === 1 ? " tópico" : " tópicos")
+          : alvos.length + (alvos.length === 1 ? " tópico" : " tópicos");
+      }
+      if (vazio) { vazio.hidden = visiveis !== 0; }
+    }
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

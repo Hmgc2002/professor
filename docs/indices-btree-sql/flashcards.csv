@@ -1,0 +1,47 @@
+frente;verso;etiqueta
+Qual é a unidade que o Postgres lê do disco, e de que tamanho?;A página, de 8 kB por omissão.;btree::l0
+Custo de um Seq Scan com um filtro simples: qual é a fórmula?;relpages x 1 + reltuples x 0.01 + reltuples x 0.0025;btree::l0
+Na moeda do planeador, quanto vale uma leitura ao calhas face a uma sequencial?;4 vezes mais (random_page_cost 4 contra seq_page_cost 1). É configurável, e num SSD costuma baixar-se para ~1.1.;btree::l0
+cost=0.00..20848.00 — o que é cada um dos dois números?;O primeiro é o custo até sair a PRIMEIRA linha (arranque), o segundo até sair a última. Importa com LIMIT.;btree::l0
+Porque é que o cost do EXPLAIN não se converte em milissegundos?;É uma unidade arbitrária em que 1 = ler uma página em sequência. Só serve para comparar planos entre si.;btree::l0
+Uma query sem índice devolve 1 linha de uma tabela com 8348 páginas. Quantas páginas lê?;As 8348. O que se lê e o que se devolve são independentes.;btree::l0
+Porque é que uma B-tree é larga e baixa em vez de binária?;Cada leitura traz 8 kB e cabem centenas de chaves nesse espaço. A base do logaritmo é o fanout (~240), não 2.;btree::l1
+bt_metap devolve level=2. Quantas leituras custa localizar uma chave?;Três. As folhas são o nível 0, portanto os níveis são 2, 1 e 0.;btree::l1
+Com fanout ~240, quantas chaves alcançam 3 níveis?;Cerca de 13,8 milhões (240 ao cubo). Por isso a altura quase nunca muda quando a tabela cresce.;btree::l1
+O que está guardado numa folha da B-tree?;A chave e um ponteiro para a linha na tabela (TID: página X, posição Y). As outras colunas não estão lá.;btree::l1
+Para que serve a ligação em cadeia entre folhas vizinhas?;Percorrer intervalos e ordenações sem voltar a subir à raiz. É o que torna BETWEEN, ORDER BY e MIN/MAX baratos.;btree::l1
+Porque é que um índice pode ter muito menos entradas do que a tabela tem linhas?;Deduplicação: desde o Postgres 13, chaves repetidas guardam-se uma vez com uma lista de ponteiros.;btree::l1
+LIKE 'abc%' usa índice B-tree? E LIKE '%abc'?;O primeiro sim (é um intervalo disfarçado), o segundo não (sem âncora no início não há intervalo contíguo).;btree::l1
+WHERE col IS NULL pode usar um índice B-tree?;Sim. Os nulos têm posição definida na ordenação, logo formam um intervalo como outro qualquer.;btree::l1
+Quais são as três formas de ir do índice à linha?;Index Scan (linha a linha, mantém a ordem), Bitmap Heap Scan (recolhe páginas e lê por ordem física) e Index Only Scan (não vai à tabela).;btree::l2
+Porque é que o Bitmap Heap Scan lê as páginas por ordem física?;Para trocar saltos aleatórios por leitura quase sequencial e tocar cada página uma só vez. Em troca, perde a ordenação.;btree::l2
+Que campo do plano revela que um Index Only Scan foi à tabela na mesma?;Heap Fetches. O nome do nó não muda.;btree::l2
+Porque é que um Index Only Scan precisa do visibility map?;Porque a informação sobre que linhas são visíveis está na tabela, não no índice. O mapa diz que páginas têm todas as linhas visíveis.;btree::l2
+Heap Fetches subiu depois de um UPDATE. Porquê, e como se repõe?;O UPDATE desmarcou as páginas no visibility map. Repõe-se com VACUUM.;btree::l2
+Heap Blocks: lossy=5000 — o que sugere?;O mapa de bits não coube em memória e passou a marcar páginas inteiras. Aumentar work_mem pode ajudar.;btree::l2
+Que query pode ser index-only com um índice só sobre (cliente_id)?;count(*) com WHERE cliente_id = ? — não precisa de ler colunas. Já max(total_cents) precisa, e não pode.;btree::l2
+Qual é a PRIMEIRA coisa a olhar num EXPLAIN ANALYZE?;O desencontro entre rows= (estimado) e actual rows= (real).;btree::l3
+Qual é a diferença entre seletividade e agrupamento?;Seletividade é a fração de linhas que passa. Agrupamento é se essas linhas estão juntas em poucas páginas. Um índice só poupa I/O se as duas forem boas.;btree::l3
+A partir de que percentagem o Postgres deixa de usar um índice?;Não há percentagem fixa. Medido numa tabela: até 50% com os valores por omissão e até 60% com random_page_cost=1.1. Depende da dispersão, do parâmetro e da tabela.;btree::l3
+Quais são as três causas de um índice não ser usado?;O planeador ter razão, as estatísticas estarem erradas, ou a query impedir o uso (função sobre a coluna, LIKE '%x').;btree::l3
+Para que serve SET enable_seqscan = off?;Para DIAGNOSTICAR: comparar o custo real dos dois planos. Nunca para deixar ligado.;btree::l3
+A tabela cresceu 100x sem ANALYZE. Qual é o risco real?;Pequeno: o planeador corrige a escala pelo tamanho real do ficheiro. O perigoso é a DISTRIBUIÇÃO mudar, que ele não corrige.;btree::l3
+correlation = 0.94 numa coluna. Posso concluir que as linhas estão agrupadas?;Não. Com poucos valores distintos, um padrão cíclico dá correlação alta e dispersão total. A prova é o BUFFERS.;btree::l3
+Um índice sobre (a, b, c) serve que procuras?;a, (a,b) e (a,b,c). Nada que não fixe a — é a regra do prefixo mais à esquerda.;btree::l4
+Que critério decide a ORDEM das colunas de um índice composto?;Igualdade primeiro, intervalo ou ORDER BY a seguir, seletividade só para desempatar.;btree::l4
+Porque é que a coluna de um intervalo deve ser a última?;Porque depois de um intervalo as colunas seguintes já não estão ordenadas dentro do que sobrou.;btree::l4
+O plano diz o nome do meu índice. Como confirmo que está a ser aproveitado?;Comparo os Buffers lidos com pg_relation_size(indice)/8192. Se forem próximos, foi varrido, não procurado.;btree::l4
+Tenho (a,b) e também (a). O que faço?;Apago o de coluna única: (a) é prefixo do composto, logo é redundante. Melhora as escritas sem piorar leituras.;btree::l4
+actual time=0.001..0.001 rows=1 loops=10000 — quanto tempo e quantas linhas?;~10 ms e 10 000 linhas. Os valores são por execução: multiplicar sempre por loops.;btree::l5
+O nó de topo diz ..500 e o filho ..480. Quanto gastou o nó de topo?;~20 ms. Os tempos são acumulados, portanto o tempo próprio é a diferença.;btree::l5
+Sort Method: external merge Disk: 240MB — o que fazer?;Ordenou em disco por falta de work_mem. Alternativas: subir work_mem na sessão, indexar pela ordem pedida, ou usar LIMIT (top-N heapsort).;btree::l5
+Correr a query outra vez deu 8 ms em vez de 310. Que número comparo em vez do tempo?;Buffers. O tempo só reflete a cache estar quente.;btree::l5
+O que acontece se correres EXPLAIN ANALYZE num DELETE?;Apaga mesmo — ANALYZE executa a query. Usa-se BEGIN ... ROLLBACK.;btree::l5
+Rows Removed by Filter: 952000 para 48000 devolvidas. O que sugere?;95% do que se leu foi deitado fora. Candidato a índice, provavelmente parcial.;btree::l5
+Quanto custam os índices nas escritas?;Medido: 4 índices tornaram um INSERT de 200k linhas 6,8x mais lento, e os índices ocupavam mais do que a tabela.;btree::l6
+Quando é que um índice parcial compensa?;Quando as queries só procuram um subconjunto: filas de trabalho, soft deletes, estados raros. Medido: 18x mais pequeno indexando 2% das linhas.;btree::l6
+Que duas condições tem um índice de expressão?;A função tem de ser IMMUTABLE, e a query tem de usar a expressão literalmente igual.;btree::l6
+Porque é que date_part('year', criada_em) não pode ser indexado se criada_em é timestamptz?;Porque o resultado depende do fuso da sessão, logo a função é STABLE e não IMMUTABLE. Corrige-se com AT TIME ZONE 'UTC'.;btree::l6
+idx_scan = 0 num índice de 340 MB. Apago?;Só depois de verificar stats_reset, se suporta uma restrição, e se alguma réplica o usa.;btree::l6
+Como testo um índice sem o deixar criado?;"BEGIN; CREATE INDEX ...; EXPLAIN (ANALYZE, BUFFERS) ...; ROLLBACK; — o CREATE INDEX é transacional em Postgres.";btree::l6
+Query lenta de 8 s num relatório noturno. Qual é a primeira pergunta?;Os 8 s são um problema para alguém? Lento não é o mesmo que problema.;btree::l6
