@@ -71,10 +71,15 @@ Parte de `modelo/topico.html` e `modelo/licao.html`. **Nunca copies a página de
 - Pelo menos um exercício com código que corre, se o tópico for técnico.
 - Fontes com 🌐 *Verificado a AAAA-MM-DD*. **Não inventes fontes, DOIs, páginas nem citações** —
   abre cada uma. Se não conseguires verificar, escreve que não verificaste.
+- 🔴 **Pelo menos uma fonte por lição que não seja documentação oficial**: livro, artigo original, curso.
+  Documentação diz *o que a ferramenta faz*; um livro ou um artigo diz *porque é assim*. Se para este tópico
+  não existir nenhuma, escreve **que procuraste e não encontraste** — é informação, não é falha.
+  Um ISBN, uma edição ou um número de página que não confirmaste junto do editor **não se escrevem**.
 
-Depois das lições: `folha.html` (imprimível), `teste.html` (intercalado), `flashcards.csv`
-(`frente;verso;etiqueta`) e `revisao.ics` (+1, +3, +7, +21, +60 dias, com `VALARM`, `DESCRIPTION`
-com os passos e `UID` estável). Um **projeto** se o tópico o permitir.
+Depois das lições: `bibliografia.html` (o percurso de leitura, ordenado por **por onde começar** e não por
+autor), `folha.html` (imprimível), `teste.html` (intercalado), `flashcards.csv` (`frente;verso;etiqueta`) e
+`revisao.ics` (+1, +3, +7, +21, +60 dias, com `VALARM`, `DESCRIPTION` com os passos e `UID` estável).
+Um **projeto** se o tópico o permitir.
 
 Acrescenta o cartão em `docs/index.html` com a etiqueta **🚧 em construção**.
 
@@ -89,6 +94,23 @@ Relê **como aluno que não sabe a matéria**, não como autor que acabou de a e
 - Que exercício se resolve por cópia do padrão do exemplo acima, sem perceber nada?
 - Que «erro comum» é mesmo comum, e qual inventaste por simetria?
 - Que afirmação escreveste de memória sem abrir a fonte?
+- 🔴 **Que exigência do `PROCESSO.md` é que não cumpriste?** Não confies na memória — percorre a lista:
+
+  | ✓ | Exige |
+  |---|---|
+  | ⬜ | As **11 secções**, por ordem, em todas as lições |
+  | ⬜ | Objetivos **verificáveis** («implementar», «explicar porquê», «diagnosticar») e não «compreender» |
+  | ⬜ | A **fronteira** («o que este curso não é»), com remissão para os tópicos vizinhos que existam |
+  | ⬜ | Cada pressuposto com **o que muda se estiver errado** |
+  | ⬜ | Um pré-requisito em falta é **lição 0**, não nota de rodapé |
+  | ⬜ | Soluções em `<details>` **fechado**; quiz com explicação em **cada** opção |
+  | ⬜ | Pelo menos um exercício com **código que corre**, se o tópico o permitir |
+  | ⬜ | **Pelo menos uma fonte que não seja documentação** por lição — ou a declaração de que não há |
+  | ⬜ | `bibliografia.html`, `folha.html`, `teste.html`, `flashcards.csv`, `revisao.ics` |
+  | ⬜ | O que é **convenção** está dito que é convenção |
+
+  Esta pergunta existe porque um curso foi publicado com zero livros na bibliografia e a Fase 2 não deu por
+  isso — olhava só para o conteúdo, nunca para o processo (ver o registo de falhas).
 
 Corrige, e **escreve na nota das fases a lista do que a Fase 1 errou**.
 Uma Fase 2 que não encontrou nada não correu — volta a correr.

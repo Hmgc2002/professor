@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>4 · Índices compostos e a ordem das colunas — Índices B-tree em SQL</title>
-<meta name="description" content="Lição 4: a regra do prefixo mais à esquerda, porque a ordem das colunas decide tudo, e o plano que diz o nome do índice mas lê 250 vezes mais páginas.">
+<title>Bibliografia — Abstracts e resumos</title>
+<meta name="description" content="O percurso de leitura do tópico, ordenado por onde começar: normas, artigos, guias de projeto e o que cada um serve.">
 <style>
 /* INICIO ESTILO */
 /* ------------------------------------------------------------------
@@ -389,14 +389,12 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
 /* FIM ESTILO */
 </style>
 </head>
-<body data-pagina="docs/indices-btree-sql/04-indices-compostos.html">
+<body data-pagina="docs/abstracts-e-resumos/bibliografia.html">
 <a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
 
 <header class="barra">
-  <p class="migalhas">
-    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
-    <a href="index.html">Índices B-tree</a> <span aria-hidden="true">›</span> Lição 4
-  </p>
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Abstracts e resumos</a> <span aria-hidden="true">›</span> bibliografia</p>
   <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
 </header>
 
@@ -404,466 +402,140 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
   <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
 
   <nav class="indice" id="indice-pagina" aria-label="Índice da página">
-    <h2>Nesta lição</h2>
+    <h2>Nesta página</h2>
     <ol>
-      <li><a href="#objetivo">1. Objetivo</a></li>
-      <li><a href="#recuperar">2. Recuperar</a></li>
-      <li><a href="#mecanismo">3. O mecanismo</a></li>
-      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
-      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
-      <li><a href="#erros">6. Erros comuns</a></li>
-      <li><a href="#praticar">7. Praticar</a></li>
-      <li><a href="#quiz">8. Quiz</a></li>
-      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
-      <li><a href="#resumo">10. Resumo</a></li>
-      <li><a href="#fontes">11. Fontes</a></li>
+      <li><a href="#percurso">Por onde começar</a></li>
+      <li><a href="#normas">Normas</a></li>
+      <li><a href="#artigos">Artigos</a></li>
+      <li><a href="#pratica">Guias de prática</a></li>
+      <li><a href="#por-licao">O que ler depois de cada lição</a></li>
+      <li><a href="#verificacao">Como isto foi verificado</a></li>
     </ol>
   </nav>
 
   <main id="conteudo">
-    <p><span class="etiqueta extensao">Lição 4 · extensão</span> <span class="etiqueta">~1 hora</span></p>
-    <h1>Índices compostos e a ordem das colunas</h1>
-    <p class="subtitulo">As mesmas duas colunas, por ordens diferentes, dão índices com utilidades diferentes.
-    E o plano de execução esconde a diferença melhor do que devia.</p>
+    <h1>Bibliografia</h1>
+    <p class="subtitulo">Ordenada por <strong>por onde começar</strong>, não por autor. É a consolidação das
+    fontes que já estão nas lições — nenhuma entrada nova, nenhuma afirmação que não esteja lá.</p>
 
-    <h2 id="objetivo">1. Objetivo</h2>
-    <p>No fim consegues, <strong>dado um conjunto de queries, decidir a ordem das colunas de um índice composto</strong>
-    e justificar a escolha. E consegues reconhecer, num plano que <em>menciona</em> o teu índice, se ele está
-    mesmo a ser aproveitado ou apenas a ser varrido do princípio ao fim.</p>
-
-    <h2 id="recuperar">2. Recuperar</h2>
-    <ol>
-      <li>Que estrutura têm as folhas de uma B-tree, e o que guardam?
-        <details class="solucao"><summary>Resposta</summary><p>Estão <strong>ordenadas por chave</strong> e ligadas em cadeia; guardam a chave e o ponteiro (TID) para a linha.</p></details>
-      </li>
-      <li>Porque é que <code>WHERE date_part('year', criada_em) = 2025</code> não usa um índice em <code>criada_em</code>?
-        <details class="solucao"><summary>Resposta</summary><p>A função destrói a ordenação: os valores de <code>date_part(...)</code> não formam um intervalo contíguo nas folhas, que guardam <code>criada_em</code>.</p></details>
-      </li>
-      <li>Qual é a primeira coisa a olhar num <code>EXPLAIN ANALYZE</code>?
-        <details class="solucao"><summary>Resposta</summary><p>O desencontro entre <code>rows=</code> e <code>actual rows=</code>.</p></details>
-      </li>
-    </ol>
-
-    <h2 id="mecanismo">3. O mecanismo</h2>
-
-    <h3>Um índice composto é uma lista telefónica</h3>
-    <p>Um índice sobre <code>(apelido, nome)</code> ordena primeiro por apelido e, dentro de cada apelido, por nome.
-    É exatamente uma lista telefónica — e a analogia leva-te longe:</p>
-    <ul>
-      <li>Procurar «Silva» → fácil: estão todos juntos.</li>
-      <li>Procurar «Silva, Ana» → fácil: dentro dos Silva, os nomes estão ordenados.</li>
-      <li>Procurar toda a gente chamada «Ana», de qualquer apelido → <strong>tens de ler a lista inteira</strong>.
-      As Anas estão espalhadas por todos os apelidos.</li>
-    </ul>
-
-    <div class="caixa dica">
-      <span class="titulo">⭐ A regra do prefixo mais à esquerda</span>
-      <p>Um índice sobre <code>(a, b, c)</code> serve procuras por <code>a</code>, por <code>(a, b)</code> e por
-      <code>(a, b, c)</code>. <strong>Não serve</strong> procuras que não fixem <code>a</code>.</p>
-      <p>O porquê é a ordenação, não uma regra arbitrária: sem fixar <code>a</code>, os valores de <code>b</code>
-      que te interessam não formam um <em>intervalo contíguo</em> nas folhas — e percorrer um intervalo contíguo é
-      a única coisa que uma B-tree sabe fazer depressa.</p>
-    </div>
-
-    <figure>
-      <svg viewBox="0 0 560 175" role="img" aria-labelledby="t-comp d-comp">
-        <title id="t-comp">Ordenação de um índice composto (cliente_id, estado)</title>
-        <desc id="d-comp">Entradas ordenadas primeiro por cliente_id e depois por estado. As entradas do cliente 42
-        estão todas juntas num bloco contíguo; as entradas com estado igual a cancelada estão dispersas por todo o índice.</desc>
-        <text class="svg-suave" x="6" y="14">folhas de um índice sobre (cliente_id, estado) — ordenadas por cliente_id, depois por estado</text>
-        <g class="svg-mono" font-size="11">
-          <rect class="svg-caixa" x="6"   y="26" width="88" height="24" rx="3"/>
-          <rect class="svg-caixa" x="100" y="26" width="88" height="24" rx="3"/>
-          <rect class="svg-realce" x="194" y="26" width="88" height="24" rx="3"/>
-          <rect class="svg-realce" x="288" y="26" width="88" height="24" rx="3"/>
-          <rect class="svg-caixa" x="382" y="26" width="88" height="24" rx="3"/>
-          <rect class="svg-caixa" x="476" y="26" width="78" height="24" rx="3"/>
-          <text class="svg-mono" x="50"  y="42" text-anchor="middle">41,cancel</text>
-          <text class="svg-mono" x="144" y="42" text-anchor="middle">41,entreg</text>
-          <text class="svg-mono" x="238" y="42" text-anchor="middle">42,cancel</text>
-          <text class="svg-mono" x="332" y="42" text-anchor="middle">42,entreg</text>
-          <text class="svg-mono" x="426" y="42" text-anchor="middle">43,cancel</text>
-          <text class="svg-mono" x="515" y="42" text-anchor="middle">43,entr</text>
-        </g>
-        <path class="svg-traco" stroke-width="2" d="M194 62 H376"/>
-        <text class="svg-texto" x="194" y="80">WHERE cliente_id = 42 → bloco contíguo ✔</text>
-        <g class="svg-traco" stroke-width="2" stroke-dasharray="4 4">
-          <path d="M6 104 H94"/><path d="M194 104 H282"/><path d="M382 104 H470"/>
-        </g>
-        <text class="svg-texto" x="6" y="126">WHERE estado = 'cancelada' → disperso por todo o índice ✘</text>
-        <text class="svg-suave" x="6" y="152">Trocar a ordem para (estado, cliente_id) inverte exatamente qual das duas é contígua.</text>
-      </svg>
-      <figcaption>A ordem das colunas decide qual das procuras fica contígua — e só a contígua é barata.</figcaption>
-    </figure>
-
-    <h3>Como escolher a ordem</h3>
-    <p>Três critérios, por ordem de importância:</p>
-    <ol>
-      <li><strong>A coluna usada com igualdade (<code>=</code>) vem primeiro.</strong> Fixar um valor exato deixa o
-      resto do índice ordenado e utilizável. Uma coluna usada com intervalo (<code>&gt;</code>, <code>BETWEEN</code>)
-      «gasta» a ordenação: depois dela, as colunas seguintes já não estão ordenadas dentro do que sobrou.</li>
-      <li><strong>Depois, a coluna do intervalo ou do <code>ORDER BY</code>.</strong> É aí que a cadeia de folhas
-      compensa.</li>
-      <li><strong>A seletividade decide empates</strong>, e só empates. É o critério que mais gente usa primeiro,
-      e é o menos importante dos três.</li>
-    </ol>
-    <p>Daí o padrão que resolve a maioria dos casos reais — <code>(igualdade, intervalo)</code>:
-    <code>(cliente_id, criada_em)</code> para «as encomendas deste cliente, das mais recentes para as mais antigas».</p>
-
-    <div class="caixa aviso">
-      <span class="titulo">⚠️ Um índice composto não substitui dois índices — nem o contrário</span>
-      <p><code>(a, b)</code> serve as procuras por <code>a</code>, portanto <strong>torna um índice separado em
-      <code>a</code> redundante</strong> (e esse deve ser removido — ocupa espaço e custa em cada escrita).
-      Mas <strong>não</strong> serve as procuras só por <code>b</code>: para essas, ou crias um índice em
-      <code>b</code>, ou aceitas que não há.</p>
-    </div>
-
-    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
-    <p>Vamos criar o índice com a ordem errada e ver o que o plano diz — porque o que ele diz é enganador.</p>
-
-    <h3>Passo 1 — criar a ordem errada, de propósito</h3>
-    <p>A query que nos interessa é <code>WHERE cliente_id = 42</code>. Criamos o índice ao contrário:</p>
-<pre><code>CREATE INDEX idx_ec ON encomendas (estado, cliente_id);
-ANALYZE encomendas;
-EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM encomendas WHERE cliente_id = 42;</code></pre>
-<pre><code>Index Scan using idx_ec on encomendas  (actual time=0.040..1.887 rows=20 loops=1)
-  Index Cond: (cliente_id = 42)
-  Buffers: shared hit=1 read=1002
-Execution Time: 1.901 ms</code></pre>
-
-    <div class="caixa critico">
-      <span class="titulo">🔴 Lê com atenção: isto parece bom e não é</span>
-      <p>O plano diz <code>Index Scan</code>. Diz o <strong>nome do índice</strong>. Até diz
-      <code>Index Cond: (cliente_id = 42)</code>. Quem olhe de relance dá a query por resolvida.</p>
-      <p>Mas olha para os <code>Buffers</code>: <strong>1003 páginas</strong>. O índice inteiro tem ~1005.
-      <strong>Ele varreu o índice do princípio ao fim</strong>, a testar <code>cliente_id = 42</code> em cada
-      entrada — porque sem fixar <code>estado</code> (a primeira coluna) não há bloco contíguo onde descer.</p>
-      <p>Fez isso porque continua a compensar face à alternativa: varrer 1005 páginas de índice é melhor do que
-      varrer 8348 páginas de tabela. É um plano racional e péssimo ao mesmo tempo.</p>
-    </div>
-
-    <h3>Passo 2 — a ordem certa, a mesma query</h3>
-<pre><code>DROP INDEX idx_ec;
-CREATE INDEX idx_ce ON encomendas (cliente_id, estado);
-ANALYZE encomendas;
-EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM encomendas WHERE cliente_id = 42;</code></pre>
-<pre><code>Bitmap Heap Scan on encomendas  (actual time=0.015..0.015 rows=20 loops=1)
-  Buffers: shared hit=1 read=3
-  -&gt;  Bitmap Index Scan on idx_ce  (actual time=0.010..0.010 rows=20 loops=1)
-        Index Cond: (cliente_id = 42)
-        Buffers: shared read=3</code></pre>
-
-    <div class="caixa ok">
-      <span class="titulo">✅ 4 páginas contra 1003. 0,015 ms contra 1,9 ms.</span>
-      <p><strong>250 vezes menos I/O</strong>, com as mesmas duas colunas, o mesmo tamanho de índice
-      (8048 kB contra 8056 kB) e a mesma query. Só mudou a ordem na declaração do índice.</p>
-    </div>
-
-    <h3>Passo 3 — a lição que fica</h3>
-    <p>O nome do nó e o nome do índice no plano <strong>não dizem se o índice está a ser aproveitado</strong>.
-    O sinal está nos <code>Buffers</code>: se o número de páginas lidas do índice se aproxima do tamanho total do
-    índice, ele está a ser <em>varrido</em>, não <em>procurado</em>.</p>
-<pre><code>-- quantas páginas tem o índice, para comparar:
-SELECT pg_relation_size('idx_ce') / 8192 AS paginas_do_indice;</code></pre>
-    <p>É o mesmo padrão da lição 2, noutra roupagem: aí era <code>Index Only Scan</code> com
-    <code>Heap Fetches</code> alto; aqui é <code>Index Scan</code> com <code>Buffers</code> alto.
-    <strong>O nome descreve a intenção; os números descrevem o que aconteceu.</strong></p>
-
-    <h2 id="lacunas">5. Exemplo com lacunas</h2>
-    <div class="exercicio">
-      <h3>Completa</h3>
-      <p><strong>Dado.</strong> Estas três queries são as quentes de uma aplicação:</p>
-      <ol>
-        <li><code>WHERE cliente_id = ? ORDER BY criada_em DESC LIMIT 20</code></li>
-        <li><code>WHERE cliente_id = ? AND estado = 'pendente'</code></li>
-        <li><code>WHERE criada_em &gt;= ? AND criada_em &lt; ?</code></li>
-      </ol>
-      <p><strong>Passo 1 (completa).</strong> Que coluna aparece com <code>=</code> em mais queries? ______</p>
-      <p><strong>Passo 2 (completa).</strong> Índice para a query 1: <code>(______, ______)</code>. Porquê esta ordem? ______</p>
-      <p><strong>Passo 3 (dado).</strong> Esse índice também serve a query 2, embora só parcialmente.</p>
-      <p><strong>Passo 4 (completa).</strong> Porque é que serve «parcialmente»? O que é que o Postgres tem de fazer a mais?</p>
-      <p><strong>Passo 5 (completa).</strong> A query 3 é servida por esse índice? Se não, o que crias?</p>
-      <details class="solucao"><summary>Ver os passos em falta</summary>
-        <p><strong>Passo 1:</strong> <code>cliente_id</code> — com <code>=</code> nas queries 1 e 2.</p>
-        <p><strong>Passo 2:</strong> <code>(cliente_id, criada_em)</code>. A igualdade primeiro fixa um bloco
-        contíguo; dentro dele, <code>criada_em</code> está ordenado, portanto o <code>ORDER BY … DESC LIMIT 20</code>
-        lê a cadeia de folhas ao contrário e <strong>para à vigésima</strong>, sem ordenar nada.</p>
-        <p><strong>Passo 4:</strong> na query 2, o índice localiza o bloco do cliente (talvez 20 entradas) mas
-        <code>estado</code> não está no índice, logo tem de ir buscar cada linha à tabela e filtrar
-        <code>estado = 'pendente'</code> lá. Com ~20 linhas por cliente, é irrelevante. Se fossem 50 000 por
-        cliente, valeria a pena <code>(cliente_id, estado, criada_em)</code> — que continua a servir a query 1,
-        porque <code>(cliente_id)</code> continua a ser prefixo.</p>
-        <p><strong>Passo 5:</strong> <strong>não serve</strong> — a query 3 não fixa <code>cliente_id</code>, e sem
-        o prefixo não há bloco contíguo. Cria-se <code>(criada_em)</code>. É o exemplo de duas necessidades
-        genuinamente diferentes que precisam mesmo de dois índices: não há ordem única que sirva as três.</p>
-      </details>
-    </div>
-
-    <h2 id="erros">6. Erros comuns</h2>
-    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns da lição 4, tabela rolável na horizontal">
+    <h2 id="percurso">Por onde começar</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Percurso de leitura recomendado, tabela rolável na horizontal">
       <table>
-        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <thead><tr><th>#</th><th>O quê</th><th>Porquê a esta altura</th><th>Tamanho</th></tr></thead>
         <tbody>
-          <tr>
-            <td>«O plano diz o nome do índice, logo está bem»</td>
-            <td>Dar a query por resolvida sem olhar para os <code>Buffers</code></td>
-            <td>Um índice pode ser <em>varrido</em> inteiro. Compara as páginas lidas com
-            <code>pg_relation_size(indice)/8192</code>: se forem próximas, não houve procura</td>
-          </tr>
-          <tr>
-            <td>«A coluna mais seletiva vai primeiro»</td>
-            <td>Ordenar por <code>n_distinct</code> sem olhar para as queries</td>
-            <td>Primeiro vem a coluna usada com <code>=</code>. A seletividade só decide empates — um índice
-            perfeitamente ordenado por seletividade pode não servir query nenhuma</td>
-          </tr>
-          <tr>
-            <td>«Um índice por coluna do <code>WHERE</code>»</td>
-            <td>Cinco índices de coluna única numa tabela com escrita</td>
-            <td>Um composto com a ordem certa serve mais casos e custa menos nas escritas. E
-            <code>(a,b)</code> torna o índice em <code>(a)</code> redundante — esse deve ser apagado</td>
-          </tr>
-          <tr>
-            <td>«A coluna do intervalo pode ir no meio»</td>
-            <td><code>(cliente_id, criada_em, estado)</code> com intervalo em <code>criada_em</code> e igualdade em <code>estado</code></td>
-            <td>Depois de um intervalo, as colunas seguintes deixam de estar ordenadas dentro do resultado.
-            <code>estado</code> passa a ser filtro, não procura. A ordem útil seria
-            <code>(cliente_id, estado, criada_em)</code></td>
-          </tr>
-          <tr>
-            <td>«Inverter a ordem só afeta o desempenho um bocadinho»</td>
-            <td>Não testar a ordem alternativa</td>
-            <td>Medido aqui: <strong>250×</strong> na mesma query, com índices do mesmo tamanho</td>
-          </tr>
+          <tr><td>1</td><td><a href="#keshav">Keshav (2007), «How to read a paper»</a></td><td>Duas páginas que mudam como lês tudo o resto. É o melhor retorno por minuto desta lista</td><td>2 páginas</td></tr>
+          <tr><td>2</td><td><a href="#z3914">ANSI/NISO Z39.14-1997</a></td><td>A fonte primária dos tipos, elementos, comprimentos e estilo — o que este curso resume</td><td>Curta, gratuita</td></tr>
+          <tr><td>3</td><td><a href="#mensh">Mensh &amp; Kording (2017)</a></td><td>Dez regras para estruturar um texto técnico; aplica-se muito para lá de artigos</td><td>Curto, acesso livre</td></tr>
+          <tr><td>4</td><td><a href="#sre">Google SRE, cap. 15</a></td><td>Quando escreveres o teu primeiro <em>post-mortem</em> a sério</td><td>Capítulo, gratuito</td></tr>
+          <tr><td>5</td><td><a href="#luhn">Luhn (1958)</a></td><td>Curiosidade que vale a pena: o primeiro resumo automático, e porque é que a abordagem dele falha</td><td>7 páginas</td></tr>
         </tbody>
       </table>
     </div>
 
-    <h2 id="praticar">7. Praticar</h2>
-
-    <div class="exercicio">
-      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
-      <h3>E1 — quais é que este índice serve?</h3>
-      <p>Índice sobre <code>(pais, estado, criada_em)</code>. Para cada condição, diz se é servida por procura
-      (descida à árvore), por varrimento do índice, ou não é servida de todo:</p>
-      <ol>
-        <li><code>WHERE pais = 'PT'</code></li>
-        <li><code>WHERE pais = 'PT' AND estado = 'pendente'</code></li>
-        <li><code>WHERE estado = 'pendente'</code></li>
-        <li><code>WHERE pais = 'PT' AND criada_em &gt; '2025-01-01'</code></li>
-        <li><code>WHERE pais = 'PT' AND estado = 'pendente' ORDER BY criada_em</code></li>
-      </ol>
-      <details class="solucao"><summary>Solução</summary>
-        <ol>
-          <li><strong>Procura.</strong> Prefixo exato.</li>
-          <li><strong>Procura.</strong> Prefixo de duas colunas.</li>
-          <li><strong>Não é servida por procura.</strong> Falta o prefixo <code>pais</code>. Na prática o planeador
-          pode varrer o índice inteiro se isso for melhor que varrer a tabela — e aí o plano <em>menciona</em> o
-          índice sem o estar a aproveitar. É o caso do exemplo trabalhado.</li>
-          <li><strong>Procura parcial.</strong> Desce por <code>pais</code>; dentro desse bloco, <code>estado</code>
-          é a coluna seguinte e não está fixa, portanto <code>criada_em</code> não está ordenado no que sobrou.
-          A data passa a ser filtro aplicado às entradas, não intervalo percorrido.</li>
-          <li><strong>Procura, e o melhor caso dos cinco.</strong> Fixa as duas primeiras por igualdade; dentro
-          desse bloco <code>criada_em</code> está ordenado, logo o <code>ORDER BY</code> sai de graça.</li>
-        </ol>
-      </details>
-    </div>
-
-    <div class="exercicio">
-      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
-      <h3>E2 — código que corre: reproduzir os 250×</h3>
-      <p>Na base de treino, cria os dois índices (um de cada vez — com ambos presentes o planeador escolhe o bom e
-      o efeito desaparece) e mede a mesma query com <code>BUFFERS</code>. Depois compara as páginas lidas com o
-      tamanho total do índice.</p>
-      <details class="solucao"><summary>Solução</summary>
-<pre><code>DROP INDEX IF EXISTS idx_ce, idx_ec;
-CREATE INDEX idx_ec ON encomendas (estado, cliente_id);
-ANALYZE encomendas;
-EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM encomendas WHERE cliente_id = 42;
-SELECT pg_relation_size('idx_ec')/8192 AS paginas_do_indice;</code></pre>
-        <p>Medido em Postgres 17.11: <code>Buffers: shared hit=1 read=1002</code> contra um índice de ~1005
-        páginas — <strong>leu-o praticamente todo</strong>. Com <code>(cliente_id, estado)</code>: 4 páginas.</p>
-        <p>⚠️ <strong>A armadilha da experiência</strong> (e a razão do aviso no enunciado): se deixares os dois
-        índices criados, o planeador escolhe o bom e não vês diferença nenhuma. Foi o que me aconteceu à primeira
-        vez que corri isto — a medição deu 4 páginas para os dois casos e quase escrevi que não havia diferença.</p>
-      </details>
-    </div>
-
-    <div class="exercicio">
-      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
-      <h3>E3 — desenhar para três queries com um orçamento de dois índices</h3>
-      <p>Uma tabela <code>mensagens (id, conversa_id, autor_id, criada_em, lida, corpo)</code>, com escrita
-      intensa. Três queries quentes:</p>
-      <ol>
-        <li><code>WHERE conversa_id = ? ORDER BY criada_em DESC LIMIT 50</code> (abrir uma conversa)</li>
-        <li><code>WHERE autor_id = ? AND lida = false</code> (por ler, de um autor)</li>
-        <li><code>SELECT count(*) WHERE conversa_id = ? AND lida = false</code> (badge de não lidas)</li>
-      </ol>
-      <p>Propõe <strong>dois</strong> índices e justifica cada coluna e cada posição. Diz também o que sacrificaste.</p>
-      <details class="solucao"><summary>Solução</summary>
-        <p>Uma proposta defensável:</p>
-        <ul>
-          <li><strong><code>(conversa_id, criada_em DESC)</code></strong> — serve a query 1 por inteiro:
-          igualdade primeiro, ordenação a seguir, e o <code>LIMIT 50</code> para logo à quinquagésima entrada.
-          Serve também a query 3 <em>parcialmente</em>: localiza o bloco da conversa, mas tem de ir à tabela
-          verificar <code>lida</code> em cada linha.</li>
-          <li><strong><code>(autor_id, lida)</code></strong> — serve a query 2. As duas são igualdades, e
-          <code>autor_id</code> vem primeiro por ser muito mais seletiva (o critério 3, que aqui decide o empate
-          entre duas igualdades).</li>
-        </ul>
-        <p><strong>O que se sacrificou:</strong> a query 3 não fica ótima. Um índice
-        <code>(conversa_id, lida)</code> resolveria-a — mas em vez de o acrescentar, pergunta-se primeiro:</p>
-        <ul>
-          <li>Um índice <strong>parcial</strong> <code>(conversa_id) WHERE lida = false</code> seria muito mais
-          pequeno (só as não lidas) e serviria a query 3 melhor do que um índice completo —
-          <a href="06-o-custo-do-outro-lado.html">lição 6</a>.</li>
-          <li>Ou cobrir: <code>(conversa_id, criada_em DESC) INCLUDE (lida)</code> torna a query 3 index-only sem
-          criar índice novo — ao preço de engordar o primeiro.</li>
-        </ul>
-        <p>⭐ O enunciado dizia «escrita intensa», e é isso que justifica o orçamento apertado. Cada índice é
-        trabalho em <em>cada</em> <code>INSERT</code>: na base de treino, quatro índices tornaram um
-        <code>INSERT</code> de 100 000 linhas <strong>16 vezes mais lento</strong> (lição 6). Numa tabela de
-        mensagens, esse custo paga-se a cada mensagem enviada.</p>
-      </details>
-    </div>
-
-    <h2 id="quiz">8. Quiz</h2>
-    <div class="quiz" data-quiz="btree-04">
-      <ol class="perguntas">
-
-        <li class="pergunta">
-          <p class="enunciado">Índice sobre <code>(a, b)</code>. Qual destas <strong>não</strong> é servida por procura?</p>
-          <ul class="opcoes">
-            <li class="opcao"><label><input type="radio" name="e1" value="a" data-certa="false"><span class="rotulo">WHERE a = 1</span></label>
-              <p class="explicacao" hidden>É servida: <code>a</code> é o prefixo mais à esquerda, e todas as entradas com a=1 formam um bloco contíguo nas folhas.</p></li>
-            <li class="opcao"><label><input type="radio" name="e1" value="b" data-certa="false"><span class="rotulo">WHERE a = 1 AND b = 2</span></label>
-              <p class="explicacao" hidden>É servida, e é o caso ideal: fixa o prefixo completo e desce direto ao ponto.</p></li>
-            <li class="opcao"><label><input type="radio" name="e1" value="c" data-certa="true"><span class="rotulo">WHERE b = 2</span></label>
-              <p class="explicacao" hidden>Certo. Sem fixar <code>a</code>, as entradas com b=2 estão dispersas por todos os valores de <code>a</code> — não formam intervalo contíguo. Cuidado: o planeador pode varrer o índice inteiro e mencioná-lo no plano, o que engana quem só lê o nome do nó.</p></li>
-            <li class="opcao"><label><input type="radio" name="e1" value="d" data-certa="false"><span class="rotulo">WHERE a = 1 ORDER BY b</span></label>
-              <p class="explicacao" hidden>É servida, e bem: fixa <code>a</code> e, dentro desse bloco, <code>b</code> já está ordenado — a ordenação sai de graça.</p></li>
-          </ul>
-        </li>
-
-        <li class="pergunta">
-          <p class="enunciado">O plano diz <code>Index Scan using idx_x</code> e <code>Buffers: read=1002</code>. O índice tem 1005 páginas. O que aconteceu?</p>
-          <ul class="opcoes">
-            <li class="opcao"><label><input type="radio" name="e2" value="a" data-certa="false"><span class="rotulo">Procura normal; 1002 páginas é o esperado num índice grande</span></label>
-              <p class="explicacao" hidden>Uma procura custa a altura da árvore — 3 ou 4 páginas — independentemente do tamanho do índice. Mil páginas só acontecem a percorrer, não a descer.</p></li>
-            <li class="opcao"><label><input type="radio" name="e2" value="b" data-certa="true"><span class="rotulo">Varreu o índice quase todo: o filtro não bate no prefixo mais à esquerda</span></label>
-              <p class="explicacao" hidden>Certo. 1002 de 1005 páginas é um varrimento completo com filtro, não uma procura. Comparar as páginas lidas com pg_relation_size(indice)/8192 é o teste que distingue os dois casos — e o nome do nó não o distingue.</p></li>
-            <li class="opcao"><label><input type="radio" name="e2" value="c" data-certa="false"><span class="rotulo">O índice está inchado e precisa de REINDEX</span></label>
-              <p class="explicacao" hidden>Inchaço faria o índice ocupar mais páginas do que devia, mas não explicaria lê-las todas numa procura por um valor. O problema está na ordem das colunas face à query, não no estado do índice.</p></li>
-          </ul>
-        </li>
-
-        <li class="pergunta">
-          <p class="enunciado">Queries: <code>WHERE cliente_id = ? AND criada_em &gt; ?</code>. Que ordem escolhes?</p>
-          <ul class="opcoes">
-            <li class="opcao"><label><input type="radio" name="e3" value="a" data-certa="true"><span class="rotulo">(cliente_id, criada_em) — a igualdade primeiro</span></label>
-              <p class="explicacao" hidden>Certo. A igualdade fixa um bloco contíguo e, dentro dele, criada_em fica ordenado, portanto o intervalo percorre-se pela cadeia de folhas. É o padrão (igualdade, intervalo), que resolve a maioria dos casos reais.</p></li>
-            <li class="opcao"><label><input type="radio" name="e3" value="b" data-certa="false"><span class="rotulo">(criada_em, cliente_id) — a data é mais seletiva</span></label>
-              <p class="explicacao" hidden>Pôr o intervalo primeiro «gasta» a ordenação: dentro do intervalo de datas, cliente_id não está ordenado, e passa a ser filtro aplicado a cada entrada em vez de procura. A seletividade é o critério menos importante dos três, não o primeiro.</p></li>
-            <li class="opcao"><label><input type="radio" name="e3" value="c" data-certa="false"><span class="rotulo">Tanto faz, as colunas são as mesmas</span></label>
-              <p class="explicacao" hidden>Medido nesta lição: 250 vezes de diferença em I/O, com índices praticamente do mesmo tamanho. A ordem é a decisão inteira num índice composto.</p></li>
-          </ul>
-        </li>
-
-        <li class="pergunta">
-          <p class="enunciado">Tens <code>(cliente_id, estado)</code> e também um índice só sobre <code>(cliente_id)</code>. O que fazes?</p>
-          <ul class="opcoes">
-            <li class="opcao"><label><input type="radio" name="e4" value="a" data-certa="false"><span class="rotulo">Deixo ambos — mais índices, mais hipóteses para o planeador</span></label>
-              <p class="explicacao" hidden>O índice de coluna única não dá hipótese nenhuma que o composto já não dê: (cliente_id) é prefixo de (cliente_id, estado). O que ele acrescenta é espaço em disco e trabalho em cada INSERT, UPDATE e DELETE.</p></li>
-            <li class="opcao"><label><input type="radio" name="e4" value="b" data-certa="true"><span class="rotulo">Apago o de coluna única — é redundante, porque (cliente_id) é prefixo do composto</span></label>
-              <p class="explicacao" hidden>Certo. É das poucas otimizações que melhoram as escritas sem piorar nada nas leituras. Antes de apagar, vale confirmar o uso real em pg_stat_user_indexes — a única exceção seria o composto ser muito mais largo e o pequeno servir varrimentos completos.</p></li>
-            <li class="opcao"><label><input type="radio" name="e4" value="c" data-certa="false"><span class="rotulo">Apago o composto e fico com o simples</span></label>
-              <p class="explicacao" hidden>É a escolha ao contrário: o composto serve tudo o que o simples serve e ainda as procuras por (cliente_id, estado). Apagá-lo perde capacidade.</p></li>
-          </ul>
-        </li>
-
-        <li class="pergunta">
-          <p class="enunciado">Porque é que a coluna de um intervalo deve ser a <strong>última</strong> do índice?</p>
-          <ul class="opcoes">
-            <li class="opcao"><label><input type="radio" name="e5" value="a" data-certa="false"><span class="rotulo">Porque intervalos são mais lentos que igualdades</span></label>
-              <p class="explicacao" hidden>Um intervalo servido por índice é barato — desce-se uma vez e percorre-se a cadeia de folhas. O problema não é o custo do intervalo em si, é o efeito dele sobre as colunas que venham a seguir.</p></li>
-            <li class="opcao"><label><input type="radio" name="e5" value="b" data-certa="true"><span class="rotulo">Porque depois de um intervalo as colunas seguintes já não estão ordenadas dentro do que sobrou</span></label>
-              <p class="explicacao" hidden>Certo. A ordenação é lexicográfica: só se mantém dentro de um valor fixo da coluna anterior. Um intervalo abrange muitos valores, e dentro dele a coluna seguinte reinicia a ordem em cada um — deixa de haver bloco contíguo para procurar.</p></li>
-            <li class="opcao"><label><input type="radio" name="e5" value="c" data-certa="false"><span class="rotulo">Porque o Postgres só suporta um intervalo por índice</span></label>
-              <p class="explicacao" hidden>Não existe tal limitação declarada. Podes ter condições de intervalo em várias colunas; o que acontece é que só a primeira delas é usada para delimitar a procura, e as outras viram filtro.</p></li>
-          </ul>
-        </li>
-
-      </ol>
-      <p class="accoes nao-imprimir">
-        <button class="botao principal" type="button" data-verificar>Verificar</button>
-        <button class="botao" type="button" data-limpar>Limpar</button>
-      </p>
-      <p class="resultado" role="status" aria-live="polite"></p>
-    </div>
-
-    <h2 id="feynman">9. Explica por palavras tuas</h2>
-    <div class="aberta">
-      <label for="f1">Explica a regra do prefixo mais à esquerda usando uma analogia que <strong>não</strong> seja a
-      lista telefónica, e diz onde a tua analogia parte.
-        <span class="pista">Escolher uma analogia nova obriga a perceber o mecanismo; repetir a do texto não obriga a nada.</span>
-      </label>
-      <textarea id="f1" data-pergunta="A regra do prefixo mais à esquerda, com uma analogia minha"></textarea>
-    </div>
-    <div class="aberta">
-      <label for="f2">Porque é que ver o nome do teu índice no plano não significa que ele esteja a ser aproveitado?
-      Que número confirmas, e contra o quê o comparas?
-        <span class="pista">Esta ideia já apareceu na lição 2 com outro nome. Se conseguires dizer qual era, melhor.</span>
-      </label>
-      <textarea id="f2" data-pergunta="Porque ver o nome do índice no plano não chega"></textarea>
-    </div>
-
-    <div class="entrega nao-imprimir">
-      <h3>Entregar</h3>
-      <p class="accoes"><button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button></p>
-      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
-      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
-      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
-      <p class="aviso-copia">Guardar em <code>topicos/indices-btree-sql/respostas/AAAA-MM-DD.md</code>.</p>
-    </div>
-
-    <h2 id="resumo">10. Resumo</h2>
-    <ul>
-      <li><strong>Prefixo mais à esquerda:</strong> <code>(a,b,c)</code> serve <code>a</code>, <code>(a,b)</code>,
-      <code>(a,b,c)</code> — e não serve nada que não fixe <code>a</code>.</li>
-      <li><strong>Ordem:</strong> igualdade primeiro, intervalo ou <code>ORDER BY</code> a seguir, seletividade só
-      para desempatar.</li>
-      <li>Depois de um intervalo, as colunas seguintes deixam de estar ordenadas — por isso o intervalo vai no fim.</li>
-      <li>🔴 <strong>O nome do índice no plano não prova nada.</strong> Compara os <code>Buffers</code> com
-      <code>pg_relation_size(indice)/8192</code>: próximos = varrimento, não procura.</li>
-      <li><code>(a,b)</code> torna o índice em <code>(a)</code> <strong>redundante</strong> — apaga-se, e as
-      escritas agradecem.</li>
-    </ul>
-
-    <h2 id="fontes">11. Fontes</h2>
+    <h2 id="normas">Normas</h2>
     <ul class="fontes">
-      <li><strong>Documentação do PostgreSQL 17 — <em>Multicolumn Indexes</em></strong>.
-        <a href="https://www.postgresql.org/docs/17/indexes-multicolumn.html">indexes-multicolumn.html</a>
-        — fonte primária para o comportamento do prefixo e para o limite de 32 colunas por índice.
-        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
-      <li><strong>Documentação do PostgreSQL 17 — <em>Indexes and ORDER BY</em></strong>.
-        <a href="https://www.postgresql.org/docs/17/indexes-ordering.html">indexes-ordering.html</a>
-        — quando é que <code>DESC</code> e <code>NULLS FIRST</code> na declaração do índice valem a pena.
-        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
-      <li><strong>Leitura recomendada</strong> — Markus Winand,
-        <a href="https://use-the-index-luke.com/sql/where-clause/the-equals-operator/concatenated-keys">«Concatenated Keys»</a>.
-        <strong>Porquê:</strong> é o tratamento mais completo da ordem das colunas que conheço, com o caso do
-        intervalo bem explicado. <strong>O que saltar:</strong> as secções de Oracle.
-        Fonte secundária. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
-      <li><strong>Livro</strong> — Markus Winand, <em>SQL Performance Explained</em> (2012), capítulos «The Where Clause» (chaves concatenadas) e «Sorting and Grouping».
-        <strong>Porquê:</strong> é o tratamento mais completo da ordem das colunas que conheço, e explica o caso do intervalo melhor do que eu. <strong>O que saltar:</strong> os apartados de outros motores. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
-      <li><strong>Todas as medições</strong> (1003 páginas contra 4; 8056 kB contra 8048 kB) foram corridas em
-        <strong>PostgreSQL 17.11</strong> sobre <a href="preparar.sql">preparar.sql</a>, com um índice de cada vez.
-        <span class="verificado">✅ Corrido a 2026-09-15</span></li>
+      <li id="z3914"><strong>ANSI/NISO Z39.14-1997 (R2015), <em>Guidelines for Abstracts</em></strong>. Gratuita em niso.org.<br>
+        <strong>Porquê:</strong> é a fonte primária deste tópico — tipos, elementos, comprimentos e estilo.
+        <strong>O que ler:</strong> §7.3, §7.4 e §7.5 são as que as lições usam diretamente.
+        <span class="verificado">Verificada no PDF — ver <a href="01-informativo-e-indicativo.html#fontes">lição 1</a></span></li>
+      <li><strong>ISO 214:1976, <em>Documentation — Abstracts for publications and documentation</em></strong>.<br>
+        ⚠️ <strong>Aviso herdado da lição 1:</strong> o conteúdo desta norma <strong>não foi verificado</strong> —
+        é paga e não foi aberta. Está aqui porque é citada, não porque tenha sido conferida. Não confies em nada
+        que dependa só dela.
+        <span class="verificado">Não verificada — declarado na <a href="01-informativo-e-indicativo.html#fontes">lição 1</a></span></li>
+      <li><strong>Flanagan, H. &amp; Ginoza, S. (2014). RFC 7322, <em>RFC Style Guide</em>, §4.3</strong>. rfc-editor.org.<br>
+        <strong>Porquê:</strong> a regra de abstract de quem escreve normas — e que <strong>contradiz</strong> a
+        Z39.14 num ponto concreto. Ver essa contradição tratada na
+        <a href="04-rfc-pep-readme.html">lição 4</a>. <strong>O que ler:</strong> a §4.3 e o próprio abstract do
+        documento, que é exemplo de si mesmo.
+        <span class="verificado">Verificada — ver <a href="04-rfc-pep-readme.html#fontes">lição 4</a></span></li>
     </ul>
+
+    <h2 id="artigos">Artigos</h2>
+    <ul class="fontes">
+      <li id="keshav"><strong>Keshav, S. (2007). <em>How to read a paper.</em></strong> ACM SIGCOMM Computer
+        Communication Review, 37(3), 83–84. <a href="https://doi.org/10.1145/1273445.1273458">doi:10.1145/1273445.1273458</a><br>
+        <strong>Porquê:</strong> duas páginas sobre ler em três passagens, e é o método que a
+        <a href="02-ler-para-decidir.html">lição 2</a> aplica. <strong>O que saltar:</strong> nada.
+        <span class="verificado">Ver <a href="02-ler-para-decidir.html#fontes">lição 2</a></span></li>
+      <li id="mensh"><strong>Mensh, B. &amp; Kording, K. (2017). <em>Ten simple rules for structuring papers.</em></strong>
+        PLOS Computational Biology, 13(9), e1005619.
+        <a href="https://doi.org/10.1371/journal.pcbi.1005619">doi:10.1371/journal.pcbi.1005619</a><br>
+        <strong>Porquê:</strong> as regras sobre uma ideia por parágrafo e sobre a ordem da informação
+        transferem-se inteiras para um PR ou um RFC.
+        <span class="verificado">Ver <a href="01-informativo-e-indicativo.html#fontes">lição 1</a></span></li>
+      <li id="luhn"><strong>Luhn, H. P. (1958). <em>The Automatic Creation of Literature Abstracts.</em></strong>
+        IBM Journal of Research and Development, 2(2), 159–165.
+        <a href="https://doi.org/10.1147/rd.22.0159">doi:10.1147/rd.22.0159</a><br>
+        <strong>Porquê:</strong> o primeiro sistema de resumo automático, por frequência de palavras — e a
+        demonstração de porque é que essa ideia, que ainda hoje reaparece, dá ao resultado de um incidente a
+        mesma importância que ao café.
+        <span class="verificado">Ver <a href="00-o-que-um-resumo-faz.html#fontes">lição 0</a></span></li>
+      <li><strong>Kintsch, W. &amp; van Dijk, T. A. (1978). <em>Toward a model of text comprehension and
+        production.</em></strong> Psychological Review, 85, 363–394.<br>
+        <strong>Porquê:</strong> é a fonte primária do mecanismo — o que uma pessoa faz quando resume.
+        <strong>O que saltar:</strong> é denso; as secções sobre macro-regras são as que interessam.
+        <span class="verificado">Ver <a href="00-o-que-um-resumo-faz.html#fontes">lição 0</a></span></li>
+      <li><strong>Sobre resumos que mentem</strong> — Pitkin, Branagan &amp; Burmeister (1999), JAMA 281(12);
+        Hartley (2004), J Med Libr Assoc 92(3); Hopewell et al. (2008), PLoS Medicine (CONSORT);
+        Boutron et al. (2010).<br>
+        <strong>Porquê:</strong> é a evidência de que resumos deficientes e enviesados são comuns em textos
+        revistos por pares — o que sustenta a <a href="02-ler-para-decidir.html">lição 2</a> e o hábito de
+        conferir os números do resumo contra o corpo.
+        <span class="verificado">Referências completas nas <a href="01-informativo-e-indicativo.html#fontes">lições 1</a> e <a href="02-ler-para-decidir.html#fontes">2</a></span></li>
+    </ul>
+
+    <h2 id="pratica">Guias de prática</h2>
+    <ul class="fontes">
+      <li id="sre"><strong>Lunney, J. &amp; Lueder, S., <em>Postmortem Culture: Learning from Failure</em></strong>,
+        capítulo 15 de <em>Site Reliability Engineering: How Google Runs Production Systems</em>.
+        Gratuito em <a href="https://sre.google/">sre.google</a>.<br>
+        <strong>Porquê:</strong> é o texto que define o género do <em>post-mortem</em> sem culpados.
+        <strong>O que ler também:</strong> o apêndice <em>Example Postmortem</em> — fictício, lê-se pela estrutura.
+        <span class="verificado">Ver <a href="05-post-mortem.html#fontes">lição 5</a></span></li>
+      <li><strong>Mensagens de commit e descrições de alteração</strong> — a página de manual do
+        <code>git-commit</code> (secção DISCUSSION); <em>Submitting patches</em>, na documentação do kernel Linux;
+        e <em>Writing good CL descriptions</em>, das Google Engineering Practices.<br>
+        <strong>Porquê:</strong> três comunidades grandes que chegaram, em separado, a regras muito parecidas —
+        o que é o melhor argumento que há a favor delas. <strong>O que ler:</strong> todos são curtos.
+        <span class="verificado">Ver <a href="03-pr-e-commit.html#fontes">lição 3</a></span></li>
+      <li><strong>Modelos de proposta</strong> — PEP 1 (secção «What belongs in a successful PEP»),
+        <code>rust-lang/rfcs</code> <code>0000-template.md</code>, e a documentação do GitHub sobre READMEs.<br>
+        <strong>Porquê:</strong> nos modelos, as frases de orientação debaixo de cada título valem mais do que
+        muitos textos sobre escrita.
+        <span class="verificado">Ver <a href="04-rfc-pep-readme.html#fontes">lição 4</a></span></li>
+    </ul>
+
+    <h2 id="por-licao">O que ler depois de cada lição</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Leitura por lição, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Lição</th><th>Continua em</th></tr></thead>
+        <tbody>
+          <tr><td><a href="00-o-que-um-resumo-faz.html">0 · O que um resumo faz</a></td><td>Kintsch &amp; van Dijk (1978) · Luhn (1958)</td></tr>
+          <tr><td><a href="01-informativo-e-indicativo.html">1 · Informativo e indicativo</a></td><td>ANSI/NISO Z39.14 · Mensh &amp; Kording (2017)</td></tr>
+          <tr><td><a href="02-ler-para-decidir.html">2 · Ler para decidir</a></td><td>Keshav (2007) · Pitkin et al. (1999)</td></tr>
+          <tr><td><a href="03-pr-e-commit.html">3 · PR e commit</a></td><td><code>git-commit</code> DISCUSSION · Google, «Writing good CL descriptions»</td></tr>
+          <tr><td><a href="04-rfc-pep-readme.html">4 · RFC, PEP, README</a></td><td>RFC 7322 §4.3 · PEP 1 · o modelo dos RFC do Rust</td></tr>
+          <tr><td><a href="05-post-mortem.html">5 · Post-mortem</a></td><td>Google SRE, cap. 15 e o exemplo do apêndice</td></tr>
+          <tr><td><a href="06-diagnosticar-e-cortar.html">6 · Diagnosticar e cortar</a></td><td>Z39.14 §7.3 e §7.5 · e <a href="../metodo.html#intercalacao">porque é que esta lição mistura géneros</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="verificacao">Como isto foi verificado</h2>
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Esta página consolida, não re-verifica</span>
+      <p>Cada entrada aqui foi verificada <strong>na lição onde aparece</strong>, e a coluna da direita liga a esse
+      sítio. Esta página não acrescenta nenhuma referência nova nem nenhuma afirmação que não esteja nas lições —
+      e é por isso que as datas de verificação vivem lá e não aqui.</p>
+      <p>A distinção importa: consolidar referências que eu não abri e carimbá-las com uma data minha seria
+      fabricar verificação. A única entrada sem verificação de conteúdo — a <strong>ISO 214:1976</strong> — está
+      assinalada como tal aqui e na lição 1.</p>
+    </div>
 
     <footer class="rodape">
-      <p><a href="03-seletividade.html">← 3 · Seletividade</a> ·
-      <a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> ·
-      <a href="05-ler-o-explain.html">5 · Ler o EXPLAIN →</a></p>
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="folha.html">folha de consulta</a> ·
+      <a href="../metodo.html">as fontes sobre o método</a> estão noutro sítio.</p>
     </footer>
   </main>
 </div>

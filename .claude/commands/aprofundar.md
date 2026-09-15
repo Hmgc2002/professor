@@ -33,6 +33,7 @@ Lê também, antes de decidir o que mexer:
 | 5 | Que afirmação foi escrita **de memória**? | Números redondos, «cerca de», «geralmente», sem fonte |
 | 6 | O **diagrama** falta ou não mostra o que interessa? | A coisa tem partes que se movem e está descrita só em prosa |
 | 7 | O quiz distingue **perceber** de **decorar**? | As distractoras são absurdas; acerta-se por eliminação |
+| 8 | As **fontes** têm alguma coisa que não seja documentação? | Só links para o manual: diz o *que faz*, nunca o *porque é assim*. Falta o livro, o artigo original ou o curso — ou a declaração de que procuraste e não há |
 
 ## 3. Corrige
 

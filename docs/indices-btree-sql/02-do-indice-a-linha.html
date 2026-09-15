@@ -874,6 +874,8 @@ EXPLAIN (ANALYZE, BUFFERS) SELECT cliente_id, criada_em FROM encomendas WHERE cl
         <a href="https://www.postgresql.org/docs/17/using-explain.html">using-explain.html</a>
         — a secção sobre bitmap scans explica <code>exact</code> e <code>lossy</code>.
         <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Livro</strong> — Markus Winand, <em>SQL Performance Explained</em> (2012), capítulo «Clustering Data». Gratuito em <a href="https://use-the-index-luke.com/">use-the-index-luke.com</a>.
+        <strong>Porquê:</strong> trata a mesma questão desta lição — o custo de ir do índice à linha — e é onde os índices de cobertura são melhor explicados. <strong>O que saltar:</strong> os apartados de Oracle e SQL Server, se só usas Postgres. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
       <li><strong>Todos os planos desta lição</strong> foram corridos em <strong>PostgreSQL 17.11</strong> sobre a
         tabela de <a href="preparar.sql">preparar.sql</a>, incluindo a degradação por <code>UPDATE</code> e a
         recuperação por <code>VACUUM</code>. <span class="verificado">✅ Corrido a 2026-09-15</span></li>
@@ -881,7 +883,7 @@ EXPLAIN (ANALYZE, BUFFERS) SELECT cliente_id, criada_em FROM encomendas WHERE cl
 
     <footer class="rodape">
       <p><a href="01-btree-por-dentro.html">← 1 · A B-tree por dentro</a> ·
-      <a href="index.html">↑ Índice do curso</a> ·
+      <a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> ·
       <a href="03-seletividade.html">3 · Seletividade →</a></p>
     </footer>
   </main>

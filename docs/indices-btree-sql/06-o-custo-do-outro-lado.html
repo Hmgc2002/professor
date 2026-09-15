@@ -839,6 +839,10 @@ DROP TABLE t_sem, t_com;</code></pre>
         <a href="https://www.postgresql.org/docs/17/monitoring-stats.html">monitoring-stats.html</a>
         — o significado de <code>idx_scan</code> e de <code>stats_reset</code>.
         <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Livro</strong> — Markus Winand, <em>SQL Performance Explained</em> (2012), capítulo «Insert, Delete and Update».
+        <strong>Porquê:</strong> é o capítulo que trata exatamente o assunto desta lição, e com números de outros motores além do Postgres. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Livro</strong> — Egor Rogov, <em>PostgreSQL 14 Internals</em>, <strong>Parte V — <em>Types of Indexes</em></strong> (Hash, B-Tree, GiST, SP-GiST, GIN, BRIN). PDF gratuito.
+        <strong>Porquê:</strong> é literalmente o tópico que este curso declarou não cobrir. Se os índices não-B-tree te fizerem falta, começa aqui. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
       <li><strong>Todas as medições</strong> (182 ms contra 1232 ms; 13 MB contra 16 MB; 384 kB contra 6904 kB;
         11,8 ms contra 31,4 ms) foram corridas em <strong>PostgreSQL 17.11</strong> sobre
         <a href="preparar.sql">preparar.sql</a>. O erro de <code>IMMUTABLE</code> foi encontrado a escrever esta
@@ -847,7 +851,7 @@ DROP TABLE t_sem, t_com;</code></pre>
 
     <footer class="rodape">
       <p><a href="05-ler-o-explain.html">← 5 · Ler o EXPLAIN</a> ·
-      <a href="index.html">↑ Índice do curso</a> ·
+      <a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> ·
       <a href="teste.html">Teste de domínio →</a></p>
     </footer>
   </main>

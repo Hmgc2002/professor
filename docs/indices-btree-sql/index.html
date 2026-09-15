@@ -585,6 +585,8 @@ psql -d treino_indices -f preparar.sql</code></pre>
 
     <h2 id="fim">No fim do tópico</h2>
     <ul>
+      <li><a href="bibliografia.html">Bibliografia</a> — o que ler a seguir, ordenado por onde começar, com
+      o porquê e o que saltar em cada entrada.</li>
       <li><a href="folha.html">Folha de consulta</a> — imprimível em A4, só o que se consulta.</li>
       <li><a href="teste.html">Teste de domínio</a> — intercalado, sem soluções à vista. A entrega vai para correção.</li>
       <li><a href="flashcards.csv">Flashcards</a> (CSV para o Anki, <code>frente;verso;etiqueta</code>).</li>
@@ -638,6 +640,19 @@ psql -d treino_indices -f preparar.sql</code></pre>
       <li><strong>A lição 2 não explicava porque é que <code>Heap Fetches</code> era 40 para 20 linhas.</strong>
       Ficava o número sem o mecanismo (duas versões por linha, à espera de <code>VACUUM</code>). Acrescentado.</li>
     </ul>
+
+    <div class="caixa correcao">
+      <span class="titulo">⚠️ Corrigido a 2026-09-15 — faltava metade da secção «Fontes»</span>
+      <p>O <code>PROCESSO.md</code> exige «<strong>livros</strong>/cursos/vídeos com o porquê de cada um e o que
+      saltar». Este curso foi publicado com 18 entradas de documentação oficial, 2 sítios e 1 ferramenta —
+      e <strong>zero livros, zero artigos originais</strong>.</p>
+      <p>Porque é que a Fase 2 não apanhou: a lista de perguntas dela tinha «que afirmação escrevi de memória?»
+      mas não tinha «<em>que exigência do processo é que eu não cumpri?</em>». Passou a ter.</p>
+      <p>Está corrigido: cada lição ganhou o livro ou o artigo que a continua, e o tópico ganhou uma
+      <a href="bibliografia.html">bibliografia</a> com os dois artigos originais das B-trees (Bayer &amp;
+      McCreight 1972; Comer 1979) e quatro livros, todos com referência conferida contra o editor ou o DOI.
+      Dois ISBN que não consegui confirmar <strong>não foram escritos</strong>, e a bibliografia diz isso.</p>
+    </div>
 
     <h3>Fase 3 — Validar</h3>
     <p>Resolvi todos os exercícios e o teste do zero, corri todo o código, e conferi cada afirmação factual contra

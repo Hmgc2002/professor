@@ -926,6 +926,8 @@ EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM encomendas WHERE estado = 'cancelada';
         <a href="https://www.postgresql.org/docs/17/runtime-config-query.html#RUNTIME-CONFIG-QUERY-CONSTANTS">runtime-config-query.html</a>
         — <code>random_page_cost</code> e a nota sobre armazenamento sem partes móveis.
         <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Livro</strong> — Markus Winand, <em>SQL Performance Explained</em> (2012), capítulos «The Where Clause» e «Testing and Scalability». Gratuito em <a href="https://use-the-index-luke.com/">use-the-index-luke.com</a>.
+        <strong>Porquê:</strong> o segundo trata precisamente do erro que esta lição corrige — medir em vez de citar percentagens — e mostra como os resultados mudam com o volume de dados. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
       <li><strong>Todas as medições desta lição</strong> — incluindo o limiar de 50%/52%, o erro de estimativa de
         448× e o comportamento com <code>random_page_cost=1.1</code> — foram corridas em
         <strong>PostgreSQL 17.11</strong> sobre <a href="preparar.sql">preparar.sql</a>.
@@ -934,7 +936,7 @@ EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM encomendas WHERE estado = 'cancelada';
 
     <footer class="rodape">
       <p><a href="02-do-indice-a-linha.html">← 2 · Do índice à linha</a> ·
-      <a href="index.html">↑ Índice do curso</a> ·
+      <a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> ·
       <a href="04-indices-compostos.html">4 · Índices compostos →</a></p>
     </footer>
   </main>

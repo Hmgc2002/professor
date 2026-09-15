@@ -94,10 +94,13 @@ Por esta ordem e com estes títulos:
 | 8 | **Quiz** | 5–10 perguntas, correção imediata, e explicação de **cada** opção errada — não só da certa |
 | 9 | **Explica por palavras tuas** | Pergunta aberta (técnica de Feynman). Vai para a entrega |
 | 10 | **Resumo** | O mínimo a reter, em 5 linhas |
-| 11 | **Fontes** | 🌐 *Verificado a AAAA-MM-DD*. Primárias sempre que existam. Livros/cursos/vídeos com o **porquê** de cada um e **o que saltar** |
+| 11 | **Fontes** | 🌐 *Verificado a AAAA-MM-DD*. Primárias sempre que existam. 🔴 **Pelo menos uma fonte que não seja documentação** — livro, artigo original, curso — com o **porquê** e **o que saltar**. Se o tópico não tiver nenhuma, escreve-se *que se procurou e não se encontrou*, que é informação diferente de silêncio |
 
 ### No fim do tópico
 
+- **`bibliografia.html`** — o percurso de leitura, ordenado por **por onde começar** e não por autor. Cada
+  entrada com o **porquê**, **o que saltar**, e a distinção primária/secundária. 🔴 Uma referência que não
+  abriste não se escreve, e um ISBN que não confirmaste **não se cita** — diz-se que não se confirmou.
 - **`folha.html`** — imprimível (A4, `@media print`), só o que se consulta.
 - **`teste.html`** — teste de domínio **intercalado** (perguntas fora da ordem das lições),
   sem soluções à vista; a entrega vai para correção.
@@ -193,3 +196,5 @@ a quinta repetição do mesmo padrão. Acrescenta-se no fim, nunca se reescreve 
 | 2026-09-15 | (infraestrutura) | O tidy 5.8 acusou `<ol type="a">` como inválido. É válido (especificação WHATWG, «The ol element») | Filtro no `validar.sh` com a razão e a fonte escritas ao lado, como o do `<title>` em SVG. Não se tirou o atributo das páginas para calar o aviso |
 | 2026-09-15 | abstracts-e-resumos | O axe passou a 400 px, mas quatro diagramas tinham texto cortado, sobreposto ou desatualizado — coisa que o axe não mede | Tirei capturas das figuras a 400 px nos dois temas (puppeteer) e corrigi. ⚠️ Não há passo do validador que o faça: por agora é um passo manual da Fase 3, e fica por decidir se entra no `validar.sh` |
 | 2026-09-15 | abstracts-e-resumos | Nos quizzes, a opção certa estava na b em 31 de 54 perguntas | Posições redistribuídas. ⚠️ Nenhum validador conta posições; o tópico piloto não foi verificado quanto a isto |
+| 2026-09-15 | indices-btree-sql | O curso foi publicado com a secção «Fontes» a cumprir metade do que o processo exige: 18 entradas de documentação, 2 sítios, 1 ferramenta — e **zero livros, zero artigos originais**. A Fase 2 não apanhou porque a lista de perguntas dela olhava para o *conteúdo* («que afirmação escrevi de memória?») e nunca para o *processo*. Um segundo tópico, criado noutra sessão, tinha bibliografia muito melhor — portanto a falha foi de execução, não do método, e é exatamente por isso que tinha de passar a ser uma verificação explícita em vez de depender de quem executa | A Fase 2 ganhou a pergunta «**que exigência do `PROCESSO.md` é que eu não cumpri?**», com uma lista de verificação a percorrer. A secção 11 passou a exigir 🔴 pelo menos uma fonte que não seja documentação, ou a declaração de que se procurou e não há. Os tópicos passaram a ter `bibliografia.html` |
+

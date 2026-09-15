@@ -25,6 +25,24 @@ erradas, dois flashcards partidos, quatro diagramas ilegíveis a 400 px e respos
 - `validar.py`: novo `ver_amostras`, que confere as contagens de palavras e caracteres que as páginas afirmam.
 - `validar.sh`: filtro justificado para um falso positivo do tidy (`<ol type>`) e verificação das colunas dos flashcards.
 
+## 2026-09-15 — Bibliografia
+
+**Novo**
+
+- `bibliografia.html` em cada tópico: percurso de leitura ordenado por **por onde começar**, com o
+  porquê e o que saltar em cada entrada.
+- O tópico de índices ganhou os dois **artigos originais** das B-trees (Bayer & McCreight 1972;
+  Comer 1979) e quatro livros — Winand, Rogov, Petrov, Kleppmann — cada um ligado à lição que continua.
+
+**Corrigido**
+
+- O curso de índices tinha sido publicado com **zero livros e zero artigos** nas fontes, contra o que
+  o `PROCESSO.md` exige. A Fase 2 não apanhou porque só olhava para o conteúdo, nunca para o processo.
+- A Fase 2 do `/aprender` passou a ter uma **lista de verificação contra o `PROCESSO.md`**, e o
+  `/aprofundar` uma oitava pergunta sobre as fontes.
+- O `validar.sh` passou a exigir `bibliografia.html` — se o processo exige e o validador não verifica,
+  a exigência é decorativa.
+
 ## 2026-09-15 — A pesquisa passou a procurar dentro das lições
 
 **Corrigido**

@@ -89,7 +89,7 @@ passo "4/5  cada tópico com folha, teste, flashcards e calendário"
 for d in docs/*/; do
   [ -e "$d/index.html" ] || continue
   nome=$(basename "$d")
-  for f in folha.html teste.html flashcards.csv revisao.ics; do
+  for f in bibliografia.html folha.html teste.html flashcards.csv revisao.ics; do
     if [ ! -e "$d$f" ]; then
       if grep -q "em construção" "$d/index.html" 2>/dev/null; then
         echo "${A}aviso${Z}  $nome: falta $f (tópico marcado 🚧 em construção)"

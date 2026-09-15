@@ -924,6 +924,10 @@ Execution Time: 0.075 ms</code></pre>
         ao motor. <strong>O que saltar:</strong> os apartados específicos de Oracle e MySQL, se só usas Postgres.
         Fonte secundária — o comportamento concreto confirma-se sempre na documentação do teu motor.
         <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Artigo original</strong> — Bayer, R., &amp; McCreight, E. (1972). <em>Organization and maintenance of large ordered indexes.</em> Acta Informatica, 1(3), 173–189. <a href="https://doi.org/10.1007/BF00288683">doi:10.1007/BF00288683</a>
+        <strong>Porquê:</strong> é o artigo que inventou a B-tree, e parte exatamente do mesmo ponto que esta lição — o custo é dominado pelos acessos a páginas, não pelas comparações. <strong>O que saltar:</strong> as demonstrações formais, à primeira leitura. <span class="verificado">🌐 Referência verificada a 2026-09-15</span></li>
+      <li><strong>Livro</strong> — Alex Petrov, <em>Database Internals</em> (O'Reilly, 2019), capítulos 2 (<em>B-Tree Basics</em>) e 4 (<em>Implementing B-Trees</em>).
+        <strong>Porquê:</strong> é a resposta a «e se eu quisesse escrever uma?». <strong>O que saltar:</strong> a Parte II inteira, sobre sistemas distribuídos. <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
       <li><strong>Todos os números desta lição</strong> foram medidos em <strong>PostgreSQL 17.11</strong> sobre a
         tabela de <a href="preparar.sql">preparar.sql</a>. Na tua máquina o fanout e as contagens de páginas podem
         diferir um pouco; a estrutura e as ordens de grandeza não.
@@ -932,7 +936,7 @@ Execution Time: 0.075 ms</code></pre>
 
     <footer class="rodape">
       <p><a href="00-paginas-e-custo.html">← 0 · Páginas e custo</a> ·
-      <a href="index.html">↑ Índice do curso</a> ·
+      <a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> ·
       <a href="02-do-indice-a-linha.html">2 · Do índice à linha →</a></p>
     </footer>
   </main>

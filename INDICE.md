@@ -102,6 +102,15 @@ o que já está escrito.
   - [10. Resumo](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#resumo)
   - [11. Fontes](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#fontes)
 
+## `docs/abstracts-e-resumos/bibliografia.html` — Bibliografia — Abstracts e resumos
+
+  - [Por onde começar](docs/abstracts-e-resumos/bibliografia.html#percurso)
+  - [Normas](docs/abstracts-e-resumos/bibliografia.html#normas)
+  - [Artigos](docs/abstracts-e-resumos/bibliografia.html#artigos)
+  - [Guias de prática](docs/abstracts-e-resumos/bibliografia.html#pratica)
+  - [O que ler depois de cada lição](docs/abstracts-e-resumos/bibliografia.html#por-licao)
+  - [Como isto foi verificado](docs/abstracts-e-resumos/bibliografia.html#verificacao)
+
 ## `docs/abstracts-e-resumos/folha.html` — Folha de consulta — Abstracts e resumos técnicos
 
   - [Antes de escrever](docs/abstracts-e-resumos/folha.html#antes)
@@ -232,6 +241,16 @@ o que já está escrito.
   - [9. Explica por palavras tuas](docs/indices-btree-sql/06-o-custo-do-outro-lado.html#feynman)
   - [10. Resumo](docs/indices-btree-sql/06-o-custo-do-outro-lado.html#resumo)
   - [11. Fontes](docs/indices-btree-sql/06-o-custo-do-outro-lado.html#fontes)
+
+## `docs/indices-btree-sql/bibliografia.html` — Bibliografia — Índices B-tree em SQL
+
+  - [Por onde começar](docs/indices-btree-sql/bibliografia.html#percurso)
+  - [Fontes primárias](docs/indices-btree-sql/bibliografia.html#primarias)
+  - [Os artigos originais](docs/indices-btree-sql/bibliografia.html#artigos)
+  - [Livros](docs/indices-btree-sql/bibliografia.html#livros)
+  - [O que ler depois de cada lição](docs/indices-btree-sql/bibliografia.html#por-licao)
+  - [O que não está aqui, e porquê](docs/indices-btree-sql/bibliografia.html#fora)
+  - [Como isto foi verificado](docs/indices-btree-sql/bibliografia.html#verificacao)
 
 ## `docs/indices-btree-sql/folha.html` — Folha de consulta — Índices B-tree em SQL
 
