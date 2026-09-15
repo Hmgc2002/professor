@@ -18,7 +18,29 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import process from "node:process";
+import { existsSync } from "node:fs";
 import puppeteer from "puppeteer";
+
+// Que Chrome usar, por ordem de preferência.
+//
+// Porquê esta ordem: o Chrome que o puppeteer descarrega vem SEM ASSINATURA, e
+// no macOS ARM o kernel mata binários arm64 não assinados (SIGKILL, que chega
+// aqui como "spawn Unknown system error -88"). Assiná-lo à mão com
+// `codesign --deep` falha com "main executable failed strict validation",
+// porque o bundle do Chrome tem frameworks aninhados que o --deep assina pela
+// ordem errada. Um Chrome instalado normalmente já vem assinado e notarizado
+// pela Google, e resolve o problema sem tocar em nada.
+function encontrarChrome() {
+  if (process.env.CHROME_PARA_VALIDAR) return process.env.CHROME_PARA_VALIDAR;
+  const candidatos = [
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+    "/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser",
+  ];
+  for (const c of candidatos) if (existsSync(c)) return c;
+  return undefined;   // cai para o que o puppeteer descarregou
+}
 
 const require = createRequire(import.meta.url);
 const axeFonte = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
@@ -36,8 +58,14 @@ const cor = process.stdout.isTTY
   : { v: "", a: "", ok: "", f: "", z: "" };
 
 let navegador;
+const caminhoChrome = encontrarChrome();
+if (caminhoChrome) console.log(`${cor.f}browser: ${caminhoChrome}${cor.z}`);
 try {
-  navegador = await puppeteer.launch({ headless: "new", args: ["--no-sandbox"] });
+  navegador = await puppeteer.launch({
+    headless: "new",
+    args: ["--no-sandbox"],
+    ...(caminhoChrome ? { executablePath: caminhoChrome } : {}),
+  });
 } catch (e) {
   // Código 3 = "não cheguei a correr", distinto de 1 = "corri e encontrei violações".
   // Tratar os dois como o mesmo faz o relatório mentir em ambas as direções.

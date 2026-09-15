@@ -43,9 +43,12 @@ Verifica âncoras e ligações, HTML bem formado (`tidy`), acessibilidade WCAG A
 400 px (`axe-core`), soluções fechadas por defeito, quiz com explicação em cada opção, e regenera
 o `INDICE.md`.
 
-⚠️ **No macOS ARM o passo do `axe-core` pode não correr:** o Chrome que o puppeteer descarrega vem
-sem assinatura e o sistema mata-o. O `validar.sh` avisa, diz o comando que resolve, e — desde a
-primeira vez que isto aconteceu — **deixa de dizer «tudo limpo» quando um passo não correu**.
+⚠️ **No macOS ARM o passo do `axe-core` precisa de um Chrome já instalado.** O que o puppeteer
+descarrega vem sem assinatura e o kernel mata-o; assiná-lo com `codesign --deep` *não* resolve
+(«main executable failed strict validation»). A correção é `brew install --cask google-chrome` —
+o `validar_a11y.mjs` encontra-o sozinho, ou aponta-se com `CHROME_PARA_VALIDAR=…`. O `validar.sh`
+avisa e — desde a primeira vez que isto aconteceu — **deixa de dizer «tudo limpo» quando um passo
+não correu**.
 Nesta sessão a acessibilidade foi validada à mão, com o `axe-core` injetado no browser:
 12 páginas × 2 temas × 2 larguras = 48 combinações, **zero violações**.
 

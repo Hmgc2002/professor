@@ -68,9 +68,13 @@ else
     falhou=1
   elif [ $estado -ne 0 ]; then
     echo "${A}o axe não chegou a correr (código $estado).${Z}"
-    echo "${A}Causa conhecida no macOS ARM: o Chrome do puppeteer vem sem assinatura e o sistema mata-o (SIGKILL).${Z}"
-    echo "${A}Correção, uma vez só — LÊ antes de correr, é uma assinatura ad-hoc de um binário descarregado:${Z}"
-    echo "${C}  codesign --force --deep --sign - \"\$(node -e 'console.log(require(\"puppeteer\").executablePath())' | sed 's|/Contents/MacOS/.*||')\"${Z}"
+    echo "${A}Causa conhecida no macOS ARM: o Chrome que o puppeteer descarrega vem SEM assinatura,${Z}"
+    echo "${A}e o kernel mata binários arm64 não assinados. Assiná-lo com 'codesign --deep' NÃO resolve${Z}"
+    echo "${A}— dá 'main executable failed strict validation', porque o bundle tem frameworks aninhados.${Z}"
+    echo "${A}A correção que funciona é usar um Chrome já assinado:${Z}"
+    echo "${C}  brew install --cask google-chrome${Z}"
+    echo "${A}O validar_a11y.mjs encontra-o sozinho. Para apontar para outro:${Z}"
+    echo "${C}  CHROME_PARA_VALIDAR=/caminho/para/chrome ./validar.sh${Z}"
     echo "${A}🔴 A acessibilidade FICOU POR VALIDAR.${Z}"
     por_validar="acessibilidade (o browser não arrancou)"
   fi
