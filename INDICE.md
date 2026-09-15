@@ -108,6 +108,7 @@ o que já está escrito.
   - [Normas](docs/abstracts-e-resumos/bibliografia.html#normas)
   - [Artigos](docs/abstracts-e-resumos/bibliografia.html#artigos)
   - [Guias de prática](docs/abstracts-e-resumos/bibliografia.html#pratica)
+  - [Livros e cursos](docs/abstracts-e-resumos/bibliografia.html#livros)
   - [O que ler depois de cada lição](docs/abstracts-e-resumos/bibliografia.html#por-licao)
   - [Como isto foi verificado](docs/abstracts-e-resumos/bibliografia.html#verificacao)
 

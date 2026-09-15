@@ -29,6 +29,12 @@ erradas, dois flashcards partidos, quatro diagramas ilegíveis a 400 px e respos
 
 **Novo**
 
+- O tópico **abstracts e resumos** ganhou quatro fontes que não vinham das lições, verificadas contra a
+  página do editor: Schimel, *Writing Science* (OUP, 2012); Pinker, *The Sense of Style* (Viking, 2014),
+  cap. 3; Williams, *Style* (com o aviso sobre as várias edições em circulação); e o curso gratuito de
+  escrita técnica da Google — este último com a nota de que **não cobre resumos**, o que confirmei na
+  página do curso.
+
 - `bibliografia.html` em cada tópico: percurso de leitura ordenado por **por onde começar**, com o
   porquê e o que saltar em cada entrada.
 - O tópico de índices ganhou os dois **artigos originais** das B-trees (Bayer & McCreight 1972;
