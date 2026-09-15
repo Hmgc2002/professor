@@ -1,0 +1,1 @@
+Houve um problema na segunda-feira com a pesquisa, que ficou lenta. Depois de muito trabalho da equipa, que olhou para a base de dados, os logs e o painel, percebeu-se que tinha a ver com a cache. A situação foi resolvida e a pesquisa ficou 23 vezes mais rápida, e 30% dos pedidos deixaram de falhar. Vamos ter mais cuidado no futuro.

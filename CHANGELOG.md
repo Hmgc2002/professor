@@ -3,6 +3,28 @@
 O formato é uma entrada por sessão de trabalho, com data. O que muda o que eu
 consigo aprender fica no topo da entrada; o que muda só a mecânica fica no fim.
 
+## 2026-09-15 — Abstracts e resumos técnicos: um curso sobre resumir para quem decide
+
+**Novo**
+
+- Tópico **Abstracts e resumos técnicos** (`docs/abstracts-e-resumos/`), a partir do pedido com a página da Wikipédia
+  «Abstract (summary)» e do diagnóstico em `topicos/abstracts-e-resumos/DIAGNOSTICO.md`.
+- Sete lições: o mecanismo de qualquer resumo (apagar, generalizar, construir — Kintsch & van Dijk) contra o método de
+  Luhn a correr; informativo e indicativo; triagem de artigos; descrição de PR e título de commit; RFC, PEP e README;
+  post-mortem; e diagnóstico intercalado de resumos maus.
+- Folha imprimível, teste de domínio intercalado, 40 flashcards, calendário de revisão, projeto.
+- Dois scripts com teste embutido: `luhn.py` (resumo extrativo de 1958) e `conferir_numeros.py` (a metade automatizável
+  da definição de abstract deficiente de Pitkin et al.), e três textos para os exercícios.
+
+**O que as fases apanharam** — está por extenso na nota das fases do tópico: nove erros da Fase 1 encontrados a reler
+como aluno (afirmações sem fonte, uma paráfrase com um acrescento meu, termos por definir), e na Fase 3 cinco contagens
+erradas, dois flashcards partidos, quatro diagramas ilegíveis a 400 px e respostas certas concentradas na opção b.
+
+**Mecânica**
+
+- `validar.py`: novo `ver_amostras`, que confere as contagens de palavras e caracteres que as páginas afirmam.
+- `validar.sh`: filtro justificado para um falso positivo do tidy (`<ol type>`) e verificação das colunas dos flashcards.
+
 ## 2026-09-15 — A pesquisa passou a procurar dentro das lições
 
 **Corrigido**

@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5 · O resumo de um post-mortem — Abstracts e resumos técnicos</title>
+<meta name="description" content="Lição 5: resumir um incidente para vários leitores ao mesmo tempo — duração com fronteiras, impacto medido ou declarado como por medir, causa sem culpa, ações.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/abstracts-e-resumos/05-post-mortem.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">Abstracts e resumos técnicos</a> <span aria-hidden="true">›</span> lição 5</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+<p class="etiqueta extensao">Lição 5 · extensão</p>
+    <h1>O resumo de um post-mortem</h1>
+    <p class="subtitulo">O resumo com mais leitores ao mesmo tempo — quem dirige, as equipas afetadas, quem vai de serviço para
+    a semana — e com uma tentação própria: construir uma causa que aponta para uma pessoa.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>Dado o relato de um incidente, escreves o resumo de um post-mortem com <strong>no máximo 70 palavras</strong> que diz o
+    que aconteceu, de quando a quando, o impacto (medido, ou declarado como por medir), a causa sistémica e as ações — e
+    reescreve-lo para um segundo leitor <strong>sem acrescentar factos nem atribuir culpa</strong>.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+<ol>
+  <li>Na lição 0, o mesmo incidente deu dois resumos diferentes. O que mudou de um para o outro?
+    <details class="solucao"><summary>Resposta</summary><p>O leitor e a decisão: a engenharia queria saber o que muda no trabalho dela; o suporte queria saber o que dizer aos clientes. O que se apagou e o que se generalizou mudou com isso.</p></details>
+  </li>
+  <li>O que é um facto acrescentado, e em que difere de uma construção?
+    <details class="solucao"><summary>Resposta</summary><p>Construir é afirmar um facto global que as frases do texto sustentam (condições, componentes, consequências). Um facto acrescentado não tem essas frases por trás — como «não houve perda de dados» num texto que não fala de dados.</p></details>
+  </li>
+  <li>Segundo a norma NISO, em que ordem vão os elementos de um abstract informativo?
+    <details class="solucao"><summary>Resposta</summary><p>Propósito, metodologia, resultados e conclusões — mas a norma admite que, para alguns públicos, é útil pôr primeiro os resultados e as conclusões.</p></details>
+  </li>
+</ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>Para que serve um post-mortem</h3>
+    <p>O livro de SRE da Google define o post-mortem como o registo escrito de um incidente, do seu impacto, das ações para o mitigar
+    ou resolver, das causas, e das ações de seguimento para evitar que se repita. Repara que a própria definição já é a lista do que o
+    resumo tem de conter. E descreve a cultura <dfn>blameless</dfn> (sem culpa): o foco está nas razões
+    <strong>sistémicas</strong> pelas quais alguém tinha informação incompleta ou errada, partindo do princípio de que toda a gente
+    agiu com boa intenção e com a informação que tinha. O mesmo capítulo recomenda definir <strong>antes</strong> de um incidente o
+    que obriga a um post-mortem — por exemplo, indisponibilidade visível acima de um limiar, perda de dados, intervenção manual de
+    quem está de serviço, ou uma falha que a monitorização não detetou.</p>
+
+    <h3>O que o exemplo do livro faz no resumo</h3>
+    <p>O livro inclui um post-mortem de exemplo — <strong>fictício</strong>, e declaradamente humorístico (um soneto de Shakespeare
+    encontrado num DeLorean). A estrutura é a que interessa:</p>
+    <ul>
+      <li>um <strong>resumo</strong> de uma frase: que serviço, quanto tempo esteve em baixo, e em que contexto;</li>
+      <li>o <strong>impacto</strong> à parte, com um número <strong>marcado como estimativa</strong> e com o que <em>não</em> foi afetado;</li>
+      <li>as <strong>causas</strong> numa frase que descreve o comportamento do sistema e não nomeia ninguém;</li>
+      <li>as <strong>ações</strong> numa tabela com tipo, responsável e referência;</li>
+      <li>lições aprendidas (o que correu bem, o que correu mal, onde houve sorte) e a <strong>cronologia</strong>, em secções próprias.</li>
+    </ul>
+    <p>Repara onde fica a cronologia: fora do resumo. A cronologia é a microestrutura — responde a «o que aconteceu a que horas».
+    O resumo responde a «quão grave, porquê, o que muda».</p>
+
+    <h3>Muitos leitores: o resumo serve a interseção</h3>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Leitores de um post-mortem e as suas decisões, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Leitor</th><th>Decide</th><th>Precisa do resumo para</th></tr></thead>
+        <tbody>
+          <tr><td>Quem dirige</td><td>É grave? Está tratado?</td><td>Duração, impacto, ações</td></tr>
+          <tr><td>Equipas vizinhas</td><td>Afeta-me? Tenho de fazer algo?</td><td>Causa (é algo que também temos?), ações que lhes tocam</td></tr>
+          <tr><td>Quem vai de serviço</td><td>Reconheço isto se voltar?</td><td>Sintoma, causa, o que resolveu</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Um resumo para os três tem de ter os cinco elementos: <strong>o quê · de quando a quando · impacto · causa · ações</strong>.
+    O pormenor de cada um vai para a sua secção. Aqui os resultados vêm primeiro, como a norma NISO admite para alguns públicos:
+    a pergunta mais comum é «quão grave foi», e é por aí que se começa.</p>
+
+    <figure>
+      <svg viewBox="0 0 520 170" role="img" aria-labelledby="t-l5-dur d-l5-dur">
+        <title id="t-l5-dur">Uma linha do tempo de incidente com quatro marcas diferentes</title>
+        <desc id="d-l5-dur">Uma linha horizontal com quatro marcas: início, que muitas vezes não se sabe; deteção; mitigação; e recuperação. Por baixo, três durações diferentes: do início à recuperação é o impacto; da deteção à mitigação é a resposta; do início à deteção é o tempo às cegas.</desc>
+        <path class="svg-traco" d="M20 60 H500"/>
+        <circle cx="75" cy="60" r="6" class="svg-realce"/>
+        <circle cx="200" cy="60" r="6" class="svg-caixa"/>
+        <circle cx="360" cy="60" r="6" class="svg-caixa"/>
+        <circle cx="450" cy="60" r="6" class="svg-caixa"/>
+        <text class="svg-texto" x="75" y="40" text-anchor="middle">início</text>
+        <text class="svg-suave" x="75" y="24" text-anchor="middle">(muitas vezes, ?)</text>
+        <text class="svg-texto" x="200" y="40" text-anchor="middle">deteção</text>
+        <text class="svg-texto" x="360" y="40" text-anchor="middle">mitigação</text>
+        <text class="svg-texto" x="450" y="40" text-anchor="middle">recuperação</text>
+        <path class="svg-traco" d="M75 88 H450"/>
+        <text class="svg-suave" x="262" y="104" text-anchor="middle">impacto: início → recuperação</text>
+        <path class="svg-traco" d="M200 120 H360"/>
+        <text class="svg-suave" x="280" y="136" text-anchor="middle">resposta: deteção → mitigação</text>
+        <path class="svg-traco" d="M75 152 H200"/>
+        <text class="svg-suave" x="137" y="166" text-anchor="middle">às cegas: início → deteção</text>
+      </svg>
+      <figcaption>«Esteve em baixo 47 minutos» só é informativo se disser entre que duas marcas.</figcaption>
+    </figure>
+
+    <h3>Culpa é uma construção — quase sempre sem base</h3>
+    <p>Na lição 0, construir era afirmar um facto global que as frases sustentam. «A pessoa de serviço demorou a perceber» parece uma
+    construção a partir da cronologia. Mas o facto global que a cronologia sustenta é outro — no incidente do certificado do exercício E2, por exemplo, «passaram
+    29 minutos entre a expiração e o primeiro aviso». <em>Porque passaram</em> — um alarme mal encaminhado, um painel que não mostrava a métrica — é o que o post-mortem tem de
+    descobrir. Escrever a culpa no resumo é <strong>parar a construção uma camada acima do que o relato sustenta</strong>, e na
+    pessoa em vez de no sistema. Além de contrariar a cultura blameless, é um resumo pior: nenhum leitor consegue agir sobre «alguém
+    demorou».</p>
+
+    <h3>Números que não se inventam</h3>
+    <p>Duas regras que decorrem das lições anteriores: se o impacto não foi medido, <strong>diz «por medir»</strong> — o exemplo do livro
+    marca a sua estimativa como estimativa; e se o texto diz «desceu para 180 ms», não escrevas «voltou ao normal»: que 180 ms seja o
+    normal é um facto que o relato não contém.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>O <a href="incidente.txt">relato do incidente</a> da lição 0, agora para o resumo do post-mortem, lido por toda a engenharia e por quem dirige.</p>
+
+    <h3>Passo 1 — Os cinco elementos, antes de escrever</h3>
+    <p>O quê: pesquisa de encomendas lenta. Quando: segunda de manhã. Impacto: ? Causa: job alterado esvaziava a cache. Ações:
+    revisão de alterações a jobs, alarme de taxa de acertos. <em>Porquê listar primeiro:</em> num relato cronológico, os elementos
+    estão espalhados por doze frases, e a lista mostra logo o que falta — aqui, o impacto.</p>
+
+    <h3>Passo 2 — As fronteiras da duração</h3>
+    <p>O início real <strong>não está no relato</strong>. O que está: as primeiras queixas «pouco depois das 9h» (deteção), a reversão às
+    11h40 (mitigação) e a descida do p95 «em dez minutos» (recuperação por volta das 11h50). Escrever «das 9h às 11h50» afirmava que a
+    lentidão começou às 9h — não sabemos. Escreve-se o que há: quando chegaram as queixas.</p>
+
+    <h3>Passo 3 — O impacto</h3>
+    <p>O relato não tem número de clientes afetados nem de pedidos lentos. Tem o p95 antes e depois da correção. Fica o p95, e fica
+    <strong>«clientes afetados: por medir»</strong> — uma frase honesta que ainda diz a quem dirige que há uma pergunta em aberto.</p>
+
+    <h3>Passo 4 — A causa, sem pessoa</h3>
+    <p>«Um job alterado na sexta-feira para correr de hora a hora esvaziava a cache de pesquisa.» O sujeito é o job, não quem o alterou.
+    E a razão sistémica fica implícita na ação («revisão de alterações a jobs»): as alterações a jobs não passavam por revisão.</p>
+
+    <h3>Passo 5 — Escrever e conferir contra o texto</h3>
+    <blockquote class="amostra" data-palavras="69">
+      <p>Na segunda-feira de manhã, a pesquisa de encomendas esteve lenta; as primeiras queixas chegaram pouco depois das 9h. Causa: um
+      job alterado na sexta-feira para correr de hora a hora esvaziava a cache de pesquisa. A reversão, às 11h40, baixou o p95 de 4,2 s
+      para 180 ms em dez minutos. Ações: revisão de alterações a jobs e alarme na taxa de acertos da cache. Clientes afetados: por medir.</p>
+    </blockquote>
+    <p>69 palavras. Cada número está no relato; «voltou ao normal» não aparece; ninguém é nomeado.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <div class="exercicio">
+      <h3>O mesmo incidente, para quem coordena o suporte</h3>
+      <p><strong>Decisão do leitor:</strong> dada — o que dizer a clientes, e se deve preparar a equipa para uma repetição.</p>
+      <p><strong>O que se apaga do resumo de cima:</strong> ______.</p>
+      <p><strong>A janela temporal, sem inventar o início:</strong> ______.</p>
+      <p><strong>A causa, dita a quem não conhece caches nem jobs:</strong> ______.</p>
+      <p><strong>A frase sobre a repetição, sem prometer o que o relato não diz:</strong> ______.</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Apaga-se:</strong> o p95 em números, «cache», «job», e as ações técnicas em pormenor.</p>
+        <p><strong>Janela:</strong> «desde, pelo menos, pouco depois das 9h até cerca das 11h50». O «pelo menos» é o que impede de afirmar o início.</p>
+        <p><strong>Causa:</strong> «uma alteração de configuração interna, já revertida» — generalização legítima.</p>
+        <p><strong>Repetição:</strong> «foram decididas medidas para que o mesmo tipo de alteração seja revisto antes de entrar». ⚠️ Não
+        «não vai voltar a acontecer»: o relato diz que se decidiram medidas, não que elas garantem o que quer que seja.</p>
+        <blockquote class="amostra" data-palavras="43"><p>Na segunda-feira, desde, pelo menos, pouco depois das 9h até cerca das 11h50, a
+        pesquisa de encomendas esteve lenta por causa de uma alteração de configuração interna, já revertida. Foram decididas medidas para
+        que esse tipo de alteração seja revisto antes de entrar.</p></blockquote>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <p>⚠️ O primeiro é o que o livro de SRE combate explicitamente; os outros decorrem do mecanismo e do exemplo do livro, não de frequências medidas.</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr><td>A causa é quem errou</td><td>O sujeito da frase da causa é uma pessoa</td><td>A causa é a razão sistémica pela qual a pessoa tinha a informação que tinha. Sobre «alguém errou» ninguém consegue agir</td></tr>
+          <tr><td>Duração é um número</td><td>«Em baixo 47 minutos», sem fronteiras</td><td>Diz entre que marcas: início, deteção, mitigação ou recuperação. O início muitas vezes não se sabe — e diz-se</td></tr>
+          <tr><td>Impacto sem medição fica de fora</td><td>O resumo não fala de impacto</td><td>Diz «por medir», ou marca a estimativa como estimativa. A ausência é informação para quem dirige</td></tr>
+          <tr><td>O resumo é a cronologia</td><td>«Às 9h… às 10h15… às 11h40…»</td><td>A cronologia tem secção própria. O resumo diz quão grave, porquê e o que muda</td></tr>
+          <tr><td>Ações são intenções</td><td>«Vamos ter mais cuidado»</td><td>Uma ação é algo que se verifica que foi feito. O exemplo do livro dá a cada uma um tipo, um responsável e uma referência</td></tr>
+          <tr><td>«Resolvido» é o normal</td><td>«O p95 voltou ao normal (180 ms)»</td><td>Se o relato não diz qual é o normal, não se afirma. Diz o número</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — Culpa ou sistema?</h3>
+      <p>Diz se cada frase atribui culpa ou descreve o sistema. Reescreve as que atribuem culpa sem inventar a razão.</p>
+      <ol type="a">
+        <li>«A pessoa de serviço esqueceu-se de renovar o certificado.»</li>
+        <li>«O alarme de expiração enviava para um canal de chat arquivado.»</li>
+        <li>«A equipa de plataforma arquivou o canal sem avisar ninguém.»</li>
+        <li>«A pessoa de serviço demorou 18 minutos a renovar o certificado depois do aviso.»</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <ol type="a">
+          <li><strong>Culpa.</strong> O facto sistémico possível: «a renovação do certificado dependia de uma ação manual». Se o relato disser
+          porquê (a renovação automática estava desativada), diz isso; se não disser, fica só a dependência.</li>
+          <li><strong>Sistema.</strong> O sujeito é o alarme, e a frase diz exatamente onde falhou.</li>
+          <li><strong>Culpa, disfarçada de facto.</strong> «Sem avisar ninguém» é um juízo. O facto: «o canal do alarme foi arquivado e o alarme
+          não foi reencaminhado». Se souberes <em>porquê</em> (por exemplo, o destino dos alarmes não fazia parte do processo de arquivar canais),
+          acrescenta-o; se não souberes, não inventes o processo.</li>
+          <li><strong>Culpa, com um número verdadeiro.</strong> «Passaram 18 minutos entre o aviso e a renovação.» O porquê dos 18 minutos é uma
+          pergunta para o post-mortem responder, não uma acusação para o resumo fazer.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — Outro incidente</h3>
+      <p>Relato (fictício): na quarta-feira às 14h02, o certificado TLS da API pública expirou, e os clientes da API começaram a receber
+      erros de handshake. O alarme de expiração existia, mas enviava para um canal de chat arquivado há quatro meses, quando a equipa mudou
+      de nome. O primeiro aviso veio de um cliente, por email, às 14h31. O certificado foi renovado às 14h49. Pelos logs do balanceador,
+      38% dos pedidos à API falharam entre as 14h02 e as 14h49. A renovação automática estava desativada desde uma migração de fornecedor, em
+      março. Decidiu-se reativar a renovação automática, apontar o alarme para o canal atual e acrescentar um teste mensal que confirma que o
+      alarme chega.</p>
+      <p>Escreve o resumo do post-mortem para toda a engenharia, com no máximo 70 palavras.</p>
+      <div class="aberta">
+        <label for="l5-e2">O teu resumo
+          <span class="pista">Os cinco elementos. Confere cada número contra o relato antes de entregar.</span>
+        </label>
+        <textarea id="l5-e2" data-pergunta="L5 E2 — resumo do incidente do certificado"></textarea>
+      </div>
+      <details class="solucao"><summary>Solução</summary>
+        <blockquote class="amostra" data-palavras="64"><p>Na quarta-feira, entre as 14h02 e as 14h49, 38% dos pedidos à API pública falharam
+        porque o certificado TLS expirou. A renovação automática estava desativada desde a migração de fornecedor, e o alarme de expiração ia
+        para um canal arquivado; o aviso veio de um cliente, 29 minutos depois. Ações: reativar a renovação, corrigir o destino do alarme e
+        testar mensalmente que ele chega.</p></blockquote>
+        <p>Aqui o início <strong>é</strong> conhecido (a expiração tem hora), por isso a janela diz-se sem «pelo menos». Os 29 minutos são uma
+        construção (14h31 − 14h02) e são o número mais importante para quem vai de serviço: é o tempo às cegas. «Falharam porque expirou» também
+        é construção — sustentada pelos erros de handshake e pela janela que coincide.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — Para fora de casa</h3>
+      <p>Abre o <a href="https://sre.google/sre-book/example-postmortem/">post-mortem de exemplo do livro de SRE</a>. Escreve o resumo que iria
+      para uma <strong>página pública de estado do serviço</strong>, com no máximo 40 palavras. Depois diz, elemento a elemento, o que apagaste e
+      porquê.</p>
+      <div class="aberta">
+        <label for="l5-e3">Resumo para a página de estado, e o que apagaste
+          <span class="pista">Quem lê uma página de estado, e que decisão toma?</span>
+        </label>
+        <textarea id="l5-e3" data-pergunta="L5 E3 — resumo público do exemplo do livro de SRE"></textarea>
+      </div>
+      <details class="solucao"><summary>Como te corrigires</summary>
+        <p>O leitor é um utilizador do serviço: decide se o problema era do lado dele e se pode confiar no serviço agora. Verifica: (1) disseste a
+        duração (66 minutos) e que está restabelecido? (2) Apagaste a estimativa de pedidos perdidos? Para este leitor não serve, e um número
+        grande numa página pública é lido como gravidade sem contexto. (3) A causa ficou generalizada (uma falha sob procura muito elevada) em vez
+        de técnica (fuga de recursos, falha em cascata)? (4) Prometeste alguma coisa que o exemplo não diz — «não volta a acontecer», «já
+        corrigido de vez»? Se sim, isso é um facto acrescentado, e numa página pública é o mais caro.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<div class="quiz" data-quiz="abstracts-l5">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Um resumo diz «o serviço esteve em baixo 66 minutos». O que é preciso para essa duração ser útil?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-1" value="a" data-certa="true"><span class="rotulo">Dizer entre que marcas se mede — início, deteção, mitigação ou recuperação</span></label>
+          <p class="explicacao" hidden>Certo. «Às cegas» (início → deteção) e «resposta» (deteção → mitigação) pedem ações diferentes. Um número sem fronteiras não diz qual melhorar.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-1" value="b" data-certa="false"><span class="rotulo">Arredondar para horas</span></label>
+          <p class="explicacao" hidden>Arredondar perde informação e não resolve o problema: continua sem se saber entre que momentos se mede.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-1" value="c" data-certa="false"><span class="rotulo">Nada: uma duração é uma duração</span></label>
+          <p class="explicacao" hidden>Duas equipas podem medir o mesmo incidente com 20 ou 66 minutos, conforme a marca de partida, e ambas ter razão.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-1" value="d" data-certa="false"><span class="rotulo">Acrescentar os segundos</span></label>
+          <p class="explicacao" hidden>A precisão não é o problema. O problema é de que momento a que momento.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O impacto do incidente não foi medido. O que se escreve no resumo?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-2" value="a" data-certa="true"><span class="rotulo">Que está por medir, ou a estimativa marcada como estimativa</span></label>
+          <p class="explicacao" hidden>Certo. O exemplo do livro de SRE marca o seu número como estimativa. «Por medir» ainda diz a quem dirige que há uma pergunta em aberto.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-2" value="b" data-certa="false"><span class="rotulo">Uma estimativa por alto, sem dizer que é estimativa</span></label>
+          <p class="explicacao" hidden>Um número não marcado é lido como medido. É um facto acrescentado com aspeto de dado.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-2" value="c" data-certa="false"><span class="rotulo">Nada — omite-se o impacto</span></label>
+          <p class="explicacao" hidden>A ausência passa despercebida. O leitor que decide «é grave?» fica sem saber que não se sabe.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-2" value="d" data-certa="false"><span class="rotulo">«Impacto significativo»</span></label>
+          <p class="explicacao" hidden>É um adjetivo no lugar de uma grandeza: não é medido, e parece.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">«A pessoa de serviço demorou a perceber o que se passava.» Qual é o problema desta frase num resumo?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-3" value="a" data-certa="false"><span class="rotulo">É vaga</span></label>
+          <p class="explicacao" hidden>É vaga, mas o problema central é outro: mesmo com um número («demorou 29 minutos»), o sujeito continua a ser a pessoa.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-3" value="b" data-certa="false"><span class="rotulo">É técnica demais para quem dirige</span></label>
+          <p class="explicacao" hidden>Não tem nada de técnico. O problema não é o público, é a construção.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-3" value="c" data-certa="false"><span class="rotulo">Nenhum, se for verdade</span></label>
+          <p class="explicacao" hidden>Mesmo verdadeira, não diz o que mudar. A cultura blameless procura as razões pelas quais alguém tinha a informação que tinha.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-3" value="d" data-certa="true"><span class="rotulo">Atribui a causa a uma pessoa em vez de à razão sistémica — e ninguém consegue agir sobre ela</span></label>
+          <p class="explicacao" hidden>Certo. O facto que a cronologia sustenta é «passaram 29 minutos até à deteção»; porquê (um alarme mal encaminhado?) é o que o post-mortem descobre.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Para que serve um post-mortem, segundo o livro de SRE?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-4" value="a" data-certa="false"><span class="rotulo">Para identificar quem foi responsável</span></label>
+          <p class="explicacao" hidden>É exatamente o que a cultura blameless rejeita como objetivo: procura razões sistémicas, não pessoas.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-4" value="b" data-certa="false"><span class="rotulo">Para cumprir um requisito formal depois de cada incidente</span></label>
+          <p class="explicacao" hidden>O livro recomenda critérios definidos antes, mas o objetivo não é formal: é aprender e reduzir a repetição.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-4" value="c" data-certa="true"><span class="rotulo">Para registar o incidente e o seu impacto, o que o mitigou, as causas e as ações para não se repetir</span></label>
+          <p class="explicacao" hidden>Certo — é a definição do livro, quase à letra. É por isso que o resumo tem de ter impacto, causa e ações, e não só o que aconteceu.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-4" value="d" data-certa="false"><span class="rotulo">Para informar os clientes</span></label>
+          <p class="explicacao" hidden>Um post-mortem interno não é uma comunicação a clientes. O exercício E3 mostra quanto muda quando o leitor é externo.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o resumo de um post-mortem não deve ser a cronologia?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-5" value="a" data-certa="true"><span class="rotulo">Porque a cronologia é a microestrutura: diz o que aconteceu a que horas, e o resumo tem de dizer quão grave, porquê e o que muda</span></label>
+          <p class="explicacao" hidden>Certo. É a lição 0 outra vez: o leitor decide com a macroestrutura. No exemplo do livro, a cronologia tem secção à parte.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-5" value="b" data-certa="false"><span class="rotulo">Porque a cronologia é secreta</span></label>
+          <p class="explicacao" hidden>A cronologia está no próprio documento, numa secção própria. O problema não é esconder, é o nível.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-5" value="c" data-certa="false"><span class="rotulo">Porque a ordem cronológica é confusa</span></label>
+          <p class="explicacao" hidden>A ordem cronológica é a certa para a cronologia. Não serve para o resumo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-5" value="d" data-certa="false"><span class="rotulo">Porque a cronologia é demasiado longa</span></label>
+          <p class="explicacao" hidden>Mesmo curta, continua a responder à pergunta errada para quem só lê o resumo.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O relato diz «o p95 desceu para 180 ms». O resumo diz «o p95 voltou ao normal (180 ms)». O que aconteceu?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-6" value="a" data-certa="false"><span class="rotulo">Uma generalização correta</span></label>
+          <p class="explicacao" hidden>Generalizar não acrescenta factos. «Normal» é um facto novo: que 180 ms é o valor habitual.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-6" value="b" data-certa="true"><span class="rotulo">Um facto acrescentado: o relato não diz qual é o normal</span></label>
+          <p class="explicacao" hidden>Certo. Pode ser verdade, mas o resumo afirma mais do que o relato. Diz o número e deixa o leitor compará-lo com o que conhece.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-6" value="c" data-certa="false"><span class="rotulo">Um apagamento</span></label>
+          <p class="explicacao" hidden>Nada foi tirado; foi acrescentado.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l5-6" value="d" data-certa="false"><span class="rotulo">Nada de errado: se desceu, voltou ao normal</span></label>
+          <p class="explicacao" hidden>Descer não é chegar ao normal. O p95 de antes do incidente podia ser 90 ms.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="l5-feynman">Explica porque é que um resumo que culpa uma pessoa é, além de injusto, um resumo pior — em termos do que o leitor consegue decidir com ele.
+        <span class="pista">Usa um exemplo teu ou um dos desta lição. Sem a palavra «blameless».</span>
+      </label>
+      <textarea id="l5-feynman" data-pergunta="L5 — porque é que um resumo com culpa é pior"></textarea>
+    </div>
+
+<div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/abstracts-e-resumos/respostas/AAAA-MM-DD.md</code> e correr <code>/corrigir abstracts-e-resumos</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li>Cinco elementos para leitores diferentes ao mesmo tempo: o quê · de quando a quando · impacto · causa · ações. O pormenor vai para as secções.</li>
+      <li>Duração com fronteiras (início, deteção, mitigação, recuperação); se o início não se sabe, diz-se.</li>
+      <li>Impacto medido, estimativa marcada, ou «por medir» — nunca um número sem origem.</li>
+      <li>Culpa é uma construção parada na pessoa: a causa diz o sistema, e é sobre ele que se age.</li>
+      <li>A cronologia tem secção própria; «voltou ao normal» só se o relato disser qual é o normal.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>Lunney, J. &amp; Lueder, S. «Postmortem Culture: Learning from Failure», capítulo 15 de <em>Site Reliability Engineering: How Google
+        Runs Production Systems</em>, ed. B. Beyer, C. Jones, J. Petoff &amp; N. R. Murphy.</strong> Livre em <a href="https://sre.google/sre-book/postmortem-culture/">sre.google</a>.
+        <strong>O que ler:</strong> a definição, os critérios para abrir um post-mortem e a secção sobre blameless. <strong>O que saltar:</strong>
+        a parte sobre ferramentas internas da Google.
+        <span class="verificado">🌐 Verificado a 2026-09-15 — definição e frase sobre blameless citadas do capítulo; autores do capítulo e editores do livro nas páginas do sre.google (a editora e o ano não aparecem lá, por isso não os ponho)</span></li>
+      <li><strong>O mesmo livro, apêndice «Example Postmortem».</strong> <a href="https://sre.google/sre-book/example-postmortem/">sre.google</a>.
+        Fictício; lê pela estrutura. Usado no exercício E3.
+        <span class="verificado">🌐 Verificado a 2026-09-15 — resumo, impacto marcado como estimativa, causa sem nomes, colunas da tabela de ações</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="#conteudo">Voltar ao início</a> · <a href="index.html">Abstracts e resumos técnicos</a> ·
+      Anterior: <a href="04-rfc-pep-readme.html">4 · RFC, PEP e README</a> ·
+      Seguinte: <a href="06-diagnosticar-e-cortar.html">6 · Diagnosticar e cortar</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

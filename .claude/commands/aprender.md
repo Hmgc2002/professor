@@ -110,6 +110,10 @@ a correr.
 4. **Cruza com os outros tópicos**: contradições (uma cede, regista-se) e sobreposições (remissão
    com fronteira declarada).
 5. `./validar.sh` até dar limpo.
+6. **Vê as figuras a 400 px, nos dois temas** (captura headless, por exemplo com o puppeteer do repositório). O axe mede
+   contraste, não texto cortado ou sobreposto num SVG.
+7. **Contagens com atributo:** uma amostra que afirma «N palavras» ou «N caracteres» leva `data-palavras` /
+   `data-caracteres`, e o `validar.py` confere. Um número que se pode contar não se escreve à mão.
 
 Escreve o que a Fase 3 apanhou na nota das fases. Só agora a etiqueta passa de
 🚧 em construção a **pronto** em `docs/index.html`.

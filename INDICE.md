@@ -4,6 +4,131 @@ Gerado por `validar.py`. **Não editar à mão.** Uma linha por cabeçalho com `
 páginas publicadas — é por aqui que a Fase 0 procura o que já existe, antes de escrever outra vez
 o que já está escrito.
 
+## `docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html` — 0 · O que um resumo faz: apagar, generalizar, construir — Abstracts e resumos técnicos
+
+  - [1. Objetivo](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#objetivo)
+  - [2. Recuperar](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#recuperar)
+  - [3. O mecanismo](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#lacunas)
+  - [6. Erros comuns](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#erros)
+  - [7. Praticar](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#praticar)
+  - [8. Quiz](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#quiz)
+  - [9. Explica por palavras tuas](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#feynman)
+  - [10. Resumo](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#resumo)
+  - [11. Fontes](docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html#fontes)
+
+## `docs/abstracts-e-resumos/01-informativo-e-indicativo.html` — 1 · Informativo ou indicativo: o abstract que responde e o que só promete — Abstracts e resumos técnicos
+
+  - [1. Objetivo](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#objetivo)
+  - [2. Recuperar](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#recuperar)
+  - [3. O mecanismo](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#lacunas)
+  - [6. Erros comuns](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#erros)
+  - [7. Praticar](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#praticar)
+  - [8. Quiz](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#quiz)
+  - [9. Explica por palavras tuas](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#feynman)
+  - [10. Resumo](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#resumo)
+  - [11. Fontes](docs/abstracts-e-resumos/01-informativo-e-indicativo.html#fontes)
+
+## `docs/abstracts-e-resumos/02-ler-para-decidir.html` — 2 · Ler para decidir: triagem de artigos pelo abstract — Abstracts e resumos técnicos
+
+  - [1. Objetivo](docs/abstracts-e-resumos/02-ler-para-decidir.html#objetivo)
+  - [2. Recuperar](docs/abstracts-e-resumos/02-ler-para-decidir.html#recuperar)
+  - [3. O mecanismo](docs/abstracts-e-resumos/02-ler-para-decidir.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/abstracts-e-resumos/02-ler-para-decidir.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/abstracts-e-resumos/02-ler-para-decidir.html#lacunas)
+  - [6. Erros comuns](docs/abstracts-e-resumos/02-ler-para-decidir.html#erros)
+  - [7. Praticar](docs/abstracts-e-resumos/02-ler-para-decidir.html#praticar)
+  - [8. Quiz](docs/abstracts-e-resumos/02-ler-para-decidir.html#quiz)
+  - [9. Explica por palavras tuas](docs/abstracts-e-resumos/02-ler-para-decidir.html#feynman)
+  - [10. Resumo](docs/abstracts-e-resumos/02-ler-para-decidir.html#resumo)
+  - [11. Fontes](docs/abstracts-e-resumos/02-ler-para-decidir.html#fontes)
+
+## `docs/abstracts-e-resumos/03-pr-e-commit.html` — 3 · A descrição de um PR e o título de um commit — Abstracts e resumos técnicos
+
+  - [1. Objetivo](docs/abstracts-e-resumos/03-pr-e-commit.html#objetivo)
+  - [2. Recuperar](docs/abstracts-e-resumos/03-pr-e-commit.html#recuperar)
+  - [3. O mecanismo](docs/abstracts-e-resumos/03-pr-e-commit.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/abstracts-e-resumos/03-pr-e-commit.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/abstracts-e-resumos/03-pr-e-commit.html#lacunas)
+  - [6. Erros comuns](docs/abstracts-e-resumos/03-pr-e-commit.html#erros)
+  - [7. Praticar](docs/abstracts-e-resumos/03-pr-e-commit.html#praticar)
+  - [8. Quiz](docs/abstracts-e-resumos/03-pr-e-commit.html#quiz)
+  - [9. Explica por palavras tuas](docs/abstracts-e-resumos/03-pr-e-commit.html#feynman)
+  - [10. Resumo](docs/abstracts-e-resumos/03-pr-e-commit.html#resumo)
+  - [11. Fontes](docs/abstracts-e-resumos/03-pr-e-commit.html#fontes)
+
+## `docs/abstracts-e-resumos/04-rfc-pep-readme.html` — 4 · RFC, PEP e README: o primeiro parágrafo que decide se alguém continua — Abstracts e resumos técnicos
+
+  - [1. Objetivo](docs/abstracts-e-resumos/04-rfc-pep-readme.html#objetivo)
+  - [2. Recuperar](docs/abstracts-e-resumos/04-rfc-pep-readme.html#recuperar)
+  - [3. O mecanismo](docs/abstracts-e-resumos/04-rfc-pep-readme.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/abstracts-e-resumos/04-rfc-pep-readme.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/abstracts-e-resumos/04-rfc-pep-readme.html#lacunas)
+  - [6. Erros comuns](docs/abstracts-e-resumos/04-rfc-pep-readme.html#erros)
+  - [7. Praticar](docs/abstracts-e-resumos/04-rfc-pep-readme.html#praticar)
+  - [8. Quiz](docs/abstracts-e-resumos/04-rfc-pep-readme.html#quiz)
+  - [9. Explica por palavras tuas](docs/abstracts-e-resumos/04-rfc-pep-readme.html#feynman)
+  - [10. Resumo](docs/abstracts-e-resumos/04-rfc-pep-readme.html#resumo)
+  - [11. Fontes](docs/abstracts-e-resumos/04-rfc-pep-readme.html#fontes)
+
+## `docs/abstracts-e-resumos/05-post-mortem.html` — 5 · O resumo de um post-mortem — Abstracts e resumos técnicos
+
+  - [1. Objetivo](docs/abstracts-e-resumos/05-post-mortem.html#objetivo)
+  - [2. Recuperar](docs/abstracts-e-resumos/05-post-mortem.html#recuperar)
+  - [3. O mecanismo](docs/abstracts-e-resumos/05-post-mortem.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/abstracts-e-resumos/05-post-mortem.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/abstracts-e-resumos/05-post-mortem.html#lacunas)
+  - [6. Erros comuns](docs/abstracts-e-resumos/05-post-mortem.html#erros)
+  - [7. Praticar](docs/abstracts-e-resumos/05-post-mortem.html#praticar)
+  - [8. Quiz](docs/abstracts-e-resumos/05-post-mortem.html#quiz)
+  - [9. Explica por palavras tuas](docs/abstracts-e-resumos/05-post-mortem.html#feynman)
+  - [10. Resumo](docs/abstracts-e-resumos/05-post-mortem.html#resumo)
+  - [11. Fontes](docs/abstracts-e-resumos/05-post-mortem.html#fontes)
+
+## `docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html` — 6 · Diagnosticar um resumo mau e cortá-lo até caber — Abstracts e resumos técnicos
+
+  - [1. Objetivo](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#objetivo)
+  - [2. Recuperar](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#recuperar)
+  - [3. O mecanismo](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#lacunas)
+  - [6. Erros comuns](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#erros)
+  - [7. Praticar](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#praticar)
+  - [8. Quiz](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#quiz)
+  - [9. Explica por palavras tuas](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#feynman)
+  - [10. Resumo](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#resumo)
+  - [11. Fontes](docs/abstracts-e-resumos/06-diagnosticar-e-cortar.html#fontes)
+
+## `docs/abstracts-e-resumos/folha.html` — Folha de consulta — Abstracts e resumos técnicos
+
+  - [Antes de escrever](docs/abstracts-e-resumos/folha.html#antes)
+  - [As três operações](docs/abstracts-e-resumos/folha.html#operacoes)
+  - [Movimentos por género](docs/abstracts-e-resumos/folha.html#movimentos)
+  - [Limites — com fonte](docs/abstracts-e-resumos/folha.html#limites)
+  - [Triagem de um artigo](docs/abstracts-e-resumos/folha.html#triagem)
+  - [Diagnóstico de um resumo — por esta ordem](docs/abstracts-e-resumos/folha.html#diagnostico)
+  - [Post-mortem: os cinco elementos](docs/abstracts-e-resumos/folha.html#post-mortem)
+
+## `docs/abstracts-e-resumos/index.html` — Abstracts e resumos técnicos — professor
+
+  - [O que vais conseguir fazer no fim](docs/abstracts-e-resumos/index.html#conseguir)
+  - [O que este curso não é](docs/abstracts-e-resumos/index.html#nao-e)
+  - [O que assumi](docs/abstracts-e-resumos/index.html#assumi)
+  - [O mapa](docs/abstracts-e-resumos/index.html#mapa)
+  - [O plano no tempo](docs/abstracts-e-resumos/index.html#plano)
+  - [Nota das fases](docs/abstracts-e-resumos/index.html#fases)
+
+## `docs/abstracts-e-resumos/teste.html` — Teste de domínio — Abstracts e resumos técnicos
+
+  - [Como fazer](docs/abstracts-e-resumos/teste.html#instrucoes)
+  - [A · Escolha múltipla](docs/abstracts-e-resumos/teste.html#parte-a)
+  - [B · Escrever](docs/abstracts-e-resumos/teste.html#parte-b)
+  - [C · Diagnosticar](docs/abstracts-e-resumos/teste.html#parte-c)
+  - [Entregar](docs/abstracts-e-resumos/teste.html#entregar)
+
 ## `docs/index.html` — professor — cursos que ficam a corrigir
 
   - [Tópicos](docs/index.html#topicos)

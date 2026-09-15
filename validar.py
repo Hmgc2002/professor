@@ -254,6 +254,30 @@ def ver_basico(rel, rp, raiz, texto):
             rel.erro(rp, 1, f"sem o marcador {marcador} — sincronizar.py não consegue manter o estilo alinhado")
 
 
+def ver_amostras(rel, rp, raiz):
+    """Cada «N palavras» / «N caracteres» afirmado numa amostra confere com a contagem real.
+
+    Porquê: no tópico abstracts-e-resumos, 5 de 17 contagens escritas à mão estavam erradas —
+    num curso que ensina a escrever dentro de um limite. Palavras contam-se como o `wc -w`
+    (separação por espaço); caracteres como `len` em Python (pontos de código, «ç» vale 1).
+    """
+    for no in raiz.descendentes():
+        classes = no.classes()
+        if "amostra" in classes and "data-palavras" in no.attrs:
+            n = len(no.texto_todo().split())
+            if no.attrs["data-palavras"] != str(n):
+                rel.erro(rp, no.linha, f"amostra afirma {no.attrs['data-palavras']} palavras e tem {n}")
+        if "amostra-titulo" in classes and "data-caracteres" in no.attrs:
+            n = len(no.texto_todo())
+            if no.attrs["data-caracteres"] != str(n):
+                rel.erro(rp, no.linha, f"título afirma {no.attrs['data-caracteres']} caracteres e tem {n}")
+        if "amostra-pr" in classes and "data-palavras-corpo" in no.attrs:
+            corpo = no.texto_todo().split("\n", 1)[-1]
+            n = len(corpo.split())
+            if no.attrs["data-palavras-corpo"] != str(n):
+                rel.erro(rp, no.linha, f"corpo do PR afirma {no.attrs['data-palavras-corpo']} palavras e tem {n}")
+
+
 def ver_tabela_rolavel(rel, rp, raiz):
     for n in raiz.descendentes():
         if "tabela-rolavel" not in n.classes():
@@ -312,6 +336,7 @@ def main():
         ver_solucoes(rel, rp, raiz)
         ver_quiz(rel, rp, raiz)
         ver_tabela_rolavel(rel, rp, raiz)
+        ver_amostras(rel, rp, raiz)
 
     for caminho in alvos:
         rp = str(caminho.relative_to(RAIZ))

@@ -41,10 +41,14 @@ else
   saida_tidy=""
   for f in docs/*.html docs/*/*.html modelo/*.html; do
     [ -e "$f" ] || continue
-    # O ÚNICO filtro: <title id="…"> dentro de <svg> é SVG válido e obrigatório para
+    # Filtro 1: <title id="…"> dentro de <svg> é SVG válido e obrigatório para
     # aria-labelledby; o tidy 5.8 não conhece SVG e trata-o como o <title> do <head>.
     # A verificação a sério do <title> do <head> está em validar.py (ver ver_basico).
-    linhas=$("$TIDY" -q -e "$f" 2>&1 | grep -v 'Warning: <title> proprietary attribute "id"')
+    # Filtro 2: <ol type="…"> é HTML válido — a especificação WHATWG lista reversed, start e
+    # type como atributos de <ol>, com os valores 1, a, A, i, I (conferido a 2026-09-15 em
+    # html.spec.whatwg.org, «The ol element»). O tidy 5.8 diz que não é HTML5; está errado.
+    linhas=$("$TIDY" -q -e "$f" 2>&1 | grep -v 'Warning: <title> proprietary attribute "id"' \
+                                     | grep -v 'Warning: <ol> attribute "type" not allowed for HTML5')
     [ -n "$linhas" ] && saida_tidy+=$(printf '%s\n' "$linhas" | sed "s|^|$f |")$'\n'
   done
   if [ -n "$saida_tidy" ]; then
@@ -95,6 +99,16 @@ for d in docs/*/; do
       fi
     fi
   done
+done
+# O separador dos flashcards é «;». Um «;» dentro do texto de um cartão parte-o em quatro
+# colunas e o Anki importa-o torto, sem erro. Já aconteceu (abstracts-e-resumos, 2026-09-15).
+for csv in docs/*/flashcards.csv; do
+  [ -e "$csv" ] || continue
+  tortos=$(python3 -c "import csv,sys; r=list(csv.reader(open(sys.argv[1],encoding='utf-8'),delimiter=';')); print(' '.join(str(i+1) for i,l in enumerate(r) if len(l)!=3))" "$csv")
+  if [ -n "$tortos" ]; then
+    echo "${V}ERRO${Z}   $csv: linhas sem exatamente 3 colunas (frente;verso;etiqueta): $tortos"
+    falhou=1
+  fi
 done
 echo "${G}✓${Z} ficheiros de fim de tópico verificados"
 

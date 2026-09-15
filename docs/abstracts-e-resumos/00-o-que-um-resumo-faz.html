@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0 · O que um resumo faz: apagar, generalizar, construir — Abstracts e resumos técnicos</title>
+<meta name="description" content="Lição 0: o mecanismo de qualquer resumo — as três operações, o objetivo do leitor que as controla, e porque é que escolher frases não chega.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/abstracts-e-resumos/00-o-que-um-resumo-faz.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">Abstracts e resumos técnicos</a> <span aria-hidden="true">›</span> lição 0</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+<p class="etiqueta nucleo">Lição 0 · núcleo</p>
+    <h1>O que um resumo faz: apagar, generalizar, construir</h1>
+    <p class="subtitulo">Antes de haver abstracts, descrições de PR ou post-mortems, há uma operação comum a todos: passar
+    do que o texto diz frase a frase para o que o texto diz no todo — para um leitor concreto. Esta lição é esse
+    mecanismo, e as outras seis são ele aplicado.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>Dado um texto de ~200 palavras e um leitor com uma decisão a tomar, escreves um resumo com <strong>no máximo 60
+    palavras</strong> e dizes, para cada frase do original que ficou de fora ou mudou, <strong>que operação</strong> lhe
+    aconteceu — e explicas porque é que um programa que só escolhe frases não chega ao mesmo resultado.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+    <p>Ainda não há lições anteriores, por isso estas perguntas puxam pelo que já trazes. Responde de memória
+    <strong>antes</strong> de abrir: uma hipótese errada escrita agora ensina mais do que nenhuma.</p>
+<ol>
+  <li>Lembra-te da última descrição de PR (ou mensagem de commit) que te fez perder tempo. O que é que ela tinha a mais, ou a menos?
+    <details class="solucao"><summary>Resposta</summary><p>Não há resposta certa: o objetivo é teres uma hipótese tua antes de leres o mecanismo. Guarda-a. No fim desta lição vais conseguir dar nome ao que falhou.</p></details>
+  </li>
+  <li>«Um resumo é uma versão mais curta do texto.» Concordas? Porquê?
+    <details class="solucao"><summary>Resposta</summary><p>É incompleto. Um bom resumo pode conter frases que não estão no texto (quando junta vários factos num só) e deixa de fora frases verdadeiras e interessantes. Mais curto é consequência, não definição.</p></details>
+  </li>
+  <li>Se duas pessoas resumirem o mesmo texto, devem chegar ao mesmo resumo?
+    <details class="solucao"><summary>Resposta</summary><p>Não necessariamente. O que cada uma precisa de fazer com o resumo decide o que é relevante. É a peça do mecanismo que costuma ficar esquecida.</p></details>
+  </li>
+</ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>Dois níveis em qualquer texto</h3>
+    <p>Um texto diz coisas a duas escalas. Frase a frase: «o CPU andava pelos 30%», «não havia bloqueios», «o job
+    passou a correr de hora a hora». E no todo: «um job mal configurado deixou a pesquisa lenta durante a manhã». A
+    segunda não está escrita em lado nenhum do texto — é o leitor que a forma.</p>
+    <p>Kintsch e van Dijk (1978), num modelo de psicologia cognitiva sobre como se compreende e se resume um texto,
+    chamam à primeira escala <dfn>microestrutura</dfn> e à segunda <dfn>macroestrutura</dfn>. E propõem que a passagem
+    de uma para a outra se faz com <strong>três regras</strong> — as <dfn>macrorregras</dfn>.</p>
+    <p>Duas palavras que vais precisar. A unidade com que o modelo trabalha é a <dfn>proposição</dfn>: uma unidade de
+    significado, grosso modo um facto. «O CPU andava pelos 30%» é uma; «não havia bloqueios» é outra, mesmo estando na
+    mesma frase. E uma proposição é <dfn>condição de interpretação</dfn> de outra quando a segunda não se percebe sem a
+    primeira: «a alteração foi revertida às 11h40» precisa de «o job tinha sido alterado», porque sem ela «a alteração»
+    não tem a que se referir.</p>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ O que isto é, e o que não é</span>
+      <p>É um modelo de <strong>compreensão</strong> de texto, de 1978, não um manual de escrita. Uso-o aqui como
+      vocabulário: dá nome às três coisas que fazes quando resumes bem, e às três formas de resumir mal. As regras de
+      escrita dos géneros concretos vêm de outras fontes, nas lições seguintes.</p>
+    </div>
+
+    <h3>As três operações</h3>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="As três macrorregras, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Operação</th><th>O que faz (paráfrase do artigo)</th><th>No incidente desta lição</th><th>O limite</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Apagar</strong></td><td>Tira uma proposição que não é condição para interpretar nenhuma das que vêm a seguir</td><td>«A manhã teve três reuniões e muito café» sai: nada do que fica precisa dela</td><td>Nunca se apaga o que é preciso para perceber algo que fica</td></tr>
+          <tr><td><strong>Generalizar</strong></td><td>Troca uma sequência de proposições pela proposição geral que as abrange — o conjunto <em>imediatamente</em> acima</td><td>«CPU a 30%» + «sem bloqueios» → «a base de dados parecia normal»</td><td>Subir de mais dá «houve um problema técnico» — verdade para qualquer incidente, inútil para este</td></tr>
+          <tr><td><strong>Construir</strong></td><td>Troca uma sequência por uma proposição nova que denota um facto global de que aquelas são condições, componentes ou consequências</td><td>«a cache estava vazia» + «o job esvaziava-a» + «passou a correr de hora a hora» → «um job alterado esvaziava a cache de hora a hora»</td><td>O facto construído tem de ser sustentado pelas frases. «Não houve perda de dados» não é construção — é invenção</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Repara na terceira: <strong>a melhor frase de um resumo muitas vezes não existe no texto original</strong>. É
+    por isso que «resumir é cortar frases» está errado, e não só incompleto.</p>
+
+    <h3>O que decide o que é relevante</h3>
+    <p>As três regras não dizem, sozinhas, o que apagar. Quem decide é o <dfn>esquema</dfn>: no artigo, a representação
+    dos <strong>objetivos de quem lê</strong>. É o esquema que classifica cada proposição como relevante ou não. Os
+    autores avisam que, sem ele, as regras produzem generalizações e abstrações sem sentido — que é exatamente o
+    «houve um problema técnico».</p>
+    <p>Para quem escreve, a consequência é prática: <strong>antes da primeira palavra, nomeia o leitor e a decisão que
+    ele vai tomar com o teu resumo</strong>. O mesmo incidente dá um resumo para a equipa de engenharia («o que muda no
+    que eu faço?») e outro, diferente e igualmente certo, para o suporte («o que digo a um cliente que ligue?»).</p>
+
+    <figure>
+      <svg viewBox="0 0 520 300" role="img" aria-labelledby="t-l0-mec d-l0-mec">
+        <title id="t-l0-mec">O objetivo do leitor controla as três operações que levam do texto ao resumo</title>
+        <desc id="d-l0-mec">À esquerda, o texto frase a frase. Ao centro, três operações empilhadas: apagar, generalizar e construir. À direita, o resumo. Por cima das operações, uma caixa com o objetivo do leitor, ligada às operações por uma seta com a palavra controla.</desc>
+        <rect class="svg-caixa" x="185" y="8" width="150" height="44" rx="6"/>
+        <text class="svg-texto" x="260" y="27" text-anchor="middle">objetivo do leitor</text>
+        <text class="svg-suave" x="260" y="44" text-anchor="middle">(o esquema)</text>
+        <path class="svg-traco" d="M260 52 V80" marker-end="url(#seta-l0)"/>
+        <text class="svg-suave" x="268" y="71">controla</text>
+        <rect class="svg-caixa" x="8" y="140" width="120" height="60" rx="6"/>
+        <text class="svg-texto" x="68" y="166" text-anchor="middle">texto</text>
+        <text class="svg-suave" x="68" y="184" text-anchor="middle">frase a frase</text>
+        <rect class="svg-caixa" x="195" y="86" width="130" height="44" rx="6"/>
+        <rect class="svg-caixa" x="195" y="148" width="130" height="44" rx="6"/>
+        <rect class="svg-caixa" x="195" y="210" width="130" height="44" rx="6"/>
+        <text class="svg-texto" x="260" y="113" text-anchor="middle">apagar</text>
+        <text class="svg-texto" x="260" y="175" text-anchor="middle">generalizar</text>
+        <text class="svg-texto" x="260" y="237" text-anchor="middle">construir</text>
+        <rect class="svg-realce" x="392" y="140" width="120" height="60" rx="6"/>
+        <text class="svg-texto" x="452" y="166" text-anchor="middle">resumo</text>
+        <text class="svg-suave" x="452" y="184" text-anchor="middle">o texto no todo</text>
+        <path class="svg-traco" d="M128 165 C160 165 165 108 189 108" marker-end="url(#seta-l0)"/>
+        <path class="svg-traco" d="M128 170 H189" marker-end="url(#seta-l0)"/>
+        <path class="svg-traco" d="M128 175 C160 175 165 232 189 232" marker-end="url(#seta-l0)"/>
+        <path class="svg-traco" d="M325 108 C355 108 360 165 386 165" marker-end="url(#seta-l0)"/>
+        <path class="svg-traco" d="M325 170 H386" marker-end="url(#seta-l0)"/>
+        <path class="svg-traco" d="M325 232 C355 232 360 175 386 175" marker-end="url(#seta-l0)"/>
+        <text class="svg-suave" x="260" y="284" text-anchor="middle">o Luhn (1958) só tem a primeira caixa — e sem o esquema</text>
+        <defs>
+          <marker id="seta-l0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>O esquema não é uma quarta operação: é o critério que as três usam para decidir.</figcaption>
+    </figure>
+
+    <h3>O contraste: um resumo sem compreensão</h3>
+    <p>Em 1958, H. P. Luhn, na IBM, pôs um IBM 704 a fazer «auto-abstracts». O método não usa significado — o artigo
+    diz, com todas as letras, que para a máquina as palavras são só coisas físicas que se contam. Faz isto:</p>
+    <ol>
+      <li>tira as palavras comuns e conta as restantes; as que se <strong>repetem</strong> são «significativas»
+      (a justificação: quem escreve repete as palavras do que está a desenvolver);</li>
+      <li>em cada frase, junta as palavras significativas que estão a no máximo <strong>quatro ou cinco</strong> palavras
+      não significativas umas das outras, formando grupos;</li>
+      <li>cada grupo vale <code>(significativas no grupo)² ÷ (palavras no grupo)</code> — no exemplo do artigo, 4² ÷ 7 = 2,3;</li>
+      <li>escolhe as frases com o grupo mais forte.</li>
+    </ol>
+    <p>Nas três operações, isto é <strong>só apagar</strong>, e à frase inteira: nunca generaliza, nunca constrói, e no
+    lugar do esquema põe a repetição. O <a href="luhn.py">luhn.py</a> deste curso implementa-o com a biblioteca-padrão
+    (o que é do artigo e o que é simplificação minha está no cabeçalho do ficheiro). Corrido sobre o
+    <a href="incidente.txt">relato do incidente</a>, dá isto — saída real, não editada:</p>
+<pre><code>$ python3 luhn.py incidente.txt 2
+palavras significativas: altera aplica base cache dados endpoi feira hora job latênc manhã pesqui sexta
+
+ 2.29  [ 1] Na segunda-feira de manhã, o endpoint de pesquisa de encomendas começou a responder devagar.
+ 0.00  [ 2] O suporte recebeu as primeiras queixas de clientes pouco depois das 9h.
+ 1.80  [ 3] A pessoa de serviço abriu o painel e confirmou que a latência do endpoint de pesquisa tinha subido.
+ 2.25  [ 4] Não tinha havido deploy da aplicação desde sexta-feira.
+ 1.33  [ 5] A base de dados parecia normal: o CPU andava pelos 30% e não havia bloqueios.
+ 1.33  [ 6] Nos logs, reparou-se que a cache de pesquisa estava vazia quase sempre.
+ 2.45  [ 7] A cache era esvaziada por um job noturno, que na sexta-feira tinha sido alterado para correr de hora a hora.
+ 1.33  [ 8] Cada vez que o job corria, apagava todas as chaves da cache de pesquisa, e os pedidos seguintes iam todos à base de dados.
+ 1.33  [ 9] A alteração ao job foi revertida às 11h40.
+ 1.00  [10] O p95 da latência desceu de 4,2 s para 180 ms em dez minutos.
+ 1.00  [11] A manhã teve três reuniões e muito café.
+ 1.29  [12] Ficou decidido que as alterações a jobs passam a ter revisão como o código da aplicação, e que a cache de pesquisa vai ter um alarme sobre a taxa de acertos.
+
+auto-abstract (2 frases, pela ordem do texto):
+  Na segunda-feira de manhã, o endpoint de pesquisa de encomendas começou a responder devagar.
+  A cache era esvaziada por um job noturno, que na sexta-feira tinha sido alterado para correr de hora a hora.</code></pre>
+    <p>Lê as pontuações da frase 10 e da 11. <strong>O resultado do incidente vale o mesmo que o café.</strong> Os
+    números não são palavras que se repitam, e «desceu» aparece uma vez. A frase 12 — a que diz o que muda para quem
+    lê — fica abaixo de «não tinha havido deploy». Repetição é um indicador de <em>tema</em>, não de <em>importância
+    para alguém</em>.</p>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ E os resumos feitos por modelos de linguagem?</span>
+      <p>Não funcionam como o Luhn, e ficam fora deste curso. Mas a pergunta que o Luhn não tem — <em>para quem, e para
+      decidir o quê?</em> — continua a ser tua: se não a deres, quem resume escolhe por ti.</p>
+    </div>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>O mesmo <a href="incidente.txt">relato do incidente</a> (184 palavras, as 12 frases numeradas acima). Limite: 60 palavras.</p>
+
+    <h3>Passo 1 — Nomear o leitor e a decisão</h3>
+    <p><strong>Leitor:</strong> quem está na engenharia e não esteve de serviço nessa manhã. <strong>Decisão:</strong>
+    «tenho de mudar alguma coisa no que faço?».</p>
+    <p><em>Porquê primeiro:</em> sem isto, as frases 4 e 5 (o diagnóstico que excluiu hipóteses) parecem tão
+    importantes como a 12. Com isto, percebe-se que quem não esteve lá não precisa do caminho, precisa do destino.</p>
+
+    <h3>Passo 2 — Apagar</h3>
+    <p>Saem: <strong>3</strong> (confirma o sintoma que a 1 já disse), <strong>4 e 5</strong> (hipóteses excluídas; nenhuma
+    frase que fica precisa delas para ser percebida), <strong>11</strong> (café).</p>
+    <p><em>Porque a 4 pode sair, apesar de ser verdadeira e ter a segunda pontuação mais alta:</em> a regra não pergunta
+    se é verdade nem se é interessante; pergunta se alguma frase que fica depende dela. Para <strong>outro</strong>
+    leitor — quem revê o processo de diagnóstico — «não houve deploy, e por isso ninguém olhou para jobs» podia ser o
+    centro do resumo.</p>
+
+    <h3>Passo 3 — Generalizar</h3>
+    <p><strong>1 + 2</strong> → «a pesquisa de encomendas ficou lenta durante a manhã de segunda-feira». O «pouco depois
+    das 9h» e as queixas generalizam-se para «durante a manhã»: para esta decisão, a hora exata não muda nada.</p>
+
+    <h3>Passo 4 — Construir</h3>
+    <p><strong>6 + 7 + 8</strong> → «um job alterado para correr de hora a hora esvaziava a cache de pesquisa». Esta
+    frase <strong>não existe</strong> no texto. É o facto global de que as três são componentes: a cache vazia (6), o
+    job que a esvazia (8), a alteração de frequência (7). O Luhn não consegue produzi-la — só pode escolher a 7, que
+    tem a causa sem a consequência.</p>
+
+    <h3>Passo 5 — O que fica, mesmo sem se repetir</h3>
+    <p><strong>9 + 10</strong> (a reversão e o efeito, com os dois números) e <strong>12</strong> (o que muda). São
+    precisamente as frases que o Luhn pôs em último — e são as que respondem à decisão do leitor.</p>
+
+    <h3>Resultado</h3>
+    <blockquote class="amostra" data-palavras="58">
+      <p>Um job alterado para correr de hora a hora esvaziava a cache de pesquisa, e a pesquisa de encomendas ficou lenta
+      durante a manhã de segunda-feira. Reverter a alteração às 11h40 baixou o p95 de 4,2 s para 180 ms. Alterações a
+      jobs passam a ter revisão, e a cache ganha um alarme sobre a taxa de acertos.</p>
+    </blockquote>
+    <p>58 palavras. Compara com o auto-abstract: o Luhn deu o sintoma e metade da causa; este dá a causa inteira, o
+    efeito medido da correção e a mudança que o leitor precisa de conhecer.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <p>O mesmo relato, <strong>outro leitor</strong>. Os passos 2 e 5 estão dados; preenche os outros antes de abrir.</p>
+    <div class="exercicio">
+      <h3>Resumo para o suporte</h3>
+      <p><strong>Passo 1 — leitor e decisão:</strong> a pessoa que coordena o suporte. Decide ______.</p>
+      <p><strong>Passo 2 — apagar (dado):</strong> tudo sobre <em>como</em> se diagnosticou (3–8) e o mecanismo do job;
+      o p95 em milissegundos não diz nada a um cliente.</p>
+      <p><strong>Passo 3 — generalizar:</strong> «alteração ao job», «cache», «p95» passam a ______.</p>
+      <p><strong>Passo 4 — construir:</strong> a hora a que a pesquisa voltou ao normal não está escrita no texto. É ______,
+      construída a partir das frases ______.</p>
+      <p><strong>Passo 5 — o que fica (dado):</strong> que aconteceu, quando, que está resolvido, e que há medidas para não se repetir.</p>
+      <p><strong>Resultado, com no máximo 40 palavras:</strong> ______.</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 1:</strong> o que dizer a um cliente que ligue — aconteceu mesmo? já passou? pode voltar a acontecer?</p>
+        <p><strong>Passo 3:</strong> «uma alteração interna», «já revertida».</p>
+        <p><strong>Passo 4:</strong> «cerca das 11h50», das frases 9 (reversão às 11h40) e 10 (a latência desceu em dez
+        minutos). É construção legítima: um facto que as duas frases sustentam juntas.</p>
+        <p><strong>Resultado</strong> (uma versão possível):</p>
+        <blockquote class="amostra" data-palavras="31"><p>Na segunda-feira, entre pouco depois das 9h e cerca das 11h50, a
+        pesquisa de encomendas esteve lenta por causa de uma alteração interna, já revertida. Há medidas para não se repetir.</p></blockquote>
+        <p>⚠️ <strong>Se escreveste «não houve perda de dados»</strong>, repara: o texto não fala de dados em lado nenhum.
+        Pode ser verdade, mas nenhuma frase a sustenta — isso não é construção, é um facto acrescentado. Num resumo para
+        quem vai repetir a frase a clientes, é o erro mais caro desta lição.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <p>⚠️ Não tenho dados sobre a <em>frequência</em> destes erros entre quem escreve resumos. Estão aqui porque
+    correspondem, um a um, a uma operação mal feita — e os dois primeiros são precisamente o que o Luhn faz.</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr><td>Resumir é escolher as frases mais importantes</td><td>O resumo é uma colagem de frases do original, e há um facto que precisa de três delas para se perceber</td><td>Só apagar não chega: sem generalizar e construir, a causa fica partida em pedaços e o limite de palavras rebenta</td></tr>
+          <tr><td>O que se repete é o que importa</td><td>O resumo gasta palavras no tema (endpoint, pesquisa, cache) e deixa cair o número</td><td>O resultado costuma ser dito uma vez. Repetição mede o tema do texto, não a relevância para o leitor</td></tr>
+          <tr><td>Um bom resumo serve para toda a gente</td><td>Não consegues dizer para quem o escreveste</td><td>Relevância é relativa a um objetivo. Sem leitor nomeado não há critério para apagar</td></tr>
+          <tr><td>Quanto mais geral, mais resumido</td><td>«Houve um problema técnico que já foi resolvido»</td><td>Generaliza-se para o conjunto <em>imediatamente</em> acima. Uma frase verdadeira para qualquer incidente não permite decidir nada sobre este</td></tr>
+          <tr><td>Se é provável, pode ir para o resumo</td><td>O resumo afirma algo que nenhuma combinação de frases do texto sustenta</td><td>Construir exige que as frases sejam condições, componentes ou consequências do facto novo. O resto é acrescentar</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — Que operação foi?</h3>
+      <p>Para cada transformação, diz se foi apagar, generalizar ou construir — e numa frase, porquê.</p>
+      <ol type="a">
+        <li>«O CPU andava pelos 30% e não havia bloqueios.» → «A base de dados parecia normal.»</li>
+        <li>«Abriu-se o painel. Leram-se os logs. Viu-se que a cache estava vazia.» → «Encontrou-se a causa.»</li>
+        <li>«A manhã teve três reuniões e muito café.» → (nada)</li>
+        <li>«A alteração foi revertida às 11h40. O p95 desceu para 180 ms em dez minutos.» → «Às 11h50 a pesquisa tinha recuperado.»</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <ol type="a">
+          <li><strong>Generalizar.</strong> «Parecia normal» é o conjunto imediatamente acima de «CPU baixo» e «sem bloqueios».
+          Nada de novo é afirmado.</li>
+          <li><strong>Construir.</strong> «Encontrou-se a causa» é um facto global de que as três ações são componentes. Se
+          tivesses dito «investigou-se», estavas mais perto de generalizar — a fronteira entre as duas é real e o artigo
+          não a torna mais nítida do que isto.</li>
+          <li><strong>Apagar.</strong> Nenhuma frase que fica depende desta.</li>
+          <li><strong>Construir.</strong> «11h50» não está no texto; resulta de juntar 11h40 com «dez minutos». Legítimo,
+          porque as duas frases o sustentam.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — Enganar o Luhn (código que corre)</h3>
+      <p>Descarrega <a href="luhn.py">luhn.py</a> e <a href="incidente.txt">incidente.txt</a> para a mesma pasta.</p>
+      <ol>
+        <li>Corre <code>python3 luhn.py --teste</code>. Tem de dizer <code>ok</code>: confirma que o fator da Fig. 2 do artigo (4² ÷ 7) está implementado como lá está.</li>
+        <li><strong>Antes de correr</strong>, prevê: com 3 frases em vez de 2, que frase entra? Depois corre <code>python3 luhn.py incidente.txt 3</code>.</li>
+        <li>Acrescenta ao fim do texto <strong>uma frase sem nenhuma informação nova</strong> que o Luhn escolha para o auto-abstract de 2 frases.</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>2.</strong> Entra a frase 4, «Não tinha havido deploy da aplicação desde sexta-feira» (2,25), à frente
+        da 3 (1,80). Seis palavras, três delas significativas e juntas — um grupo curto e denso pontua muito.</p>
+        <p><strong>3.</strong> Qualquer frase que empilhe palavras significativas sem palavras comuns pelo meio. Por
+        exemplo, acrescentando <code>Cache de pesquisa, endpoint de pesquisa, job de pesquisa e cache de pesquisa.</code>,
+        a frase nova pontua 4,92 — quase o dobro da segunda — e o auto-abstract passa a ser:</p>
+<pre><code>auto-abstract (2 frases, pela ordem do texto):
+  A cache era esvaziada por um job noturno, que na sexta-feira tinha sido alterado para correr de hora a hora.
+  Cache de pesquisa, endpoint de pesquisa, job de pesquisa e cache de pesquisa.</code></pre>
+        <p>O que isto mostra: o método mede densidade de palavras repetidas, e densidade é fácil de fabricar sem dizer
+        nada. Um resumo humano sem esquema falha da mesma maneira, só que com frases mais bonitas.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — Outro texto, outro leitor</h3>
+      <p>Texto (fictício):</p>
+      <blockquote>
+        <p>A biblioteca de datas que usamos, na versão 2, deixou de receber correções de segurança em março.
+        Experimentámos a versão 3 num ramo. A API mudou em três funções: format, parse e diff. Encontrámos 41 chamadas a
+        essas funções no código. O parse agora lança exceção em vez de devolver null, o que obriga a rever os 12 sítios
+        que testavam null. Os testes passaram todos depois das alterações, exceto dois testes de fuso horário que já
+        falhavam antes. O bundle ficou 8 kB mais pequeno. A alteração demorou dois dias a uma pessoa. Um colega lembrou
+        que a biblioteca concorrente é mais popular, mas ninguém a avaliou.</p>
+      </blockquote>
+      <p><strong>Leitor:</strong> quem lidera a equipa e decide se a migração entra já ou fica para depois.
+      Escreve um resumo com <strong>no máximo 45 palavras</strong> e, para cada frase do original, diz que operação lhe aplicaste.</p>
+      <div class="aberta">
+        <label for="l0-e3">O teu resumo e as operações, frase a frase
+          <span class="pista">Uma linha por frase do original: «frase 5 — apagar, porque…».</span>
+        </label>
+        <textarea id="l0-e3" data-pergunta="L0 E3 — resumo da migração e operações"></textarea>
+      </div>
+      <details class="solucao"><summary>Solução</summary>
+        <p>Uma versão possível:</p>
+        <blockquote class="amostra" data-palavras="42"><p>A versão 2 da biblioteca de datas já não recebe correções de
+        segurança. A migração para a 3 está feita num ramo: 41 chamadas adaptadas, 12 com tratamento de exceção novo,
+        e os testes passam (as duas falhas já existiam). Falta aprovar.</p></blockquote>
+        <ul>
+          <li><strong>Frase 1 fica</strong> (é a razão da decisão: urgência). «Em março» apaga-se — a decisão não depende do mês.</li>
+          <li><strong>2, 3, 4, 5 constroem-se</strong> em «migração feita: 41 chamadas adaptadas, 12 com tratamento novo». Os nomes das funções apagam-se.</li>
+          <li><strong>6 fica generalizada</strong> — e a ressalva das duas falhas <em>não se apaga</em>: sem ela, «os testes passam» seria mais forte do que o texto.</li>
+          <li><strong>7 e 8 apagam-se</strong> para este leitor. Discutível: se a equipa estiver sem ninguém disponível, «dois dias» passa a ser relevante — é o esquema a mandar.</li>
+          <li><strong>9 apaga-se.</strong> Uma alternativa que ninguém avaliou não muda a decisão de hoje. ⚠️ Se escreveste «a alternativa foi considerada», construíste o que o texto nega.</li>
+        </ul>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <p>Cada opção errada tem a sua explicação — é aí que está o que faltava perceber, por isso lê-as todas, mesmo quando acertas.</p>
+<div class="quiz" data-quiz="abstracts-l0">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">O texto diz «o CPU andava pelos 30% e não havia bloqueios». O resumo diz «a base de dados parecia normal». Que operação foi?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-1" value="a" data-certa="true"><span class="rotulo">Generalizar</span></label>
+          <p class="explicacao" hidden>Certo: «parecia normal» é o conjunto imediatamente acima de «CPU baixo» e «sem bloqueios». Repara que «a base de dados não era a causa» já seria outra coisa — uma conclusão, ou seja, construção.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-1" value="b" data-certa="false"><span class="rotulo">Apagar</span></label>
+          <p class="explicacao" hidden>Não se tirou informação sem a substituir: as duas frases foram trocadas por uma que as abrange. Apagar deixaria o resumo sem nada sobre a base de dados.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-1" value="c" data-certa="false"><span class="rotulo">Construir</span></label>
+          <p class="explicacao" hidden>Construir produz um facto novo de que as frases são condições, componentes ou consequências. «Parecia normal» não acrescenta facto: descreve as duas frases a um nível mais alto.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o luhn.py dá à frase «O p95 da latência desceu de 4,2 s para 180 ms» a mesma pontuação que a frase do café?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-2" value="a" data-certa="false"><span class="rotulo">Porque o método penaliza frases curtas</span></label>
+          <p class="explicacao" hidden>O fator só olha para o grupo de palavras significativas, não para o comprimento da frase. A frase 4, com seis palavras, tem uma das pontuações mais altas.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-2" value="b" data-certa="false"><span class="rotulo">Porque está perto do fim do texto</span></label>
+          <p class="explicacao" hidden>Nem o método descrito por Luhn nem o script usam a posição da frase. A frase 12, a última, pontua acima da 10.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-2" value="c" data-certa="false"><span class="rotulo">Porque o método reconhece que é um pormenor técnico</span></label>
+          <p class="explicacao" hidden>O método não reconhece nada: o artigo diz explicitamente que não usa o significado das palavras. Se o resultado desce na lista, é por acaso estatístico, não por julgamento.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-2" value="d" data-certa="true"><span class="rotulo">Porque os números não contam como palavras e as outras palavras dessa frase quase não se repetem</span></label>
+          <p class="explicacao" hidden>Certo. O método mede repetição e proximidade; o resultado de um incidente costuma ser dito uma vez e com números. Relevância para o leitor não é algo que a contagem veja.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Segundo o modelo de Kintsch e van Dijk, o que decide se uma frase é relevante para o resumo?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-3" value="a" data-certa="false"><span class="rotulo">A frequência das palavras dessa frase no texto</span></label>
+          <p class="explicacao" hidden>Isso é o critério do Luhn, não do modelo. É precisamente a diferença entre um resumo com compreensão e um sem ela.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-3" value="b" data-certa="false"><span class="rotulo">A posição da frase no parágrafo</span></label>
+          <p class="explicacao" hidden>Posição pode ser um bom palpite em textos bem escritos, mas não é o que o modelo propõe. E num relato cronológico, como o do incidente, a posição engana.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-3" value="c" data-certa="false"><span class="rotulo">O comprimento da frase</span></label>
+          <p class="explicacao" hidden>Não tem papel no modelo. Uma frase longa pode ser toda apagável; uma curta pode ser a única que responde à decisão.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-3" value="d" data-certa="true"><span class="rotulo">O esquema — a representação do objetivo de quem lê</span></label>
+          <p class="explicacao" hidden>Certo. As três regras dizem como se transforma; o esquema diz o que se mantém. Sem ele, avisam os autores, as regras dão abstrações sem sentido.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Um colega resume o incidente como «Houve um problema técnico na segunda-feira, que já foi resolvido.» Qual é a falha principal?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-4" value="a" data-certa="false"><span class="rotulo">Construiu um facto que o texto não sustenta</span></label>
+          <p class="explicacao" hidden>«Resolvido» é sustentado pelas frases 9 e 10. O problema não é haver algo inventado; é haver quase nada.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-4" value="b" data-certa="true"><span class="rotulo">Generalizou muito para lá do conjunto imediatamente acima: a frase serve para qualquer incidente</span></label>
+          <p class="explicacao" hidden>Certo. É verdadeira e inútil. Nenhum leitor consegue decidir nada com ela — nem a engenharia (o que muda?) nem o suporte (quando?).</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-4" value="c" data-certa="false"><span class="rotulo">Não apagou o suficiente</span></label>
+          <p class="explicacao" hidden>Pelo contrário: apagou quase tudo. Mas o sintoma de apagar de mais seria faltar um facto concreto, e aqui a falha visível é o vazio da frase geral.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-4" value="d" data-certa="false"><span class="rotulo">Nenhuma: um resumo deve ser neutro e curto</span></label>
+          <p class="explicacao" hidden>Curto não é critério de qualidade por si. Um resumo mede-se pelo que deixa o leitor decidir.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Quando é legítimo apagar «Não tinha havido deploy da aplicação desde sexta-feira»?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-5" value="a" data-certa="false"><span class="rotulo">Nunca: é um facto verdadeiro e relevante para o diagnóstico</span></label>
+          <p class="explicacao" hidden>A regra de apagar não pergunta se é verdade; pergunta se alguma frase que fica depende dela. Verdadeiro e relevante para <em>outro</em> leitor não chega.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-5" value="b" data-certa="false"><span class="rotulo">Sempre, porque o deploy não foi a causa</span></label>
+          <p class="explicacao" hidden>Não ser a causa não a torna irrelevante: «como não houve deploy, ninguém olhou para jobs» pode ser a lição do incidente para outro leitor.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-5" value="c" data-certa="false"><span class="rotulo">Só quando o leitor é de fora da engenharia</span></label>
+          <p class="explicacao" hidden>O critério não é a profissão do leitor, é a decisão dele. Um engenheiro que só quer saber o que muda no seu trabalho também não precisa dela.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-5" value="d" data-certa="true"><span class="rotulo">Quando nenhuma frase que fica no resumo precisa dela para ser percebida — por exemplo, se o resumo não fala do diagnóstico</span></label>
+          <p class="explicacao" hidden>Certo. É a única restrição que o modelo põe ao apagar. Para quem revê o processo de diagnóstico, a mesma frase pode ser o centro.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">No resumo para o suporte escreveste «não houve perda de dados». O texto não fala de dados perdidos. O que aconteceu?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-6" value="a" data-certa="true"><span class="rotulo">Um facto acrescentado que não é construção: nenhuma frase do texto é condição, componente ou consequência dele</span></label>
+          <p class="explicacao" hidden>Certo. Pode até ser verdade, mas o resumo passou a afirmar mais do que o texto. Num resumo que alguém vai repetir a clientes, é o erro mais caro.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-6" value="b" data-certa="false"><span class="rotulo">Uma generalização legítima</span></label>
+          <p class="explicacao" hidden>Generalizar substitui frases que existem por uma que as abrange. Não há nenhuma frase sobre dados para ser abrangida.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-6" value="c" data-certa="false"><span class="rotulo">Um apagamento</span></label>
+          <p class="explicacao" hidden>Apagar tira; aqui acrescentou-se.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l0-6" value="d" data-certa="false"><span class="rotulo">Nada de errado: é a hipótese mais provável</span></label>
+          <p class="explicacao" hidden>Provável não é sustentado. O resumo diz ao leitor «isto está no relato», e não está.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <p>Explicar sem jargão expõe os buracos que a leitura esconde. Esta resposta vai para a entrega.</p>
+    <div class="aberta">
+      <label for="l0-feynman">Explica a alguém que programa, mas nunca pensou nisto, porque é que um bom resumo não é uma versão curta do texto.
+        <span class="pista">Usa o Luhn como exemplo. Sem as palavras «macrorregra», «esquema» nem «microestrutura».</span>
+      </label>
+      <textarea id="l0-feynman" data-pergunta="L0 — porque é que um resumo não é um texto mais curto"></textarea>
+    </div>
+
+<div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/abstracts-e-resumos/respostas/AAAA-MM-DD.md</code> e correr <code>/corrigir abstracts-e-resumos</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li>Resumir é passar do que o texto diz frase a frase para o que diz no todo, <strong>para um leitor e uma decisão</strong>.</li>
+      <li>Três operações: <strong>apagar</strong> o que nada do que fica precisa; <strong>generalizar</strong> para o conjunto imediatamente acima; <strong>construir</strong> um facto global que as frases sustentam.</li>
+      <li>O objetivo do leitor decide o que é relevante. Sem ele, as regras dão frases verdadeiras e inúteis.</li>
+      <li>A melhor frase de um resumo muitas vezes não existe no original; e um facto que nenhuma frase sustenta não é construção.</li>
+      <li>O método de Luhn só apaga e mede repetição: acerta no tema, falha o resultado e a decisão.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>Kintsch, W. &amp; van Dijk, T. A. (1978). «Toward a model of text comprehension and production».
+        <em>Psychological Review</em>, 85, 363–394.</strong> Fonte primária do mecanismo. <strong>O que ler:</strong> as secções
+        sobre macroestrutura (definição das três regras e da restrição ao apagar) e sobre o papel do esquema.
+        <strong>O que saltar:</strong> o modelo de processamento em ciclos e os parâmetros de memória de trabalho — são
+        sobre prever o que se recorda, não sobre escrever. Registo no <a href="https://eric.ed.gov/?id=EJ191792">ERIC</a>.
+        <span class="verificado">🌐 Verificado a 2026-09-15 — li as definições das três regras, a restrição ao apagar e a secção sobre o esquema no PDF do artigo</span></li>
+      <li><strong>Luhn, H. P. (1958). «The Automatic Creation of Literature Abstracts». <em>IBM Journal of Research and
+        Development</em>, 2(2), 159–165.</strong> <a href="https://doi.org/10.1147/rd.22.0159">doi:10.1147/rd.22.0159</a>.
+        Curto e legível. <strong>O que ler:</strong> as secções sobre palavras significativas e sobre o fator de
+        significância (incluindo a Fig. 2). <strong>O que saltar:</strong> as extensões para codificação e indexação.
+        <span class="verificado">🌐 Verificado a 2026-09-15 — metadados na Crossref; o limite de «four or five» palavras e a fórmula da Fig. 2 conferidos no texto do artigo</span></li>
+      <li><strong>Wikipédia, «Abstract (summary)».</strong> O ponto de partida pedido. Fonte <strong>terciária</strong>:
+        útil para o vocabulário, não para afirmações — nada nesta lição depende dela.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="#conteudo">Voltar ao início</a> · <a href="index.html">Abstracts e resumos técnicos</a> ·
+      Seguinte: <a href="01-informativo-e-indicativo.html">1 · Informativo ou indicativo</a> ·
+      <a href="../metodo.html">Porque é que a lição tem esta forma</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

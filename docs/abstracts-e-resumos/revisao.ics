@@ -1,0 +1,127 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//professor//abstracts-e-resumos//PT
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Revisão — Abstracts e resumos técnicos
+BEGIN:VEVENT
+UID:83b1c3074cd931be@professor.local
+DTSTAMP:20260915T120000Z
+DTSTART;VALUE=DATE:20261013
+DTEND;VALUE=DATE:20261014
+SUMMARY:Revisão +1 — as três operações
+DESCRIPTION:Revisão espaçada\, +1 dias após o fim do núcleo (lições 0
+  a 3).\nDatas calculadas para um núcleo acabado a 2026-10-12: se acabou n
+ outro dia\, move os eventos.\n\n1. Sem abrir nada: escreve de memória as 
+ três operações de um resumo e a restrição de cada uma.\n2. Resume em 
+ 40 palavras um texto curto que tenhas lido hoje\, para um leitor que nomei
+ as antes de começar.\n3. Flashcards abstracts::l0 e abstracts::l1.\n\nPá
+ gina: docs/abstracts-e-resumos/index.html\nFlashcards: docs/abstracts-e-re
+ sumos/flashcards.csv\nFolha: docs/abstracts-e-resumos/folha.html\n\nDepois
+ : regista uma linha em topicos/abstracts-e-resumos/PROGRESSO.md.
+CATEGORIES:professor,revisão,abstracts-e-resumos
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER;RELATED=START:PT9H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +1 — as três operações — 30 minutos\, sem consu
+ ltar primeiro.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:8de66350d7deb97f@professor.local
+DTSTAMP:20260915T120000Z
+DTSTART;VALUE=DATE:20261015
+DTEND;VALUE=DATE:20261016
+SUMMARY:Revisão +3 — ler para decidir
+DESCRIPTION:Revisão espaçada\, +3 dias após o fim do núcleo (lições 0
+  a 3).\nDatas calculadas para um núcleo acabado a 2026-10-12: se acabou n
+ outro dia\, move os eventos.\n\n1. Escreve uma pergunta técnica tua e faz
+  a triagem de 3 artigos recentes só pelo abstract\, com relógio.\n2. Par
+ a cada um: decisão\, razão numa linha\, sinal de desconfiança.\n3. Flas
+ hcards abstracts::l2.\n\nPágina: docs/abstracts-e-resumos/index.html\nFla
+ shcards: docs/abstracts-e-resumos/flashcards.csv\nFolha: docs/abstracts-e-
+ resumos/folha.html\n\nDepois: regista uma linha em topicos/abstracts-e-res
+ umos/PROGRESSO.md.
+CATEGORIES:professor,revisão,abstracts-e-resumos
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER;RELATED=START:PT9H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +3 — ler para decidir — 30 minutos\, sem consultar
+  primeiro.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:a6dddbaf1dc831d5@professor.local
+DTSTAMP:20260915T120000Z
+DTSTART;VALUE=DATE:20261019
+DTEND;VALUE=DATE:20261020
+SUMMARY:Revisão +7 — o teu último PR
+DESCRIPTION:Revisão espaçada\, +7 dias após o fim do núcleo (lições 0
+  a 3).\nDatas calculadas para um núcleo acabado a 2026-10-12: se acabou n
+ outro dia\, move os eventos.\n\n1. Abre a descrição do teu último PR (f
+ ora deste repositório) e diagnostica-a com as quatro partes da lição 3.
+ \n2. Reescreve o título com no máximo 50 caracteres.\n3. Flashcards abst
+ racts::l3. Não entregues o texto do trabalho: só o que mudaste e porquê
+ .\n\nPágina: docs/abstracts-e-resumos/index.html\nFlashcards: docs/abstra
+ cts-e-resumos/flashcards.csv\nFolha: docs/abstracts-e-resumos/folha.html\n
+ \nDepois: regista uma linha em topicos/abstracts-e-resumos/PROGRESSO.md.
+CATEGORIES:professor,revisão,abstracts-e-resumos
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER;RELATED=START:PT9H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +7 — o teu último PR — 30 minutos\, sem consultar
+  primeiro.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:658dbd66f6a5633f@professor.local
+DTSTAMP:20260915T120000Z
+DTSTART;VALUE=DATE:20261102
+DTEND;VALUE=DATE:20261103
+SUMMARY:Revisão +21 — um resumo mau\, de memória
+DESCRIPTION:Revisão espaçada\, +21 dias após o fim do núcleo (lições 
+ 0 a 3).\nDatas calculadas para um núcleo acabado a 2026-10-12: se acabou 
+ noutro dia\, move os eventos.\n\n1. Sem a folha: escreve as seis perguntas
+  do diagnóstico e a ordem de corte.\n2. Diagnostica o primeiro parágrafo
+  do README de um projeto open source que uses.\n3. Todos os flashcards do 
+ tópico.\n\nPágina: docs/abstracts-e-resumos/index.html\nFlashcards: docs
+ /abstracts-e-resumos/flashcards.csv\nFolha: docs/abstracts-e-resumos/folha
+ .html\n\nDepois: regista uma linha em topicos/abstracts-e-resumos/PROGRESS
+ O.md.
+CATEGORIES:professor,revisão,abstracts-e-resumos
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER;RELATED=START:PT9H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +21 — um resumo mau\, de memória — 30 minutos\, s
+ em consultar primeiro.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:a4c4af879b206f7d@professor.local
+DTSTAMP:20260915T120000Z
+DTSTART;VALUE=DATE:20261211
+DTEND;VALUE=DATE:20261212
+SUMMARY:Revisão +60 — o critério de sucesso
+DESCRIPTION:Revisão espaçada\, +60 dias após o fim do núcleo (lições 
+ 0 a 3).\nDatas calculadas para um núcleo acabado a 2026-10-12: se acabou 
+ noutro dia\, move os eventos.\n\n1. Refaz a parte B do teste de domínio s
+ em olhar para a entrega anterior\; compara depois.\n2. Se falhares algo da
+ do como sabido\, o intervalo foi longo demais: regista-o e encurta.\n3. To
+ dos os flashcards do tópico.\n\nPágina: docs/abstracts-e-resumos/index.h
+ tml\nFlashcards: docs/abstracts-e-resumos/flashcards.csv\nFolha: docs/abst
+ racts-e-resumos/folha.html\n\nDepois: regista uma linha em topicos/abstrac
+ ts-e-resumos/PROGRESSO.md.
+CATEGORIES:professor,revisão,abstracts-e-resumos
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER;RELATED=START:PT9H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +60 — o critério de sucesso — 30 minutos\, sem co
+ nsultar primeiro.
+END:VALARM
+END:VEVENT
+END:VCALENDAR

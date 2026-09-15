@@ -1,0 +1,41 @@
+frente;verso;etiqueta
+Quais são as três operações de um resumo (Kintsch e van Dijk)?;Apagar, generalizar e construir.;abstracts::l0
+Qual é a única restrição ao apagar?;Não se apaga uma proposição que é condição para interpretar outra que fica.;abstracts::l0
+Generalizar: até onde se sobe?;Até ao conjunto imediatamente acima. Mais alto dá frases verdadeiras e inúteis («houve um problema técnico»).;abstracts::l0
+Construir: o que tem de ser verdade sobre as frases do texto?;Têm de ser condições, componentes ou consequências do facto global construído.;abstracts::l0
+«Não houve perda de dados» num resumo de um texto que não fala de dados: que erro é?;Um facto acrescentado. Não é construção, porque nenhuma frase do texto o sustenta.;abstracts::l0
+O que decide o que é relevante para um resumo?;O objetivo de quem lê (o esquema). Sem ele não há critério para apagar.;abstracts::l0
+Porque é que o método de Luhn perde o resultado de um relatório?;Escolhe frases por repetição de palavras próximas. O resultado é dito uma vez e com números — que não contam.;abstracts::l0
+Fator de significância de Luhn para um grupo de palavras?;(significativas no grupo)² ÷ (palavras no grupo). Na Fig. 2 do artigo: 4² ÷ 7 = 2,3.;abstracts::l0
+Informativo vs indicativo (NISO): o que diz cada um?;Informativo: propósito, metodologia, resultados e conclusões. Indicativo: o âmbito, e talvez abordagens e argumentos.;abstracts::l1
+Teste rápido para reconhecer um abstract indicativo?;De quem são os verbos: se o sujeito é o documento («descreve», «discute»), é indicativo.;abstracts::l1
+Quando é o indicativo o tipo certo?;Em documentos sem metodologia nem resultados: ensaios, editoriais, guias, livros, relatórios longos.;abstracts::l1
+Os movimentos de um abstract informativo?;Contexto, lacuna, o que se fez, resultado com grandeza, implicação — e a implicação responde à lacuna.;abstracts::l1
+Porque é que a lacuna não se pode apagar?;Porque dá escala ao resultado: sem ela um número não diz se é muito ou pouco.;abstracts::l1
+Máximo NISO para o abstract de um artigo, se nada for especificado?;250 palavras (notas 100, editoriais 30, teses uma página ou 300).;abstracts::l1
+O que resume Hartley (2004) sobre abstracts estruturados?;Mais informação e mais fáceis de ler, mas ocupam mais espaço e não impedem omissões nem distorções.;abstracts::l1
+O que é IMRaD, e quando se generalizou?;Introduction, Methods, Results and Discussion. Em 4 revistas médicas: 0% em 1935, cerca de 80% nos anos 70, 100% em JAMA e Lancet em 1985.;abstracts::l1
+A primeira passagem de Keshav?;Título, abstract e introdução · títulos das secções · conclusões · olhar pelas referências. Cinco a dez minutos.;abstracts::l2
+Os cinco Cs de Keshav?;Categoria, contexto, correção, contribuições, clareza.;abstracts::l2
+Porque se escreve a pergunta antes da triagem?;É o teu critério de relevância: sem ele, abstracts bem escritos parecem todos relevantes.;abstracts::l2
+Pitkin et al. (1999): o que é um abstract deficiente, e quão comum foi?;Dados inconsistentes com o corpo ou ausentes dele. De 18% a 68% conforme a revista (6 revistas médicas).;abstracts::l2
+Boutron et al. (2010): onde foi o spin mais frequente no abstract?;Nas conclusões: 42 de 72 ensaios (58,3%). Resultados 37,5%, títulos 18,0%.;abstracts::l2
+Cinco sinais de desconfiança num abstract?;Resultado de outra métrica · conclusão maior do que o método · número sem condição · adjetivos no lugar de grandezas · indicativo vestido de informativo.;abstracts::l2
+Limite recomendado para o título de um commit, e quem o diz?;50 caracteres, pela página de manual git-commit — recomendação, não obrigatório. O kernel dá 70 a 75.;abstracts::l3
+Porque é que o título de um commit se escreve no imperativo?;Descreve o que aplicar o commit faz ao código, não o que tu fizeste. Pedido pelo kernel e pela Google.;abstracts::l3
+As quatro partes de uma descrição de PR?;Problema e impacto · solução e porquê esta · números e custos · limitações, onde olhar, testes.;abstracts::l3
+Porque é que «Ver JIRA-4821» não é descrição?;Não é autocontida: quem lê o histórico pode não ter acesso ao ticket.;abstracts::l3
+A história da investigação vai para a descrição do PR?;Não. Ficam só as alternativas rejeitadas, como justificação da escolha.;abstracts::l3
+Porque é que o RFC 7322 proíbe citações no Abstract?;Porque o Abstract aparece isolado em anúncios e no índice, onde a referência não existe.;abstracts::l4
+O que dá copiar a introdução para o Abstract (RFC 7322)?;Um Abstract incompleto e redundante.;abstracts::l4
+Abstract de PEP: tamanho segundo o PEP 1?;Cerca de 200 palavras, com Motivation e Rationale como secções à parte.;abstracts::l4
+O que diz o abstract de uma proposta ainda sem resultados?;A decisão proposta, o problema, o custo e o que se pede a quem lê — o não medido como «espera-se».;abstracts::l4
+RFC 7322 e NISO §7.4 discordam em quê, e como se resolve?;O RFC manda começar por «This document» e a NISO desaconselha nomear o tipo de documento. Ganha a convenção do sítio.;abstracts::l4
+O que responde o primeiro parágrafo de um README?;O que o projeto faz e porque é útil. Como começar, onde pedir ajuda e quem mantém vêm depois.;abstracts::l4
+Os cinco elementos do resumo de um post-mortem?;O quê · de quando a quando · impacto · causa sistémica · ações.;abstracts::l5
+As quatro marcas de tempo de um incidente?;Início, deteção, mitigação, recuperação. O início muitas vezes não se sabe — e diz-se.;abstracts::l5
+Impacto não medido: o que se escreve?;«Por medir», ou a estimativa marcada como estimativa.;abstracts::l5
+Porque é que culpar uma pessoa dá um resumo pior?;É uma construção parada na pessoa: ninguém consegue agir sobre ela. A causa útil é a razão sistémica.;abstracts::l5
+As seis perguntas do diagnóstico, por ordem?;Leitor e decisão · lido sozinho · movimentos · factos sustentados · custo · limite.;abstracts::l6
+Por onde se começa a cortar um resumo?;Por proposições (apagar, generalizar, construir). Palavras só no fim.;abstracts::l6
+O que é que o conferir_numeros.py não vê?;Números presentes no texto mas com outro significado. E acusa contas honestas, como «23 vezes mais rápido».;abstracts::l6

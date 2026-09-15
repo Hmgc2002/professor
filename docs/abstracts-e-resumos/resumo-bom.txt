@@ -1,0 +1,1 @@
+Um job alterado para correr de hora a hora esvaziava a cache de pesquisa, e a pesquisa de encomendas ficou lenta durante a manhã de segunda-feira. Reverter a alteração às 11h40 baixou o p95 de 4,2 s para 180 ms. Alterações a jobs passam a ter revisão, e a cache ganha um alarme sobre a taxa de acertos.

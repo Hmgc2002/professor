@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 · A descrição de um PR e o título de um commit — Abstracts e resumos técnicos</title>
+<meta name="description" content="Lição 3: o título de um commit como resumo de uma linha, e a descrição de um PR como abstract informativo escrito para quem revê.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/abstracts-e-resumos/03-pr-e-commit.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">Abstracts e resumos técnicos</a> <span aria-hidden="true">›</span> lição 3</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+<p class="etiqueta nucleo">Lição 3 · núcleo</p>
+    <h1>A descrição de um PR e o título de um commit</h1>
+    <p class="subtitulo">O género de resumo que escreves mais vezes. O leitor é quem revê hoje e quem vai correr
+    <code>git blame</code> daqui a um ano; a microestrutura é o diff; e o que eles precisam é um abstract informativo com
+    uma linha à cabeça que sobreviva sozinha.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>Dada a descrição de uma alteração, escreves um <strong>título de commit</strong> com no máximo 50 caracteres que diz o
+    efeito, e uma <strong>descrição de PR</strong> com no máximo 150 palavras que deixa quem revê saber o problema, a solução,
+    porquê esta, o que custa e como foi testada — e, numa descrição má, dizes <strong>qual destas falta</strong>.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+<ol>
+  <li>Quais são os movimentos de um abstract informativo?
+    <details class="solucao"><summary>Resposta</summary><p>Contexto, lacuna, o que se fez, resultado (com grandeza), implicação. A implicação responde à lacuna.</p></details>
+  </li>
+  <li>«Houve um problema técnico que já foi resolvido.» Que operação falhou, e como?
+    <details class="solucao"><summary>Resposta</summary><p>Generalizar: subiu muito acima do conjunto imediato. A frase é verdadeira para qualquer incidente e não deixa decidir nada.</p></details>
+  </li>
+  <li>Porque é que um abstract não pode depender do texto à volta?
+    <details class="solucao"><summary>Resposta</summary><p>Porque é lido sozinho — numa lista, numa pesquisa, num anúncio. Tudo o que não disser não existe para esse leitor.</p></details>
+  </li>
+</ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>Dois leitores, duas decisões</h3>
+    <p><strong>Quem revê</strong> decide «aprovo?» e, antes disso, «onde é que tenho de olhar com cuidado?». <strong>Quem lê o
+    histórico</strong> daqui a um ano decide «porque é que isto está assim, e posso mudar sem partir nada?». O diff responde a
+    <em>o quê</em>; nenhum dos dois consegue tirar <em>porquê</em> nem <em>a que custo</em> do diff.</p>
+
+    <h3>O título é um abstract de uma linha</h3>
+    <p>O título aparece sozinho: em <code>git log --oneline</code>, em qualquer vista do histórico que mostre uma linha por
+    commit, e no assunto do email quando um commit vira patch. Três fontes primárias, três limites:</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Regras para o título de um commit, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Fonte</th><th>Limite</th><th>O que diz sobre o conteúdo</th></tr></thead>
+        <tbody>
+          <tr><td>Página de manual <code>git-commit</code>, secção DISCUSSION</td><td>Não obrigatório; «boa ideia» começar com uma linha curta de <strong>no máximo 50 caracteres</strong>, seguida de uma linha em branco</td><td>A linha resume a alteração. O texto até à primeira linha em branco é tratado como título em todo o Git — o <code>git format-patch</code> usa-o como assunto do email</td></tr>
+          <tr><td>Kernel Linux, «Submitting patches»</td><td>Frase-resumo com <strong>no máximo 70–75 caracteres</strong></td><td>Tem de dizer o que o patch muda <em>e</em> porque pode ser necessário. Torna-se o identificador do patch e propaga-se até ao changelog do Git</td></tr>
+          <tr><td>Google, «Writing good CL descriptions»</td><td>Curta, sem número</td><td>Um resumo do que se está a fazer, como frase completa, escrito como uma ordem. Tem de se perceber sem ler o resto</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Modo imperativo.</strong> O kernel pede «make xyzzy do frotz» em vez de «este patch faz» ou «eu mudei»; a Google
+    pede a frase escrita como uma ordem. O porquê, na minha leitura: o título descreve o que <em>aplicar o commit</em> faz ao
+    código, não o que tu fizeste ontem. Em português ⚠️ <strong>não conheço fonte</strong> que fixe a forma: há equipas com o
+    infinitivo («Invalidar…») e equipas com o presente («Invalida…»). É convenção — escolhe uma e mantém-na.</p>
+    <p><strong>Títulos indicativos.</strong> A Google dá exemplos de descrições más, como «Fix bug» e «Fix build»: não dizem
+    <em>que</em> bug nem <em>o que</em> mudou. Na linguagem da lição 1, são indicativos — e na da lição 0, uma generalização que
+    serve para qualquer commit.</p>
+
+    <h3>O corpo é um abstract informativo para quem revê</h3>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Correspondência entre abstract e descrição de PR, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Movimento (lição 1)</th><th>Na descrição de um PR</th><th>Quem o pede</th></tr></thead>
+        <tbody>
+          <tr><td>Contexto e lacuna</td><td>O problema e o seu impacto, com números</td><td>Kernel: descrever o problema e o impacto visível; convencer quem revê de que vale a pena ler para lá do primeiro parágrafo. Google: uma breve descrição do problema resolvido</td></tr>
+          <tr><td>O que se fez</td><td>A solução — e <strong>porquê esta</strong> e não as alternativas</td><td>Google: porque é que esta é a melhor abordagem</td></tr>
+          <tr><td>Resultado</td><td>Números que sustentam o efeito, e os custos</td><td>Kernel: otimizações com números, e os custos não óbvios — «otimizações raramente são grátis», em paráfrase</td></tr>
+          <tr><td>Implicação</td><td>Limitações, riscos, onde olhar na revisão, como foi testado</td><td>Google: limitações e contexto relevante</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>E uma regra que decorre de o texto viver no histórico: <strong>autocontido</strong>. O kernel pede que a explicação se
+    perceba sem recursos externos; a Google lembra que as ligações podem deixar de estar acessíveis a quem lê no futuro. «Ver
+    JIRA-4821» é uma descrição que depende de uma coisa que talvez não exista daqui a um ano.</p>
+    <p>A Google acrescenta um passo que costuma ficar esquecido: <strong>rever a descrição antes de submeter</strong>, porque a
+    alteração pode ter mudado muito desde que a descrição foi escrita.</p>
+
+    <figure>
+      <svg viewBox="0 0 520 210" role="img" aria-labelledby="t-l3-pr d-l3-pr">
+        <title id="t-l3-pr">Do diff ao título e à descrição, e quem lê cada um</title>
+        <desc id="d-l3-pr">À esquerda, o diff, que diz o quê. Dele saem o título, com no máximo 50 caracteres, lido sozinho no git log e no assunto do email; e a descrição com quatro partes: problema e impacto, solução e porquê, números e custos, onde olhar e testes, lida por quem revê e por quem faz git blame.</desc>
+        <rect class="svg-caixa" x="8" y="70" width="110" height="60" rx="6"/>
+        <text class="svg-texto" x="63" y="96" text-anchor="middle">diff</text>
+        <text class="svg-suave" x="63" y="114" text-anchor="middle">diz «o quê»</text>
+        <rect class="svg-realce" x="160" y="10" width="200" height="40" rx="6"/>
+        <text class="svg-texto" x="260" y="35" text-anchor="middle">título · ≤ 50 caracteres</text>
+        <rect class="svg-caixa" x="160" y="70" width="200" height="130" rx="6"/>
+        <text class="svg-texto" x="175" y="94">1 problema e impacto</text>
+        <text class="svg-texto" x="175" y="124">2 solução e porquê esta</text>
+        <text class="svg-texto" x="175" y="154">3 números e custos</text>
+        <text class="svg-texto" x="175" y="184">4 onde olhar · testes</text>
+        <path class="svg-traco" d="M118 90 C140 90 140 30 154 30" marker-end="url(#seta-l3)"/>
+        <path class="svg-traco" d="M118 110 H154" marker-end="url(#seta-l3)"/>
+        <text class="svg-suave" x="440" y="35" text-anchor="middle">git log, email</text>
+        <text class="svg-suave" x="440" y="125" text-anchor="middle">quem revê</text>
+        <text class="svg-suave" x="440" y="142" text-anchor="middle">quem faz blame</text>
+        <path class="svg-traco" d="M360 30 H388" marker-end="url(#seta-l3)"/>
+        <path class="svg-traco" d="M360 132 H388" marker-end="url(#seta-l3)"/>
+        <defs>
+          <marker id="seta-l3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>As quatro partes são os movimentos da lição 1 com os nomes deste género.</figcaption>
+    </figure>
+
+    <h3>Um caso real de regras em choque: este repositório</h3>
+    <p>O <code>CLAUDE.md</code> do repositório <em>professor</em> manda que o título de cada commit diga <strong>o que se
+    descobriu</strong>, não o que se mexeu — é pedir um título informativo. Medido à data em que esta lição foi escrita, com o
+    comando do exercício E2: <strong>5 commits, nenhum com 50 caracteres ou menos, nenhum com 72 ou menos, o maior com 139</strong>.
+    A regra da casa ganhou à do git, de propósito: preferiu-se que o <code>git log --oneline</code> contasse a história a que
+    coubesse numa linha estreita. É uma troca legítima — o erro seria fazê-la sem saber que se está a fazer.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>A continuação do incidente da lição 0 (fictício). A reversão resolveu a manhã; este PR resolve a causa. Os factos:</p>
+    <ul>
+      <li>O job de reindexação apagava a cache de pesquisa inteira a cada execução (de hora a hora).</li>
+      <li>A alteração: passa a apagar só as chaves das encomendas com <code>updated_at</code> posterior à execução anterior.</li>
+      <li>Alternativas: TTL curto (serviria resultados desatualizados durante todo o TTL); voltar a correr só de noite (a pesquisa precisa das encomendas novas dentro da hora).</li>
+      <li>Staging, 24 h de tráfego gravado: taxa de acertos durante o job 12% → 79%; p95 da pesquisa durante o job 3,8 s → 210 ms.</li>
+      <li>Custo: o job passa de 2 s para 40 s, porque tem de consultar as alterações.</li>
+      <li>Limitação: alterações feitas diretamente na base de dados sem atualizar <code>updated_at</code> não invalidam a cache. Há dois scripts de manutenção assim.</li>
+      <li>Testes: unitários do job, e o replay de 24 h em staging.</li>
+      <li>E a história: dois dias a investigar, suspeitou-se primeiro da base de dados, depois da rede.</li>
+    </ul>
+
+    <h3>Passo 1 — Leitor e decisão</h3>
+    <p>Quem revê: aprova, e onde olha. Quem faz blame daqui a um ano: porque é que o job não faz simplesmente FLUSH.</p>
+
+    <h3>Passo 2 — O título</h3>
+    <p>Primeira tentativa: «Corrige cache». Indicativa, e verdadeira para metade dos commits do mundo. Segunda: «Altera o job
+    de reindexação para invalidar apenas as chaves das encomendas alteradas» — informativa, mas com mais de 70 caracteres.
+    Aplicar as operações: «o job de reindexação» generaliza-se em «na reindexação», «apenas as chaves das encomendas alteradas»
+    em «só chaves alteradas».</p>
+<pre><code class="amostra-titulo" data-caracteres="43">Invalida só chaves alteradas na reindexação</code></pre>
+    <p>43 caracteres. Diz o efeito; o porquê fica para o corpo, que é onde a regra do git o põe.</p>
+
+    <h3>Passo 3 — Apagar a história</h3>
+    <p>Os dois dias e as suspeitas erradas saem. <em>Porquê:</em> nenhuma frase da descrição precisa delas para ser percebida, e
+    nenhum dos dois leitores decide nada com elas. <strong>As alternativas rejeitadas ficam</strong> — não como história, mas como
+    «porquê esta»: são o que impede alguém, daqui a um ano, de «simplificar» para um TTL.</p>
+
+    <h3>Passo 4 — Números e custo</h3>
+    <p>Os dois números do efeito ficam, com a condição em que foram medidos (staging, replay de 24 h). O custo — 2 s para 40 s —
+    fica, por mais que apeteça esconder: quem revê precisa dele para decidir se é aceitável.</p>
+
+    <h3>Passo 5 — Onde olhar</h3>
+    <p>A limitação dos scripts é a frase mais útil para quem revê: diz-lhe exatamente onde está o risco.</p>
+
+    <h3>Resultado</h3>
+<pre class="amostra-pr" data-palavras-corpo="146"><code>Invalida só chaves alteradas na reindexação
+
+O job de reindexação apagava a cache de pesquisa inteira a cada hora.
+Durante o job, a taxa de acertos caía para 12% e o p95 da pesquisa de
+encomendas subia para 3,8 s.
+
+Passa a apagar só as chaves das encomendas com updated_at posterior à
+execução anterior. Um TTL curto serviria resultados desatualizados
+durante todo o TTL; correr só de noite deixaria encomendas novas fora
+da pesquisa durante horas.
+
+Em staging, com 24 h de tráfego gravado: acertos 12% → 79% e p95
+3,8 s → 210 ms durante o job. Custo: o job passa de 2 s para 40 s.
+
+Limitação: alterações feitas diretamente na base de dados sem mexer em
+updated_at não invalidam a cache. Os dois scripts de manutenção em
+scripts/ fazem isso — é aí que vale a pena olhar.
+
+Testes: unitários do job e replay de 24 h em staging.</code></pre>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <div class="exercicio">
+      <h3>Paginação por chave</h3>
+      <p>Os factos (fictícios): a listagem <code>/encomendas</code> usava <code>OFFSET</code>; a página 500 demorava 2,3 s · passa
+      a paginar por chave (<code>WHERE id &lt; último_id</code>), 35 ms em qualquer página · custo: deixa de ser possível saltar
+      para a página N; o botão «ir para a página» sai da interface · há 3 clientes internos da API que usam <code>?page=</code>;
+      o parâmetro continua a funcionar durante 60 dias, com um cabeçalho de descontinuação · testes: de integração nos dois modos.</p>
+      <p><strong>Título, no máximo 50 caracteres:</strong> ______.</p>
+      <p><strong>Problema e impacto:</strong> dado — a listagem usava OFFSET e a página 500 demorava 2,3 s.</p>
+      <p><strong>Solução e porquê:</strong> dado — paginação por chave, que custa o mesmo em qualquer página.</p>
+      <p><strong>Números e custo:</strong> ______.</p>
+      <p><strong>Onde olhar:</strong> ______.</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+<pre><code class="amostra-titulo" data-caracteres="44">Pagina encomendas por chave em vez de OFFSET</code></pre>
+        <p>44 caracteres. «Melhora paginação» seria indicativo; «Muda a query de OFFSET para keyset na listagem de encomendas» passa dos 50.</p>
+        <p><strong>Números e custo:</strong> 2,3 s → 35 ms na página 500, e o mesmo tempo em qualquer página. Custo: deixa de ser
+        possível saltar para a página N — o botão sai da interface.</p>
+        <p><strong>Onde olhar:</strong> os 3 clientes internos que usam <code>?page=</code>. O parâmetro funciona mais 60 dias, com
+        cabeçalho de descontinuação; quem revê deve confirmar que os três estão avisados.</p>
+        <p>⚠️ Se puseste o botão removido como «pormenor de interface» no fim, repara que é o custo principal para quem usa a
+        listagem. Custos não se escondem no fim por serem negativos.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <p>⚠️ Os três primeiros são exatamente o que as fontes avisam (Google: exemplos de descrições más e ligações que deixam de
+    estar acessíveis; kernel: números e custos). Os restantes decorrem das lições anteriores.</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr><td>O título diz o que mexi</td><td>«Alterações no job», «Corrige bug», «Refactor»</td><td>O título diz o efeito de aplicar o commit. Um título que serve para qualquer commit é uma generalização sem conteúdo</td></tr>
+          <tr><td>O ticket explica</td><td>«Ver JIRA-4821.»</td><td>A descrição vive no histórico, onde o ticket pode não estar. Tem de se perceber sozinha</td></tr>
+          <tr><td>«Mais rápido» chega</td><td>Otimização sem número, ou sem o que custou</td><td>Números que sustentem o efeito e os custos não óbvios. O custo é metade da decisão de quem revê</td></tr>
+          <tr><td>O diff explica-se sozinho</td><td>Descrição vazia, ou uma lista dos ficheiros tocados</td><td>O diff diz o quê. O porquê e o a-que-custo não estão lá</td></tr>
+          <tr><td>Contar como se chegou lá</td><td>«Primeiro suspeitei da BD, depois…»</td><td>Apaga-se a história. Ficam só as alternativas rejeitadas, como justificação da escolha</td></tr>
+          <tr><td>A descrição escreve-se no primeiro commit</td><td>A descrição fala de uma abordagem que a revisão já mudou</td><td>Revê-se antes de submeter — e depois de mudanças grandes na revisão</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — Títulos maus, com contexto</h3>
+      <p>Para cada título, o que falta — e reescreve-o com no máximo 50 caracteres usando o contexto.</p>
+      <ol type="a">
+        <li>«Corrige bug» — o relatório diário mostrava as vendas de ontem com o fuso UTC em vez do de Lisboa.</li>
+        <li>«WIP» — adiciona validação do email no formulário de faturação, só do lado do cliente.</li>
+        <li>«Alterações pedidas na revisão» — troca o nome da função <code>get_data</code> por <code>carregar_encomendas</code> e acrescenta um teste.</li>
+        <li>«Atualiza dependências» — sobe a biblioteca de PDF de 2.1 para 3.0 por causa de uma vulnerabilidade conhecida.</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <p>Versões possíveis (conta os caracteres das tuas — o E2 dá-te a ferramenta):</p>
+        <ol type="a">
+          <li>Falta <em>que</em> bug. <code>Usa o fuso de Lisboa no relatório diário</code></li>
+          <li>Falta tudo; «WIP» nem é um resumo. <code>Valida o email no formulário de faturação</code> — e o «só do lado do cliente» vai para o corpo, como limitação.</li>
+          <li>Diz a origem, não o efeito; ninguém no histórico sabe que revisão foi. <code>Renomeia get_data para carregar_encomendas</code> — o teste fica no corpo.</li>
+          <li>Falta qual e porquê — e o porquê aqui é a razão de urgência. <code>Sobe a biblioteca de PDF para 3.0 (segurança)</code></li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — Medir os títulos de um repositório (código que corre)</h3>
+      <p>Num repositório Git teu, e depois num projeto open source grande que tenhas clonado, corre:</p>
+<pre><code>git log --format=%s | python3 -c "import sys; n=[len(l.rstrip('\n')) for l in sys.stdin]; print(len(n), 'commits;', sum(x&lt;=50 for x in n), 'com &lt;=50;', sum(x&lt;=72 for x in n), 'com &lt;=72; máximo', max(n))"</code></pre>
+      <p>Compara as duas proporções. Depois abre 10 títulos ao acaso do projeto grande e classifica cada um como informativo
+      ou indicativo. Há relação entre comprimento e tipo?</p>
+      <div class="aberta">
+        <label for="l3-e2">Os teus números, os 10 títulos classificados, e a relação que encontraste (ou não)
+          <span class="pista">Não copies títulos de repositórios do trabalho — usa só o nome do projeto open source e os números.</span>
+        </label>
+        <textarea id="l3-e2" data-pergunta="L3 E2 — comprimento e tipo dos títulos"></textarea>
+      </div>
+      <details class="solucao"><summary>Solução</summary>
+        <p>No repositório <em>professor</em>, à data em que a lição foi escrita, a saída foi:</p>
+<pre><code>5 commits; 0 com &lt;=50; 0 com &lt;=72; máximo 139</code></pre>
+        <p>Porque <code>len</code> em Python e não <code>awk '{print length}'</code>: queres caracteres, e com acentos a contagem
+        de bytes dá mais. Se quiseres ver, compara as duas numa linha com «ç».</p>
+        <p>Sobre a relação: não há resposta fixa, mas o padrão a procurar é este — títulos muito curtos tendem a ser indicativos
+        («Fix build»), e títulos muito longos tendem a ser informativos e a partir o limite. O resumo difícil é o do meio: informativo
+        dentro dos 50. É por isso que o E1 e o exemplo trabalhado gastam as operações da lição 0 no título.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — Um PR que custa</h3>
+      <p>Os factos (fictícios): remove a feature flag <code>nova_faturacao</code>, que está a 100% há 30 dias · apaga ~1.200 linhas
+      do caminho antigo e 2 testes que só testavam esse caminho · nos 30 dias não houve erros novos associados à faturação ·
+      custo: até agora, voltar atrás era desligar a flag (cerca de 1 minuto); depois disto, é reverter e fazer deploy · a flag foi
+      criada por outra equipa, que já concordou.</p>
+      <p>Escreve o título (no máximo 50 caracteres) e a descrição (no máximo 150 palavras).</p>
+      <div class="aberta">
+        <label for="l3-e3">Título e descrição do PR
+          <span class="pista">Os quatro movimentos. Qual é a frase que quem revê mais precisa?</span>
+        </label>
+        <textarea id="l3-e3" data-pergunta="L3 E3 — PR de remoção da flag"></textarea>
+      </div>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>Remove a flag nova_faturacao e o caminho antigo
+
+A nova faturação está a 100% há 30 dias, sem erros novos associados.
+O caminho antigo (~1.200 linhas) já não corre e continua a ter de ser
+mantido a cada alteração à faturação.
+
+Remove a flag, o caminho antigo e os 2 testes que só o testavam. A
+equipa que criou a flag concordou.
+
+Custo: até agora, voltar atrás era desligar a flag (cerca de 1 minuto).
+Depois deste PR, é reverter e fazer deploy.
+
+Onde olhar: se há algum sítio além de faturacao/ que ainda leia a flag.</code></pre>
+        <p>A frase de que quem revê mais precisa é o <strong>custo</strong>: a remoção troca um rollback de um minuto por um deploy.
+        Se ficou de fora, o revisor aprova sem saber em que troca está a consentir. Repara também que «continua a ter de ser mantido»
+        é uma construção: não estava nos factos, mas é a consequência direta de haver 1.200 linhas mortas — legítima, e a razão do PR.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<div class="quiz" data-quiz="abstracts-l3">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o título de um commit tem de se perceber sozinho?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-1" value="a" data-certa="false"><span class="rotulo">Porque o Git recusa commits com títulos de mais de 50 caracteres</span></label>
+          <p class="explicacao" hidden>O Git não impõe limite: a página de manual diz que é «boa ideia», não obrigatório. Este repositório tem títulos de 139 caracteres e funciona.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-1" value="b" data-certa="false"><span class="rotulo">Porque o corpo da mensagem é opcional</span></label>
+          <p class="explicacao" hidden>O corpo é opcional para o Git, mas a razão pela qual o título tem de se perceber sozinho é outra: é o sítio onde é lido sem o corpo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-1" value="c" data-certa="true"><span class="rotulo">Porque aparece sozinho — no git log --oneline, em vistas do histórico com uma linha por commit, no assunto do email de um patch</span></label>
+          <p class="explicacao" hidden>Certo. É um abstract de uma linha: o leitor decide com ele se abre o resto, e muitas vezes não abre.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-1" value="d" data-certa="false"><span class="rotulo">Por uma questão de estética</span></label>
+          <p class="explicacao" hidden>A razão é funcional. O kernel chama-lhe identificador do patch: é por ele que se encontra a alteração.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">«Melhora o desempenho da pesquisa.» O que falta, segundo o guia do kernel?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-2" value="a" data-certa="false"><span class="rotulo">O modo imperativo</span></label>
+          <p class="explicacao" hidden>«Melhora» já está no presente, e o problema maior é outro — há frases imperativas que continuam sem dizer nada.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-2" value="b" data-certa="true"><span class="rotulo">Números que sustentem a melhoria e os custos não óbvios</span></label>
+          <p class="explicacao" hidden>Certo. O guia pede as duas coisas juntas: otimizações raramente são grátis, e quem revê precisa de saber o preço.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-2" value="c" data-certa="false"><span class="rotulo">Uma ligação para o benchmark</span></label>
+          <p class="explicacao" hidden>Uma ligação pode ajudar, mas o guia pede uma explicação que se perceba sem recursos externos. Os números vão no texto.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-2" value="d" data-certa="false"><span class="rotulo">Nada, é um bom título</span></label>
+          <p class="explicacao" hidden>Serve para qualquer otimização em qualquer sistema. É uma generalização sem conteúdo.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A descrição de um PR diz só «Ver JIRA-4821». Qual é o problema?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-3" value="a" data-certa="true"><span class="rotulo">Não é autocontida: quem ler o histórico daqui a um ano pode não ter acesso ao ticket</span></label>
+          <p class="explicacao" hidden>Certo. O kernel pede explicações compreensíveis sem recursos externos; a Google lembra que o acesso às ligações pode deixar de existir.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-3" value="b" data-certa="false"><span class="rotulo">Falta o título</span></label>
+          <p class="explicacao" hidden>O título é outra coisa. Uma descrição com título perfeito e só «Ver JIRA-4821» continua a obrigar a abrir outro sistema.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-3" value="c" data-certa="false"><span class="rotulo">As ferramentas de revisão não aceitam ligações</span></label>
+          <p class="explicacao" hidden>Aceitam, e ligações são úteis como complemento. O problema é serem a única coisa.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-3" value="d" data-certa="false"><span class="rotulo">É indicativa, mas aceitável em equipas pequenas</span></label>
+          <p class="explicacao" hidden>O tamanho da equipa não muda quem lê o histórico: a própria pessoa, daqui a um ano, com o ticket arquivado.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Qual é a correspondência entre os movimentos de um abstract e as partes de uma descrição de PR?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-4" value="a" data-certa="false"><span class="rotulo">Contexto ↔ testes; resultado ↔ solução; implicação ↔ problema</span></label>
+          <p class="explicacao" hidden>Está baralhada: o problema é o contexto e a lacuna, não a implicação. Os testes são parte do que diz ao revisor onde confiar e onde olhar.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-4" value="b" data-certa="false"><span class="rotulo">Não há correspondência: são géneros diferentes</span></label>
+          <p class="explicacao" hidden>Os géneros têm convenções diferentes, mas o mecanismo é o mesmo. É por isso que a lição 1 vem antes desta.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-4" value="c" data-certa="true"><span class="rotulo">Lacuna ↔ problema e impacto; o que se fez ↔ solução e porquê; resultado ↔ números e custos; implicação ↔ limitações e onde olhar</span></label>
+          <p class="explicacao" hidden>Certo. É o mesmo abstract informativo com os nomes de outro género, e com o leitor que revê no lugar do esquema.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-4" value="d" data-certa="false"><span class="rotulo">Título ↔ abstract inteiro; corpo ↔ artigo</span></label>
+          <p class="explicacao" hidden>Tem uma parte de verdade — o título é um resumo do resumo —, mas o corpo não é o artigo: o artigo é o diff.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Os títulos dos commits do repositório professor têm 111 a 139 caracteres. O que isto mostra?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-5" value="a" data-certa="false"><span class="rotulo">Que o repositório não segue regra nenhuma</span></label>
+          <p class="explicacao" hidden>Segue uma regra escrita no CLAUDE.md, e segue-a com mais disciplina do que muitos repositórios seguem os 50 caracteres.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-5" value="b" data-certa="false"><span class="rotulo">Que o Git vai truncar ou recusar esses commits</span></label>
+          <p class="explicacao" hidden>O Git não trunca nem recusa. As recomendações são sobre legibilidade, não sobre funcionamento.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-5" value="c" data-certa="true"><span class="rotulo">Uma regra da casa (dizer o que se descobriu) ganhou, de propósito, às recomendações do git (50) e do kernel (70–75)</span></label>
+          <p class="explicacao" hidden>Certo. É uma troca: títulos informativos no git log --oneline em vez de títulos que cabem numa linha estreita. O erro seria fazê-la sem saber.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-5" value="d" data-certa="false"><span class="rotulo">Que os 50 caracteres estão errados</span></label>
+          <p class="explicacao" hidden>Não estão errados; servem um objetivo (caber numa linha curta) que este repositório pôs abaixo de outro.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A história da investigação («suspeitei primeiro da base de dados, depois da rede») deve ir para a descrição?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-6" value="a" data-certa="false"><span class="rotulo">Sim, mostra o esforço feito</span></label>
+          <p class="explicacao" hidden>Quem revê decide se aprova e onde olha; o esforço não entra nessa decisão.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-6" value="b" data-certa="false"><span class="rotulo">Sim, e por ordem cronológica, que é mais honesto</span></label>
+          <p class="explicacao" hidden>A ordem cronológica é a microestrutura de quem investigou. O leitor precisa da macroestrutura: problema, solução, custo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-6" value="c" data-certa="false"><span class="rotulo">Só se o PR for grande</span></label>
+          <p class="explicacao" hidden>O tamanho do PR não muda o critério. Num PR grande a história ainda gasta mais palavras que quem revê não usa.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l3-6" value="d" data-certa="true"><span class="rotulo">Em regra não: apaga-se, e só ficam as alternativas rejeitadas que justificam a escolha</span></label>
+          <p class="explicacao" hidden>Certo. Nenhuma frase da descrição depende da história. As alternativas ficam porque protegem a escolha de ser «simplificada» mais tarde.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="l3-feynman">Explica a um colega que começou há um mês porque é que «Corrige bug» é um mau título e «Ver ticket» é uma má descrição.
+        <span class="pista">Sem as palavras «informativo», «indicativo» e «autocontido».</span>
+      </label>
+      <textarea id="l3-feynman" data-pergunta="L3 — porque é que «Corrige bug» é mau"></textarea>
+    </div>
+
+<div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/abstracts-e-resumos/respostas/AAAA-MM-DD.md</code> e correr <code>/corrigir abstracts-e-resumos</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li>O título é um resumo de uma linha lido sozinho: git ≤ 50 caracteres (recomendação), kernel 70–75; diz o efeito de aplicar o commit.</li>
+      <li>O corpo é um abstract informativo para quem revê: problema e impacto · solução e porquê esta · números e custos · limitações, onde olhar, testes.</li>
+      <li>Autocontido: uma ligação complementa, não substitui.</li>
+      <li>Apaga-se a história da investigação; ficam as alternativas rejeitadas, como justificação.</li>
+      <li>Regras em choque resolvem-se sabendo o que se troca — este repositório troca os 50 caracteres por títulos que dizem o que se descobriu.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>Git, página de manual <code>git-commit</code>, secção DISCUSSION.</strong> Online em
+        <a href="https://git-scm.com/docs/git-commit">git-scm.com/docs/git-commit</a>. Um parágrafo — lê-o inteiro.
+        <span class="verificado">🌐 Verificado a 2026-09-15 na página de manual instalada (git 2.54.0)</span></li>
+      <li><strong>The Linux Kernel documentation, «Submitting patches: the essential guide to getting your code into the kernel».</strong>
+        <a href="https://www.kernel.org/doc/html/latest/process/submitting-patches.html">kernel.org</a>. <strong>O que ler:</strong>
+        «Describe your changes» e «The canonical patch format». <strong>O que saltar:</strong> tudo sobre listas de email,
+        assinaturas e manutenção de patches — é do processo do kernel, não da escrita.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Google Engineering Practices, «Writing good CL descriptions».</strong>
+        <a href="https://google.github.io/eng-practices/review/developer/cl-descriptions.html">google.github.io/eng-practices</a>.
+        Curto; lê inteiro. «CL» é o nome interno da Google para uma alteração submetida a revisão.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="#conteudo">Voltar ao início</a> · <a href="index.html">Abstracts e resumos técnicos</a> ·
+      Anterior: <a href="02-ler-para-decidir.html">2 · Ler para decidir</a> ·
+      Seguinte: <a href="04-rfc-pep-readme.html">4 · RFC, PEP e README</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

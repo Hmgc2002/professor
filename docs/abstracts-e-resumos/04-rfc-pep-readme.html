@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4 · RFC, PEP e README: o primeiro parágrafo que decide se alguém continua — Abstracts e resumos técnicos</title>
+<meta name="description" content="Lição 4: o abstract de uma proposta e o primeiro parágrafo de um README — autocontido, sem citações, informativo sobre a decisão, com o custo lá dentro.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/abstracts-e-resumos/04-rfc-pep-readme.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">Abstracts e resumos técnicos</a> <span aria-hidden="true">›</span> lição 4</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+<p class="etiqueta extensao">Lição 4 · extensão</p>
+    <h1>RFC, PEP e README: o primeiro parágrafo que decide se alguém continua</h1>
+    <p class="subtitulo">Uma proposta técnica tem muitos leitores, e cada um começa por decidir, no topo, se aquilo lhe diz
+    respeito. Um README tem o primeiro parágrafo para dizer se o projeto é o que procuras. Os dois são abstracts — e os guias de estilo
+    destes géneros dizem, com regras concretas, porquê.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>Escreves o primeiro parágrafo de uma <strong>proposta</strong> (RFC, PEP, design doc) ou de um <strong>README</strong>
+    que, lido sozinho, diz o que é, que problema resolve, o que decide ou faz, e a que custo — e verificas-o contra as regras
+    do RFC 7322 e do PEP 1, dizendo onde as duas fontes (e a norma NISO) discordam.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+<ol>
+  <li>Quais são as quatro partes de uma boa descrição de PR?
+    <details class="solucao"><summary>Resposta</summary><p>Problema e impacto; solução e porquê esta; números e custos; limitações, onde olhar e testes.</p></details>
+  </li>
+  <li>O que diz a norma NISO sobre documentos sem metodologia nem resultados?
+    <details class="solucao"><summary>Resposta</summary><p>Que o abstract indicativo é o adequado: diz o âmbito, as abordagens e os argumentos, porque não há resultado para dizer.</p></details>
+  </li>
+  <li>Na primeira passagem de Keshav, porque é que se lê o abstract antes da introdução?
+    <details class="solucao"><summary>Resposta</summary><p>Porque o abstract é o resumo do todo feito para decidir; a introdução prepara quem já decidiu ler. Nesta lição, quem lê a tua proposta faz o mesmo contigo.</p></details>
+  </li>
+</ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>O abstract de uma proposta: separado do resto, de propósito</h3>
+    <p>Os modelos de proposta dos projetos que mais as usam separam o resumo do argumento:</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Estrutura de propostas em três projetos, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Fonte</th><th>O resumo</th><th>O que fica fora do resumo</th></tr></thead>
+        <tbody>
+          <tr><td>PEP 1 (Python)</td><td><strong>Abstract</strong>: uma descrição curta, de cerca de 200 palavras, do problema técnico tratado</td><td><strong>Motivation</strong> (porque é que o que existe não chega; PEPs sem motivação suficiente podem ser rejeitados) e <strong>Rationale</strong> (porquê este desenho, alternativas, objeções)</td></tr>
+          <tr><td>Modelo de RFC do Rust</td><td><strong>Summary</strong>: a explicação da funcionalidade num parágrafo</td><td>Motivation, explicações a dois níveis, <strong>Drawbacks</strong> («porque é que <em>não</em> devíamos fazer isto?»), alternativas, trabalho anterior, questões em aberto</td></tr>
+          <tr><td>RFC 7322 (IETF), §4.3</td><td><strong>Abstract</strong>: visão concisa e abrangente do propósito e do conteúdo; mais curto, menos detalhado e talvez mais largo do que a introdução</td><td>A introdução — e o documento tem de se aguentar como se não houvesse Abstract</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A separação é a lição 0 em estrutura de documento: o resumo é a macroestrutura; a motivação, a racionalidade e as
+    desvantagens são a microestrutura que a sustenta. Quem só precisa de saber «isto afeta-me?» para no resumo.</p>
+
+    <h3>Porque é que não pode ter citações: o isolamento</h3>
+    <p>O RFC 7322 dá a regra e a razão juntas: o Abstract <strong>não pode ter citações</strong>, porque aparece <strong>isolado</strong>
+    em anúncios de publicação e no índice online — onde «ver [3]» aponta para nada. Pela mesma razão, o Abstract deve ser
+    <strong>completo em si</strong>. E o guia avisa contra o atalho óbvio: copiar os primeiros parágrafos da introdução pode dar um
+    Abstract incompleto e redundante.</p>
+    <p>Generalizando o mecanismo (a generalização é minha): tudo o que o leitor isolado não consegue resolver sozinho — uma citação,
+    uma sigla da equipa, «o problema de que falámos na reunião» — falha no abstract.</p>
+
+    <h3>Uma proposta tem resultado? Tem uma decisão</h3>
+    <p>Pela norma NISO (lição 1), documentos sem metodologia nem resultados levam abstract indicativo. Uma proposta ainda não
+    implementada não tem resultados medidos — mas, na minha leitura, tem uma coisa que um ensaio não tem: <strong>uma decisão que
+    se pode dizer numa frase</strong>. Um abstract «indicativo» de proposta («este documento analisa a situação e apresenta uma
+    proposta») obriga todos os leitores a abrir; um abstract <strong>informativo sobre a decisão</strong> diz:</p>
+    <ol>
+      <li>o que se propõe (a decisão);</li>
+      <li>que problema resolve (a lacuna, com número se houver);</li>
+      <li>o que custa (a desvantagem principal — o <em>Drawbacks</em> do Rust, numa frase);</li>
+      <li>o que se pede a quem lê (rever, comentar, decidir até quando).</li>
+    </ol>
+    <p>O terceiro ponto é o que mais se esquece e o que mais decide: é por ele que uma equipa afetada sabe que tem de ler o resto.</p>
+
+    <h3>Onde as fontes discordam</h3>
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Duas fontes primárias em desacordo</span>
+      <p>O <strong>RFC 7322</strong> diz que o Abstract deve começar por uma expressão como «This memo…» ou «This document…». A
+      <strong>norma NISO</strong> (§7.4) diz o contrário: evitar nomear o tipo de documento na primeira frase («Este artigo avalia…»)
+      quando isso se percebe pelo título ou pelo resto. Nenhuma das duas, nas partes que li, justifica a regra. A resolução prática:
+      <strong>a convenção do sítio onde publicas ganha</strong> — um RFC começa por «This document»; um relatório técnico ou um
+      design doc não precisa. O que não muda entre as duas é o resto: completo em si, sem depender do texto à volta.</p>
+    </div>
+
+    <h3>O README: o que o primeiro parágrafo tem de responder</h3>
+    <p>A documentação do GitHub diz que um README costuma dizer <strong>o que o projeto faz</strong>, <strong>porque é útil</strong>,
+    <strong>como começar</strong>, <strong>onde pedir ajuda</strong> e <strong>quem o mantém</strong>. Os dois primeiros são o abstract;
+    os outros três são para quem já decidiu ficar. Quem chega a um README vindo de uma pesquisa decide, antes de ler o resto, se é
+    aquilo — e um parágrafo com adjetivos («moderno, rápido, poderoso») em vez de «o que faz» obriga-o a ler o código para descobrir.</p>
+
+    <figure>
+      <svg viewBox="0 0 520 200" role="img" aria-labelledby="t-l4-iso d-l4-iso">
+        <title id="t-l4-iso">O abstract separa-se do documento e aparece sozinho noutros sítios</title>
+        <desc id="d-l4-iso">À esquerda, um documento com quatro partes: abstract, motivação, desenho, desvantagens. O abstract está destacado e tem setas para três sítios à direita: índice ou pesquisa, anúncio ou notificação, lista de propostas. Nesses sítios, as outras partes não existem.</desc>
+        <rect class="svg-caixa" x="8" y="10" width="170" height="180" rx="6"/>
+        <rect class="svg-realce" x="20" y="22" width="146" height="36" rx="4"/>
+        <text class="svg-texto" x="93" y="45" text-anchor="middle">abstract</text>
+        <text class="svg-suave" x="93" y="85" text-anchor="middle">motivação</text>
+        <text class="svg-suave" x="93" y="120" text-anchor="middle">desenho</text>
+        <text class="svg-suave" x="93" y="155" text-anchor="middle">desvantagens</text>
+        <rect class="svg-caixa" x="300" y="14" width="210" height="44" rx="6"/>
+        <rect class="svg-caixa" x="300" y="78" width="210" height="44" rx="6"/>
+        <rect class="svg-caixa" x="300" y="142" width="210" height="44" rx="6"/>
+        <text class="svg-texto" x="405" y="41" text-anchor="middle">índice, pesquisa</text>
+        <text class="svg-texto" x="405" y="105" text-anchor="middle">anúncio, notificação</text>
+        <text class="svg-texto" x="405" y="169" text-anchor="middle">lista de propostas</text>
+        <path class="svg-traco" d="M166 36 C230 36 240 36 294 36" marker-end="url(#seta-l4)"/>
+        <path class="svg-traco" d="M166 42 C230 42 240 100 294 100" marker-end="url(#seta-l4)"/>
+        <path class="svg-traco" d="M166 48 C230 48 240 164 294 164" marker-end="url(#seta-l4)"/>
+        <defs>
+          <marker id="seta-l4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>À direita só chega o que está no retângulo destacado. É daí que vêm «sem citações» e «completo em si».</figcaption>
+    </figure>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>O terceiro capítulo da história do incidente (fictício). O PR da lição 3 tratou do sintoma; esta proposta muda a arquitetura.
+    O primeiro parágrafo, tal como foi escrito:</p>
+    <blockquote>
+      <p>Desde 2021 que a pesquisa de encomendas depende de um job de reindexação (ver [1]). Ao longo do tempo, várias equipas
+      acrescentaram responsabilidades a esse job, e hoje ele faz mais do que foi pensado para fazer. Neste documento analisamos a
+      situação atual, discutimos várias alternativas e apresentamos uma proposta.</p>
+    </blockquote>
+    <p>O que o documento diz: propõe-se trocar o job horário por eventos emitidos a cada alteração de encomenda · com o job, uma
+    encomenda nova pode demorar até uma hora a aparecer na pesquisa · com eventos, espera-se que apareça em segundos · custo: o
+    serviço de encomendas passa a depender do barramento de eventos · as equipas de encomendas e de pesquisa têm de rever a
+    secção sobre falhas do barramento até ao fim do mês.</p>
+
+    <h3>Passo 1 — Leitores e decisão</h3>
+    <p>Muitos leitores, uma decisão comum: «isto afeta-me, e tenho de fazer alguma coisa?». <em>Porquê este e não «perceber a
+    história do job»:</em> é a decisão que todos os leitores partilham, seja qual for a equipa; a história só serve a quem já decidiu ler.</p>
+
+    <h3>Passo 2 — Verificar contra o RFC 7322</h3>
+    <p>«(ver [1])» → citação, fora. «Desde 2021…», «ao longo do tempo…» → é a introdução colada: história, que nenhuma frase do
+    abstract precisa. «Neste documento analisamos… discutimos… apresentamos uma proposta» → indicativo: diz que há proposta sem
+    dizer qual.</p>
+
+    <h3>Passo 3 — Encontrar a decisão</h3>
+    <p>A frase que falta é a que o documento inteiro existe para dizer: <strong>trocar o job horário por eventos</strong>.
+    Vai para a primeira frase.</p>
+
+    <h3>Passo 4 — Lacuna com número, e custo</h3>
+    <p>«Até uma hora» dá escala ao problema. «Segundos» fica, mas como <strong>expectativa</strong> («espera-se») — ainda não foi
+    medido, e dizê-lo como resultado seria construir o que o documento não sustenta. O custo (depender do barramento) entra numa frase.</p>
+
+    <h3>Passo 5 — O que se pede</h3>
+    <p>Quem tem de agir, sobre o quê, até quando. É a frase que transforma o abstract num instrumento de decisão.</p>
+
+    <h3>Resultado</h3>
+    <blockquote class="amostra" data-palavras="78">
+      <p>Este documento propõe substituir o job horário de reindexação da pesquisa de encomendas por eventos emitidos a cada
+      alteração de encomenda. Com o job, uma encomenda nova pode demorar até uma hora a aparecer na pesquisa; com eventos, espera-se
+      que apareça em segundos. O custo é o serviço de encomendas passar a depender do barramento de eventos. Pede-se às equipas de
+      encomendas e de pesquisa que revejam a secção sobre falhas do barramento até ao fim do mês.</p>
+    </blockquote>
+    <p>Começa por «Este documento» — a convenção do RFC 7322. Num design doc interno, pela norma NISO, podia começar diretamente
+    por «Propõe-se substituir…». As duas estão certas no seu sítio.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <div class="exercicio">
+      <h3>O README do luhn.py</h3>
+      <p>Primeiro parágrafo atual: <em>«luhn.py — um resumidor de texto em Python.»</em></p>
+      <p>O que se sabe do script (lição 0): escolhe as frases que mais concentram palavras repetidas e próximas, à maneira de Luhn
+      (1958), e mostra a pontuação de cada frase · só usa a biblioteca-padrão · não reescreve frases nem entende números ou
+      significado · trata variantes de uma palavra pelos primeiros 6 caracteres · existe para se ver o que um resumo sem compreensão
+      apanha e perde.</p>
+      <p><strong>O que faz:</strong> ______.</p>
+      <p><strong>Porque é útil, e para quem:</strong> ______.</p>
+      <p><strong>O que não faz (a limitação que evita o mal-entendido):</strong> ______.</p>
+      <p><strong>Como começar:</strong> dado — <code>python3 luhn.py texto.txt 3</code>.</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>O que faz:</strong> escolhe as frases que mais concentram palavras repetidas e mostra a pontuação de cada frase.</p>
+        <p><strong>Porque é útil:</strong> para ver, a correr, o que um resumo sem compreensão apanha e o que perde — é material de estudo, não uma ferramenta de produção.</p>
+        <p><strong>O que não faz:</strong> não reescreve nem junta frases, e não entende números nem significado.</p>
+        <blockquote class="amostra" data-palavras="46"><p>luhn.py escolhe as frases de um texto que mais concentram palavras repetidas,
+        à maneira de Luhn (1958), e mostra a pontuação de cada uma. Serve para ver, a correr, o que um resumo sem compreensão apanha
+        e o que perde. Não reescreve frases nem entende números.</p></blockquote>
+        <p>⚠️ «Um resumidor de texto» não é falso — é uma generalização que promete o que o script não faz. Quem o descarregasse
+        para resumir documentos a sério ficava enganado; a limitação no primeiro parágrafo impede-o.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <p>⚠️ Os dois primeiros são avisos explícitos do RFC 7322. Os outros decorrem das fontes da lição (a pergunta «porque não?» do
+    modelo do Rust; a lista do GitHub), não de frequências medidas.</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr><td>O abstract são os primeiros parágrafos da introdução</td><td>Começa pela história; acaba antes da proposta</td><td>O guia do RFC avisa: dá um abstract incompleto e redundante. A introdução prepara; o abstract substitui</td></tr>
+          <tr><td>Uma citação ou ligação no abstract ajuda</td><td>«(ver [1])», «como discutido em #412»</td><td>O abstract aparece isolado, onde a referência não existe. Tem de ser completo em si</td></tr>
+          <tr><td>Proposta sem resultados leva abstract indicativo</td><td>«Analisamos a situação e apresentamos uma proposta»</td><td>Diz a decisão: o que se propõe, porquê, a que custo, e o que se pede</td></tr>
+          <tr><td>O custo vai na secção de desvantagens</td><td>Abstract só com benefícios</td><td>Detalhe na secção; o custo principal numa frase no abstract — é por ele que quem é afetado sabe que tem de ler</td></tr>
+          <tr><td>O README começa pela instalação</td><td>Primeiro parágrafo: emblemas, <code>npm install</code>, «ver docs»</td><td>Primeiro o que faz e porque é útil; a instalação é para quem já decidiu</td></tr>
+          <tr><td>Adjetivos descrevem o projeto</td><td>«Moderno, rápido e poderoso»</td><td>Serve para qualquer projeto. Um número com condição («3,4× num ficheiro de 1 GB») ou uma limitação diz mais</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — Duas regras lado a lado</h3>
+      <p>Abre o <a href="https://peps.python.org/pep-0001/">PEP 1</a> (procura «Abstract» em «What belongs in a successful PEP») e a
+      <a href="https://www.rfc-editor.org/rfc/rfc7322.html#section-4.3">secção 4.3 do RFC 7322</a>. Diz uma coisa em que concordam e
+      duas que só um deles pede.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>Concordam:</strong> o abstract é curto e descreve o assunto do documento, separado do argumento (no PEP, Motivation e
+        Rationale são secções à parte; no RFC, a introdução).</p>
+        <p><strong>Só o PEP 1:</strong> uma ordem de grandeza — cerca de 200 palavras.</p>
+        <p><strong>Só o RFC 7322:</strong> sem citações; completo em si; começar por «This document» ou «This memo»; e o aviso contra
+        copiar a introdução.</p>
+        <p>Repara que o PEP 1 diz muito menos. Não é que discorde — é que as regras do RFC decorrem de um problema que o guia nomeia (o
+        isolamento em anúncios e índices), e o PEP não trata desse problema.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — Um README com emblemas e sem conteúdo</h3>
+      <p>Abertura atual (fictícia): <em>«fastcsv — Blazing fast! 🚀 Instalação: pip install fastcsv. Uso: ver a documentação.»</em></p>
+      <p>Factos: lê CSV em streaming, com memória constante · num ficheiro de 1 GB, no portátil do autor, foi 3,4 vezes mais rápido do
+      que o módulo <code>csv</code> da biblioteca-padrão · só lê, não escreve · feito para scripts que processam CSV grandes.</p>
+      <p>Reescreve o primeiro parágrafo com no máximo 50 palavras.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <blockquote class="amostra" data-palavras="46"><p>fastcsv lê ficheiros CSV grandes em streaming, com memória constante, para scripts
+        que não cabem na RAM com o módulo csv. Num ficheiro de 1 GB, no portátil do autor, foi 3,4 vezes mais rápido do que o csv da
+        biblioteca-padrão. Só lê; não escreve CSV.</p></blockquote>
+        <p>Três decisões: o «blazing fast» virou um número <strong>com a condição</strong> em que foi medido (sem ela, o número promete
+        mais do que foi medido); a limitação «só lê» entra, porque é o que faz alguém que precisa de escrever parar ali; a instalação sai
+        do primeiro parágrafo. ⚠️ «Que não cabem na RAM» é uma construção a partir de «memória constante» — sustentada, mas confirma que
+        é mesmo esse o público antes de a pores num README verdadeiro.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — O abstract aguenta?</h3>
+      <p>Escolhe um PEP que ainda não tenhas lido na <a href="https://peps.python.org/">lista de PEPs</a>. Lê <strong>só</strong> o
+      Abstract e escreve, numa frase, o que o PEP decide e o que precisarias de ler a seguir para saberes se te afeta. Depois lê a
+      Motivation e o Rationale, e avalia: o Abstract aguentou? Faltava-lhe a decisão, a lacuna ou o custo?</p>
+      <div class="aberta">
+        <label for="l4-e3">Número do PEP, a tua frase antes de ler o resto, e a avaliação depois
+          <span class="pista">Não copies o Abstract — diz o que ele tinha e o que lhe faltava.</span>
+        </label>
+        <textarea id="l4-e3" data-pergunta="L4 E3 — o abstract de um PEP aguentou?"></textarea>
+      </div>
+      <details class="solucao"><summary>Como te corrigires</summary>
+        <p>(1) A tua frase diz uma decisão («passa a ser possível X», «descontinua Y») ou só um tema («é sobre tipos»)? Se só um tema,
+        ou o Abstract era indicativo ou a tua leitura foi. (2) Depois de ler a Motivation, a lacuna que o Abstract implicava é a mesma
+        que a Motivation defende? (3) Havia um custo (compatibilidade, desempenho, complexidade) que só aparecia mais abaixo? Se sim,
+        reescreve a última frase do Abstract com esse custo, em 25 palavras.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<div class="quiz" data-quiz="abstracts-l4">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o RFC 7322 proíbe citações no Abstract?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-1" value="a" data-certa="false"><span class="rotulo">Porque as citações ficam desatualizadas</span></label>
+          <p class="explicacao" hidden>O guia dá outra razão, e ela é mais forte: não é que a referência envelheça, é que no sítio onde o Abstract é lido não há lista de referências.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-1" value="b" data-certa="false"><span class="rotulo">Para poupar palavras</span></label>
+          <p class="explicacao" hidden>Uma citação ocupa três caracteres. O problema é funcional, não de espaço.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-1" value="c" data-certa="false"><span class="rotulo">Por uma questão de estilo tipográfico</span></label>
+          <p class="explicacao" hidden>O guia justifica com o sítio onde o texto aparece, não com a aparência.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-1" value="d" data-certa="true"><span class="rotulo">Porque o Abstract aparece isolado, em anúncios e no índice online, onde a referência não existe</span></label>
+          <p class="explicacao" hidden>Certo. É a mesma razão que o obriga a ser completo em si. Tudo o que o leitor isolado não consegue resolver falha.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Segundo o PEP 1, o Abstract de um PEP tem cerca de quantas palavras?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-2" value="a" data-certa="false"><span class="rotulo">50</span></label>
+          <p class="explicacao" hidden>Com 50 palavras dificilmente se descreve um problema técnico e a solução. O PEP 1 dá outro número.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-2" value="b" data-certa="true"><span class="rotulo">200</span></label>
+          <p class="explicacao" hidden>Certo: uma descrição curta, de cerca de 200 palavras, do problema técnico tratado. É o mesmo tamanho de grandeza dos 250 da norma NISO para artigos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-2" value="c" data-certa="false"><span class="rotulo">500</span></label>
+          <p class="explicacao" hidden>500 palavras são uma página inteira; o PEP 1 quer o Abstract curto, com Motivation e Rationale como secções à parte.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-2" value="d" data-certa="false"><span class="rotulo">Uma frase</span></label>
+          <p class="explicacao" hidden>Uma frase é o Summary do modelo do Rust (um parágrafo), ou um título. O PEP 1 dá um número em palavras.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O que dá copiar os dois primeiros parágrafos da introdução para o Abstract, segundo o RFC 7322?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-3" value="a" data-certa="false"><span class="rotulo">Um bom Abstract, porque a introdução já resume o documento</span></label>
+          <p class="explicacao" hidden>A introdução prepara a leitura; não diz o que o documento conclui. É por isso que o guia avisa contra este atalho.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-3" value="b" data-certa="false"><span class="rotulo">Um Abstract indicativo aceitável</span></label>
+          <p class="explicacao" hidden>O guia não o considera aceitável, e o problema não é só ser indicativo: é repetir texto que o leitor vai ver a seguir.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-3" value="c" data-certa="false"><span class="rotulo">Nada de especial, desde que se retirem as citações</span></label>
+          <p class="explicacao" hidden>Tirar as citações resolve o isolamento, mas não resolve faltar o que o documento decide.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-3" value="d" data-certa="true"><span class="rotulo">Um Abstract que pode ser incompleto e redundante</span></label>
+          <p class="explicacao" hidden>Certo. Incompleto, porque a introdução acaba antes da conclusão; redundante, porque repete o que está logo abaixo.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Primeiro parágrafo de um README: «Uma ferramenta moderna e rápida para programadores.» O que falta?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-4" value="a" data-certa="false"><span class="rotulo">Emblemas de cobertura de testes</span></label>
+          <p class="explicacao" hidden>Emblemas não dizem o que o projeto faz. Quem chegou por uma pesquisa continua sem saber se é o que procura.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-4" value="b" data-certa="true"><span class="rotulo">O que a ferramenta faz e que problema resolve — a frase serve para qualquer ferramenta</span></label>
+          <p class="explicacao" hidden>Certo. É uma generalização sem conteúdo, como «Corrige bug» num commit. A lista do GitHub começa por o que faz e porque é útil.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-4" value="c" data-certa="false"><span class="rotulo">As instruções de instalação</span></label>
+          <p class="explicacao" hidden>A instalação é para quem já decidiu ficar. O primeiro parágrafo serve para decidir.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-4" value="d" data-certa="false"><span class="rotulo">A licença</span></label>
+          <p class="explicacao" hidden>A licença é importante, mas não é o que um primeiro parágrafo tem de responder. Não diz se o projeto serve.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Numa proposta, onde entra o custo da decisão?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-5" value="a" data-certa="true"><span class="rotulo">Numa frase no abstract, e em detalhe na secção de desvantagens</span></label>
+          <p class="explicacao" hidden>Certo. É a frase que diz a uma equipa afetada que tem de ler o resto. O modelo do Rust dá uma secção inteira à pergunta «porque é que não devíamos fazer isto?».</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-5" value="b" data-certa="false"><span class="rotulo">Só na secção de desvantagens</span></label>
+          <p class="explicacao" hidden>O detalhe vai lá, mas quem só lê o topo nunca chega. É justamente quem é afetado pelo custo que precisa de o ver primeiro.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-5" value="c" data-certa="false"><span class="rotulo">Não entra: uma proposta defende uma posição</span></label>
+          <p class="explicacao" hidden>Uma proposta que esconde o custo é aprovada por quem não percebeu o que aprovou, e revertida mais tarde.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-5" value="d" data-certa="false"><span class="rotulo">No fim do documento, depois das conclusões</span></label>
+          <p class="explicacao" hidden>Os leitores que decidem pelo topo nunca chegam ao fim.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O RFC 7322 manda começar o Abstract por «This document…»; a norma NISO desaconselha nomear o tipo de documento na primeira frase. Como se resolve?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-6" value="a" data-certa="false"><span class="rotulo">A norma NISO ganha, porque é uma norma nacional</span></label>
+          <p class="explicacao" hidden>A norma NISO não se aplica aos RFC; o guia do RFC Editor é a regra desse sítio.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-6" value="b" data-certa="true"><span class="rotulo">A convenção do sítio onde publicas ganha; o resto das duas (completo em si, sem depender do texto) coincide</span></label>
+          <p class="explicacao" hidden>Certo. Um RFC começa por «This document»; um relatório ou design doc não precisa. Saber que as fontes discordam evita tratar uma convenção como lei universal.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-6" value="c" data-certa="false"><span class="rotulo">O RFC 7322 ganha, porque é mais recente</span></label>
+          <p class="explicacao" hidden>Serem de datas diferentes não decide nada: governam géneros diferentes.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-6" value="d" data-certa="false"><span class="rotulo">É indiferente, as duas fontes dizem o mesmo</span></label>
+          <p class="explicacao" hidden>Dizem o contrário sobre a primeira frase. É exatamente o caso em que convém saber qual regra estás a seguir.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Uma proposta ainda não implementada: o abstract tem de ser indicativo?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-7" value="a" data-certa="true"><span class="rotulo">Não: pode ser informativo sobre a decisão — o que se propõe, porquê, a que custo e o que se pede</span></label>
+          <p class="explicacao" hidden>Certo. Não tem resultados medidos, e por isso o que ainda não foi medido diz-se como expectativa («espera-se»), mas a decisão diz-se.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-7" value="b" data-certa="false"><span class="rotulo">Sim, a norma NISO manda indicativo para documentos sem resultados</span></label>
+          <p class="explicacao" hidden>A norma descreve esse caso a pensar em ensaios e editoriais. Uma proposta tem uma coisa que eles não têm: uma decisão que se pode dizer. Esta leitura é minha, não da norma.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-7" value="c" data-certa="false"><span class="rotulo">Sim, porque não se pode afirmar o que ainda não aconteceu</span></label>
+          <p class="explicacao" hidden>Não se afirma um resultado que não existe, mas afirma-se a proposta, que existe. «Espera-se que» marca a diferença.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l4-7" value="d" data-certa="false"><span class="rotulo">Não, deve inventar-se um resultado provável para o tornar informativo</span></label>
+          <p class="explicacao" hidden>Um resultado não medido dito como medido é um facto sem base — o erro da lição 0.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="l4-feynman">Explica porque é que um abstract tem de sobreviver sozinho, usando um sítio concreto onde já viste um resumo aparecer sem o resto (uma notificação, uma lista, um resultado de pesquisa).
+        <span class="pista">Que regra desta lição decorre desse sítio?</span>
+      </label>
+      <textarea id="l4-feynman" data-pergunta="L4 — porque é que um abstract tem de sobreviver sozinho"></textarea>
+    </div>
+
+<div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/abstracts-e-resumos/respostas/AAAA-MM-DD.md</code> e correr <code>/corrigir abstracts-e-resumos</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li>Nas propostas, o resumo é uma secção à parte (PEP 1: ~200 palavras; Rust: um parágrafo) e o argumento vai abaixo.</li>
+      <li>O abstract aparece isolado: sem citações, completo em si, e não é a introdução colada (RFC 7322).</li>
+      <li>Uma proposta sem resultados diz a decisão: o que se propõe, o problema, o custo e o que se pede a quem lê.</li>
+      <li>README: o primeiro parágrafo diz o que faz e porque é útil; a instalação é para quem já decidiu.</li>
+      <li>RFC 7322 e NISO discordam sobre começar por «Este documento» — ganha a convenção do sítio onde publicas.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>Flanagan, H. &amp; Ginoza, S. (2014). RFC 7322, «RFC Style Guide», §4.3 Abstract.</strong>
+        <a href="https://www.rfc-editor.org/rfc/rfc7322.html#section-4.3">rfc-editor.org</a>. <strong>O que ler:</strong> a §4.3 e o
+        próprio Abstract do documento (exercício E3 da lição 1). <strong>O que saltar:</strong> as regras de formatação de referências e
+        de secções obrigatórias do IETF.
+        <span class="verificado">🌐 Verificado a 2026-09-15 — autores e data no cabeçalho (setembro de 2014), a §4.3 e o Abstract do documento</span></li>
+      <li><strong>PEP 1, «PEP Purpose and Guidelines», secção «What belongs in a successful PEP».</strong>
+        <a href="https://peps.python.org/pep-0001/">peps.python.org/pep-0001</a>. Lê só essa secção.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>rust-lang/rfcs, <code>0000-template.md</code>.</strong>
+        <a href="https://github.com/rust-lang/rfcs/blob/master/0000-template.md">github.com/rust-lang/rfcs</a>. Um modelo curto; as frases de
+        orientação debaixo de cada título valem mais do que muitos guias.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>GitHub Docs, «About the repository README file».</strong>
+        <a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes">docs.github.com</a>.
+        Só a lista do que um README costuma responder.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>ANSI/NISO Z39.14-1997 (R2015), §7.4 First Sentences.</strong> A regra que contradiz o RFC 7322; ligação na
+        <a href="01-informativo-e-indicativo.html#fontes">lição 1</a>.
+        <span class="verificado">🌐 Verificado a 2026-09-15 no PDF</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="#conteudo">Voltar ao início</a> · <a href="index.html">Abstracts e resumos técnicos</a> ·
+      Anterior: <a href="03-pr-e-commit.html">3 · A descrição de um PR</a> ·
+      Seguinte: <a href="05-post-mortem.html">5 · O resumo de um post-mortem</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1 · Informativo ou indicativo: o abstract que responde e o que só promete — Abstracts e resumos técnicos</title>
+<meta name="description" content="Lição 1: a anatomia de um abstract — informativo e indicativo, contexto e lacuna, IMRaD, estruturado e não estruturado, e porque é que o leitor decide só com ele.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/abstracts-e-resumos/01-informativo-e-indicativo.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">Abstracts e resumos técnicos</a> <span aria-hidden="true">›</span> lição 1</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+<p class="etiqueta nucleo">Lição 1 · núcleo</p>
+    <h1>Informativo ou indicativo: o abstract que responde e o que só promete</h1>
+    <p class="subtitulo">O abstract científico é o género de resumo com mais regras escritas e testadas. Não vais escrever
+    artigos — mas é aqui que se vê, com nome, o que um resumo tem de conter para o leitor poder decidir sem abrir o resto.
+    As lições 3 a 5 levam isto para o PR, a proposta e o post-mortem.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+    <p>Dado um abstract, classificas-o como <strong>informativo</strong> ou <strong>indicativo</strong>, apontas que
+    <strong>movimentos</strong> lhe faltam (contexto e lacuna, o que se fez, resultado, implicação) e, com os factos do
+    texto completo à frente, reescreves um indicativo como informativo com no máximo 100 palavras.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+    <p>De memória, antes de abrir.</p>
+<ol>
+  <li>Quais são as três operações de um resumo, e o que decide qual se aplica a cada frase?
+    <details class="solucao"><summary>Resposta</summary><p>Apagar, generalizar e construir. Decide o objetivo de quem lê — o esquema. Sem ele não há critério para apagar.</p></details>
+  </li>
+  <li>Porque é que o luhn.py deixou de fora a frase com o resultado do incidente?
+    <details class="solucao"><summary>Resposta</summary><p>Escolhe frases por repetição de palavras próximas. Os números não contam e o resultado foi dito uma vez — pontuou o mesmo que a frase do café.</p></details>
+  </li>
+  <li>Que diferença há entre generalizar e construir?
+    <details class="solucao"><summary>Resposta</summary><p>Generalizar troca frases pela proposição que as abrange, sem afirmar nada novo. Construir afirma um facto global de que as frases são condições, componentes ou consequências — uma frase que muitas vezes não existe no texto.</p></details>
+  </li>
+</ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>Um abstract vive longe do texto</h3>
+    <p>Um abstract aparece <strong>sozinho</strong>: em resultados de pesquisa, em bases bibliográficas que só indexam o
+    abstract, em listas de anúncio. O guia de estilo dos RFC diz-o explicitamente — é por o Abstract aparecer isolado
+    em anúncios e no índice que não pode ter citações (voltamos a isto na lição 4). E as diretrizes CONSORT para
+    abstracts de ensaios clínicos partem do mesmo facto: os leitores fazem muitas vezes a primeira avaliação de um
+    estudo só pelo abstract.</p>
+    <p>Consequência: <strong>a decisão do leitor acontece com o abstract e mais nada</strong>. «Abro isto?», «uso este
+    resultado?», «isto é o que procuro?». Tudo o que o abstract não disser, para esse leitor, não existe.</p>
+
+    <h3>Dois tipos, duas promessas</h3>
+    <p>A norma ANSI/NISO Z39.14 distingue:</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Informativo e indicativo, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th></th><th>Informativo</th><th>Indicativo</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">O que diz (norma)</th><td>O propósito, a metodologia, os resultados e as conclusões do documento</td><td>O propósito ou âmbito da discussão; pode dizer as abordagens usadas e os argumentos</td></tr>
+          <tr><th scope="row">Para que documentos (norma)</th><td>Investigações experimentais, inquéritos, estudos</td><td>Documentos pouco estruturados (editoriais, ensaios, opiniões) ou longos (livros, atas, relatórios anuais) — em geral, documentos sem metodologia nem resultados</td></tr>
+          <tr><th scope="row">O que o leitor consegue fazer</th><td>Saber a resposta sem abrir o texto</td><td>Saber a pergunta — e ter de abrir para saber a resposta</td></tr>
+          <tr><th scope="row">Como se reconhece</th><td>Verbos sobre o <em>mundo</em>: «a latência desceu», «a cache reduz»</td><td>Verbos sobre o <em>documento</em>: «descreve», «discute», «apresenta»</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A última linha é o teste mais rápido que conheço, e não vem da norma — é uma heurística minha que decorre das
+    definições: se todos os verbos principais têm como sujeito o próprio documento, o abstract está a descrever um índice,
+    não um resultado. A norma prevê ainda um tipo misto, <dfn>indicativo-informativo</dfn>: informativo para as partes
+    principais, indicativo para o resto.</p>
+    <div class="caixa ok">
+      <span class="titulo">✅ Indicativo não é sinónimo de mau</span>
+      <p>Para um ensaio de opinião, um guia de 80 páginas ou um livro, o indicativo é o tipo <strong>certo</strong> segundo
+      a norma: não há um resultado que caiba num parágrafo. O erro é usar o indicativo onde <em>há</em> um resultado —
+      um relatório de medição, um teste A/B, a descrição de uma correção.</p>
+    </div>
+
+    <h3>Os movimentos de um abstract informativo</h3>
+    <p>A norma lista quatro elementos — propósito, metodologia, resultados, conclusões — e acrescenta que a ordem ótima
+    pode depender do público: para alguns leitores, pôr os resultados e conclusões primeiro é útil. Mensh e Kording (2017)
+    dão a mesma estrutura com uma peça que a norma não nomeia: a <strong>lacuna</strong>. No esquema deles, o contexto de um
+    abstract tem de dizer ao leitor <em>que lacuna</em> o trabalho preenche e porque importa; depois vem o que se fez e o
+    resultado; e a conclusão interpreta o resultado para <strong>responder à pergunta posta</strong> no início.</p>
+
+    <figure>
+      <svg viewBox="0 0 520 190" role="img" aria-labelledby="t-l1-mov d-l1-mov">
+        <title id="t-l1-mov">Os cinco movimentos de um abstract e onde para o indicativo</title>
+        <desc id="d-l1-mov">Cinco caixas em fila: contexto, lacuna, o que se fez, resultado, implicação. Uma chaveta por cima das três primeiras diz: o indicativo fica por aqui. Uma chaveta por baixo de todas diz: o informativo. Uma seta curva liga a implicação de volta à lacuna, com a legenda: a implicação responde à lacuna.</desc>
+        <path class="svg-traco" d="M8 34 V26 H300 V34"/>
+        <text class="svg-suave" x="154" y="18" text-anchor="middle">indicativo: fica por aqui</text>
+        <rect class="svg-caixa" x="8"   y="44" width="92" height="46" rx="6"/>
+        <rect class="svg-realce" x="112" y="44" width="92" height="46" rx="6"/>
+        <rect class="svg-caixa" x="216" y="44" width="92" height="46" rx="6"/>
+        <rect class="svg-caixa" x="320" y="44" width="92" height="46" rx="6"/>
+        <rect class="svg-realce" x="424" y="44" width="92" height="46" rx="6"/>
+        <text class="svg-texto" x="54"  y="72" text-anchor="middle">contexto</text>
+        <text class="svg-texto" x="158" y="72" text-anchor="middle">lacuna</text>
+        <text class="svg-texto" x="262" y="72" text-anchor="middle">o que se fez</text>
+        <text class="svg-texto" x="366" y="72" text-anchor="middle">resultado</text>
+        <text class="svg-texto" x="470" y="72" text-anchor="middle">implicação</text>
+        <path class="svg-traco" d="M8 100 V108 H516 V100"/>
+        <text class="svg-suave" x="262" y="124" text-anchor="middle">informativo: os cinco</text>
+        <path class="svg-traco" d="M470 90 C470 170 158 170 158 96" marker-end="url(#seta-l1)"/>
+        <text class="svg-suave" x="314" y="178" text-anchor="middle">a implicação responde à lacuna</text>
+        <defs>
+          <marker id="seta-l1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>Os nomes dos movimentos são meus, para usar em todo o curso; a norma diz «propósito, metodologia,
+      resultados, conclusões», e Mensh &amp; Kording dizem «contexto, conteúdo, conclusão».</figcaption>
+    </figure>
+
+    <p>Porque é que a lacuna importa tanto: sem ela, o resultado flutua. «O p95 desceu para 240 ms» não diz se isso é muito
+    ou pouco, nem para quem. «O p95 era 1,9 s na hora de ponta» dá ao resultado a escala de que ele precisa. Nas três
+    operações da lição 0, a lacuna é a frase que <strong>não se pode apagar</strong>, porque o resultado depende dela para
+    ser interpretado.</p>
+
+    <h3>IMRaD: porque é que o abstract tem esta ordem</h3>
+    <p>A maior parte dos artigos científicos segue a estrutura <dfn>IMRaD</dfn> — <em>Introduction, Methods, Results, and
+    Discussion</em>. Não foi sempre assim: Sollaci e Pereira (2004) contaram artigos em quatro revistas de medicina
+    interna (BMJ, JAMA, Lancet, NEJM) entre 1935 e 1985. Em 1935 nenhum seguia IMRaD; em 1950 passava de 10%; nos anos 70
+    chegou a cerca de 80%; e em 1985 duas das revistas (JAMA e Lancet) estavam nos 100%. O abstract informativo é IMRaD
+    em miniatura — e por isso, lido bem, diz-te também <strong>em que secção</strong> do artigo está o que te interessa.</p>
+
+    <h3>Estruturado ou não estruturado</h3>
+    <p>A norma diz para escrever, em geral, o abstract num só parágrafo; num <dfn>abstract estruturado</dfn>, os pontos
+    principais vão em parágrafos com rótulo («Objetivo», «Métodos», «Resultados», «Conclusões»). Foram introduzidos nas
+    revistas médicas em meados dos anos 80. A revisão de Hartley (2004) resume o que se mediu desde então: os estruturados
+    tendem a conter <strong>mais informação</strong>, a ser <strong>mais fáceis de ler</strong> e bem recebidos por leitores
+    e autores; mas <strong>ocupam mais espaço</strong>, a vantagem na pesquisa não é consensual, e continuam sujeitos às
+    mesmas omissões e distorções dos tradicionais.</p>
+    <p>A minha explicação do porquê — compatível com esses resultados, mas não medida por eles: um rótulo vazio
+    <strong>vê-se</strong>. Num parágrafo corrido, faltar o resultado passa despercebido; debaixo de «Resultados:» não. Mas
+    o rótulo não obriga ao conteúdo — «Resultados: são apresentados e discutidos» cumpre a forma e falha tudo.</p>
+
+    <h3>Quanto mede</h3>
+    <p>Quando o limite não é dado, a norma considera adequados, no máximo:</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Comprimentos máximos da norma NISO, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Documento</th><th>Máximo do abstract</th></tr></thead>
+        <tbody>
+          <tr><td>Artigos, partes de monografias</td><td>250 palavras</td></tr>
+          <tr><td>Notas, comunicações curtas</td><td>100 palavras</td></tr>
+          <tr><td>Editoriais, cartas ao editor</td><td>30 palavras</td></tr>
+          <tr><td>Documentos longos (monografias, teses)</td><td>uma página, 300 palavras</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>⚠️ A Wikipédia diz que um informativo tem «tipicamente 100 a 200 palavras». Não é contraditório com a norma (que dá
+    máximos, não típicos). A Wikipédia atribui o número a um livro de escrita técnica (Finkelstein, 2004) que não abri — por isso fica fora da folha de consulta.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+    <p>Um relatório interno (fictício) sobre uma cache. O abstract que o acompanha:</p>
+    <blockquote>
+      <p>Este relatório descreve a introdução de uma cache no serviço de pesquisa de encomendas. Discutem-se as opções
+      consideradas e a metodologia de medição, apresentam-se os resultados e fazem-se recomendações para outros serviços.</p>
+    </blockquote>
+    <p>O que o relatório diz, no corpo:</p>
+    <ul>
+      <li>Na hora de ponta, o p95 da pesquisa era 1,9 s. Nos logs de 7 dias, 70% dos pedidos repetiam as mesmas 200 consultas.</li>
+      <li>Opções: índice na base de dados (excluída: consultas de texto livre); cache local em cada uma das 6 instâncias (excluída: taxa de acertos baixa); cache partilhada em Redis (escolhida).</li>
+      <li>Método: cache ativa para 50% do tráfego, durante 14 dias.</li>
+      <li>Resultados no grupo com cache: p95 de 240 ms, 81% de acertos. Custo: uma instância a mais; resultados até 60 s desatualizados.</li>
+      <li>Recomendação: usar o mesmo desenho em endpoints de leitura onde 60 s de atraso sejam aceitáveis.</li>
+    </ul>
+
+    <h3>Passo 1 — Classificar</h3>
+    <p>Os verbos: «descreve», «discutem-se», «apresentam-se», «fazem-se». O sujeito de todos é o relatório.
+    <strong>Indicativo.</strong> Teste de confirmação: consegues responder a «a cache funcionou?» só com isto? Não.</p>
+    <p><em>Porque é que aqui é um erro e não uma escolha legítima:</em> o documento tem metodologia e resultados. É o caso
+    em que a norma aponta para o informativo.</p>
+
+    <h3>Passo 2 — Mapear os movimentos</h3>
+    <p>Contexto: «serviço de pesquisa de encomendas» (presente, vago). Lacuna: <strong>ausente</strong> — não diz que havia
+    um problema. O que se fez: «introdução de uma cache» (presente, sem método). Resultado: <strong>ausente</strong>
+    («apresentam-se os resultados» é um anúncio, não um resultado). Implicação: <strong>ausente</strong> («recomendações» sem
+    conteúdo).</p>
+
+    <h3>Passo 3 — Escolher o leitor e aplicar as operações</h3>
+    <p>Leitor: quem gere outro serviço e decide se deve copiar o desenho. Então:</p>
+    <ul>
+      <li><strong>A lacuna fica</strong> com os dois números (1,9 s e 70% de repetição) — o segundo é o que diz ao leitor se o <em>seu</em> serviço é parecido.</li>
+      <li><strong>As opções excluídas generalizam-se</strong> numa oração, sem as razões: o leitor precisa de saber que foram consideradas, não porquê.</li>
+      <li><strong>O método fica</strong> em forma curta (50% do tráfego, 14 dias) — é o que torna o resultado credível.</li>
+      <li><strong>O custo fica</strong>, apesar de ser «negativo»: a decisão do leitor depende dos 60 s de atraso.</li>
+    </ul>
+
+    <h3>Passo 4 — Escrever e contar</h3>
+    <blockquote class="amostra" data-palavras="89">
+      <p>Na hora de ponta, a pesquisa de encomendas tinha um p95 de 1,9 s, e 70% dos pedidos repetiam as mesmas 200
+      consultas. Testámos uma cache partilhada com metade do tráfego durante 14 dias, depois de excluir índices na base de
+      dados e cache local por instância. Com a cache, o p95 desceu para 240 ms, com 81% de acertos, ao custo de uma
+      instância a mais e de resultados até 60 s desatualizados. Recomendamos o mesmo desenho para endpoints de leitura onde
+      60 s de atraso sejam aceitáveis.</p>
+    </blockquote>
+
+    <h3>Passo 5 — Verificar</h3>
+    <p>89 palavras. Os cinco movimentos presentes. E o teste final: a última frase (implicação) responde à primeira
+    (lacuna)? Sim — para quem tem leituras repetidas e tolera 60 s, este desenho resolve o p95 alto.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+    <div class="exercicio">
+      <h3>Da fila à resposta</h3>
+      <p>Abstract (fictício): <em>«Este documento apresenta a migração do sistema de filas de RabbitMQ para Kafka, descreve os
+      problemas encontrados e discute as lições aprendidas.»</em></p>
+      <p>O corpo diz: nos picos de fim de mês, as filas chegavam a 15 min de atraso · migraram-se 23 consumidores em 5 semanas ·
+      a ordem por cliente obrigou a usar o cliente como chave de partição · o atraso máximo em fim de mês passou a 40 s ·
+      custo: a equipa passou a gerir partições, e houve 2 incidentes de rebalanceamento na primeira semana · conclusão: só
+      compensa com picos deste volume; os sistemas pequenos ficam em RabbitMQ.</p>
+      <p><strong>Passo 1 — tipo:</strong> dado — indicativo (sujeito de todos os verbos: «este documento»).</p>
+      <p><strong>Passo 2 — lacuna:</strong> ______.</p>
+      <p><strong>Passo 2 — o que se fez:</strong> dado — 23 consumidores migrados em 5 semanas, com o cliente como chave de partição.</p>
+      <p><strong>Passo 2 — resultado:</strong> ______ (com o número e com o custo).</p>
+      <p><strong>Passo 2 — implicação:</strong> ______.</p>
+      <p><strong>Passo 4 — abstract informativo, no máximo 100 palavras:</strong> ______.</p>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Lacuna:</strong> atrasos de até 15 min nas filas em picos de fim de mês.</p>
+        <p><strong>Resultado:</strong> atraso máximo de 40 s; em troca, gestão de partições e 2 incidentes de rebalanceamento na primeira semana.</p>
+        <p><strong>Implicação:</strong> só compensa com picos deste volume; os sistemas pequenos ficam onde estão.</p>
+        <blockquote class="amostra" data-palavras="76"><p>Em picos de fim de mês, as filas em RabbitMQ chegavam a 15 minutos
+        de atraso. Migrámos os 23 consumidores para Kafka em cinco semanas, com a chave de partição no cliente para manter a
+        ordem. O atraso máximo em fim de mês desceu para 40 s; em troca, a equipa passou a gerir partições e houve dois
+        incidentes de rebalanceamento na primeira semana. Só compensa com picos deste volume: os sistemas pequenos ficam em
+        RabbitMQ.</p></blockquote>
+        <p>Se o teu não tem os 2 incidentes, pergunta-te porquê. Se foi para caber no limite, repara que tinhas margem — e que,
+        para quem decide migrar outro sistema, o custo é metade da decisão.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+    <p>⚠️ Os dois primeiros têm apoio direto nas fontes (o guia de estilo dos RFC avisa contra o primeiro; a revisão de Hartley
+    regista que estruturar não impede omissões). Os outros são consequências das definições, não frequências medidas.</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr><td>O abstract é a introdução em curto</td><td>Acaba antes do resultado; «neste trabalho discute-se…»</td><td>A introdução prepara a leitura; o abstract substitui-a para quem não vai ler. O guia de estilo dos RFC avisa que colar os primeiros parágrafos da introdução dá um abstract incompleto e redundante</td></tr>
+          <tr><td>Estruturado garante informativo</td><td>«Resultados: são apresentados e discutidos.»</td><td>O rótulo torna a falta visível, mas não a preenche. Os estruturados também omitem e distorcem</td></tr>
+          <tr><td>Indicativo é sempre um erro</td><td>Forçar «resultados» num ensaio de opinião ou num guia</td><td>Para documentos sem metodologia nem resultados, a norma recomenda o indicativo</td></tr>
+          <tr><td>Resultado sem grandeza é resultado</td><td>«Melhorou significativamente o desempenho»</td><td>O leitor decide com grandezas. Sem número (ou sem comparação), sabe a direção e não sabe se lhe serve</td></tr>
+          <tr><td>Mais palavras, mais informativo</td><td>150 palavras de contexto e uma de resultado</td><td>Informativo é ter os movimentos, não o tamanho. O comprimento é o preço, não a causa</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — Classificar</h3>
+      <p>Informativo, indicativo ou indicativo-informativo? Todos fictícios.</p>
+      <ol type="a">
+        <li>«Este ensaio discute o papel dos testes de contrato em arquiteturas de microserviços e propõe critérios para decidir quando os adotar.»</li>
+        <li>«Medimos o arranque de 40 funções serverless em dois fornecedores durante 30 dias: o arranque a frio teve mediana de 410 ms num e 1,2 s no outro, e dependeu sobretudo do tamanho do pacote.»</li>
+        <li>«Este guia descreve a configuração do PgBouncer em produção. Em modo transaction, as ligações ao servidor desceram de 800 para 60; os capítulos seguintes tratam de autenticação, monitorização e limites.»</li>
+        <li>«Mostramos que a nova versão do serializador é mais rápida e usa menos memória.»</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <ol type="a">
+          <li><strong>Indicativo</strong> — e é ensaio, por isso o tipo é defensável. Mas «propõe critérios» sem dizer quais é
+          desperdício: se os critérios cabem numa frase, dizê-los tornava-o indicativo-informativo e muito mais útil.</li>
+          <li><strong>Informativo.</strong> Método (40 funções, 2 fornecedores, 30 dias), resultado com números, e uma
+          explicação. Falta a implicação, mas o tipo é claro.</li>
+          <li><strong>Indicativo-informativo.</strong> A primeira frase e o fim são indicativos; o meio dá um resultado.</li>
+          <li><strong>Informativo na forma, pobre no conteúdo.</strong> Os verbos são sobre o mundo («é mais rápida»), mas sem
+          grandeza, sem comparação e sem condições. Quem decide migrar não tem com que decidir.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — O rótulo vazio</h3>
+      <p>Abstract estruturado (fictício):</p>
+      <blockquote>
+        <p><strong>Objetivo:</strong> avaliar se comprimir as respostas JSON reduz o custo de tráfego.
+        <strong>Método:</strong> ativámos gzip em 50% dos pedidos da API pública durante 7 dias.
+        <strong>Resultados:</strong> são apresentados e discutidos os resultados obtidos.
+        <strong>Conclusão:</strong> a compressão é recomendada.</p>
+      </blockquote>
+      <p>Os dados do corpo: tráfego de saída −68% nos pedidos comprimidos; CPU dos servidores +3 pontos percentuais; p50 +2 ms.
+      Reescreve <strong>Resultados</strong> e <strong>Conclusão</strong>, e diz que movimento a conclusão original falhava.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>Resultados:</strong> nos pedidos comprimidos, o tráfego de saída desceu 68%; o CPU subiu 3 pontos percentuais e o p50 subiu 2 ms.</p>
+        <p><strong>Conclusão:</strong> a compressão reduz o custo de tráfego a um custo de CPU e latência pequeno; recomenda-se ativá-la em toda a API pública.</p>
+        <p>A conclusão original não era falsa — era uma <strong>implicação sem a lacuna respondida</strong>: dizia «recomendada»
+        sem dizer em troca de quê. O leitor que paga o CPU não conseguia decidir. Repara também que «a um custo pequeno» é um
+        juízo teu: se o CPU já estiver no limite, 3 pontos não são pequenos — e por isso os números ficam nos Resultados.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — Um abstract a sério</h3>
+      <p>Abre o <a href="https://www.rfc-editor.org/rfc/rfc7322.html">RFC 7322</a> (o guia de estilo dos RFC) e lê
+      <strong>só o Abstract</strong>, no topo. Classifica-o, justifica pelos verbos, e diz se o tipo é o adequado ao documento
+      segundo a norma NISO.</p>
+      <div class="aberta">
+        <label for="l1-e3">Classificação do Abstract do RFC 7322, com justificação
+          <span class="pista">Tipo · verbos e sujeitos · o tipo é o adequado? Porquê?</span>
+        </label>
+        <textarea id="l1-e3" data-pergunta="L1 E3 — o Abstract do RFC 7322"></textarea>
+      </div>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>Quase todo indicativo.</strong> O sujeito das três primeiras frases é o documento («descreve», «capta»,
+        «oferece orientação») e fala do que o documento cobre, não do que conclui. A última frase é diferente: diz que o
+        documento torna obsoleto um RFC anterior — é um facto sobre o efeito do documento, informativo.</p>
+        <p><strong>O tipo é o adequado:</strong> um guia de estilo é um documento de orientação, sem metodologia nem resultados — o caso
+        para que a norma recomenda o indicativo. E a frase informativa é a que um leitor com o RFC antigo precisa.</p>
+        <p>⭐ Repara que começa por «This document» — o próprio guia manda fazê-lo. A norma NISO, pelo contrário, desaconselha
+        nomear o tipo de documento na primeira frase. Duas fontes primárias em desacordo; voltamos a isto na lição 4.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <p>Lê a explicação de cada opção, mesmo quando acertas.</p>
+<div class="quiz" data-quiz="abstracts-l1">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">«Este artigo descreve um novo algoritmo de ordenação e compara-o com os existentes.» Que tipo de abstract é?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-1" value="a" data-certa="false"><span class="rotulo">Informativo</span></label>
+          <p class="explicacao" hidden>Diz que há comparação, mas não diz o resultado dela. Um informativo diria, por exemplo, «é 30% mais rápido em dados quase ordenados».</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-1" value="b" data-certa="false"><span class="rotulo">Estruturado</span></label>
+          <p class="explicacao" hidden>Estruturado refere-se à forma (parágrafos com rótulos), não ao conteúdo. Esta frase não tem rótulos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-1" value="c" data-certa="true"><span class="rotulo">Indicativo</span></label>
+          <p class="explicacao" hidden>Certo. O sujeito é o artigo, e o leitor fica a saber a pergunta («é melhor?») sem a resposta. Para um artigo com resultados, é a escolha errada.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-1" value="d" data-certa="false"><span class="rotulo">Indicativo-informativo</span></label>
+          <p class="explicacao" hidden>O misto tem pelo menos uma parte informativa — um resultado dito. Aqui não há nenhum.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que um abstract informativo permite decidir sem abrir o texto?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-2" value="a" data-certa="false"><span class="rotulo">Porque é mais longo</span></label>
+          <p class="explicacao" hidden>Um informativo pode ser mais curto do que um indicativo. O que o torna útil são os movimentos presentes, não o tamanho.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-2" value="b" data-certa="true"><span class="rotulo">Porque contém o resultado e a conclusão, que são o que a decisão do leitor precisa</span></label>
+          <p class="explicacao" hidden>Certo. A decisão acontece com o abstract e mais nada: se o resultado não está lá, para esse leitor não existe.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-2" value="c" data-certa="false"><span class="rotulo">Porque segue a estrutura IMRaD</span></label>
+          <p class="explicacao" hidden>IMRaD é a estrutura do artigo; o abstract costuma espelhá-la, mas um indicativo também pode seguir essa ordem sem dizer um único resultado.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-2" value="d" data-certa="false"><span class="rotulo">Porque tem cabeçalhos</span></label>
+          <p class="explicacao" hidden>Cabeçalhos são forma. «Resultados: são apresentados» tem cabeçalho e não permite decidir nada.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Para que documento é que a norma NISO considera adequado um abstract indicativo?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-3" value="a" data-certa="false"><span class="rotulo">O relatório de um teste A/B</span></label>
+          <p class="explicacao" hidden>Um teste A/B tem método e resultado — é o caso típico do informativo. Um indicativo aqui obriga o leitor a abrir o relatório para saber se funcionou.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-3" value="b" data-certa="false"><span class="rotulo">Um artigo experimental curto</span></label>
+          <p class="explicacao" hidden>Experimental é o caso central do informativo na norma, seja curto ou longo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-3" value="c" data-certa="true"><span class="rotulo">Um ensaio de opinião, sem metodologia nem resultados</span></label>
+          <p class="explicacao" hidden>Certo. Não há resultado que se possa dizer, por isso o abstract diz o âmbito e os argumentos. O mesmo vale para documentos longos, como livros e relatórios anuais.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-3" value="d" data-certa="false"><span class="rotulo">Nenhum: a norma recomenda sempre o informativo</span></label>
+          <p class="explicacao" hidden>A norma descreve os dois tipos e os documentos a que cada um serve. «Indicativo é sempre errado» é um erro comum desta lição.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O que é que a revisão de Hartley (2004) resume sobre os abstracts estruturados?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-4" value="a" data-certa="false"><span class="rotulo">Eliminam as omissões e distorções dos abstracts tradicionais</span></label>
+          <p class="explicacao" hidden>A revisão diz o contrário: continuam sujeitos às mesmas omissões e distorções. Um rótulo não obriga ao conteúdo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-4" value="b" data-certa="true"><span class="rotulo">Tendem a ter mais informação e a ser mais fáceis de ler, mas ocupam mais espaço e não impedem omissões</span></label>
+          <p class="explicacao" hidden>Certo. É um ganho real com um custo real, e sem garantia — a combinação que torna o rótulo útil e insuficiente.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-4" value="c" data-certa="false"><span class="rotulo">São mais curtos</span></label>
+          <p class="explicacao" hidden>Tendem a ocupar mais espaço, não menos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-4" value="d" data-certa="false"><span class="rotulo">Não há diferença medida</span></label>
+          <p class="explicacao" hidden>Há várias diferenças medidas; a única que a revisão apresenta como disputada é a vantagem na pesquisa.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">No esquema de Mensh e Kording, onde é que entra a lacuna?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-5" value="a" data-certa="false"><span class="rotulo">Nas conclusões, no fim</span></label>
+          <p class="explicacao" hidden>A conclusão responde à lacuna, mas a lacuna tem de vir antes: é ela que dá escala ao resultado.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-5" value="b" data-certa="false"><span class="rotulo">Nos métodos</span></label>
+          <p class="explicacao" hidden>Os métodos dizem o que se fez para preencher a lacuna, não qual é.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-5" value="c" data-certa="false"><span class="rotulo">Não faz parte do abstract, só da introdução</span></label>
+          <p class="explicacao" hidden>O esquema põe-na explicitamente no abstract. É o que distingue um resultado com significado de um número solto.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-5" value="d" data-certa="true"><span class="rotulo">No contexto, no início: diz que falta saber e porque importa</span></label>
+          <p class="explicacao" hidden>Certo. Sem ela, «o p95 desceu para 240 ms» não diz se é muito ou pouco. Nas operações da lição 0, é uma frase que não se pode apagar.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Um abstract acaba em «Os resultados sugerem implicações importantes para a prática.» O que falta?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-6" value="a" data-certa="false"><span class="rotulo">O método</span></label>
+          <p class="explicacao" hidden>Pode faltar também, mas o problema desta frase é outro: anuncia implicações sem dizer quais.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-6" value="b" data-certa="true"><span class="rotulo">Dizer quais são as implicações — é um fecho indicativo num abstract que devia ser informativo</span></label>
+          <p class="explicacao" hidden>Certo. O leitor sabe que há implicações e não sabe nenhuma. Se o documento tem resultados, a implicação cabe numa frase e deve estar lá.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-6" value="c" data-certa="false"><span class="rotulo">Números</span></label>
+          <p class="explicacao" hidden>Uma implicação não precisa de números; precisa de conteúdo: «recomenda-se X para quem tem Y».</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="abstracts-l1-6" value="d" data-certa="false"><span class="rotulo">Nada: é normal num abstract</span></label>
+          <p class="explicacao" hidden>É frequente, mas frequente não é certo. É exatamente o movimento que responde à pergunta posta na lacuna.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <p>Esta resposta vai para a entrega.</p>
+    <div class="aberta">
+      <label for="l1-feynman">Explica a diferença entre informativo e indicativo a um colega, usando o README de um projeto que conheças: o primeiro parágrafo dele é qual dos dois? Devia ser?
+        <span class="pista">Sem as palavras «informativo» e «indicativo» na explicação — só no fim, para classificar.</span>
+      </label>
+      <textarea id="l1-feynman" data-pergunta="L1 — informativo e indicativo num README"></textarea>
+    </div>
+
+<div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/abstracts-e-resumos/respostas/AAAA-MM-DD.md</code> e correr <code>/corrigir abstracts-e-resumos</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+    <ul>
+      <li>Um abstract é lido sozinho: a decisão do leitor acontece com ele e mais nada.</li>
+      <li><strong>Informativo</strong> dá propósito, método, resultados e conclusões; <strong>indicativo</strong> dá o âmbito. Teste rápido: de quem são os verbos — do mundo ou do documento?</li>
+      <li>Indicativo é o tipo certo para documentos sem resultados (ensaios, guias, livros), e o errado onde há resultados.</li>
+      <li>Movimentos: contexto, <strong>lacuna</strong>, o que se fez, resultado com grandeza, implicação — e a implicação responde à lacuna.</li>
+      <li>Estruturar com rótulos torna as faltas visíveis, custa espaço e não as impede.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+    <ul class="fontes">
+      <li><strong>ANSI/NISO Z39.14-1997 (R2015), <em>Guidelines for Abstracts</em>.</strong> Fonte primária para os tipos,
+        os elementos, os comprimentos e o estilo. Gratuita em
+        <a href="https://www.niso.org/publications/ansiniso-z3914-1997-r2015-guidelines-abstracts">niso.org</a>.
+        <strong>O que ler:</strong> secções 6 (tipos e conteúdo) e 7 (estilo), e os exemplos do apêndice A.
+        <strong>O que saltar:</strong> as secções sobre abstracts em serviços de indexação.
+        <span class="verificado">🌐 Verificado a 2026-09-15 — definições, tabela de comprimentos e §7.2 conferidas no PDF</span></li>
+      <li><strong>ISO 214:1976, <em>Documentation — Abstracts for publications and documentation</em>.</strong> A norma
+        internacional, citada pela Wikipédia. ⚠️ <strong>Não verifiquei o conteúdo:</strong> a página da ISO recusou o acesso
+        e a norma é paga. Nada nesta lição depende dela.</li>
+      <li><strong>Mensh, B. &amp; Kording, K. (2017). «Ten simple rules for structuring papers». <em>PLOS Computational
+        Biology</em>, 13(9), e1005619.</strong> <a href="https://doi.org/10.1371/journal.pcbi.1005619">doi:10.1371/journal.pcbi.1005619</a>.
+        Acesso livre. <strong>O que ler:</strong> a regra sobre o abstract e a explicação do esquema contexto-conteúdo-conclusão.
+        <strong>O que saltar:</strong> as regras sobre o processo de escrita do artigo inteiro, se não escreves artigos.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Sollaci, L. B. &amp; Pereira, M. G. (2004). «The introduction, methods, results, and discussion (IMRAD)
+        structure: a fifty-year survey». <em>J Med Libr Assoc</em>, 92(3), 364–371.</strong>
+        <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC442179/">PMC442179</a>. Só para a história da estrutura.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Hartley, J. (2004). «Current findings from research on structured abstracts». <em>J Med Libr Assoc</em>,
+        92(3), 368–371.</strong> <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC442180/">PMC442180</a>. Revisão curta:
+        lê a tabela de resultados e salta o resto.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+      <li><strong>Hopewell, S. et al. (2008). «CONSORT for reporting randomized controlled trials in journal and conference
+        abstracts: explanation and elaboration». <em>PLoS Medicine</em>, 5(1), e20.</strong>
+        <a href="https://doi.org/10.1371/journal.pmed.0050020">doi:10.1371/journal.pmed.0050020</a>. Fonte da afirmação de que
+        os leitores avaliam muitas vezes um estudo só pelo abstract. <strong>O que saltar:</strong> os itens específicos de ensaios clínicos.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="#conteudo">Voltar ao início</a> · <a href="index.html">Abstracts e resumos técnicos</a> ·
+      Anterior: <a href="00-o-que-um-resumo-faz.html">0 · O que um resumo faz</a> ·
+      Seguinte: <a href="02-ler-para-decidir.html">2 · Ler para decidir</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>
