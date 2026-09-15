@@ -430,7 +430,8 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
           <tr><td>4</td><td><a href="#schimel">Schimel, <em>Writing Science</em></a></td><td>Quando quiseres perceber de onde vem a forma de um resumo, e não só qual é</td><td>Livro</td></tr>
           <tr><td>5</td><td><a href="#sre">Google SRE, cap. 15</a></td><td>Quando escreveres o teu primeiro <em>post-mortem</em> a sério</td><td>Capítulo, gratuito</td></tr>
           <tr><td>6</td><td><a href="#pinker">Pinker, cap. 3</a></td><td>Quando quiseres saber porque é que <em>tu</em> escreves resumos maus, sabendo a matéria</td><td>Capítulo</td></tr>
-          <tr><td>7</td><td><a href="#luhn">Luhn (1958)</a></td><td>Curiosidade que vale a pena: o primeiro resumo automático, e porque é que a abordagem dele falha</td><td>7 páginas</td></tr>
+          <tr><td>7</td><td><a href="#workbook">SRE Workbook, cap. 10</a></td><td>O post-mortem mau e o bom lado a lado — o melhor exemplo trabalhado desta lista</td><td>Capítulo, gratuito</td></tr>
+          <tr><td>8</td><td><a href="#luhn">Luhn (1958)</a></td><td>Curiosidade que vale a pena: o primeiro resumo automático, e porque é que a abordagem dele falha</td><td>7 páginas</td></tr>
         </tbody>
       </table>
     </div>
@@ -553,6 +554,46 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
         exercícios e organização, não na substância.
         <span class="verificado">🌐 Verificado a 2026-09-15 — edições confirmadas na Pearson e na UChicago Press</span></li>
 
+      <li id="swe"><strong>Titus Winters, Tom Manshreck &amp; Hyrum Wright (curadores),
+        <em>Software Engineering at Google</em></strong>. O'Reilly, 2020. ISBN 978-1-4920-8279-8.
+        <strong>Gratuito em HTML</strong> em <a href="https://abseil.io/resources/swe-book">abseil.io</a>.<br>
+        <strong>Porquê:</strong> dois capítulos servem este tópico. O <strong>9, <em>Code Review</em></strong>,
+        mostra o que acontece do outro lado de um PR — quem lê, o que procura, e porque é que uma alteração
+        pequena com boa descrição passa em horas. O <strong>10, <em>Documentation</em></strong>, trata a
+        pergunta «para quem estás a escrever?», que decide o documento inteiro.<br>
+        <strong>O que saltar:</strong> as partes sobre a ferramenta interna da Google — os princípios
+        transferem-se, a ferramenta não. E a Parte IV, sobre construção e testes, é outro assunto.
+        <span class="verificado">🌐 Verificado a 2026-09-15 no índice em abseil.io</span></li>
+
+      <li id="fogel"><strong>Karl Fogel, <em>Producing Open Source Software: How to Run a Successful Free
+        Software Project</em></strong>. O'Reilly. <strong>Gratuito</strong> em
+        <a href="https://producingoss.com/">producingoss.com</a>.<br>
+        <strong>Porquê:</strong> o capítulo 6, <em>Communications</em> — e dentro dele a secção
+        <em>You Are What You Write</em> — explica porque é que num projeto onde ninguém se vê a escrita
+        <em>é</em> o principal instrumento de influência. É o contexto que falta a quem aprendeu o formato de
+        um RFC sem perceber para que serve o tom.<br>
+        <strong>O que saltar:</strong> os capítulos 7 a 9 (empacotamento, gestão de participantes, licenças)
+        são excelentes e são sobre gerir um projeto, não sobre escrever.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+
+      <li id="dekker"><strong>Sidney Dekker, <em>The Field Guide to Understanding 'Human Error'</em></strong>,
+        3.ª edição. CRC Press / Ashgate, 2014. ISBN 978-1-4724-3905-5.<br>
+        <strong>Porquê:</strong> é o mecanismo por trás da regra «sem culpados». O Dekker mostra que «erro
+        humano» não é uma explicação — é o sítio onde a investigação <strong>parou</strong>. Depois disto, um
+        post-mortem que acaba em «o engenheiro enganou-se» lê-se como o trabalho inacabado que é.<br>
+        <strong>O que saltar:</strong> os capítulos sobre aviação e medicina, se só te interessa software —
+        embora sejam os exemplos que melhor se fixam.
+        <span class="verificado">🌐 Verificado a 2026-09-15 na Routledge</span></li>
+
+      <li id="workbook"><strong><em>The Site Reliability Workbook</em>, capítulo 10,
+        <em>Postmortem Culture: Learning from Failure</em></strong>. Gratuito em
+        <a href="https://sre.google/workbook/postmortem-culture/">sre.google/workbook/postmortem-culture</a>.<br>
+        <strong>Porquê:</strong> mostra um post-mortem <strong>mal escrito</strong> e a seguir o mesmo incidente
+        bem tratado, com o contraste comentado. É o exemplo trabalhado da lição 5 feito em tamanho real.<br>
+        ⚠️ <strong>Não confundir com o anterior:</strong> <a href="#sre"><em>Site Reliability Engineering</em></a>
+        (cap. 15) é o primeiro livro; este é o segundo, e não repete o primeiro — acrescenta os exemplos.
+        <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
+
       <li id="google"><strong>Curso</strong> — Google, <em>Technical Writing Courses for Engineers</em>.
         Gratuito em <a href="https://developers.google.com/tech-writing">developers.google.com/tech-writing</a>.<br>
         <strong>Porquê:</strong> é o único curso desta lista que é gratuito, curto, e feito para quem escreve
@@ -570,9 +611,9 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
           <tr><td><a href="00-o-que-um-resumo-faz.html">0 · O que um resumo faz</a></td><td>Kintsch &amp; van Dijk (1978) · Luhn (1958) · Schimel, caps. 2 a 4</td></tr>
           <tr><td><a href="01-informativo-e-indicativo.html">1 · Informativo e indicativo</a></td><td>ANSI/NISO Z39.14 · Mensh &amp; Kording (2017) · Schimel, cap. 5 (<em>The opening</em>)</td></tr>
           <tr><td><a href="02-ler-para-decidir.html">2 · Ler para decidir</a></td><td>Keshav (2007) · Pitkin et al. (1999) · Pinker, cap. 3 (<em>The Curse of Knowledge</em>)</td></tr>
-          <tr><td><a href="03-pr-e-commit.html">3 · PR e commit</a></td><td><code>git-commit</code> DISCUSSION · Google, «Writing good CL descriptions»</td></tr>
-          <tr><td><a href="04-rfc-pep-readme.html">4 · RFC, PEP, README</a></td><td>RFC 7322 §4.3 · PEP 1 · o modelo dos RFC do Rust</td></tr>
-          <tr><td><a href="05-post-mortem.html">5 · Post-mortem</a></td><td>Google SRE, cap. 15 e o exemplo do apêndice</td></tr>
+          <tr><td><a href="03-pr-e-commit.html">3 · PR e commit</a></td><td><code>git-commit</code> DISCUSSION · <em>Software Engineering at Google</em>, cap. 9 (<em>Code Review</em>)</td></tr>
+          <tr><td><a href="04-rfc-pep-readme.html">4 · RFC, PEP, README</a></td><td>RFC 7322 §4.3 · PEP 1 · Fogel, cap. 6 (<em>Communications</em>) · <em>SWE at Google</em>, cap. 10</td></tr>
+          <tr><td><a href="05-post-mortem.html">5 · Post-mortem</a></td><td>Google SRE, cap. 15 · <strong>SRE Workbook, cap. 10</strong> (o mau e o bom lado a lado) · Dekker, <em>Field Guide</em></td></tr>
           <tr><td><a href="06-diagnosticar-e-cortar.html">6 · Diagnosticar e cortar</a></td><td>Schimel, cap. 16 (<em>Condensing</em>) · Williams, sobre concisão · Z39.14 §7.3 e §7.5 · e <a href="../metodo.html#intercalacao">porque é que esta lição mistura géneros</a></td></tr>
         </tbody>
       </table>
@@ -585,8 +626,9 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
       da direita liga ao sítio onde isso aconteceu — esta página não lhes carimba data nova, porque eu não as
       reabri. Carimbar «verificado hoje» em fontes que não abri seria fabricar verificação
       (<code>DECISOES.md</code> D-017).</p>
-      <p><strong>Os livros e o curso</strong> não vinham das lições: foram acrescentados e verificados
-      a <strong>2026-09-15</strong> contra a página do editor ou do curso — e essa data está escrita em cada um.
+      <p><strong>Os oito livros e o curso</strong> não vinham das lições: foram acrescentados e verificados
+      a <strong>2026-09-15</strong> contra a página do editor, o índice publicado, ou o próprio texto quando é
+      de acesso livre — e essa data está escrita em cada um.
       Onde há várias edições em circulação (o Williams), está dito quais e qual eu recomendaria.</p>
       <p>A distinção importa: consolidar referências que eu não abri e carimbá-las com uma data minha seria
       fabricar verificação. A única entrada sem verificação de conteúdo — a <strong>ISO 214:1976</strong> — está
