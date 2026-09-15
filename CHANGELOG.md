@@ -3,6 +3,19 @@
 O formato é uma entrada por sessão de trabalho, com data. O que muda o que eu
 consigo aprender fica no topo da entrada; o que muda só a mecânica fica no fim.
 
+## 2026-09-15 — A pesquisa passou a procurar dentro das lições
+
+**Corrigido**
+
+- A pesquisa do catálogo filtrava cartões com uma lista de palavras-chave escrita à mão.
+  Testada com 21 termos reais, falhava em **8**: `bitmap`, `vacuum`, `heap fetches`,
+  `work_mem`, `visibility map`, `prefixo`, `correlação`, `estatísticas`.
+- Passa a usar um índice **gerado do conteúdo** das páginas pelo `sincronizar.py`
+  (111 secções, ~85 kB inline), com relevância por **onde** o termo aparece e resultados
+  agrupados por página, com ligação direta à secção.
+- Limite declarado em D-015: acima de ~40 páginas indexadas, o índice inline deixa de caber
+  e a decisão tem de ser revista.
+
 ## 2026-09-15 — Repositório criado e publicado
 
 **No ar:** <https://hmgc2002.github.io/professor/> (GitHub Pages, `main:/docs`)
