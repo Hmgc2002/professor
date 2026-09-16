@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0 · Ver as frequências de um sinal — Digitalizar cassetes</title>
+<meta name="description" content="Lição 0: o espetro, a FFT, a janela, a interpolação do pico e o espetrograma, com NumPy e Audacity.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-captura/00-espetro.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Digitalizar cassetes</a> <span aria-hidden="true">›</span> Lição 0
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta nucleo">Lição 0 · nucleo</span> <span class="etiqueta">~1 h</span></p>
+    <h1>Ver as frequências de um sinal</h1>
+    <p class="subtitulo">Antes de medir o azimute, o wow ou o zumbido, é preciso saber ler um espetro: o que a FFT pergunta, porque é que a resposta vem em degraus e como se tira de lá mais precisão do que eles.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim consegues pegar num ficheiro de áudio, <strong>calcular o espetro</strong> dele com NumPy e com o
+    Audacity, e <strong>dizer a frequência de um tom com erro abaixo de 1 Hz</strong>. E consegues explicar
+    porque é que uma janela maior dá mais precisão em frequência e menos precisão no tempo. É a ferramenta de
+    que dependem todas as medições do curso: o azimute (lição 3), o wow (lição 4) e o zumbido (lição 2).</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>Estas vêm da lição 0 do <a href="../cassete-dados/00-som-numero-ficheiro.html">cassete-dados</a>, que é
+    pré-requisito desta. Responde antes de abrir.</p>
+    <ol>
+      <li>Um ficheiro a 48 kHz. Qual é a frequência mais alta que ele consegue representar, e porquê?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>24 kHz, metade da taxa. Um período precisa de pelo menos duas amostras para existir nos dados.</p>
+        </details>
+      </li>
+      <li>Passar de 16 para 24 bits por amostra dá mais agudos?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Não. Os bits decidem os degraus de amplitude, e portanto o piso de ruído. Os agudos dependem da
+          taxa. São escolhas independentes.</p>
+        </details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <figure>
+      <svg viewBox="0 0 520 350" role="img" aria-labelledby="t-f0 d-f0">
+        <title id="t-f0">O mesmo sinal visto no tempo e visto em frequência</title>
+        <desc id="d-f0">Em cima, quatro milissegundos de um sinal que parece uma onda irregular. Em baixo, o
+        espetro do mesmo sinal, de 0 a 4000 hertz: três picos isolados, em 50, 1000 e 3150 hertz, com alturas
+        diferentes, sobre um fundo de ruído muito mais baixo.</desc>
+        <rect class="svg-fundo" x="0" y="0" width="520" height="350"/>
+        <text class="svg-texto" x="20" y="18">no tempo (4 ms): uma forma que não se lê</text>
+        <path class="svg-traco" d="M20 70 H500" opacity="0.5"/>
+        <polyline points="20.0,69.6 22.5,54.7 25.0,40.6 27.5,31.7 30.1,28.2 32.6,30.6 35.1,38.8 37.6,50.0 40.1,63.5 42.6,75.2 45.1,85.4 47.6,90.5 50.2,90.0 52.7,84.0 55.2,73.7 57.7,60.4 60.2,46.8 62.7,35.5 65.2,27.9 67.7,26.4 70.3,30.5 72.8,39.9 75.3,53.9 77.8,70.1 80.3,85.7 82.8,98.5 85.3,106.7 87.9,109.8 90.4,106.6 92.9,98.1 95.4,86.6 97.9,73.4 100.4,61.1 102.9,52.3 105.4,48.4 108.0,49.9 110.5,57.7 113.0,68.1 115.5,82.0 118.0,95.7 120.5,106.5 123.0,113.2 125.5,114.6 128.1,109.9 130.6,99.3 133.1,85.1 135.6,68.8 138.1,53.5 140.6,41.2 143.1,33.3 145.7,31.6 148.2,35.7 150.7,44.1 153.2,56.1 155.7,69.2 158.2,80.8 160.7,88.5 163.2,92.0 165.8,88.7 168.3,80.7 170.8,69.2 173.3,54.9 175.8,41.5 178.3,30.2 180.8,24.4 183.4,23.7 185.9,28.8 188.4,39.5 190.9,54.7 193.4,70.3 195.9,85.1 198.4,97.2 200.9,103.6 203.5,105.3 206.0,100.4 208.5,91.4 211.0,78.8 213.5,66.4 216.0,55.5 218.5,48.7 221.0,46.1 223.6,50.0 226.1,58.9 228.6,71.5 231.1,85.9 233.6,99.8 236.1,110.4 238.6,116.2 241.2,115.6 243.7,110.1 246.2,98.7 248.7,84.0 251.2,68.0 253.7,53.3 256.2,42.5 258.7,36.5 261.3,35.9 263.8,40.9 266.3,50.7 268.8,63.1 271.3,75.6 273.8,85.8 276.3,92.1 278.8,92.8 281.4,88.3 283.9,78.4 286.4,65.1 288.9,50.3 291.4,36.8 293.9,26.0 296.4,20.9 299.0,21.6 301.5,29.1 304.0,40.3 306.5,55.2 309.0,70.6 311.5,85.2 314.0,94.9 316.5,100.1 319.1,100.1 321.6,94.0 324.1,83.8 326.6,71.2 329.1,58.9 331.6,48.9 334.1,44.0 336.6,44.0 339.2,49.8 341.7,60.1 344.2,74.2 346.7,89.0 349.2,103.1 351.7,112.8 354.2,117.7 356.8,115.8 359.3,108.8 361.8,97.0 364.3,82.2 366.8,66.6 369.3,53.3 371.8,43.7 374.3,39.1 376.9,40.2 379.4,47.5 381.9,58.2 384.4,70.7 386.9,82.6 389.4,91.3 391.9,95.7 394.5,94.8 397.0,88.0 399.5,76.6 402.0,62.1 404.5,47.4 407.0,33.7 409.5,24.0 412.0,20.1 414.6,22.0 417.1,29.7 419.6,41.9 422.1,56.5 424.6,71.8 427.1,84.6 429.6,93.1 432.1,96.5 434.7,93.9 437.2,87.2 439.7,75.6 442.2,63.4 444.7,51.7 447.2,43.1 449.7,39.4 452.3,41.5 454.8,49.3 457.3,61.2 459.8,76.5 462.3,91.7 464.8,104.7 467.3,114.1 469.8,117.1 472.4,114.8 474.9,106.4 477.4,94.3 479.9,79.7 482.4,64.9 484.9,52.6 487.4,45.0 489.9,42.5 492.5,45.8 495.0,53.7 497.5,65.6 500.0,77.8" fill="none" style="stroke: var(--acento)" stroke-width="1.5"/>
+        <text class="svg-texto" x="20" y="182">em frequência (0–4000 Hz): três coisas separadas</text>
+        <path class="svg-traco" d="M20 310 H500"/>
+        <polyline points="20,310.0 21,310.0 22,310.0 23,310.0 24,310.0 25,255.1 26,246.8 27,310.0 28,310.0 29,310.0 30,310.0 31,310.0 32,310.0 33,310.0 34,310.0 35,310.0 36,310.0 37,310.0 38,310.0 39,310.0 40,310.0 41,310.0 42,310.0 43,310.0 44,310.0 45,310.0 46,310.0 47,310.0 48,310.0 49,310.0 50,310.0 51,310.0 52,310.0 53,310.0 54,310.0 55,310.0 56,310.0 57,310.0 58,310.0 59,310.0 60,310.0 61,310.0 62,310.0 63,310.0 64,310.0 65,308.6 66,310.0 67,310.0 68,310.0 69,310.0 70,310.0 71,310.0 72,310.0 73,310.0 74,310.0 75,310.0 76,310.0 77,310.0 78,310.0 79,310.0 80,310.0 81,310.0 82,310.0 83,310.0 84,310.0 85,310.0 86,310.0 87,309.2 88,310.0 89,310.0 90,310.0 91,310.0 92,308.3 93,310.0 94,310.0 95,310.0 96,310.0 97,310.0 98,310.0 99,310.0 100,310.0 101,310.0 102,310.0 103,310.0 104,310.0 105,310.0 106,310.0 107,310.0 108,310.0 109,310.0 110,310.0 111,310.0 112,310.0 113,310.0 114,310.0 115,309.1 116,309.9 117,310.0 118,309.2 119,310.0 120,310.0 121,310.0 122,310.0 123,310.0 124,310.0 125,310.0 126,310.0 127,310.0 128,310.0 129,310.0 130,310.0 131,310.0 132,310.0 133,310.0 134,310.0 135,310.0 136,310.0 137,310.0 138,310.0 139,227.5 140,219.2 141,310.0 142,310.0 143,310.0 144,310.0 145,307.3 146,310.0 147,310.0 148,310.0 149,310.0 150,310.0 151,310.0 152,310.0 153,310.0 154,310.0 155,310.0 156,310.0 157,310.0 158,310.0 159,310.0 160,310.0 161,310.0 162,310.0 163,310.0 164,310.0 165,310.0 166,310.0 167,310.0 168,310.0 169,310.0 170,310.0 171,310.0 172,310.0 173,310.0 174,310.0 175,310.0 176,310.0 177,310.0 178,310.0 179,310.0 180,310.0 181,310.0 182,310.0 183,310.0 184,310.0 185,310.0 186,310.0 187,310.0 188,310.0 189,307.8 190,310.0 191,310.0 192,310.0 193,310.0 194,310.0 195,310.0 196,310.0 197,310.0 198,310.0 199,310.0 200,310.0 201,310.0 202,310.0 203,310.0 204,310.0 205,310.0 206,310.0 207,310.0 208,306.9 209,310.0 210,310.0 211,310.0 212,310.0 213,310.0 214,310.0 215,310.0 216,310.0 217,310.0 218,310.0 219,310.0 220,310.0 221,310.0 222,310.0 223,310.0 224,310.0 225,310.0 226,310.0 227,310.0 228,310.0 229,310.0 230,310.0 231,310.0 232,310.0 233,310.0 234,310.0 235,310.0 236,310.0 237,310.0 238,310.0 239,310.0 240,310.0 241,310.0 242,310.0 243,310.0 244,310.0 245,310.0 246,310.0 247,310.0 248,310.0 249,310.0 250,310.0 251,310.0 252,310.0 253,310.0 254,310.0 255,310.0 256,310.0 257,310.0 258,310.0 259,310.0 260,310.0 261,310.0 262,310.0 263,310.0 264,310.0 265,310.0 266,310.0 267,310.0 268,310.0 269,310.0 270,310.0 271,310.0 272,309.7 273,310.0 274,310.0 275,310.0 276,310.0 277,310.0 278,310.0 279,310.0 280,310.0 281,310.0 282,310.0 283,310.0 284,310.0 285,310.0 286,310.0 287,310.0 288,310.0 289,310.0 290,310.0 291,310.0 292,310.0 293,310.0 294,310.0 295,310.0 296,310.0 297,310.0 298,310.0 299,310.0 300,310.0 301,310.0 302,310.0 303,310.0 304,310.0 305,310.0 306,310.0 307,310.0 308,310.0 309,310.0 310,310.0 311,310.0 312,310.0 313,310.0 314,310.0 315,310.0 316,310.0 317,310.0 318,310.0 319,310.0 320,310.0 321,310.0 322,310.0 323,310.0 324,310.0 325,310.0 326,310.0 327,310.0 328,310.0 329,310.0 330,310.0 331,310.0 332,310.0 333,310.0 334,310.0 335,310.0 336,310.0 337,310.0 338,310.0 339,310.0 340,310.0 341,310.0 342,310.0 343,310.0 344,310.0 345,310.0 346,310.0 347,310.0 348,310.0 349,310.0 350,310.0 351,310.0 352,310.0 353,310.0 354,310.0 355,310.0 356,310.0 357,310.0 358,310.0 359,310.0 360,310.0 361,310.0 362,310.0 363,310.0 364,310.0 365,310.0 366,310.0 367,310.0 368,310.0 369,310.0 370,310.0 371,310.0 372,310.0 373,310.0 374,310.0 375,310.0 376,310.0 377,310.0 378,310.0 379,310.0 380,310.0 381,310.0 382,310.0 383,310.0 384,310.0 385,310.0 386,309.3 387,310.0 388,310.0 389,310.0 390,310.0 391,310.0 392,310.0 393,310.0 394,310.0 395,310.0 396,310.0 397,216.6 398,208.3 399,310.0 400,310.0 401,310.0 402,308.8 403,310.0 404,310.0 405,310.0 406,310.0 407,310.0 408,310.0 409,310.0 410,310.0 411,310.0 412,310.0 413,310.0 414,310.0 415,310.0 416,310.0 417,310.0 418,310.0 419,310.0 420,310.0 421,310.0 422,310.0 423,310.0 424,310.0 425,310.0 426,310.0 427,310.0 428,310.0 429,310.0 430,310.0 431,310.0 432,310.0 433,310.0 434,310.0 435,310.0 436,310.0 437,310.0 438,310.0 439,310.0 440,310.0 441,310.0 442,310.0 443,310.0 444,310.0 445,310.0 446,310.0 447,310.0 448,310.0 449,310.0 450,310.0 451,310.0 452,310.0 453,310.0 454,310.0 455,310.0 456,310.0 457,310.0 458,310.0 459,310.0 460,310.0 461,310.0 462,310.0 463,310.0 464,310.0 465,310.0 466,310.0 467,310.0 468,310.0 469,310.0 470,310.0 471,310.0 472,310.0 473,310.0 474,310.0 475,310.0 476,310.0 477,310.0 478,310.0 479,310.0 480,310.0 481,310.0 482,310.0 483,310.0 484,310.0 485,310.0 486,310.0 487,310.0 488,310.0 489,310.0 490,310.0 491,310.0 492,310.0 493,310.0 494,310.0 495,310.0 496,310.0 497,310.0 498,310.0 499,310.0 500,310.0" fill="none" style="stroke: var(--acento)" stroke-width="1.2"/>
+        <text class="svg-suave" x="20" y="326">0</text>
+        <text class="svg-suave" x="500" y="326" text-anchor="end">4000 Hz</text>
+        <text class="svg-mono" x="28" y="236">50 Hz</text>
+        <text class="svg-mono" x="140" y="214">1000 Hz</text>
+        <text class="svg-mono" x="404" y="206" text-anchor="end">3150 Hz</text>
+        <text class="svg-suave" x="20" y="344">o fundo irregular em baixo é o ruído, a −70 dB e menos</text>
+      </svg>
+      <figcaption>Figura calculada, não desenhada: é o espetro real do sinal <code>0,5·sen(3150) + 0,2·sen(1000)
+      + 0,02·sen(50) + ruído</code>. No tempo, os três somam-se numa forma que não se consegue ler. Em
+      frequência, cada um fica no seu sítio e com a sua altura.</figcaption>
+    </figure>
+
+    <h3>A pergunta que a FFT faz</h3>
+    <p>Um espetro responde a uma pergunta por cada frequência: <em>quanto é que este sinal se parece com um seno
+    desta frequência?</em> A forma de a fazer é multiplicar, amostra a amostra, o sinal por um seno de teste e
+    somar tudo.</p>
+    <ul>
+      <li>Se o sinal <strong>tem</strong> aquela frequência, os dois sobem e descem juntos. O produto é quase
+      sempre positivo e a soma cresce com cada amostra.</li>
+      <li>Se <strong>não tem</strong>, umas vezes estão do mesmo lado e outras não. Os produtos positivos e
+      negativos anulam-se, e a soma fica perto de zero.</li>
+    </ul>
+    <p>Repete-se o mesmo com um cosseno, porque o tom do sinal pode estar desfasado do seno de teste. Os dois
+    resultados juntos dão a <strong>amplitude</strong> e a <strong>fase</strong> dessa frequência. A
+    <em>transformada rápida de Fourier</em> (FFT) é só uma forma eficiente de fazer isto para todas as
+    frequências de uma vez. Em NumPy é <code>np.fft.rfft</code>, a versão para sinais reais, que devolve só as
+    frequências positivas.</p>
+
+    <h3>Quais frequências: os <em>bins</em></h3>
+    <p>Com <em>N</em> amostras, a FFT não testa todas as frequências. Testa as que cabem um número inteiro de
+    vezes na janela: 0, 1, 2… ciclos em <em>N</em> amostras. Isso dá frequências espaçadas de</p>
+    <p style="text-align:center"><strong>Δf = taxa ÷ N</strong></p>
+    <p>A 48 kHz com 4096 amostras, Δf = 11,7 Hz. Um tom a 3150 Hz cai entre dois bins (3140,6 e 3152,3), e o
+    pico que vês não é 3150.</p>
+    <div class="caixa critico">
+      <span class="titulo">🔴 A troca que não se evita</span>
+      <p>Para ter bins mais juntos precisas de mais amostras, e mais amostras são <strong>mais tempo</strong>.
+      Com N = 48 000 a 48 kHz tens Δf = 1 Hz, mas o espetro é a média de um segundo inteiro: o que mudar dentro
+      desse segundo fica borrado. O manual do Audacity di-lo por outras palavras: uma janela maior dá bandas mais
+      estreitas, mas faz a média sobre mais tempo. Na lição 4 esta troca decide como se mede o wow.</p>
+    </div>
+
+    <h3>Porque é que o pico se espalha: a fuga</h3>
+    <p>Um tom que não dá um número inteiro de ciclos na janela é cortado a meio de um ciclo nas duas pontas.
+    Para a FFT, que supõe que a janela se repete, isso é um salto, e um salto tem energia em todas as
+    frequências. O pico alarga-se e levanta o fundo à volta dele. Chama-se <strong>fuga espetral</strong>.</p>
+    <p>A <strong>janela de Hann</strong> reduz a fuga: multiplica o bloco por uma curva que começa e acaba em
+    zero, e assim deixa de haver salto. Custa um pico um pouco mais largo. É a janela por omissão do Audacity, e
+    o manual recomenda-a para a maioria das situações.</p>
+
+    <h3>Mais precisão do que os bins: interpolar o pico</h3>
+    <p>O pico de um tom ocupa três ou quatro bins com alturas que descem dos dois lados. Passar uma parábola
+    pelos três bins mais altos e tomar o vértice dá a frequência com uma fração de Δf. É o que a função
+    <code>pico()</code> faz. No exemplo trabalhado, o erro desce de 2,34 Hz para 0,16 Hz, com as mesmas 4096
+    amostras. ⚠️ A <em>altura</em> interpolada é menos fiável do que a frequência: no exercício com lacunas erra
+    0,3 dB.</p>
+
+    <h3>dB, e dBFS</h3>
+    <p>As alturas vêm em decibéis: <strong>20·log₁₀(amplitude)</strong>. Cada −20 dB é um décimo da amplitude,
+    e cada −6 dB é cerca de metade. Quando a referência é o máximo que o ficheiro consegue guardar, escreve-se
+    <strong>dBFS</strong> (<em>full scale</em>). 0 dBFS é o teto, e uma captura nunca lá deve chegar
+    (lição 2).</p>
+
+    <h3>O espetrograma</h3>
+    <p>Um espetrograma são muitas FFTs seguidas, uma por fatia de tempo, desenhadas lado a lado com a altura
+    em cor. É o que o Audacity mostra quando mudas a vista da pista para <em>Spectrogram</em>, no menu da
+    própria pista. A troca de cima volta a aparecer: fatias curtas mostram bem <strong>quando</strong>
+    (cliques, arestas), e fatias longas mostram bem <strong>que frequência</strong> (um zumbido).</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p><strong>O problema.</strong> Um sinal tem um tom de 3150 Hz com amplitude 0,5, um zumbido de 50 Hz muito
+    mais fraco e algum chiado. Queremos a frequência do tom com menos de 1 Hz de erro e o nível do zumbido em
+    dB. Instala o NumPy (<code>pip install numpy</code>) e descarrega o
+    <a href="codigo/captura.py">captura.py</a> para a mesma pasta.</p>
+
+    <h3>Passo 1 — escolher N pela resolução, não pelo hábito</h3>
+    <p>Quero distinguir 3150 de 3149. Sem interpolação precisava de Δf ≤ 1 Hz, ou seja, N ≥ 48 000 (um segundo
+    inteiro). Com interpolação posso usar muito menos. Experimento os dois extremos e comparo.</p>
+
+    <h3>Passo 2 — medir</h3>
+    <pre><code>import numpy as np
+import captura as C
+
+TAXA = 48_000
+t = np.arange(TAXA // 2) / TAXA                      # meio segundo
+rng = np.random.default_rng(1)
+x = (0.5 * np.sin(2 * np.pi * 3150 * t)              # o tom que queremos medir
+     + 0.02 * np.sin(2 * np.pi * 50 * t)             # zumbido da corrente
+     + rng.normal(0, 0.001, len(t)))                 # chiado
+
+for n in (4096, 24000):
+    f, m = C.espetro(x, TAXA, n)
+    k = np.argmax(m)
+    fi, ai = C.pico(f, m, 1000, 5000)
+    print(f&quot;N={n:6d}  df={TAXA / n:6.2f} Hz  |  bin mais alto: {f[k]:8.2f} Hz  &quot;
+          f&quot;|  interpolado: {fi:8.2f} Hz, {ai:6.2f} dB&quot;)
+
+f, m = C.espetro(x, TAXA, 24000)
+print(f&quot;a 50 Hz: {m[np.argmin(abs(f - 50))]:.1f} dB   (esperado: 20*log10(0.02) = {20*np.log10(0.02):.1f})&quot;)</code></pre>
+    <p class="verificado">Saída (colada de uma execução):</p>
+    <pre><code>N=  4096  df= 11.72 Hz  |  bin mais alto:  3152.34 Hz  |  interpolado:  3149.84 Hz,  -5.96 dB
+N= 24000  df=  2.00 Hz  |  bin mais alto:  3150.00 Hz  |  interpolado:  3150.00 Hz,  -6.02 dB
+a 50 Hz: -34.0 dB   (esperado: 20*log10(0.02) = -34.0)</code></pre>
+
+    <h3>Passo 3 — ler o resultado</h3>
+    <ul>
+      <li>Com N = 4096, o bin mais alto está a 3152,34 Hz. É o bin mais próximo de 3150, <strong>não</strong> é a
+      medida. A interpolação dá 3149,84 Hz, e o erro passou de 2,34 Hz para 0,16 Hz.</li>
+      <li>Com N = 24 000 (Δf = 2 Hz), 3150 é um bin exato e as duas leituras coincidem. Não é o N maior que
+      ajudou: é o tom caber um número inteiro de vezes na janela.</li>
+      <li>A altura certa é 20·log₁₀(0,5) = −6,02 dB. Com N = 24 000, em que o tom cai num bin, a medida é
+      exatamente essa. Com N = 4096 sai −5,96 dB: a interpolação aproxima a altura, mas não a acerta.</li>
+      <li>O zumbido a 50 Hz aparece a −34,0 dB, que é o esperado. Um zumbido 28 dB abaixo do tom continua a ser
+      perfeitamente visível num espetro, e quase invisível numa forma de onda.</li>
+    </ul>
+    <div class="caixa ok">
+      <span class="titulo">✅ O que levar daqui</span>
+      <p>O bin é a pergunta que a FFT fez. A interpolação é a resposta que tu dás a partir dos bins vizinhos. É
+      por isso que se pode medir uma frequência com muito mais precisão do que Δf.</p>
+    </div>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa antes de correr</h3>
+      <p>Uma fita de ZX Spectrum começa com um tom-piloto de 807,2 Hz (é o de meias ondas de 2168 T-states, da
+      <a href="../cassete-dados/05-formato-zx.html">lição 5 do cassete-dados</a>). A captura está a 44,1 kHz e
+      usas N = 2048.</p>
+      <ol>
+        <li>Δf = 44 100 ÷ 2048 = <strong>______</strong> Hz.</li>
+        <li>Os dois bins à volta de 807,2 são 21,53 × 37 = 796,7 e <strong>______</strong>.</li>
+        <li>Sem interpolar, o erro máximo possível é <strong>______</strong> de Δf.</li>
+        <li>A amplitude é 0,3, logo a altura certa é 20·log₁₀(0,3) = <strong>______</strong> dB.</li>
+      </ol>
+      <pre><code>import numpy as np
+import captura as C
+
+TAXA = 44_100
+t = np.arange(TAXA) / TAXA
+x = 0.3 * np.sin(2 * np.pi * 807.2 * t)          # o tom-piloto de uma fita de Spectrum
+
+n = 2048
+print(&quot;df =&quot;, round(TAXA / n, 2), &quot;Hz&quot;)
+f, m = C.espetro(x, TAXA, n)
+print(&quot;bin mais alto:&quot;, round(float(f[np.argmax(m)]), 2), &quot;Hz&quot;)
+fi, ai = C.pico(f, m, 400, 1600)
+print(&quot;interpolado:&quot;, round(fi, 2), &quot;Hz,&quot;, round(ai, 2), &quot;dB&quot;)</code></pre>
+    <p class="verificado">Saída (colada de uma execução):</p>
+    <pre><code>df = 21.53 Hz
+bin mais alto: 796.73 Hz
+interpolado: 807.25 Hz, -10.15 dB</code></pre>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <ol>
+          <li>21,53 Hz.</li>
+          <li>21,53 × 38 = 818,3 Hz. O tom está a 10,5 Hz de 796,7 e a 11,1 Hz de 818,3, por isso o bin mais
+          alto é o de 796,7, que é o que a execução mostra. ⚠️ Na primeira versão desta solução escrevi 818,3
+          sem fazer a conta.</li>
+          <li>Metade de Δf, cerca de 10,8 Hz: o tom pode estar exatamente a meio de dois bins.</li>
+          <li>−10,46 dB. A execução dá −10,15 dB, 0,3 dB acima. O tom está quase a meio de dois bins, e é aí
+          que a parábola erra mais na altura. A frequência interpolada, 807,25 Hz, está a 0,05 Hz da certa.
+          <strong>Para medir frequências, a interpolação chega. Para medir níveis com décimas de dB, escolhe um
+          N em que o tom caia num bin, ou mede com um tom longo.</strong></li>
+        </ol>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr><td>«O bin mais alto é a frequência do tom»</td>
+            <td>Medir 3152,3 Hz num tom de 3150 e culpar a fita</td>
+            <td>É a frequência de teste mais próxima. Com Δf = 11,7 Hz o erro pode chegar a 5,9 Hz. Interpola</td></tr>
+          <tr><td>«Uma FFT maior é sempre melhor»</td>
+            <td>Usar um segundo inteiro para ver um clique</td>
+            <td>Uma janela maior separa melhor as frequências e borra mais o tempo. Para eventos curtos quer-se
+            uma janela curta</td></tr>
+          <tr><td>«Sem janela é mais honesto, porque não mexe no sinal»</td>
+            <td>Um tom puro com um fundo a −40 dB que não existe</td>
+            <td>Sem janela, o corte nas pontas é um salto, e o salto espalha energia por todo o lado (fuga).
+            A janela mexe menos no resultado do que a falta dela</td></tr>
+          <tr><td>«Um pico a 50 Hz é um som da gravação»</td>
+            <td>Tentar ouvi-lo na música</td>
+            <td>Em Portugal a corrente é de 50 Hz. Um pico a 50, 100 e 150 Hz é quase sempre a cadeia de captura,
+            não a fita (lição 2)</td></tr>
+          <tr><td>«−6 dB é metade do volume»</td>
+            <td>Confundir amplitude com potência ou com sensação</td>
+            <td>−6 dB é metade da <em>amplitude</em>. Em potência é um quarto. O volume percebido é outra
+            coisa e não se mede aqui</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — contas antes de medir</h3>
+      <p>Vais capturar a 96 kHz (a recomendação da IASA, lição 2) e usar blocos de 8192 amostras para ver o
+      espetro. Quanto vale Δf? Quanto tempo cobre cada bloco? E se quiseres Δf = 1 Hz, quantas amostras e quantos
+      segundos?</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>Δf = 96 000 ÷ 8192 = 11,7 Hz. Cada bloco cobre 8192 ÷ 96 000 = 85 ms. Para 1 Hz precisas de
+        96 000 amostras, que é um segundo. Repara que a resolução em frequência depende só da <strong>duração</strong>
+        do bloco (Δf = 1 ÷ duração). A taxa não a melhora, só alarga a gama de frequências.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — o mesmo no Audacity</h3>
+      <p>No Audacity: <code>Generate &gt; Tone</code>, seno, 3150 Hz, amplitude 0,5, 5 s. Seleciona tudo e abre
+      <code>Analyze &gt; Plot Spectrum</code>. Muda <em>Size</em> entre 1024 e 65536 e, para cada um, escreve o que
+      o cursor diz no pico. Depois responde: porque é que a leitura com 1024 é pior, se o tom é o mesmo?</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>Com Size 1024 a 44,1 kHz (a taxa por omissão de muitos projetos), Δf = 43 Hz. O cursor mostra a
+        frequência do bin, e o erro pode chegar a metade disso. Com 65536, Δf = 0,67 Hz. O tom é o mesmo: o que
+        mudou foi a pergunta, porque as frequências de teste ficaram mais juntas. ⚠️ Não abri o código do Audacity
+        para saber se o cursor interpola; o manual não o diz. Mede e confirma na tua versão.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●● · código que corre</span>
+      <h3>E3 — separar dois tons de 20 Hz de distância</h3>
+      <p>Dois tons iguais, a 3150 e a 3170 Hz. Qual é o menor N (potência de 2) com que o espetro mostra dois
+      picos separados, e não um pico gordo? <strong>Prevê antes de correr</strong>, a partir de Δf e da largura
+      do pico da janela de Hann, que ocupa cerca de quatro bins. Depois escreve o programa.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <pre><code>import numpy as np
+import captura as C
+
+TAXA = 48_000
+t = np.arange(4 * TAXA) / TAXA
+x = 0.5 * np.sin(2 * np.pi * 3150 * t) + 0.5 * np.sin(2 * np.pi * 3170 * t)
+
+for n in (1024, 2048, 4096, 8192):
+    f, m = C.espetro(x, TAXA, n)
+    banda = (f &gt; 3100) &amp; (f &lt; 3220)
+    fb, mb = f[banda], m[banda]
+    # dois picos separados = há um mínimo entre eles pelo menos 3 dB abaixo do mais baixo
+    picos = [i for i in range(1, len(mb) - 1) if mb[i] &gt; mb[i - 1] and mb[i] &gt;= mb[i + 1]]
+    separados = False
+    if len(picos) &gt;= 2:
+        a, b = picos[0], picos[-1]
+        separados = mb[a:b + 1].min() &lt; min(mb[a], mb[b]) - 3
+    print(f&quot;N={n:5d}  df={TAXA / n:5.1f} Hz  picos={len(picos)}  separados={separados}&quot;)</code></pre>
+    <p class="verificado">Saída (colada de uma execução):</p>
+    <pre><code>N= 1024  df= 46.9 Hz  picos=0  separados=False
+N= 2048  df= 23.4 Hz  picos=2  separados=False
+N= 4096  df= 11.7 Hz  picos=1  separados=False
+N= 8192  df=  5.9 Hz  picos=2  separados=True</code></pre>
+        <p>Separam-se a partir de N = 8192 (Δf = 5,9 Hz). Com 4096 (Δf = 11,7 Hz) os dois tons estão a menos de
+        dois bins um do outro, e os lóbulos de Hann, com cerca de quatro bins de largura, fundem-se num só. Com
+        2048 aparecem dois máximos, mas sem vale entre eles: são dois bins do mesmo pico gordo, não dois tons.
+        Previsão pela regra dos quatro bins: é preciso 4·Δf ≲ 20 Hz, ou seja Δf ≲ 5 Hz, o que aponta para 16 384.
+        A medição diz 8192, porque o critério «há um vale de 3 dB» é menos exigente do que «os lóbulos não se
+        tocam». Uma regra de bolso dá a ordem de grandeza. A resposta certa é a que se mede.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <div class="quiz" data-quiz="c0">
+      <ol class="perguntas">
+        <li class="pergunta">
+          <p class="enunciado">Capturas a 96 kHz em vez de 48 kHz e usas o mesmo N = 4096. O que acontece à resolução em frequência?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c0-1" value="a" data-certa="true"><span class="rotulo">Piora para o dobro de Δf: 23,4 Hz em vez de 11,7</span></label>
+              <p class="explicacao" hidden>Δf = taxa ÷ N. Com N fixo, dobrar a taxa dobra o espaço entre bins, porque as mesmas 4096 amostras cobrem metade do tempo. A resolução depende da duração do bloco.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-1" value="b" data-certa="false"><span class="rotulo">Melhora, porque há mais amostras por segundo</span></label>
+              <p class="explicacao" hidden>Mais amostras por segundo alargam a gama (até 48 kHz), não apertam os bins. Com o mesmo N o bloco é mais curto, e um bloco mais curto vê menos ciclos de cada tom.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-1" value="c" data-certa="false"><span class="rotulo">Fica igual, porque N não mudou</span></label>
+              <p class="explicacao" hidden>N sozinho não decide. Δf = taxa ÷ N, e a taxa mudou.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">A FFT diz que o bin mais alto está a 3152,34 Hz. O que podes afirmar sobre o tom?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c0-2" value="a" data-certa="false"><span class="rotulo">Que está a 3152,34 Hz</span></label>
+              <p class="explicacao" hidden>É a frequência de teste mais próxima, não a do tom. Com Δf = 11,7 Hz o tom pode estar até 5,9 Hz ao lado.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-2" value="b" data-certa="false"><span class="rotulo">Que a fita está 0,07 % rápida</span></label>
+              <p class="explicacao" hidden>Seria concluir sobre a fita a partir de um erro de medição. Primeiro mede bem, e só depois culpa a máquina.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-2" value="c" data-certa="true"><span class="rotulo">Que está mais perto de 3152,34 do que dos bins vizinhos, e que a interpolação dá o valor fino</span></label>
+              <p class="explicacao" hidden>É exatamente o que o bin diz, e não mais. A parábola pelos três bins mais altos recupera a fração.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Queres ver num espetrograma um clique que dura 2 ms. Que janela escolhes?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c0-3" value="a" data-certa="false"><span class="rotulo">A maior possível, para ter o máximo de detalhe</span></label>
+              <p class="explicacao" hidden>Detalhe em frequência, sim, mas uma janela de um segundo mistura o clique com tudo o que o rodeia, e ele desaparece na média.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-3" value="b" data-certa="true"><span class="rotulo">Uma curta, de algumas centenas de amostras</span></label>
+              <p class="explicacao" hidden>Eventos curtos pedem resolução no tempo. O manual do Audacity recomenda janelas pequenas para encontrar cliques e grandes para encontrar um tom.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-3" value="c" data-certa="false"><span class="rotulo">Tanto faz: o espetrograma mostra o tempo no eixo horizontal</span></label>
+              <p class="explicacao" hidden>Mostra, mas cada coluna é uma média sobre a janela. Com uma janela longa, as colunas vizinhas veem quase o mesmo trecho.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que se usa a janela de Hann em vez de cortar o bloco a seco?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c0-4" value="a" data-certa="true"><span class="rotulo">Porque o corte a seco cria um salto nas pontas, e o salto espalha energia por todas as frequências</span></label>
+              <p class="explicacao" hidden>A FFT trata o bloco como se se repetisse. Se não há um número inteiro de ciclos, a repetição tem um degrau. A janela leva as pontas a zero e o degrau desaparece.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-4" value="b" data-certa="false"><span class="rotulo">Porque aumenta a amplitude dos tons</span></label>
+              <p class="explicacao" hidden>Faz o contrário, e é por isso que se multiplica por 2 ÷ soma(janela) para corrigir.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-4" value="c" data-certa="false"><span class="rotulo">Porque estreita o pico</span></label>
+              <p class="explicacao" hidden>Alarga-o ligeiramente. É o custo aceite para baixar a fuga.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Um tom tem amplitude 0,1. A que altura aparece no espetro, com a correção de amplitude?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c0-5" value="a" data-certa="false"><span class="rotulo">−10 dB</span></label>
+              <p class="explicacao" hidden>Isso seria 10·log₁₀. Para amplitudes usa-se 20·log₁₀.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-5" value="b" data-certa="true"><span class="rotulo">−20 dB</span></label>
+              <p class="explicacao" hidden>20·log₁₀(0,1) = −20. Cada fator de 10 na amplitude são 20 dB.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-5" value="c" data-certa="false"><span class="rotulo">−40 dB</span></label>
+              <p class="explicacao" hidden>Seria uma amplitude de 0,01.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Vês picos a 50, 100 e 150 Hz numa captura de uma fita de dados. Qual é a hipótese mais provável?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c0-6" value="a" data-certa="true"><span class="rotulo">Zumbido da corrente, entrado pela cadeia de captura</span></label>
+              <p class="explicacao" hidden>A corrente é de 50 Hz em Portugal. Harmónicas exatas de 50 Hz apontam para um laço de massa ou um cabo mal blindado (lição 2). Confirma-se capturando com o deck parado: se o pico continua lá, a fita está inocente.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-6" value="b" data-certa="false"><span class="rotulo">A fita tem música gravada por baixo</span></label>
+              <p class="explicacao" hidden>Uma série exata de múltiplos de 50 é a assinatura da rede elétrica em Portugal, não de um instrumento.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c0-6" value="c" data-certa="false"><span class="rotulo">Wow a 50 Hz</span></label>
+              <p class="explicacao" hidden>Wow é uma variação da <em>frequência</em> de um tom, e aparece como bandas laterais à volta do tom, não como picos isolados a 50 Hz (lição 4).</p>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="feynman-1">Explica a alguém que programa, mas nunca ouviu falar de Fourier, porque é que uma janela maior dá mais precisão em frequência e menos no tempo
+        <span class="pista">Sem as palavras bin, FFT ou resolução. Se precisares delas, ainda não está.</span>
+      </label>
+      <textarea id="feynman-1" data-pergunta="Explica a alguém que programa, mas nunca ouviu falar de Fourier, porque é que uma janela maior dá mais precisão em frequência e menos no tempo"></textarea>
+    </div>
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/cassete-captura/respostas/AAAA-MM-DD.md</code> e correr
+      <code>/corrigir cassete-captura</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Um espetro mede, para cada frequência, quanto é que o sinal se parece com um seno dessa frequência.</li>
+      <li>Com N amostras, as frequências de teste estão espaçadas de <strong>Δf = taxa ÷ N = 1 ÷ duração</strong>.</li>
+      <li>Janela maior: frequência mais fina, tempo mais borrado. Não há como ter as duas coisas.</li>
+      <li>A janela de Hann corta a fuga. A interpolação parabólica dá uma fração de Δf.</li>
+      <li>Amplitude em dB: 20·log₁₀. −6 dB ≈ metade, −20 dB = um décimo.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>NumPy, <em>Discrete Fourier Transform (numpy.fft)</em></strong> — documentação oficial.
+      Daqui vêm o comportamento do <code>rfft</code> (só frequências positivas, <em>n</em>/2+1 pontos) e a
+      normalização por omissão. <a href="https://numpy.org/doc/stable/reference/routines.fft.html">numpy.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Audacity, manual: <em>Plot Spectrum</em>, <em>Spectrogram View</em> e <em>Tone</em></strong> —
+      documentação oficial. Daqui vêm os caminhos dos menus, a recomendação da janela de Hann e a troca entre
+      janelas grandes e pequenas.
+      <a href="https://manual.audacityteam.org/man/plot_spectrum.html">Plot Spectrum</a> ·
+      <a href="https://manual.audacityteam.org/man/spectrogram_view.html">Spectrogram View</a> ·
+      <a href="https://manual.audacityteam.org/man/tone.html">Tone</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Livro (não é documentação) — Steven W. Smith, <em>The Scientist and Engineer's Guide to Digital
+      Signal Processing</em></strong>, California Technical Publishing, ©1997–2011, texto integral gratuito no
+      sítio do autor. <strong>Porquê:</strong> explica a transformada com desenhos em vez de integrais.
+      <strong>O que ler:</strong> capítulo 8 (<em>The Discrete Fourier Transform</em>) e capítulo 9
+      (<em>Applications of the DFT</em>, onde estão as janelas e a resolução). <strong>O que saltar:</strong> por
+      agora, tudo o que é sobre desenho de filtros (capítulos 14 a 21).
+      <a href="https://www.dspguide.com/pdfbook.htm">dspguide.com</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16 — índice de capítulos confirmado; os capítulos 8 e 9
+      não os reli nesta sessão</span></li>
+      <li><strong>Wikipédia, <em>Mains electricity by country</em></strong> — fonte secundária, só para os 50 Hz
+      de Portugal. <a href="https://en.wikipedia.org/wiki/Mains_electricity_by_country">en.wikipedia.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> · Próxima: <a href="01-maquina.html">Lição 1 · A máquina →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

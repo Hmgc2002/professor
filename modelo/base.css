@@ -306,6 +306,9 @@ textarea {
 figure { margin: 1.5rem 0; }
 figure svg { max-width: 100%; height: auto; display: block; }
 figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
 .svg-fundo  { fill: var(--superficie-2); }
 .svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
 .svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }

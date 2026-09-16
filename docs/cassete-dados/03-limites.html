@@ -315,6 +315,9 @@ textarea {
 figure { margin: 1.5rem 0; }
 figure svg { max-width: 100%; height: auto; display: block; }
 figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
 .svg-fundo  { fill: var(--superficie-2); }
 .svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
 .svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
@@ -553,8 +556,19 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
     </ul>
 
     <p>E há o <strong>azimute</strong>: se a fenda da cabeça não estiver exactamente perpendicular ao percurso
-    da fita, as duas metades da pista são lidas com um desfasamento. Como a informação está no <em>quando</em>,
-    um azimute mal alinhado é uma cabeça que mente sobre as horas.</p>
+    da fita, cada ponto da largura da pista é lido com um atraso diferente, e a cabeça devolve a média deles. O
+    efeito é uma <strong>perda de agudos</strong> — tanto maior quanto mais curto for o comprimento de onda — e,
+    numa cabeça estéreo, um desfasamento constante entre os dois canais.</p>
+
+    <div class="caixa aviso correcao">
+      <span class="titulo">⚠️ Corrigido a 2026-09-16</span>
+      <p>Esta passagem dizia «como a informação está no <em>quando</em>, um azimute mal alinhado é uma cabeça que
+      mente sobre as horas». <strong>Está errado</strong>: o atraso que o azimute introduz é <em>constante</em>, e
+      um atraso constante não muda o comprimento de nenhuma meia onda — que é o que o descodificador mede. O que
+      o azimute faz é cortar agudos e arredondar as arestas. A conta está no
+      <a href="../cassete-captura/03-azimute.html">tópico da digitalização, lição 3</a>, que mede a perda e o
+      desfasamento entre canais.</p>
+    </div>
 
     <div class="caixa critico">
       <span class="titulo">🔴 A conclusão que o resto do curso depende</span>

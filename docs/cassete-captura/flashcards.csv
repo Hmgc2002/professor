@@ -1,0 +1,38 @@
+frente;verso;etiqueta
+Qual é a velocidade de uma cassete?;4,7625 cm/s (1⅞ polegadas por segundo).;captura::l1
+Largura de uma pista mono e de um canal estéreo numa cassete?;Mono 1,5 mm. Estéreo 0,6 mm por canal, com 0,3 mm entre eles (0,9 mm de centro a centro).;captura::l3
+Δf de um espetro: de que depende?;Δf = taxa ÷ N = 1 ÷ duração do bloco. Só da duração.;captura::l0
+Porque se usa uma janela (Hann) antes da FFT?;Sem ela, o corte nas pontas é um salto, e um salto espalha energia por todas as frequências (fuga).;captura::l0
+Como se mede uma frequência com mais precisão do que Δf?;Interpolando com uma parábola pelos três bins mais altos. A frequência fica fina — a altura erra décimas de dB.;captura::l0
+Perda por afastamento entre a fita e a cabeça?;54,6 dB por comprimento de onda de distância (Kadis). 1 µm a 10 kHz = 11,5 dB.;captura::l1
+Porque é que a sujidade na cabeça quase não afeta fitas de dados?;Porque a perda é distância ÷ λ, e a 807 Hz λ = 59 µm. 1 µm custa 0,9 dB.;captura::l1
+O que fixa a velocidade da fita?;O capstan e o rolete de pressão. Nunca as bobinas.;captura::l1
+Gravar um tom e lê-lo na mesma máquina mede o quê?;O wow e o flutter de gravar e ler somados. NÃO mede a velocidade: o erro constante anula-se.;captura::l1
+Os cinco critérios da IASA para um leitor de cassetes de arquivo?;Azimute ajustável · velocidade melhor que 0,3 % · wow e flutter ponderados < 0,1 % · 30 Hz a 20 kHz +2/−3 dB · tipos I, II e IV.;captura::l1
+Que entrada de áudio tem um Mac mini de 2018 ou 2024?;Nenhuma. A tomada de 3,5 mm é de auscultadores, ou seja, saída. É preciso uma interface USB.;captura::l2
+O que a IASA exige a um conversor A/D?;Gama dinâmica ≥ 115 dB, THD+N < −105 dB, ±0,1 dB de 20 Hz a 20 kHz. É a peça mais crítica.;captura::l2
+Piso de quantização de N bits?;6,02·N + 1,76 dB abaixo do teto. 98 dB com 16 bits, 146 dB com 24.;captura::l2
+Porque é que a folga de nível é grátis com 24 bits?;Porque o chiado da fita (~45 dB abaixo do sinal) fica sempre dezenas de dB acima do piso do conversor.;captura::l2
+Nível de linha doméstico e profissional?;−10 dBV (0,316 V eficazes) e +4 dBu (≈1,228 V).;captura::l2
+Sintoma de um laço de massa?;Riscas a 50 Hz e harmónicas. Confirma-se gravando com o deck parado. Nunca se corrige tirando a terra.;captura::l2
+Porque se captura em estéreo uma fita mono?;Os dois canais leem a mesma pista em alturas diferentes: o atraso entre eles mede o azimute.;captura::l2
+Fórmula da perda por azimute?;sen(x)/x com x = π · largura · tan(ângulo) ÷ λ. Tem zeros onde largura·tan θ = λ.;captura::l3
+Atraso entre canais por erro de azimute?;τ = 0,9 mm × tan θ ÷ v. A 10′ dá 55 µs, ou 2,6 amostras a 48 kHz.;captura::l3
+Porque é que o azimute se afina antes da captura?;Perto de um zero a cabeça não lê nada, e o que não foi lido não está no ficheiro (IASA §5.4.12.3).;captura::l3
+Com que frequência se afina o azimute?;Em cada lado de cada fita: cada gravação tem o ângulo da cabeça que a fez.;captura::l3
+Os dois critérios para afinar o azimute sem fita de teste?;Atraso E−D a zero (sensível perto do ótimo) e energia dos agudos de E+D no máximo (seguro em estéreo).;captura::l3
+Faixas de deriva, wow, flutter e flutter de arrasto?;Abaixo de 0,5 Hz · 0,5 a 6 Hz · 6 a 100 Hz · acima de 100 Hz.;captura::l4
+Os quatro passos de um medidor de wow e flutter?;Demodular (sinal analítico), ponderar (máximo a 4 Hz), detetar (2 sigma), durante pelo menos 5 s.;captura::l4
+O que é o sinal analítico?;Um sinal complexo sem frequências negativas. A fase dele roda à frequência do tom, e a derivada da fase é a frequência instantânea.;captura::l4
+As duas leituras do detetor «2 sigma»?;Duas vezes o desvio-padrão (Martin) ou o valor excedido 5 % do tempo (Virtins). Num seno diferem 41 %.;captura::l4
+Como se aponta a peça culpada pelo wow?;Pelo espetro do desvio: uma peça que a fita arrasta, de diâmetro D, roda a v ÷ (π·D) Hz.;captura::l4
+Qual é o chão da medição de wow e flutter?;O ruído: com 30 dB de SNR, uma máquina perfeita mede 0,115 % não ponderados.;captura::l4
+Que três provas substituem «igual ao original» numa fita real?;Paridade de cada bloco · comprimento anunciado pelo cabeçalho · duas capturas independentes iguais.;captura::l5
+Quando é que somar os canais piora a leitura de uma fita de dados?;Com o azimute muito errado: a soma é um filtro em pente e a 45′ o primeiro zero cai a 2021 Hz, sobre o bit 0.;captura::l5
+O que mede o tom-piloto de uma fita de Spectrum?;807,2 Hz de referência: dá a velocidade relativa entre o gravador de origem e o teu deck, e o wow da cadeia toda.;captura::l5
+Porque é que «1,5 amostras por meia onda» não era um limite do descodificador?;Porque muda com o método de reduzir a taxa: reamostrando pela FFT não há limiar limpo. Era do método de geração.;captura::l5
+Onde vive o restauro, segundo a IASA?;Nas cópias de acesso. O mestre guarda-se como saiu, porque os artefactos também fazem parte do documento.;captura::l6
+Mudar a velocidade no digital estraga o sinal?;Depende do método: pela FFT a ida e volta dá −240 dB de erro — com interpolação linear, −24,5 dB.;captura::l6
+Porque é que tirar o zumbido é irreversível?;Porque leva com ele tudo o que estiver nessas frequências. Uma nota a 100 Hz desaparece.;captura::l6
+Descodificar Dolby B: quando?;Na transferência, se souberes que a fita o tem (IASA §5.4.11.3). Se não souberes, capturar flat e decidir numa cópia.;captura::l6
+Como se restaura uma fita de dados que nenhuma captura lê inteira?;Juntando capturas bloco a bloco: fica o bloco que passa a paridade. Os acidentes mudam de sítio entre passagens.;captura::l6

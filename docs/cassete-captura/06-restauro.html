@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6 · Restaurar sem destruir — Digitalizar cassetes</title>
+<meta name="description" content="Lição 6: mestre e cópias de acesso, o que é reversível medido em dB, o caso do Dolby B, e juntar duas capturas de uma fita de dados bloco a bloco.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-captura/06-restauro.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Digitalizar cassetes</a> <span aria-hidden="true">›</span> Lição 6
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta extensao">Lição 6 · extensao</span> <span class="etiqueta">~1 h 15</span></p>
+    <h1>Restaurar sem destruir</h1>
+    <p class="subtitulo">O mestre guarda-se como saiu e o restauro vive nas cópias. O que é reversível mede-se, não se opina — e nas fitas de dados há um restauro que é exato.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim consegues <strong>separar o que é reversível do que não é</strong> num restauro, com uma medição e
+    não com uma opinião. Consegues <strong>corrigir a velocidade, tirar o zumbido e juntar duas capturas de uma
+    fita de dados</strong>, sabendo o que cada operação leva com ela. E sabes <strong>o que nunca se faz ao
+    ficheiro mestre</strong>, e porquê.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <ol>
+      <li>Da lição 2: qual é o único defeito de captura que não tem volta?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>O clipping. O que passou do teto não ficou guardado em lado nenhum.</p>
+        </details>
+      </li>
+      <li>Da lição 3: porque é que os agudos perdidos por azimute não se repõem com um equalizador?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Perto dos zeros da curva sen(x)/x a cabeça não leu praticamente nada. Amplificar isso só sobe o
+          chiado.</p>
+        </details>
+      </li>
+      <li>Da lição 5: que três provas substituem «igual ao original»?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Paridade de cada bloco, comprimento anunciado pelo cabeçalho, e duas capturas independentes iguais.</p>
+        </details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <h3>A regra que decide tudo o resto</h3>
+    <p>A IASA-TC 03 (§8) diz que uma transferência de arquivo tem de produzir «o substituto mais próximo
+    possível» do original, que alterações subjetivas ou «melhorias» devem ser evitadas, e — a parte que costuma
+    surpreender — que <strong>os defeitos também fazem parte do documento</strong>: «o sinal que o engenheiro de
+    som pretendia captar é só uma parte de um documento audiovisual. Artefactos não intencionais e indesejáveis
+    (por exemplo, ruído, distorções, quedas de sinal) também fazem parte dele». E que os dois se devem preservar
+    com o máximo rigor.</p>
+    <p>Isso não proíbe restaurar. Diz onde é que o restauro vive (§12): as <strong>cópias de acesso</strong> podem
+    ser modificadas conforme quem as vai usar. O que não se modifica é o mestre.</p>
+    <div class="caixa critico">
+      <span class="titulo">🔴 Dois ficheiros, sempre</span>
+      <ul>
+        <li><strong>O mestre</strong>: o WAV que saiu da captura, tal e qual, com o ficheiro de texto ao lado
+        (deck, interface, ganho, Dolby, azimute, data, relatório). Nunca se grava por cima.</li>
+        <li><strong>As cópias de acesso</strong>: tudo o que fizeres a partir dele, com a lista do que fizeste. Se
+        te arrependeres, apagas a cópia e voltas ao mestre.</li>
+      </ul>
+      <p>É a mesma disciplina de um repositório: o mestre é o commit, as cópias são o que se experimenta por cima.</p>
+    </div>
+
+    <h3>Reversível, e reversível na prática</h3>
+    <p>Uma operação é <strong>reversível</strong> se existe outra que a desfaz exatamente. Mas há uma segunda
+    pergunta, que é a que interessa: <em>desfaz mesmo, com estes números e este ficheiro?</em></p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Operações de restauro, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Operação</th><th>Em teoria</th><th>Na prática, e o que leva com ela</th></tr></thead>
+        <tbody>
+          <tr><td>Ganho</td><td>reversível</td>
+            <td>Sim, <strong>se não bater no teto</strong>. Se bater, o corte é irreversível (exercício com lacunas)</td></tr>
+          <tr><td>Tirar o desvio de zero</td><td>reversível</td><td>Sim: é somar uma constante</td></tr>
+          <tr><td>Mudar a velocidade</td><td>reversível</td>
+            <td>Com um método correto, o sinal volta com erro de −240 dB. Com interpolação linear, −24 dB: aí já
+            se ouve (exemplo trabalhado)</td></tr>
+          <tr><td>Equalizar (linear)</td><td>reversível</td>
+            <td>Só onde há sinal. Onde a cabeça não leu, amplificar sobe o chiado (lição 3)</td></tr>
+          <tr><td>Cortar o zumbido</td><td><strong>não</strong></td>
+            <td>O que estava nessas frequências desaparece com ele. Numa música com uma nota a 100 Hz, a nota
+            vai-se toda</td></tr>
+          <tr><td>Redução de ruído</td><td><strong>não</strong></td>
+            <td>Decide, banda a banda, o que é ruído. O que decidir mal não volta</td></tr>
+          <tr><td>Tirar cliques</td><td><strong>não</strong></td>
+            <td>Substitui amostras por outras inventadas a partir das vizinhas</td></tr>
+          <tr><td>Descodificar Dolby B</td><td>parcialmente</td>
+            <td>Caso à parte, abaixo: não é uma melhoria, é parte da leitura correta</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>O caso do Dolby B</h3>
+    <p>Hoyt explica o mecanismo: o Dolby B comprime os agudos fracos ao gravar e expande-os ao ler, numa banda
+    deslizante que pode começar nos 300 Hz ou nos 20 kHz conforme o sinal; ganham-se cerca de 10 dB de ruído. Só
+    funciona se o nível e a resposta em frequência entre gravar e ler forem iguais — e entre as duas coisas estão
+    a fita, o azimute, a altura da cabeça e a equalização de leitura. Quando não batem certo, ouve-se o
+    <em>pumping</em>: o fundo de chiado a subir e a descer com a música.</p>
+    <p>A IASA (§5.4.11.3) diz que a descodificação <strong>se deve fazer na altura da transferência</strong>,
+    porque adiá-la faz compor os erros de alinhamento. E (§5.4.11.4), quando não se sabe se a fita foi gravada com
+    Dolby, que a cópia se faça <em>flat</em>, ou seja, sem descodificar. O sintoma que a IASA dá para reconhecer a
+    escolha certa é o <strong>nível do chiado</strong>: parado, é a leitura certa; a flutuar, é a errada.</p>
+    <p>A regra deste curso, que junta as duas: <strong>se souberes que tem Dolby, descodifica na captura e
+    escreve-o no ficheiro de texto. Se não souberes, captura sem descodificar, escreve isso, e decide depois numa
+    cópia.</strong> Descodificar depois é possível, mas é preciso saber que o mestre está por descodificar — e é
+    por isso que o registo faz parte do trabalho.</p>
+
+    <h3>Dados: o restauro que é exato</h3>
+    <p>Com música, «melhor» é uma opinião. Com dados, não: ou a paridade dá zero ou não dá. Isso permite um
+    restauro que não existe do outro lado — <strong>juntar capturas</strong>. Cada passagem da fita tem os seus
+    acidentes: um buraco cai num sítio numa, noutro sítio na outra. Bloco a bloco, fica-se com o que passa a
+    paridade. Duas capturas de uma fita que nenhuma delas lê inteira podem dar o ficheiro completo (E3).</p>
+    <p>⭐ É a ideia por trás de qualquer recuperação por repetição: o meio é mau, mas os erros não caem sempre no
+    mesmo sítio. O formato do Spectrum não corrige erros (só os deteta), mas deteta o suficiente para se poder
+    escolher.</p>
+
+    <h3>O que fazer com o wow, se ele for grande</h3>
+    <p>Corrigir wow no digital exige saber <strong>quanto</strong> a velocidade variou em cada instante, e para isso
+    é preciso uma referência gravada na fita. Numa fita de dados tens uma: o tom-piloto, mas só onde ele existe.
+    Em música não costuma haver nenhuma. Por isso a resposta deste curso é a mesma da IASA (§5.4.8): a velocidade
+    escolhe-se e ajusta-se <strong>no deck</strong>, na transferência, e documenta-se. O que se corrige no digital
+    é um erro constante, não uma oscilação.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p><strong>O problema.</strong> Duas operações que toda a gente faz: mudar a velocidade e tirar o zumbido.
+    Quanto custa cada uma, medido?</p>
+    <pre><code>import numpy as np
+import captura as C
+
+TAXA = 48_000
+t = np.arange(5 * TAXA) / TAXA
+musica = sum(a * np.sin(2 * np.pi * f * t) for a, f in ((0.3, 220), (0.2, 1760), (0.1, 9000)))
+musica += np.random.default_rng(3).normal(0, 0.002, len(t))
+
+def erro_db(a, b):
+    &quot;&quot;&quot;Quanto do original NAO voltou, em dB (menos e melhor). Ignora as pontas.&quot;&quot;&quot;
+    m = TAXA // 2
+    return float(C.db(np.std(b[m:-m] - a[m:-m]) / np.std(a[m:-m])))
+
+def sobra_db(a, filtrado):
+    &quot;&quot;&quot;Quanto do sinal `a` sobreviveu ao filtro, em dB (0 = intacto).&quot;&quot;&quot;
+    m = TAXA // 2
+    return float(C.db(np.std(filtrado[m:-m]) / np.std(a[m:-m])))
+
+def por_fft(s, n):
+    &quot;&quot;&quot;Reamostrar para exatamente n amostras, pela FFT.&quot;&quot;&quot;
+    X = np.fft.rfft(s)
+    if n &lt; len(s):
+        X = X[: n // 2 + 1]
+    else:
+        X = np.concatenate([X, np.zeros(n // 2 + 1 - len(X))])
+    return np.fft.irfft(X * (n / len(s)), n)
+
+def por_linear(s, n):
+    return np.interp(np.linspace(0, len(s) - 1, n), np.arange(len(s)), s)
+
+print(&quot;MUDAR A VELOCIDADE 1,5 % E VOLTAR ATRAS (o mesmo sinal tem de voltar)&quot;)
+n1 = round(len(musica) * 1.015)
+for nome, f in ((&quot;FFT&quot;, por_fft), (&quot;interpolacao linear&quot;, por_linear)):
+    volta = f(f(musica, n1), len(musica))
+    print(f&quot;  {nome:20s} erro {erro_db(musica, volta):6.1f} dB&quot;)
+
+print(&quot;\nTIRAR O ZUMBIDO (cortes em 50, 100 e 150 Hz)&quot;)
+zumbido = 0.05 * np.sin(2 * np.pi * 50 * t) + 0.02 * np.sin(2 * np.pi * 150 * t)
+
+def corte(s, largura):
+    X = np.fft.rfft(s)
+    f = np.fft.rfftfreq(len(s), 1 / TAXA)
+    for k in (1, 2, 3):
+        X[np.abs(f - 50 * k) &lt; largura] = 0
+    return np.fft.irfft(X, len(s))
+
+for largura in (0.5, 5.0, 20.0):
+    limpo = corte(musica + zumbido, largura)
+    print(f&quot;  +-{largura:4.1f} Hz: zumbido que sobra {sobra_db(zumbido, corte(zumbido, largura)):7.1f} dB&quot;
+          f&quot;   danos na musica {erro_db(musica, corte(musica, largura)):6.1f} dB&quot;)
+
+print(&quot;\nE SE A MUSICA TIVER UMA NOTA EM 100 Hz (sol#2)?&quot;)
+nota = 0.25 * np.sin(2 * np.pi * 100 * t)
+for largura in (0.5, 5.0, 20.0):
+    print(f&quot;  +-{largura:4.1f} Hz: da nota sobra {sobra_db(nota, corte(nota, largura)):7.1f} dB&quot;)</code></pre>
+    <p class="verificado">Saída (colada de uma execução):</p>
+    <pre><code>MUDAR A VELOCIDADE 1,5 % E VOLTAR ATRAS (o mesmo sinal tem de voltar)
+  FFT                  erro -240.0 dB
+  interpolacao linear  erro  -24.5 dB
+
+TIRAR O ZUMBIDO (cortes em 50, 100 e 150 Hz)
+  +- 0.5 Hz: zumbido que sobra  -240.0 dB   danos na musica  -82.4 dB
+  +- 5.0 Hz: zumbido que sobra  -240.0 dB   danos na musica  -72.2 dB
+  +-20.0 Hz: zumbido que sobra  -240.0 dB   danos na musica  -65.6 dB
+
+E SE A MUSICA TIVER UMA NOTA EM 100 Hz (sol#2)?
+  +- 0.5 Hz: da nota sobra  -240.0 dB
+  +- 5.0 Hz: da nota sobra  -240.0 dB
+  +-20.0 Hz: da nota sobra  -240.0 dB</code></pre>
+
+    <h3>Ler</h3>
+    <ol>
+      <li><strong>A velocidade, pela FFT, volta ao sítio com −240 dB de erro</strong>, que é zero (é o limite da
+      aritmética de vírgula flutuante). Com interpolação linear, o erro é −24,5 dB: perfeitamente audível. Hoyt,
+      em 2000, desaconselhava mudar a velocidade no digital por causa da distorção que isso introduzia. A medição
+      diz que a distorção depende do <strong>método</strong>: com um método correto ela desaparece.
+      ⚠️ Isto mede o meu reamostrador com sinais bem comportados, não o botão do teu editor. Mede o teu da mesma
+      maneira antes de confiar nele.</li>
+      <li><strong>O corte de zumbido não danifica esta «música»</strong> (−82 dB com ±0,5 Hz), porque ela não tem
+      nada em 50, 100 ou 150 Hz. Repara que alargar o corte de ±0,5 para ±20 Hz piora os danos em 17 dB e não
+      melhora nada: o zumbido já tinha desaparecido com o corte estreito, porque é um tom puro e estável.</li>
+      <li><strong>Se houver uma nota exatamente numa dessas frequências, ela desaparece</strong> — os −240 dB da
+      última secção são a nota inteira apagada. É por isso que tirar zumbido não é reversível, e é por isso que se
+      faz na cópia de acesso.</li>
+    </ol>
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ O que este exemplo não mede</span>
+      <p>O zumbido real não é um tom perfeitamente estável: a frequência da rede oscila um pouco, e a fita
+      acrescenta-lhe wow. Um corte de ±0,5 Hz deixa passar o que sair de lá. Por isso é que os programas de
+      restauro usam filtros que seguem a frequência. Não medi nenhum deles.</p>
+    </div>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa antes de correr</h3>
+      <p>Subir 6 dB e voltar a descer 6 dB devia devolver o mesmo ficheiro.</p>
+      <ol>
+        <li>+6 dB é multiplicar a amplitude por <strong>______</strong>.</li>
+        <li>Se o sinal tem picos a 0,5 e o ficheiro guarda entre −1 e 1, o que acontece ao subir 6 dB?
+        <strong>______</strong></li>
+        <li>E se os picos forem a 0,8? <strong>______</strong></li>
+        <li>Então o ganho é reversível <strong>______</strong>.</li>
+      </ol>
+      <pre><code>import numpy as np
+import captura as C
+
+TAXA = 48_000
+t = np.arange(3 * TAXA) / TAXA
+x = 0.5 * np.sin(2 * np.pi * 440 * t)
+
+# 1. ganho de +6 dB e depois -6 dB, num ficheiro de 24 bits
+subiu = x * 2
+voltou = subiu / 2
+print(&quot;ganho +6 e -6 dB (sem passar do teto): erro&quot;,
+      round(float(C.db(np.std(voltou - x) / np.std(x))), 1), &quot;dB&quot;)
+
+# 2. o mesmo, com picos a 0,8: ao subir 6 dB pedem 1,6, e o ficheiro so guarda ate 1,0
+y = 0.8 * np.sin(2 * np.pi * 440 * t)
+voltou2 = np.clip(y * 2, -1, 1) / 2
+print(&quot;picos a 0,8, +6 e -6 dB:              erro&quot;,
+      round(float(C.db(np.std(voltou2 - y) / np.std(y))), 1), &quot;dB&quot;)</code></pre>
+    <p class="verificado">Saída (colada de uma execução):</p>
+    <pre><code>ganho +6 e -6 dB (sem passar do teto): erro -240.0 dB
+picos a 0,8, +6 e -6 dB:              erro -10.8 dB</code></pre>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <ol>
+          <li>2 (20·log₁₀2 = 6,02 dB).</li>
+          <li>Nada: 0,5 × 2 = 1,0, ainda cabe. A execução dá −240 dB de erro, ou seja, zero.</li>
+          <li>0,8 × 2 = 1,6 não cabe: o ficheiro guarda 1,0 e o resto perde-se. Ao dividir por 2, os picos ficam a
+          0,5 em vez de 0,8. A execução mede −10,8 dB de erro.</li>
+          <li>Reversível <strong>enquanto não bate no teto</strong>. É a mesma regra da lição 2, agora do lado do
+          restauro.</li>
+        </ol>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr><td>«Limpo primeiro e guardo o resultado»</td>
+            <td>Um só ficheiro por fita</td>
+            <td>O mestre guarda-se como saiu. O restauro vive numa cópia (IASA-TC 03 §8 e §12)</td></tr>
+          <tr><td>«O chiado não faz parte da gravação»</td>
+            <td>Redução de ruído por omissão em tudo</td>
+            <td>A norma diz que os artefactos também são parte do documento. Numa cópia de acesso, tira; no mestre,
+            não</td></tr>
+          <tr><td>«Mudar a velocidade no digital estraga sempre»</td>
+            <td>Repetir a regra sem a medir</td>
+            <td>Depende do método: −240 dB com um bom, −24 dB com interpolação linear. Mede o teu</td></tr>
+          <tr><td>«O corte de 50 Hz é inofensivo, é só uma risca»</td>
+            <td>Aplicá-lo a tudo por hábito</td>
+            <td>Leva o que estiver nessas frequências. Uma nota a 100 Hz desaparece</td></tr>
+          <tr><td>«Dolby é uma melhoria: ligo sempre»</td>
+            <td>Descodificar fitas que não foram gravadas com Dolby</td>
+            <td>Não é melhoria, é a outra metade de um par. Se a fita não tem, descodificar tira agudos que lá
+            estavam</td></tr>
+          <tr><td>«Uma fita que não lê inteira perdeu-se»</td>
+            <td>Desistir depois de uma captura falhada</td>
+            <td>Os acidentes mudam de sítio entre passagens. Bloco a bloco, duas capturas podem dar o ficheiro
+            completo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — reversível ou não</h3>
+      <p>Para cada uma, diz se é reversível e o que é preciso guardar para a desfazer: (a) converter para 16 bits;
+      (b) inverter a polaridade; (c) trocar os canais; (d) normalizar para o pico ficar a −1 dBFS; (e) exportar em
+      MP3 a 320 kbit/s.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>(a) <strong>Não</strong>: os bits que sobram são deitados fora, e o ruído de quantização fica lá. (b)
+        <strong>Sim</strong>, exatamente: inverter outra vez. (c) <strong>Sim</strong>. (d) <strong>Sim</strong>,
+        se souberes o fator usado e se nada bateu no teto — mas o fator é justamente o que essa operação não te
+        diz, por isso na prática é preciso registá-lo. (e) <strong>Não</strong>: é o que a IASA proíbe para
+        preservação (§2.7).</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — o ficheiro que acompanha o mestre</h3>
+      <p>Escreve o modelo do <code>.txt</code> que vai ficar ao lado de cada WAV mestre, com os campos que a
+      IASA-TC 03 §8 pede («a documentação cuidada de todos os parâmetros escolhidos e procedimentos empregues no
+      processo de transferência é igualmente essencial»). Depois preenche-o para a fita de ensaio, como se fosse
+      real. Vai para a entrega.</p>
+      <details class="solucao"><summary>Uma versão possível</summary>
+        <p>Fita (identificação, tipo I/II/IV, estado) · lado · data · deck (modelo, estado, quando foi revisto) ·
+        interface · cabo · taxa e bits · ganho e picos medidos · Dolby (ligado/desligado/desconhecido) · posição do
+        azimute e como foi encontrada (atraso e agudos) · relatório da cadeia sem fita · relatório da captura ·
+        anomalias ouvidas, com o tempo · o que <strong>não</strong> foi feito (nenhum processamento) · nome do
+        ficheiro e soma de verificação (por exemplo SHA-256).</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●● · código que corre</span>
+      <h3>E3 — duas capturas estragadas, um ficheiro bom</h3>
+      <p>Gera duas capturas da mesma fita com um buraco em sítios diferentes (uma no cabeçalho, outra nos dados) e
+      junta-as bloco a bloco, ficando com o que passa a paridade. <strong>Prevê</strong>: que garantia é que este
+      método <em>não</em> dá?</p>
+      <details class="solucao"><summary>Solução</summary>
+        <pre><code>import ensaio, captura as C, margens as M
+import ler_fita as L
+
+def capturar(nome, buraco, semente):
+    &quot;&quot;&quot;Uma passagem da fita: o buraco cai noutro sitio e o chiado e outro.&quot;&quot;&quot;
+    d = dict(ensaio.DEFEITOS, buraco=buraco, semente=semente)
+    certo = M.tap(ensaio.gerar(nome, d))
+    taxa, x = C.ler_wav(nome)
+    return certo, M.ler(M.canal(x, &quot;soma&quot;), taxa)
+
+def juntar(*leituras):
+    &quot;&quot;&quot;Bloco a bloco, fica o primeiro que passa a paridade.&quot;&quot;&quot;
+    saida = []
+    for blocos in zip(*leituras):
+        bom = next((b for b in blocos if L.paridade_ok(b)), blocos[0])
+        saida.append(bom)
+    return saida
+
+certo, a = capturar(&quot;a.wav&quot;, (8.6, 0.030, 0.05), 1)      # buraco no bloco de dados
+_, b = capturar(&quot;b.wav&quot;, (5.36, 0.020, 0.05), 2)         # buraco nos bits do cabecalho
+
+for nome, blocos in ((&quot;captura A&quot;, a), (&quot;captura B&quot;, b), (&quot;juntas  &quot;, juntar(a, b))):
+    print(f&quot;{nome}: blocos {[len(v) for v in blocos]}  paridades &quot;
+          f&quot;{[L.paridade_ok(v) for v in blocos]}  bytes certos: {M.tap(blocos) == certo}&quot;)</code></pre>
+    <p class="verificado">Saída (colada de uma execução):</p>
+    <pre><code>captura A: blocos [19, 72]  paridades [True, False]  bytes certos: False
+captura B: blocos [7, 258]  paridades [False, True]  bytes certos: False
+juntas  : blocos [19, 258]  paridades [True, True]  bytes certos: True</code></pre>
+        <p>Cada captura falha num bloco diferente, e juntas dão os bytes certos. A garantia que <strong>não</strong>
+        dá: a paridade é um XOR, e um bloco com dois erros na mesma posição de bit passa na mesma. Juntar aumenta a
+        probabilidade de acertar; não a torna 1. Por isso a prova das duas capturas <em>iguais</em> (lição 5)
+        continua a ser precisa: aqui elas não são iguais, escolhemos pedaços de cada uma.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E4 — uma cópia de acesso, documentada</h3>
+      <p>A partir de uma captura tua (ou da fita de ensaio), faz uma cópia de acesso: corrige a velocidade pelo
+      erro que mediste no piloto, tira o desvio de zero, e só isso. Guarda ao lado a lista de operações, com os
+      números. Depois responde: se daqui a um ano quiseres experimentar outra coisa, o que precisas de ter guardado?</p>
+      <details class="solucao"><summary>O que procurar</summary>
+        <p>Precisas do mestre e da lista. Com os dois, qualquer experiência nova parte do princípio. Sem o mestre,
+        partes do que já foi mexido, e os erros acumulam-se — que é exatamente o argumento da IASA para
+        descodificar o Dolby na altura certa em vez de o adiar.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <div class="quiz" data-quiz="c6">
+      <ol class="perguntas">
+        <li class="pergunta">
+          <p class="enunciado">A IASA diz que os artefactos (ruído, distorções, quedas) fazem parte do documento. O que é que isso implica?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c6-1" value="a" data-certa="false"><span class="rotulo">Que não se deve restaurar nada, nunca</span></label>
+              <p class="explicacao" hidden>Implica onde é que o restauro vive, não que ele seja proibido: as cópias de acesso podem ser modificadas (§12).</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-1" value="b" data-certa="true"><span class="rotulo">Que o mestre se guarda como saiu, e o restauro se faz em cópias</span></label>
+              <p class="explicacao" hidden>IASA-TC 03 §8 e §12. O mestre é a única cópia do que a fita tinha naquele dia.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-1" value="c" data-certa="false"><span class="rotulo">Que se deve gravar o chiado à parte</span></label>
+              <p class="explicacao" hidden>Não é isso que a norma pede.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Subiste 6 dB uma captura cujos picos estavam a −2 dBFS, e depois desceste 6 dB. O que aconteceu?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c6-2" value="a" data-certa="true"><span class="rotulo">Os picos foram cortados no meio do caminho e não voltam</span></label>
+              <p class="explicacao" hidden>É a mesma regra da lição 2. O exercício com lacunas mede: −12,3 dB de erro com picos a 0,8.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-2" value="b" data-certa="false"><span class="rotulo">Nada: o ganho é reversível</span></label>
+              <p class="explicacao" hidden>Só enquanto não bate no teto. Com picos a −2 dBFS, +6 dB leva-os a +4: cortados.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-2" value="c" data-certa="false"><span class="rotulo">Ficou tudo 6 dB mais baixo</span></label>
+              <p class="explicacao" hidden>A segunda operação desfaz o nível; o que não desfaz é o corte.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Hoyt desaconselha mudar a velocidade no digital. A medição desta lição diz o quê?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c6-3" value="a" data-certa="false"><span class="rotulo">Que ele tem razão: qualquer mudança digital distorce</span></label>
+              <p class="explicacao" hidden>Com um reamostrador correto, a ida e volta dá −240 dB de erro, que é zero.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-3" value="b" data-certa="false"><span class="rotulo">Que é melhor mudar a velocidade duas vezes do que uma</span></label>
+              <p class="explicacao" hidden>Nada nesta lição sugere isso.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-3" value="c" data-certa="true"><span class="rotulo">Que o custo depende do método: quase nada pela FFT, −24 dB com interpolação linear</span></label>
+              <p class="explicacao" hidden>O aviso dele aplica-se a métodos ingénuos. Mede o teu antes de confiar nele.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Não sabes se uma fita de música foi gravada com Dolby B. O que fazes na captura?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c6-4" value="a" data-certa="false"><span class="rotulo">Ligas o Dolby: melhora sempre</span></label>
+              <p class="explicacao" hidden>Não é uma melhoria: é a outra metade de um par. Numa fita sem Dolby, descodificar tira agudos que lá estavam.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-4" value="b" data-certa="false"><span class="rotulo">Capturas duas vezes, uma com e outra sem</span></label>
+              <p class="explicacao" hidden>É possível, mas duplica as passagens da fita — e cada passagem gasta a fita.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-4" value="c" data-certa="true"><span class="rotulo">Capturas sem descodificar, escreves isso no ficheiro de texto, e decides depois numa cópia</span></label>
+              <p class="explicacao" hidden>É o que a IASA sugere quando não há documentação (§5.4.11.4), com a ressalva de que descodificar na altura da transferência é o ideal quando se sabe (§5.4.11.3).</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que juntar duas capturas funciona numa fita de dados e não numa de música?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c6-5" value="a" data-certa="true"><span class="rotulo">Porque nos dados há um teste objetivo por bloco (a paridade) que diz qual das versões está certa</span></label>
+              <p class="explicacao" hidden>Na música não há critério objetivo para escolher entre duas passagens: só gosto.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-5" value="b" data-certa="false"><span class="rotulo">Porque as fitas de dados são mais curtas</span></label>
+              <p class="explicacao" hidden>O comprimento não tem nada a ver.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-5" value="c" data-certa="false"><span class="rotulo">Porque as fitas de dados não têm dropouts</span></label>
+              <p class="explicacao" hidden>Têm, e é precisamente por isso que se juntam capturas.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Qual destas operações é irreversível mesmo quando corre bem?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c6-6" value="a" data-certa="true"><span class="rotulo">Cortar as frequências de 50, 100 e 150 Hz</span></label>
+              <p class="explicacao" hidden>O que estava lá desaparece com o zumbido. Na medição, uma nota a 100 Hz fica reduzida a nada.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-6" value="b" data-certa="false"><span class="rotulo">Trocar os canais esquerdo e direito</span></label>
+              <p class="explicacao" hidden>Troca-se outra vez e volta ao sítio.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c6-6" value="c" data-certa="false"><span class="rotulo">Somar uma constante para tirar o desvio de zero</span></label>
+              <p class="explicacao" hidden>Subtrai-se a mesma constante e volta.</p>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="feynman-1">Explica a alguém que programa porque é que o ficheiro que sai da captura se trata como um commit e o restauro como trabalho por cima, e o que se perde quando alguém grava por cima do mestre
+        <span class="pista">Sem usar as palavras «preservação» nem «arquivo».</span>
+      </label>
+      <textarea id="feynman-1" data-pergunta="Explica a alguém que programa porque é que o ficheiro que sai da captura se trata como um commit e o restauro como trabalho por cima, e o que se perde quando alguém grava por cima do mestre"></textarea>
+    </div>
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/cassete-captura/respostas/AAAA-MM-DD.md</code> e correr
+      <code>/corrigir cassete-captura</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Mestre intacto + cópias de acesso. Os defeitos fazem parte do documento (IASA-TC 03 §8, §12).</li>
+      <li>Reversível na prática: ganho (sem teto), desvio de zero, velocidade (com bom método: −240 dB).</li>
+      <li>Irreversível: cortar zumbido (leva o que lá estiver), reduzir ruído, tirar cliques, 16 bits, MP3.</li>
+      <li>Dolby B não é melhoria: é a outra metade de um par. Sabendo, descodifica na captura; não sabendo, <em>flat</em>.</li>
+      <li>Nos dados há restauro exato: bloco a bloco, fica o que passa a paridade — duas capturas podem dar um ficheiro bom.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>IASA-TC 03, <em>The Safeguarding of the Audiovisual Heritage</em></strong>, 4.ª edição (2017),
+      §8 (transferência não modificada) e §12 (cópias de acesso e documentação).
+      <a href="https://www.iasa-web.org/book/export/html/895">iasa-web.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16 — as frases citadas foram lidas nesta sessão</span></li>
+      <li><strong>IASA-TC 04, §5.4.11</strong> (redução de ruído: descodificar na transferência; sem documentação,
+      copiar <em>flat</em>; o chiado estável como sinal de leitura certa) e <strong>§5.4.8</strong> (velocidade).
+      <a href="https://www.iasa-web.org/tc04/magnetic-tapes-noise-reduction">§5.4.11</a> ·
+      <a href="https://www.iasa-web.org/tc04/magnetic-tapes-speed">§5.4.8</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Guia de um engenheiro (não é documentação) — Howard Hoyt, <em>A Guide to Cassette Tape
+      Transfers</em></strong>, ©2001, secções 3.3 (velocidade), 4.1 e 4.2 (Dolby B: o mecanismo, o que se mete entre
+      o codificador e o descodificador, e como reconhecer o <em>pumping</em>). <strong>Porquê:</strong> é a
+      explicação mais prática que encontrei do que corre mal com o Dolby numa transferência. <strong>O que
+      saltar:</strong> a secção 5, que é sobre defeitos físicos (está na lição 1).
+      <a href="https://proaudioeng.com/wp-content/uploads/2018/01/A-Guide-to-Cassette-Transfers.pdf">proaudioeng.com</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Livro (não é documentação) — Steven W. Smith, <em>The Scientist and Engineer's Guide to Digital
+      Signal Processing</em></strong>, capítulo 22 («Audio Processing»). <strong>Porquê:</strong> para perceber o que
+      um filtro faz ao sinal que não é o alvo, que é o tema de metade desta lição. ⚠️ Não reli o capítulo nesta
+      sessão: está aqui como leitura seguinte, e nenhuma afirmação desta lição vem dele.
+      <a href="https://www.dspguide.com/pdfbook.htm">dspguide.com</a>
+      <span class="verificado">🌐 Índice verificado a 2026-09-16</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> · Anterior: <a href="05-fita-real.html">← Lição 5</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

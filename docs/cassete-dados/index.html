@@ -315,6 +315,9 @@ textarea {
 figure { margin: 1.5rem 0; }
 figure svg { max-width: 100%; height: auto; display: block; }
 figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
 .svg-fundo  { fill: var(--superficie-2); }
 .svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
 .svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
@@ -702,6 +705,26 @@ mkdir cassete &amp;&amp; cd cassete</code></pre>
       está dito em cada sítio onde aparecem. E a explicação do circuito de entrada do Spectrum (lição 7) é uma
       reconstrução minha, marcada como tal.</li>
     </ol>
+
+    <h3>Depois da publicação — o que outro tópico apanhou aqui</h3>
+    <div class="caixa aviso correcao">
+      <span class="titulo">⚠️ Duas correções a 2026-09-16</span>
+      <ol>
+        <li><strong>O arnês do E3 da lição 6 não corria.</strong> Importa <code>cabecalho</code>,
+        <code>bloco</code>, <code>tap</code>, <code>estragar</code> e <code>onda</code> com wow, e o
+        <code>fita.py</code> publicado na lição 5 não tem nada disso. Quem seguisse o curso pela ordem não
+        conseguia reproduzir os limites. A <a href="06-descodificador.html">lição 6</a> passou a publicar o
+        ficheiro completo. Apareceu ao reconstruir estes ficheiros <em>a partir das páginas</em>, no tópico
+        <a href="../cassete-captura/index.html">Digitalizar cassetes a sério</a>.</li>
+        <li><strong>A lição 3 dizia que o azimute «mente sobre as horas».</strong> Não mente: o atraso que ele
+        introduz é constante, e não muda o comprimento de nenhuma meia onda. O que faz é cortar agudos. Corrigido
+        na <a href="03-limites.html">lição 3</a>, com a conta na
+        <a href="../cassete-captura/03-azimute.html">lição 3 do tópico novo</a>.</li>
+        <li>E um limite deste curso deixou de o ser: «parte a 1,5 amostras por meia onda» era propriedade do
+        método de geração do simulador. Medido no tópico novo, <a href="../cassete-captura/05-fita-real.html">lição
+        5</a>.</li>
+      </ol>
+    </div>
 
     <footer class="rodape">
       <p><a href="../index.html">↑ Todos os tópicos</a> ·

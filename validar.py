@@ -27,6 +27,16 @@ VERMELHO, AMARELO, VERDE, CINZA, FIM_COR = "\033[31m", "\033[33m", "\033[32m", "
 if not sys.stdout.isatty():
     VERMELHO = AMARELO = VERDE = CINZA = FIM_COR = ""
 
+# No Windows, com a saida redirecionada (que e o que o validar.sh faz), a consola
+# usa cp1252 e um simples "✓" atira UnicodeEncodeError. Pior: isso so acontecia
+# no caminho de SUCESSO, por isso o validador rebentava exactamente quando estava
+# tudo bem. Apanhado a 2026-09-16, ao criar o topico cassete-captura.
+for _fluxo in (sys.stdout, sys.stderr):
+    try:
+        _fluxo.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
+
 
 class No:
     __slots__ = ("tag", "attrs", "filhos", "pai", "linha", "texto")

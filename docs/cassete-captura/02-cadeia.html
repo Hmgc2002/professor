@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 · A cadeia de captura: do deck ao ficheiro — Digitalizar cassetes</title>
+<meta name="description" content="Lição 2: a entrada que o Mac mini não tem, níveis de linha, clipping e folga, taxa, bits, formato, laço de massa e o relatório de uma captura.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-captura/02-cadeia.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Digitalizar cassetes</a> <span aria-hidden="true">›</span> Lição 2
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta nucleo">Lição 2 · nucleo</span> <span class="etiqueta">~1 h</span></p>
+    <h1>A cadeia de captura: do deck ao ficheiro</h1>
+    <p class="subtitulo">Quatro dos cinco elos entre a fita e o ficheiro são teus, e cada um pode estragar a captura de uma forma diferente. Mede-se a cadeia antes de a fita entrar.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim consegues <strong>montar a cadeia do deck ao ficheiro</strong> e escolher cada peça por uma razão
+    que se mede. Consegues <strong>medir a cadeia sozinha</strong>, sem fita (fundo de ruído, zumbido, desvio de
+    zero), e <strong>ler o relatório de uma captura</strong> para decidir se ela serve ou se se repete.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <ol>
+      <li>Da lição 0: um pico a −34 dB num espetro. Que amplitude tem esse tom?
+        <details class="solucao"><summary>Resposta</summary><p>10<sup>−34/20</sup> ≈ 0,02.</p></details>
+      </li>
+      <li>Da lição 1: que prova de chegada mede a velocidade de uma máquina <em>em relação a outra</em>?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Ler um tom gravado noutra máquina, como o piloto de uma fita de Spectrum. Gravar e ler na mesma
+          máquina anula o erro.</p>
+        </details>
+      </li>
+      <li>Da lição 0 do cassete-dados: 24 bits dão mais agudos do que 16?
+        <details class="solucao"><summary>Resposta</summary><p>Não. Dão um piso de ruído mais baixo.</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <figure>
+      <svg viewBox="0 0 520 330" role="img" aria-labelledby="t-f2 d-f2">
+        <title id="t-f2">A cadeia de captura, elo a elo, e o defeito que cada elo pode meter</title>
+        <desc id="d-f2">Cinco caixas em coluna ligadas por setas: o deck, o cabo, a interface de áudio, o
+        computador e o ficheiro. Ao lado de cada uma, o defeito que ali entra: no deck, o que a fita e a máquina
+        já trazem; no cabo, o zumbido de 50 hertz; na interface, o clipping, o ruído do pré-amplificador, o
+        desvio de zero e o aliasing; no computador, o processamento que alguém ligou sem querer; no ficheiro, a
+        compressão com perdas.</desc>
+        <rect class="svg-fundo" x="0" y="0" width="520" height="330"/>
+        <rect class="svg-caixa" x="16" y="12" width="170" height="44" rx="6"/>
+        <rect class="svg-caixa" x="16" y="76" width="170" height="44" rx="6"/>
+        <rect class="svg-realce" x="16" y="140" width="170" height="54" rx="6"/>
+        <rect class="svg-caixa" x="16" y="214" width="170" height="44" rx="6"/>
+        <rect class="svg-caixa" x="16" y="278" width="170" height="44" rx="6"/>
+        <text class="svg-texto" x="28" y="32">deck</text>
+        <text class="svg-suave" x="28" y="48">saída de linha (RCA)</text>
+        <text class="svg-texto" x="28" y="96">cabo</text>
+        <text class="svg-suave" x="28" y="112">RCA → jack, blindado</text>
+        <text class="svg-texto" x="28" y="160">interface USB</text>
+        <text class="svg-suave" x="28" y="176">entrada de linha, ganho,</text>
+        <text class="svg-suave" x="28" y="189">filtro, conversor A/D</text>
+        <text class="svg-texto" x="28" y="234">Mac + Audacity</text>
+        <text class="svg-suave" x="28" y="250">32 bits float por dentro</text>
+        <text class="svg-texto" x="28" y="298">ficheiro</text>
+        <text class="svg-suave" x="28" y="314">WAV, 24 bits</text>
+        <path class="svg-traco" d="M101 56 V72" marker-end="url(#seta-c)"/>
+        <path class="svg-traco" d="M101 120 V136" marker-end="url(#seta-c)"/>
+        <path class="svg-traco" d="M101 194 V210" marker-end="url(#seta-c)"/>
+        <path class="svg-traco" d="M101 258 V274" marker-end="url(#seta-c)"/>
+        <text class="svg-texto" x="200" y="38">o que a fita e a máquina já trazem</text>
+        <text class="svg-texto" x="200" y="102">zumbido de 50 Hz (laço de massa)</text>
+        <text class="svg-texto" x="200" y="156">clipping · ruído do pré-amplificador</text>
+        <text class="svg-texto" x="200" y="174">desvio de zero · aliasing</text>
+        <text class="svg-texto" x="200" y="240">«melhorias» ligadas sem querer</text>
+        <text class="svg-texto" x="200" y="304">compressão com perdas: nunca</text>
+        <defs>
+          <marker id="seta-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" class="svg-fundo" style="fill: currentColor"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>Só o primeiro elo é culpa da fita. Os outros quatro são teus, e medem-se antes de a fita
+      entrar.</figcaption>
+    </figure>
+
+    <h3>O primeiro elo que falta: a entrada</h3>
+    <p>Os Mac mini de 2018 e de 2024 não têm entrada de áudio. A ficha técnica da Apple para o modelo de 2018 lista
+    <em>«3.5 mm headphone jack»</em>, e a de 2024 também. É uma tomada de auscultadores, ou seja, uma saída. O
+    Mac mini (Late 2014) ainda tinha <em>«Audio line in»</em>. ⚠️ As fichas de 2020 e 2023 não as abri. Vê o ano
+    do teu em <code>Acerca deste Mac</code>. O HomePod é um altifalante: serve para ouvir, não para gravar.</p>
+    <p>Conclusão: precisas de uma <strong>interface de áudio USB com entrada de linha</strong>. É a peça mais
+    importante da cadeia. A IASA escreve que o conversor A/D «é o componente mais crítico em todo o percurso de
+    preservação digital», e pede-lhe (§2.4.1):</p>
+    <ul>
+      <li>gama dinâmica de <strong>pelo menos 115 dB</strong>;</li>
+      <li>THD+N (distorção mais ruído) <strong>abaixo de −105 dB</strong>;</li>
+      <li>resposta de 20 Hz a 20 kHz dentro de <strong>±0,1 dB</strong>, a 48 kHz.</li>
+    </ul>
+    <p>Na ficha de uma interface, procura estes três números. Se não estiverem lá, é mau sinal.</p>
+
+    <h3>Linha, microfone, instrumento: não é o mesmo buraco</h3>
+    <p>Um deck doméstico dá o nível de linha doméstico: <strong>−10 dBV, 0,316 V eficazes</strong>. O
+    profissional é +4 dBu, cerca de 1,228 V. O sinal de um microfone é muito mais fraco. Uma entrada de microfone
+    tem um pré-amplificador com muito ganho, pensado para esse sinal fraco. Se lhe ligares um deck, o ganho
+    que sobra leva ao clipping, e o pré-amplificador acrescenta ruído que não era preciso. <strong>Liga o deck a
+    uma entrada de linha</strong>, ou baixa o ganho ao mínimo e mede (lição 0).</p>
+
+    <h3>Clipping: o único erro que não tem volta</h3>
+    <p>O conversor tem um teto: 0 dBFS. Um sinal que o passe é cortado, e a forma verdadeira da onda acima do
+    teto <strong>não fica em lado nenhum</strong>. Tudo o resto nesta lição se corrige depois (um zumbido
+    filtra-se, um desvio de zero subtrai-se). O clipping não.</p>
+    <p>Quanta folga deixar? Faz a conta dos dois ruídos. Um conversor de N bits tem um piso de quantização
+    teórico de 6,02·N + 1,76 dB abaixo do teto: 98 dB com 16 bits, 146 dB com 24. Hoyt dá 45 dB de relação
+    sinal-ruído à cassete sem Dolby. Mesmo que deixes 12 dB de folga, o chiado da fita fica mais de 80 dB acima
+    do piso do conversor. <strong>Com 24 bits, a folga não custa nada que se ouça, e o clipping custa
+    tudo.</strong> Hoyt, que escrevia em 2000, propunha acertar o nível a cerca de 1 dB do teto no pico mais alto
+    da fita. Este curso propõe picos entre −12 e −6 dBFS. ⚠️ Esse intervalo é convenção minha, não vem de uma
+    norma. A regra que o justifica é a conta de cima.</p>
+
+    <h3>Taxa e bits: o que a IASA pede, e porquê</h3>
+    <p>A IASA recomenda (§2.2 e §2.3) <strong>pelo menos 48 kHz</strong>, 96 kHz como referência mais alta, e
+    <strong>pelo menos 24 bits</strong> para qualquer material analógico. Para as fitas de dados, 48 kHz dá
+    folga de sobra: o descodificador do cassete-dados só parte abaixo de 6,5 kHz. Para as de música, a IASA não
+    explica, no texto que li, porque vale a pena ir a 96 kHz. A razão que eu dou, e que é minha, é ter margem
+    para o filtro anti-aliasing do conversor trabalhar longe da banda que interessa.
+    <strong>Neste curso: 96 kHz e 24 bits para música, 48 kHz e 24 bits para dados.</strong> ⭐ É a norma de
+    arquivo aplicada a este caso, não uma lei física.</p>
+
+    <h3>O formato</h3>
+    <p>A IASA recomenda <strong>WAV</strong> (PCM linear), e o BWF para arquivo (§2.8). E proíbe formatos com
+    compressão com perdas: «partes da informação primária perdem-se irremediavelmente» (§2.7). MP3, AAC e Ogg
+    ficam para as cópias de ouvir, nunca para a captura. O Audacity trabalha por dentro em 32 bits de vírgula
+    flutuante: grava assim e <strong>exporta em WAV de 24 bits</strong>.</p>
+
+    <h3>Grava sempre em estéreo, mesmo as fitas mono</h3>
+    <p>Uma fita mono tem uma pista de 1,5 mm. Uma cabeça estéreo lê-a com duas faixas de 0,6 mm (Wikipédia,
+    <em>Cassette tape</em>). Os dois canais são o mesmo sinal lido em duas alturas, e a diferença de tempo entre
+    eles mede o azimute (lição 3). Juntar os dois canais num só, na captura, deita fora essa informação.</p>
+
+    <h3>O zumbido: um transformador que ninguém quis montar</h3>
+    <p>O deck está ligado à tomada e à interface. A interface está ligada ao Mac, que está ligado à tomada. A
+    malha dos cabos e o fio de terra fecham assim uma espira. A Wikipédia descreve-a como o secundário de uma
+    espira de um transformador: os campos dos cabos de corrente à volta induzem nela uma corrente. Essa corrente,
+    ao passar pela resistência da malha do cabo de áudio, cria uma tensão que <strong>se soma ao sinal</strong>.
+    Chama-se <strong>laço de massa</strong>. Como a corrente em Portugal é de 50 Hz, o sintoma é um pico a 50 Hz e
+    às suas harmónicas.</p>
+    <p>O que fazer, por ordem: ligar o deck e o Mac à <strong>mesma extensão</strong>, encurtar e afastar os
+    cabos de áudio dos de corrente, usar um cabo blindado de boa qualidade. A Wikipédia lista também
+    transformadores de isolamento e ligações balanceadas.</p>
+    <div class="caixa critico">
+      <span class="titulo">🔴 Nunca tires a terra de um aparelho para acabar com o zumbido</span>
+      <p>Resolve o zumbido e tira a proteção contra choques que essa ligação existe para dar. A Wikipédia avisa
+      disto explicitamente.</p>
+    </div>
+
+    <h3>Medir a cadeia antes da fita</h3>
+    <p>Com tudo ligado e o deck <strong>parado</strong>, grava 10 segundos. O que aparecer nessa captura (fundo,
+    zumbido, desvio de zero) é da cadeia, porque ainda não há fita nenhuma. Depois toca uma fita em branco (o
+    chiado da fita) e uma com som. Se o fundo da cadeia estiver 10 dB ou mais abaixo do chiado da fita, a cadeia
+    já não é o limite. A conta do exercício com lacunas diz porquê.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p><strong>O problema.</strong> Três capturas da mesma música, com três cadeias diferentes. Sem as ouvir,
+    qual se guarda? O <code>relatorio()</code> do <a href="codigo/captura.py">captura.py</a> mede, por canal:
+    o pico, o nível médio (RMS), quantas amostras estão encostadas ao teto, o desvio de zero, o fundo (o 5.º
+    percentil do nível em blocos de 50 ms) e a maior das riscas a 50, 100 e 150 Hz.</p>
+
+    <h3>Passo 1 — medir as três</h3>
+    <pre><code>import numpy as np
+import captura as C
+
+TAXA = 48_000
+t = np.arange(10 * TAXA) / TAXA
+rng = np.random.default_rng(2)
+musica = 0.25 * np.sin(2 * np.pi * 440 * t) * (1 + 0.8 * np.sin(2 * np.pi * 0.3 * t))
+chiado = rng.normal(0, 0.003, len(t))
+zumbido = 0.004 * np.sin(2 * np.pi * 50 * t) + 0.002 * np.sin(2 * np.pi * 150 * t)
+
+capturas = {
+    &quot;A boa&quot;:            musica + chiado,
+    &quot;B ganho a mais&quot;:   np.clip(4 * (musica + chiado), -1, 1),
+    &quot;C laco de massa&quot;:  musica + chiado + zumbido + 0.01,
+}
+for nome, x in capturas.items():
+    r = C.relatorio(x, TAXA)[0]
+    print(f&quot;{nome:16s} pico {r[&#x27;pico_dbfs&#x27;]:6.1f}  rms {r[&#x27;rms_dbfs&#x27;]:6.1f}  &quot;
+          f&quot;no teto {r[&#x27;no_teto&#x27;]:6d}  dc {r[&#x27;desvio_dc&#x27;]:+.3f}  &quot;
+          f&quot;zumbido {r[&#x27;zumbido_dbfs&#x27;]:6.1f}&quot;)</code></pre>
+    <p class="verificado">Saída (colada de uma execução):</p>
+    <pre><code>A boa            pico   -6.8  rms  -13.8  no teto      0  dc +0.000  zumbido  -98.6
+B ganho a mais   pico    0.0  rms   -3.8  no teto 121980  dc +0.000  zumbido  -85.3
+C laco de massa  pico   -6.5  rms  -13.8  no teto      0  dc +0.010  zumbido  -47.9</code></pre>
+
+    <h3>Passo 2 — ler, por ordem de gravidade</h3>
+    <ol>
+      <li><strong>No teto.</strong> A B tem 121 980 amostras no teto, um quarto de todas. <em>Não se guarda</em>:
+      repete-se com menos ganho, porque o que foi cortado não volta. O pico a 0,0 dBFS confirma, mas não chega
+      como prova sozinho: um pico a 0,0 pode ser uma só amostra.</li>
+      <li><strong>Zumbido.</strong> A C tem uma risca a −47,9 dBFS, e nas outras duas a maior fica abaixo de −85. A risca
+      tem a amplitude que eu injetei (0,004, ou seja −48 dB). Guardava-a se não houvesse outra hipótese, mas a
+      cadeia tem de ser corrigida antes da próxima fita.</li>
+      <li><strong>Desvio de zero.</strong> A C tem +0,010. Não estraga nada que não se corrija com uma subtração,
+      e o descodificador do cassete-dados já o tira (passa-alto). Regista-se, não se repete a captura por causa
+      dele.</li>
+    </ol>
+    <div class="caixa ok">
+      <span class="titulo">✅ A ordem importa</span>
+      <p>O que não tem volta vem primeiro (clipping), depois o que tem volta mas custa (zumbido, que obriga a
+      filtrar e leva sinal com ele, lição 6), e por fim o que é só aritmética (desvio de zero).</p>
+    </div>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa antes de correr</h3>
+      <p>O chiado da fita e o ruído da cadeia são independentes, por isso somam-se as <em>potências</em>.
+      Potência relativa de um ruído d dB abaixo: 10<sup>−d/10</sup>.</p>
+      <ol>
+        <li>Cadeia com o mesmo nível da fita (d = 0): a potência total é 1 + 1 = 2, logo o fundo sobe
+        10·log₁₀(2) = <strong>______</strong> dB.</li>
+        <li>Cadeia 10 dB abaixo: 1 + <strong>______</strong> = 1,1, logo sobe <strong>______</strong> dB.</li>
+        <li>A partir de que diferença é que a cadeia deixa de contar mais do que meio dB? <strong>______</strong></li>
+      </ol>
+      <pre><code>import math
+# ruídos independentes somam-se em POTÊNCIA, não em amplitude
+for abaixo in (0, 3, 6, 10, 20):
+    total = 10 * math.log10(1 + 10 ** (-abaixo / 10))
+    print(f&quot;cadeia {abaixo:2d} dB abaixo da fita -&gt; o fundo sobe {total:.2f} dB&quot;)</code></pre>
+    <p class="verificado">Saída (colada de uma execução):</p>
+    <pre><code>cadeia  0 dB abaixo da fita -&gt; o fundo sobe 3.01 dB
+cadeia  3 dB abaixo da fita -&gt; o fundo sobe 1.76 dB
+cadeia  6 dB abaixo da fita -&gt; o fundo sobe 0.97 dB
+cadeia 10 dB abaixo da fita -&gt; o fundo sobe 0.41 dB
+cadeia 20 dB abaixo da fita -&gt; o fundo sobe 0.04 dB</code></pre>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <ol>
+          <li>3,01 dB.</li>
+          <li>0,1, e sobe 0,41 dB.</li>
+          <li>Algures entre 6 dB (sobe 0,97) e 10 dB (sobe 0,41). É daqui que vem a regra dos 10 dB da secção
+          3: a partir dali, melhorar a cadeia já quase não muda o resultado.</li>
+        </ol>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr><td>«Quanto mais alto gravar, melhor»</td>
+            <td>Picos a 0,0 dBFS e o medidor sempre no vermelho</td>
+            <td>Com 24 bits a folga é grátis e o clipping é para sempre. Picos entre −12 e −6 dBFS</td></tr>
+          <tr><td>«A entrada de microfone também serve»</td>
+            <td>Ganho no mínimo e mesmo assim no teto, ou muito chiado</td>
+            <td>É feita para sinais muito mais fracos. Um deck quer uma entrada de linha</td></tr>
+          <tr><td>«Gravo em MP3 de alta qualidade, ninguém nota»</td>
+            <td>Um ficheiro <code>.mp3</code> como captura</td>
+            <td>A IASA proíbe-o para preservação: a informação que o codec deita fora não volta. MP3 só para
+            cópias de ouvir</td></tr>
+          <tr><td>«A fita é mono, gravo mono»</td>
+            <td>Uma captura com um canal só</td>
+            <td>Os dois canais de uma cabeça estéreo medem o azimute (lição 3). Grava em estéreo e decide depois</td></tr>
+          <tr><td>«O zumbido vem da fita velha»</td>
+            <td>Culpar a fita sem gravar com o deck parado</td>
+            <td>Grava 10 s com o deck parado. Se a risca a 50 Hz lá está, é da cadeia</td></tr>
+          <tr><td>«Tiro a terra e o zumbido passa»</td>
+            <td>Adaptadores que eliminam o pino de terra</td>
+            <td>Passa, e tira a proteção contra choques. Nunca</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — o piso do conversor</h3>
+      <p>Qual é o piso de quantização teórico de um conversor de 16 bits e de um de 24? Deixas os picos a
+      −12 dBFS numa fita cuja relação sinal-ruído é 45 dB. A que distância fica o chiado da fita do piso de cada
+      conversor?</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>16 bits: 6,02 × 16 + 1,76 = 98,1 dB. 24 bits: 146,2 dB. O chiado fica a −12 − 45 = −57 dBFS. Isso está
+        41 dB acima do piso de 16 bits e 89 dB acima do de 24. Nos dois casos o conversor não é o limite, mas com
+        24 bits podias deixar mais 48 dB de folga sem problema. ⚠️ Estes são pisos <em>teóricos</em>. O que manda
+        numa interface real é o ruído analógico do pré-amplificador, e é por isso que a IASA pede a gama dinâmica
+        medida (115 dB) e não o número de bits.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — o protocolo, por escrito</h3>
+      <p>Escreve, em passos numerados, como vais capturar a primeira fita que importa: desde ligar os cabos até ao
+      ficheiro exportado. Inclui a medição da cadeia sem fita, a escolha do nível e o que registas num ficheiro
+      de texto ao lado do WAV. Este protocolo vai para a entrega.</p>
+      <details class="solucao"><summary>Uma versão possível</summary>
+        <ol>
+          <li>Deck e Mac na mesma extensão. Cabo RCA para a entrada de linha da interface.</li>
+          <li>Audacity: entrada = a interface, 2 canais, projeto a 96 kHz (música) ou 48 kHz (dados).</li>
+          <li>Deck parado: gravar 10 s → <code>cadeia.wav</code>. Correr <code>python captura.py relatorio
+          cadeia.wav</code>. Se o zumbido passar de −70 dBFS, corrigir a cadeia primeiro. ⚠️ Os −70 são convenção
+          minha.</li>
+          <li>Fita sem valor: afinar o azimute (lição 3), achar o trecho mais forte e acertar o ganho para picos
+          entre −12 e −6 dBFS.</li>
+          <li>Fita que importa: afinar o azimute nela, rebobinar e capturar o lado inteiro de uma vez.</li>
+          <li>Exportar WAV de 24 bits. Correr o relatório. Se houver amostras no teto, repetir com menos ganho.</li>
+          <li>Ficheiro <code>.txt</code> ao lado: deck, interface, ganho, Dolby ligado ou não, tipo de fita,
+          ajuste de azimute, data, relatório. A IASA (TC-03 §8) considera essa documentação essencial.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●● · código que corre</span>
+      <h3>E3 — onde está o clipping</h3>
+      <p>O relatório diz <em>quantas</em> amostras estão no teto, mas não <em>onde</em>. Escreve
+      <code>trechos_no_teto(x, taxa)</code> que devolve os intervalos de tempo, juntando trechos a menos de 50 ms
+      um do outro. Testa com um sinal que tem um trecho longo e um estalo curto. Porque é que juntar é preciso?</p>
+      <details class="solucao"><summary>Solução</summary>
+        <pre><code>import numpy as np
+
+def trechos_no_teto(x, taxa, limiar=0.999, junta_s=0.05):
+    &quot;&quot;&quot;Devolve [(inicio_s, fim_s, amostras)] dos trechos com amostras no teto.
+    Trechos a menos de junta_s um do outro contam como um só.&quot;&quot;&quot;
+    idx = np.flatnonzero(np.abs(x) &gt;= limiar)
+    if len(idx) == 0:
+        return []
+    cortes = np.flatnonzero(np.diff(idx) &gt; junta_s * taxa)
+    inicios = np.concatenate([[0], cortes + 1])
+    fins = np.concatenate([cortes, [len(idx) - 1]])
+    return [(idx[a] / taxa, idx[b] / taxa, b - a + 1) for a, b in zip(inicios, fins)]
+
+TAXA = 48_000
+t = np.arange(20 * TAXA) / TAXA
+x = 0.3 * np.sin(2 * np.pi * 440 * t)
+x[int(3.2 * TAXA):int(3.5 * TAXA)] *= 4          # um pico de volume aos 3,2 s
+x[int(11.0 * TAXA):int(11.01 * TAXA)] *= 5       # um estalo curto aos 11 s
+x = np.clip(x, -1, 1)
+for a, b, n in trechos_no_teto(x, TAXA):
+    print(f&quot;de {a:6.2f} s a {b:6.2f} s: {n:6d} amostras no teto&quot;)</code></pre>
+    <p class="verificado">Saída (colada de uma execução):</p>
+    <pre><code>de   3.20 s a   3.50 s:   5400 amostras no teto
+de  11.00 s a  11.01 s:    263 amostras no teto</code></pre>
+        <p>Juntar é preciso porque um tom cortado só encosta ao teto nos cumes de cada ciclo. Sem juntar, o
+        trecho de 0,3 s deste tom de 440 Hz dá 264 «trechos» de poucas amostras (contei-os à parte), e o que te interessa é
+        onde voltar na fita, não cada ciclo.</p>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+    <div class="quiz" data-quiz="c2">
+      <ol class="perguntas">
+        <li class="pergunta">
+          <p class="enunciado">Tens um Mac mini de 2024. Onde ligas o deck?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c2-1" value="a" data-certa="false"><span class="rotulo">Na tomada de 3,5 mm da frente</span></label>
+              <p class="explicacao" hidden>É de auscultadores, uma saída. A ficha técnica não lista nenhuma entrada de áudio.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-1" value="b" data-certa="true"><span class="rotulo">Numa interface de áudio USB com entrada de linha</span></label>
+              <p class="explicacao" hidden>É a única forma de o sinal entrar. E a interface é a peça que decide o ruído e o clipping da cadeia.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-1" value="c" data-certa="false"><span class="rotulo">No HomePod, por AirPlay</span></label>
+              <p class="explicacao" hidden>O HomePod reproduz som. Não o grava nem o envia ao Mac.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">A captura tem picos a −9 dBFS e nenhuma amostra no teto. O chiado da fita está 45 dB abaixo dos picos. Devias ter subido o ganho?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c2-2" value="a" data-certa="false"><span class="rotulo">Sim, para aproveitar os 24 bits</span></label>
+              <p class="explicacao" hidden>O chiado está a −54 dBFS, perto de 90 dB acima do piso de um conversor de 24 bits. Subir o ganho sobe o chiado da fita na mesma proporção, e só aproxima o teto.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-2" value="b" data-certa="false"><span class="rotulo">Não, porque subir o ganho aumenta o wow</span></label>
+              <p class="explicacao" hidden>O ganho não mexe na velocidade da fita.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-2" value="c" data-certa="true"><span class="rotulo">Não: a folga custa nada que se ouça e protege do clipping</span></label>
+              <p class="explicacao" hidden>Com 24 bits o limite é a fita, não o conversor. A folga é seguro gratuito.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Gravas 10 s com o deck parado e aparece uma risca a 50 Hz a −55 dBFS. O que concluis?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c2-3" value="a" data-certa="false"><span class="rotulo">A fita tem zumbido gravado</span></label>
+              <p class="explicacao" hidden>Não havia fita a tocar. O zumbido está na cadeia.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-3" value="b" data-certa="true"><span class="rotulo">A cadeia tem zumbido, provavelmente um laço de massa</span></label>
+              <p class="explicacao" hidden>É exatamente para isto que se grava sem fita. Primeiro a mesma extensão e os cabos afastados dos de corrente. Nunca tirar a terra.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-3" value="c" data-certa="false"><span class="rotulo">O conversor tem aliasing</span></label>
+              <p class="explicacao" hidden>O aliasing dobra frequências altas para dentro da banda. Não cria uma risca exata na frequência da rede.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que a IASA proíbe capturas em MP3?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c2-4" value="a" data-certa="false"><span class="rotulo">Porque os ficheiros são pequenos de mais para arquivo</span></label>
+              <p class="explicacao" hidden>O tamanho não é o argumento. O argumento é a informação que se perde.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-4" value="b" data-certa="true"><span class="rotulo">Porque a codificação perceptual deita fora informação que não se recupera</span></label>
+              <p class="explicacao" hidden>IASA-TC 04 §2.7. Uma captura é a única cópia completa do que a fita tinha naquele dia.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-4" value="c" data-certa="false"><span class="rotulo">Porque o MP3 não suporta estéreo</span></label>
+              <p class="explicacao" hidden>Suporta. Não é esse o problema.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Uma fita de dados mono. Porque é que se captura em estéreo?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c2-5" value="a" data-certa="true"><span class="rotulo">Porque os dois canais leem a mesma pista em alturas diferentes, e o atraso entre eles mede o azimute</span></label>
+              <p class="explicacao" hidden>Uma cabeça estéreo lê a pista mono de 1,5 mm com duas faixas de 0,6 mm. É a lição 3.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-5" value="b" data-certa="false"><span class="rotulo">Porque o Audacity não grava mono</span></label>
+              <p class="explicacao" hidden>Grava em mono sem problema nenhum. A razão para gravar em estéreo é outra: os dois canais trazem informação que um canal só não traz, que é a diferença de tempo entre eles.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-5" value="c" data-certa="false"><span class="rotulo">Porque o descodificador precisa dos dois canais</span></label>
+              <p class="explicacao" hidden>O descodificador do cassete-dados lê um canal só. Os dois canais servem para o azimute e para escolher o melhor.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Duas capturas: A tem 12 amostras no teto num estalo de 1 ms; B tem 40 000 espalhadas por toda a música. Qual repetes?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="c2-6" value="a" data-certa="false"><span class="rotulo">As duas: amostra no teto é captura perdida</span></label>
+              <p class="explicacao" hidden>Um estalo de 1 ms é um defeito da fita (um clique), e o que se perdeu foi o cume do clique. Repetir com menos ganho perde folga em todo o resto para salvar um clique que se remove depois (lição 6).</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-6" value="b" data-certa="true"><span class="rotulo">Só a B</span></label>
+              <p class="explicacao" hidden>Na B o ganho está alto de mais para a música toda, e o que foi cortado era música. É para isto que o E3 diz <em>onde</em> estão as amostras, e não só quantas.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="c2-6" value="c" data-certa="false"><span class="rotulo">Só a A, porque o estalo é mais grave</span></label>
+              <p class="explicacao" hidden>O estalo não é da cadeia, é da fita, e é curto. A B estraga o sinal inteiro.</p>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="feynman-1">Explica porque é que, com 24 bits, deixar os picos 10 dB abaixo do teto não piora a captura, e deixá-los passar do teto a estraga para sempre
+        <span class="pista">Fala de onde está o chiado da fita e de onde está o piso do conversor.</span>
+      </label>
+      <textarea id="feynman-1" data-pergunta="Explica porque é que, com 24 bits, deixar os picos 10 dB abaixo do teto não piora a captura, e deixá-los passar do teto a estraga para sempre"></textarea>
+    </div>
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/cassete-captura/respostas/AAAA-MM-DD.md</code> e correr
+      <code>/corrigir cassete-captura</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>O Mac mini recente não tem entrada de áudio. É precisa uma interface USB com entrada de linha.</li>
+      <li>O conversor é a peça crítica: ≥115 dB de gama dinâmica, THD+N &lt; −105 dB (IASA).</li>
+      <li>Clipping não tem volta. Com 24 bits a folga é grátis: picos entre −12 e −6 dBFS.</li>
+      <li>WAV de 24 bits, ≥48 kHz (96 para música), estéreo mesmo em fitas mono. Nunca MP3 na captura.</li>
+      <li>Mede a cadeia com o deck parado. Zumbido a 50 Hz é laço de massa. Nunca tirar a terra.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Apple, fichas técnicas do Mac mini</strong> — (Late 2014), (2018) e (2024).
+      <a href="https://support.apple.com/en-us/111931">2014</a> ·
+      <a href="https://support.apple.com/en-us/111912">2018</a> ·
+      <a href="https://support.apple.com/en-us/121555">2024</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16 — as de 2020 e 2023 não abri</span></li>
+      <li><strong>IASA-TC 04</strong>, §2.2 (taxa), §2.3 (bits), §2.4.1 (conversor A/D), §2.7 (compressão com
+      perdas), §2.8 (WAV e BWF).
+      <a href="https://www.iasa-web.org/tc04/key-digital-principles">iasa-web.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>IASA-TC 03, <em>The Safeguarding of the Audiovisual Heritage: Ethics, Principles and
+      Preservation Strategy</em></strong>, 4.ª edição (2017), §8: documentar todos os parâmetros da transferência.
+      <a href="https://www.iasa-web.org/book/export/html/895">iasa-web.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Guia de um engenheiro (não é documentação) — Howard Hoyt, <em>A Guide to Cassette Tape
+      Transfers</em></strong>, ©2001, secção 3.1. <strong>Porquê:</strong> o método de acertar o nível pelo pico
+      mais alto da fita, e o argumento de que o nível alto não é um defeito numa cassete, que tem menos gama
+      dinâmica do que um CD. <strong>O que saltar:</strong> as referências ao Sound Forge, que é o programa que ele
+      usava. <a href="https://proaudioeng.com/wp-content/uploads/2018/01/A-Guide-to-Cassette-Transfers.pdf">proaudioeng.com</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Wikipédia (fontes secundárias)</strong>: <em>Line level</em> (os −10 dBV e +4 dBu),
+      <em>Ground loop (electricity)</em> (o mecanismo e o aviso sobre a terra), <em>Cassette tape</em> (larguras
+      das pistas).
+      <a href="https://en.wikipedia.org/wiki/Line_level">Line level</a> ·
+      <a href="https://en.wikipedia.org/wiki/Ground_loop_(electricity)">Ground loop</a> ·
+      <a href="https://en.wikipedia.org/wiki/Cassette_tape">Cassette tape</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Audacity, manual: <em>Quality Preferences</em></strong> — o formato interno de 32 bits float.
+      <a href="https://manual.audacityteam.org/man/quality_preferences.html">manual.audacityteam.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> · Anterior: <a href="01-maquina.html">← Lição 1</a> · Próxima: <a href="03-azimute.html">Lição 3 · O azimute →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

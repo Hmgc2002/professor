@@ -3,6 +3,47 @@
 O formato é uma entrada por sessão de trabalho, com data. O que muda o que eu
 consigo aprender fica no topo da entrada; o que muda só a mecânica fica no fim.
 
+## 2026-09-16 (2) — Digitalizar cassetes a sério: o curso que põe o simulador à prova de uma máquina real
+
+**Novo**
+
+- Tópico **Digitalizar cassetes a sério** (`docs/cassete-captura/`), continuação declarada do `cassete-dados`. O
+  diagnóstico apanhou uma contradição — «sem prazo» com «há fitas que precisam de ser digitalizadas» — e resolveu-a com
+  **dois percursos**: o das fitas (chega à primeira captura a sério em três semanas) e o do critério
+  (`topicos/cassete-captura/DIAGNOSTICO.md`).
+- Sete lições: ler um espetro · escolher, provar e não estragar a máquina · a cadeia de captura · o azimute · medir o wow
+  e o flutter · o projeto com uma fita real · restaurar sem destruir. Com as normas de arquivo (IASA-TC 03 e TC-04) como
+  fonte dos critérios numéricos.
+- Três programas em `docs/cassete-captura/codigo/`: `captura.py` (espetro, relatório de captura, azimute, wow e flutter),
+  `margens.py` (descodificar, provar e medir margens de uma fita real) e `ensaio.py` (uma fita de ensaio sintética, para
+  praticar o projeto antes de haver máquina).
+- Bibliografia, folha de consulta, teste intercalado, 37 flashcards e calendário de revisão.
+
+**O que as fases apanharam** — por extenso na nota das fases do tópico. O essencial:
+
+- 🔴 **O limite mais citado do curso anterior não é um limite.** «Parte a 1,5 amostras por meia onda» era propriedade do
+  método de geração do simulador: reamostrando a mesma gravação pela FFT, falha a 8000 Hz, passa a 7000 e falha a 6500.
+- 🔴 **O arnês de medição da lição 6 do `cassete-dados` não corria** — importava cinco funções que o `fita.py` publicado
+  não tinha. Corrigido nesse tópico, com o ficheiro completo publicado e a correção à vista.
+- 🔴 **Contradição entre tópicos:** a lição 3 do `cassete-dados` dizia que o azimute «mente sobre as horas». Não mente: o
+  atraso é constante. Corrigida lá, com a marca de correção.
+- 🔴 **42 de 42 respostas certas na opção «c»** — a rotação da posição usava `n · 3 % 3`, que é sempre zero. Apanhado pelo
+  `validar.py`, que ganhou essa verificação depois da ocorrência anterior.
+- Medições que mudaram o conteúdo: a soma dos canais **falha** onde cada canal sozinho lê (azimute ≥ 45′, pente a
+  2021 Hz); um dropout que a captura ainda aguenta **gasta-lhe a margem toda**; o chiado põe um chão na medição do wow
+  (0,115 % a 30 dB de SNR); a ida e volta de uma mudança de velocidade pela FFT dá −240 dB de erro, o que desmente, para
+  métodos corretos, o aviso de Hoyt contra mudar a velocidade no digital.
+- ⚠️ **Sem hardware:** não há deck nem cassetes. Todas as medições do curso são sobre sinais gerados, e isso está dito em
+  cada sítio onde aparecem.
+
+**Mecânica**
+
+- `validar.py`: força UTF-8 na saída. Numa consola de Windows com a saída redirecionada, imprimir o «✓» final atirava
+  `UnicodeEncodeError` — ou seja, o validador rebentava exactamente no caminho do sucesso.
+- `modelo/base.css`: links dentro de `<figcaption>` passam a usar a cor de acento. Sem isso, ficavam com a cor por
+  omissão do browser e falhavam o contraste WCAG AA no tema claro (2,33:1), apanhado pelo axe.
+- `docs/index.html`: cartão do tópico novo, com a ressalva de que nenhuma medição foi feita em máquina real.
+
 ## 2026-09-16 — A cassete como memória de computador: um curso que acaba num descodificador que corre
 
 **Novo**

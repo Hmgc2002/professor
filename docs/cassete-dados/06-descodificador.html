@@ -315,6 +315,9 @@ textarea {
 figure { margin: 1.5rem 0; }
 figure svg { max-width: 100%; height: auto; display: block; }
 figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
 .svg-fundo  { fill: var(--superficie-2); }
 .svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
 .svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
@@ -932,6 +935,150 @@ if a != b:
       ataques, um de cada vez, e depois os quatro juntos.</p>
       <p>🔴 <strong>No ruído, usa várias sementes.</strong> Uma medição com uma semente só não é uma medição: é
       uma anedota. Um descodificador que funciona com uma semente e falha com outra não «funciona».</p>
+
+      <div class="caixa aviso correcao">
+        <span class="titulo">⚠️ Corrigido a 2026-09-16 — faltava aqui o <code>fita.py</code> completo</span>
+        <p>O arnês abaixo importa <code>cabecalho</code>, <code>bloco</code>, <code>tap</code>,
+        <code>estragar</code> e <code>onda</code> com o parâmetro <code>wow</code>. A versão do
+        <code>fita.py</code> publicada na <a href="05-formato-zx.html">lição 5</a> não tem nada disso: ela constrói
+        só o essencial para <em>ver</em> o formato. Quem seguisse o curso pela ordem não conseguia correr este
+        exercício — apanhado ao reconstruir estes ficheiros a partir das páginas, no tópico
+        <a href="../cassete-captura/index.html">Digitalizar cassetes a sério</a>. A versão completa está aqui.</p>
+        <details class="solucao"><summary>O <code>fita.py</code> completo (é este que o arnês importa)</summary>
+<pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Gera um .wav que imita uma fita de ZX Spectrum a partir de um .tap.
+
+Só stdlib. Corre em qualquer sítio, sem instalar nada.
+&quot;&quot;&quot;
+import math
+import random
+import struct
+import sys
+import wave
+
+RELOGIO = 3_500_000          # T-states por segundo no Spectrum de 48K
+PILOTO = 2168                # T por meia-onda do tom-piloto
+SINC1, SINC2 = 667, 735      # os dois pulsos de sincronismo
+BIT0, BIT1 = 855, 1710       # T por meia-onda; um bit são DUAS meias-ondas
+PULSOS_PILOTO = {0x00: 8063, 0xFF: 3223}   # cabeçalho ~5 s, dados ~2 s
+
+
+# ---------------------------------------------------------------- .tap
+def blocos_do_tap(dados):
+    &quot;&quot;&quot;Um .tap é uma fila de (comprimento em 2 bytes little-endian, bloco).&quot;&quot;&quot;
+    i, saida = 0, []
+    while i + 2 &lt;= len(dados):
+        (n,) = struct.unpack_from(&quot;&lt;H&quot;, dados, i)
+        i += 2
+        saida.append(dados[i:i + n])
+        i += n
+    return saida
+
+
+def bloco(bandeira, corpo):
+    &quot;&quot;&quot;Monta bandeira + corpo + paridade. O XOR de tudo tem de dar 0x00.&quot;&quot;&quot;
+    b = bytes([bandeira]) + corpo
+    paridade = 0
+    for x in b:
+        paridade ^= x
+    return b + bytes([paridade])
+
+
+def cabecalho(tipo, nome, comprimento, par1, par2):
+    corpo = struct.pack(&quot;&lt;B10sHHH&quot;, tipo, nome.encode(&quot;ascii&quot;).ljust(10)[:10],
+                        comprimento, par1, par2)
+    return bloco(0x00, corpo)
+
+
+def tap(blocos):
+    return b&quot;&quot;.join(struct.pack(&quot;&lt;H&quot;, len(b)) + b for b in blocos)
+
+
+# ---------------------------------------------------------------- pulsos
+def pulsos(b):
+    &quot;&quot;&quot;A sequência de meias-ondas, em T-states, que grava um bloco.&quot;&quot;&quot;
+    yield from [PILOTO] * PULSOS_PILOTO[b[0]]
+    yield SINC1
+    yield SINC2
+    for byte in b:
+        for i in range(7, -1, -1):          # bit mais significativo primeiro
+            t = BIT1 if (byte &gt;&gt; i) &amp; 1 else BIT0
+            yield t
+            yield t
+
+
+# ---------------------------------------------------------------- áudio
+def onda(seq_pulsos, taxa, wow=0.0, wow_hz=3.0):
+    &quot;&quot;&quot;Meias-ondas -&gt; amostras de -1/+1, com a velocidade a variar (wow).&quot;&quot;&quot;
+    amostras, nivel, pos = [], 1, 0.0
+    for t in seq_pulsos:
+        # A velocidade da fita oscila: cada meia-onda fica mais curta ou mais
+        # longa. É isto que impede o descodificador de contar amostras fixas.
+        v = 1.0 + wow * math.sin(2 * math.pi * wow_hz * len(amostras) / taxa)
+        pos += t * taxa / RELOGIO / v
+        while len(amostras) &lt; pos:
+            amostras.append(nivel)
+        nivel = -nivel
+    return amostras
+
+
+def estragar(x, taxa, corte_hz=6000.0, ruido=0.04, dc=0.05, semente=1):
+    &quot;&quot;&quot;As três coisas que a fita faz ao sinal: corta agudos, soma ruído, desvia.&quot;&quot;&quot;
+    rnd = random.Random(semente)
+    a = 1.0 - math.exp(-2 * math.pi * corte_hz / taxa)   # passa-baixo de 1 polo
+    y, anterior = [], 0.0
+    for v in x:
+        anterior += a * (v - anterior)
+        y.append(anterior)
+    # amplitude a variar devagar: fita gasta, cabeça suja, pilhas a morrer
+    n = len(y)
+    return [v * (0.75 + 0.25 * math.sin(2 * math.pi * 0.4 * i / taxa))
+            + rnd.gauss(0, ruido) + dc for i, v in enumerate(y)]
+
+
+def escrever_wav(caminho, amostras, taxa):
+    pico = max(1e-9, max(abs(v) for v in amostras))
+    quadros = b&quot;&quot;.join(struct.pack(&quot;&lt;h&quot;, int(max(-1.0, min(1.0, v / pico / 1.05)) * 32000))
+                       for v in amostras)
+    with wave.open(caminho, &quot;wb&quot;) as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(taxa)
+        w.writeframes(quadros)
+
+
+def silencio(taxa, segundos):
+    return [0.0] * int(taxa * segundos)
+
+
+def main():
+    taxa = 44100
+    nome = sys.argv[1] if len(sys.argv) &gt; 1 else &quot;fita.wav&quot;
+
+    corpo = bytes(range(32)) + b&quot;OLA MUNDO&quot; + bytes([0xAA, 0x55] * 8)
+    blocos = [cabecalho(3, &quot;TESTE&quot;, len(corpo), 32768, 32768), bloco(0xFF, corpo)]
+    dados_tap = tap(blocos)
+    with open(nome.replace(&quot;.wav&quot;, &quot;.tap&quot;), &quot;wb&quot;) as f:
+        f.write(dados_tap)
+
+    x = silencio(taxa, 0.3)
+    for b in blocos_do_tap(dados_tap):
+        x += onda(pulsos(b), taxa, wow=0.004)
+        x += silencio(taxa, 0.5)
+    x += silencio(taxa, 0.3)
+
+    escrever_wav(nome, estragar(x, taxa), taxa)
+    print(f&quot;{nome}: {len(x)/taxa:.2f} s, {taxa} Hz&quot;)
+    print(f&quot;{nome.replace(&#x27;.wav&#x27;, &#x27;.tap&#x27;)}: {len(dados_tap)} bytes, &quot;
+          f&quot;{len(blocos)} blocos de {[len(b) for b in blocos]}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+          <p>Corre <code>python fita.py fita.wav</code> e deve dar <code>9.00 s</code> e blocos de
+          <code>[19, 59]</code> bytes, como a saída mais acima nesta lição.</p>
+        </details>
+      </div>
       <details class="solucao"><summary>Solução</summary>
 <pre><code>&quot;&quot;&quot;Ate onde e que o descodificador aguenta? Uma medicao por ataque.&quot;&quot;&quot;
 import io, math, struct, wave

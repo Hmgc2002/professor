@@ -139,6 +139,143 @@ o que já está escrito.
   - [C · Diagnosticar](docs/abstracts-e-resumos/teste.html#parte-c)
   - [Entregar](docs/abstracts-e-resumos/teste.html#entregar)
 
+## `docs/cassete-captura/00-espetro.html` — 0 · Ver as frequências de um sinal — Digitalizar cassetes
+
+  - [1. Objetivo](docs/cassete-captura/00-espetro.html#objetivo)
+  - [2. Recuperar](docs/cassete-captura/00-espetro.html#recuperar)
+  - [3. O mecanismo](docs/cassete-captura/00-espetro.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-captura/00-espetro.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-captura/00-espetro.html#lacunas)
+  - [6. Erros comuns](docs/cassete-captura/00-espetro.html#erros)
+  - [7. Praticar](docs/cassete-captura/00-espetro.html#praticar)
+  - [8. Quiz](docs/cassete-captura/00-espetro.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-captura/00-espetro.html#feynman)
+  - [10. Resumo](docs/cassete-captura/00-espetro.html#resumo)
+  - [11. Fontes](docs/cassete-captura/00-espetro.html#fontes)
+
+## `docs/cassete-captura/01-maquina.html` — 1 · A máquina: escolher, provar, não estragar — Digitalizar cassetes
+
+  - [1. Objetivo](docs/cassete-captura/01-maquina.html#objetivo)
+  - [2. Recuperar](docs/cassete-captura/01-maquina.html#recuperar)
+  - [3. O mecanismo](docs/cassete-captura/01-maquina.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-captura/01-maquina.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-captura/01-maquina.html#lacunas)
+  - [6. Erros comuns](docs/cassete-captura/01-maquina.html#erros)
+  - [7. Praticar](docs/cassete-captura/01-maquina.html#praticar)
+  - [8. Quiz](docs/cassete-captura/01-maquina.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-captura/01-maquina.html#feynman)
+  - [10. Resumo](docs/cassete-captura/01-maquina.html#resumo)
+  - [11. Fontes](docs/cassete-captura/01-maquina.html#fontes)
+
+## `docs/cassete-captura/02-cadeia.html` — 2 · A cadeia de captura: do deck ao ficheiro — Digitalizar cassetes
+
+  - [1. Objetivo](docs/cassete-captura/02-cadeia.html#objetivo)
+  - [2. Recuperar](docs/cassete-captura/02-cadeia.html#recuperar)
+  - [3. O mecanismo](docs/cassete-captura/02-cadeia.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-captura/02-cadeia.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-captura/02-cadeia.html#lacunas)
+  - [6. Erros comuns](docs/cassete-captura/02-cadeia.html#erros)
+  - [7. Praticar](docs/cassete-captura/02-cadeia.html#praticar)
+  - [8. Quiz](docs/cassete-captura/02-cadeia.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-captura/02-cadeia.html#feynman)
+  - [10. Resumo](docs/cassete-captura/02-cadeia.html#resumo)
+  - [11. Fontes](docs/cassete-captura/02-cadeia.html#fontes)
+
+## `docs/cassete-captura/03-azimute.html` — 3 · O azimute — Digitalizar cassetes
+
+  - [1. Objetivo](docs/cassete-captura/03-azimute.html#objetivo)
+  - [2. Recuperar](docs/cassete-captura/03-azimute.html#recuperar)
+  - [3. O mecanismo](docs/cassete-captura/03-azimute.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-captura/03-azimute.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-captura/03-azimute.html#lacunas)
+  - [6. Erros comuns](docs/cassete-captura/03-azimute.html#erros)
+  - [7. Praticar](docs/cassete-captura/03-azimute.html#praticar)
+  - [8. Quiz](docs/cassete-captura/03-azimute.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-captura/03-azimute.html#feynman)
+  - [10. Resumo](docs/cassete-captura/03-azimute.html#resumo)
+  - [11. Fontes](docs/cassete-captura/03-azimute.html#fontes)
+
+## `docs/cassete-captura/04-wow-flutter.html` — 4 · Medir o wow e o flutter — Digitalizar cassetes
+
+  - [1. Objetivo](docs/cassete-captura/04-wow-flutter.html#objetivo)
+  - [2. Recuperar](docs/cassete-captura/04-wow-flutter.html#recuperar)
+  - [3. O mecanismo](docs/cassete-captura/04-wow-flutter.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-captura/04-wow-flutter.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-captura/04-wow-flutter.html#lacunas)
+  - [6. Erros comuns](docs/cassete-captura/04-wow-flutter.html#erros)
+  - [7. Praticar](docs/cassete-captura/04-wow-flutter.html#praticar)
+  - [8. Quiz](docs/cassete-captura/04-wow-flutter.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-captura/04-wow-flutter.html#feynman)
+  - [10. Resumo](docs/cassete-captura/04-wow-flutter.html#resumo)
+  - [11. Fontes](docs/cassete-captura/04-wow-flutter.html#fontes)
+
+## `docs/cassete-captura/05-fita-real.html` — 5 · Projeto: uma fita de dados real — Digitalizar cassetes
+
+  - [1. Objetivo](docs/cassete-captura/05-fita-real.html#objetivo)
+  - [2. Recuperar](docs/cassete-captura/05-fita-real.html#recuperar)
+  - [3. O mecanismo](docs/cassete-captura/05-fita-real.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-captura/05-fita-real.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-captura/05-fita-real.html#lacunas)
+  - [6. Erros comuns](docs/cassete-captura/05-fita-real.html#erros)
+  - [7. Praticar](docs/cassete-captura/05-fita-real.html#praticar)
+  - [8. Quiz](docs/cassete-captura/05-fita-real.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-captura/05-fita-real.html#feynman)
+  - [10. Resumo](docs/cassete-captura/05-fita-real.html#resumo)
+  - [11. Fontes](docs/cassete-captura/05-fita-real.html#fontes)
+
+## `docs/cassete-captura/06-restauro.html` — 6 · Restaurar sem destruir — Digitalizar cassetes
+
+  - [1. Objetivo](docs/cassete-captura/06-restauro.html#objetivo)
+  - [2. Recuperar](docs/cassete-captura/06-restauro.html#recuperar)
+  - [3. O mecanismo](docs/cassete-captura/06-restauro.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-captura/06-restauro.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-captura/06-restauro.html#lacunas)
+  - [6. Erros comuns](docs/cassete-captura/06-restauro.html#erros)
+  - [7. Praticar](docs/cassete-captura/06-restauro.html#praticar)
+  - [8. Quiz](docs/cassete-captura/06-restauro.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-captura/06-restauro.html#feynman)
+  - [10. Resumo](docs/cassete-captura/06-restauro.html#resumo)
+  - [11. Fontes](docs/cassete-captura/06-restauro.html#fontes)
+
+## `docs/cassete-captura/bibliografia.html` — Bibliografia — Digitalizar cassetes
+
+  - [O percurso](docs/cassete-captura/bibliografia.html#percurso)
+  - [1. Se leres só uma coisa](docs/cassete-captura/bibliografia.html#primeiro)
+  - [2. As normas de arquivo](docs/cassete-captura/bibliografia.html#normas)
+  - [3. A máquina e a física](docs/cassete-captura/bibliografia.html#maquina)
+  - [4. Medir: sinal e frequência](docs/cassete-captura/bibliografia.html#medir)
+  - [5. As ferramentas](docs/cassete-captura/bibliografia.html#ferramentas)
+  - [O que não consegui abrir](docs/cassete-captura/bibliografia.html#nao-abri)
+
+## `docs/cassete-captura/folha.html` — Folha de consulta — Digitalizar cassetes
+
+  - [Os números da cassete](docs/cassete-captura/folha.html#numeros)
+  - [As contas](docs/cassete-captura/folha.html#contas)
+  - [Os critérios](docs/cassete-captura/folha.html#criterios)
+  - [Os comandos](docs/cassete-captura/folha.html#comandos)
+  - [De sintoma para causa](docs/cassete-captura/folha.html#sintomas)
+
+## `docs/cassete-captura/index.html` — Digitalizar cassetes a sério
+
+  - [O que vais conseguir fazer no fim](docs/cassete-captura/index.html#conseguir)
+  - [O que este curso não é](docs/cassete-captura/index.html#nao-e)
+  - [O que assumi](docs/cassete-captura/index.html#assumi)
+  - [O mapa](docs/cassete-captura/index.html#mapa)
+  - [O plano no tempo](docs/cassete-captura/index.html#plano)
+  - [Preparar](docs/cassete-captura/index.html#preparar)
+  - [No fim do tópico](docs/cassete-captura/index.html#fim)
+  - [Nota das fases](docs/cassete-captura/index.html#fases)
+    - [Fase 2 — Aprofundar: o que a Fase 1 errou](docs/cassete-captura/index.html#fase2)
+
+## `docs/cassete-captura/teste.html` — Teste de domínio — Digitalizar cassetes
+
+  - [Como funciona](docs/cassete-captura/teste.html#como)
+  - [Parte 1 — mecanismo](docs/cassete-captura/teste.html#parte1)
+  - [Parte 2 — contas](docs/cassete-captura/teste.html#parte2)
+  - [Parte 3 — diagnóstico](docs/cassete-captura/teste.html#parte3)
+  - [Parte 4 — caso completo](docs/cassete-captura/teste.html#parte4)
+  - [Entregar](docs/cassete-captura/teste.html#entregar)
+
 ## `docs/cassete-dados/00-som-numero-ficheiro.html` — 0 · Som, número, ficheiro — o que lá está mesmo dentro de um .wav — A cassete como memória
 
   - [1. Objetivo](docs/cassete-dados/00-som-numero-ficheiro.html#objetivo)
