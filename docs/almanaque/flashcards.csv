@@ -1,0 +1,50 @@
+O que é o ponto subastral de um astro?;O ponto da Terra onde o astro está no zénite. Latitude = declinação, longitude oeste = GHA.;almanaque::licao0
+Medir a altura de um astro dá-te um ponto ou um círculo? Porquê?;Um círculo. A altura dá a distância ao ponto subastral (90° − H) e não a direção.;almanaque::licao0
+Quais são os três lados do triângulo de posição?;90° − latitude (co-latitude), 90° − declinação (distância polar), 90° − altura (distância zenital).;almanaque::licao0
+A única conta da navegação astronómica;sin H = sin φ · sin δ + cos φ · cos δ · cos LHA;almanaque::licao0
+Porque é que o azimute se calcula com atan2 e não com atan?;Porque a divisão y/x apaga os sinais, e com eles o quadrante. O atan2 recebe os dois em separado.;almanaque::licao0
+O que distingue um zij de um almanaque?;O zij publica o método — tens de calcular. O almanaque publica o resultado já calculado.;almanaque::licao1
+Quando e onde nasce o almanaque no sentido moderno?;1088, Toledo: o Almanaque de Azarquiel, de al-Zarqālī, com posições diárias verdadeiras para 1088–1092.;almanaque::licao1
+Almanaque do GPS contra efeméride do GPS: a diferença;Almanaque: grosseiro, válido até duas semanas, 12,5 min para a constelação toda. Efeméride: preciso, válido 4 horas, 18–36 s por satélite.;almanaque::licao1
+Quem propôs pré-calcular as distâncias lunares, quando, e onde saiu?;Maskelyne, no British Mariner's Guide (1763). O Nautical Almanac para 1767 saiu impresso em 1766.;almanaque::licao1
+Até quando saíram distâncias lunares nos almanaques oficiais britânicos?;Até 1906. A tabela morre quando o problema muda, não quando a astronomia muda.;almanaque::licao1
+Em que escala de tempo corre uma série de posição? E o GHA?;Posição em TT (uniforme). GHA em UT1 (rotação da Terra). A diferença é o ΔT.;almanaque::licao2
+O que é o ΔT e de onde vem o seu valor?;ΔT = TT − UT1. É MEDIDO pelo IERS, não calculado. Cerca de 69 s hoje, e o almanaque imprime-o em cada página.;almanaque::licao2
+Quantos graus roda a Terra por dia solar?;360,98564736629°. Os 0,9856 a mais são o que ela andou na órbita — daí o dia sidéreo ser 3m56s mais curto.;almanaque::licao2
+GMST ou GAST no cálculo do GHA?;GAST, o aparente (inclui a nutação). Usar o médio custa até 0,263′ — quase três vezes a tolerância do livro.;almanaque::licao2
+Quanto vale 1 segundo de erro de relógio, em posição?;0,25′ de GHA = 0,25 milhas náuticas no equador. Regra de cabeça: 4 segundos = 1 milha.;almanaque::licao2
+Quanto vale a equação do centro, e de onde vem?;Até ±1,914°. É a segunda lei de Kepler em série: o primeiro coeficiente é 2e = 0,0334 rad.;almanaque::licao3
+Quanto valem a nutação e a aberração na longitude do Sol?;Nutação até ±17,2″ (0,29′) · aberração −20,5″ (0,34′), quase constante. Cada uma vale mais do que o triplo da tolerância do livro.;almanaque::licao3
+Porque é que o analema é um oito?;A equação do tempo soma uma componente semestral (obliquidade) com uma anual (excentricidade). Sem uma delas, degenera.;almanaque::licao3
+Extremos da equação do tempo;−14m15s a 11 de fevereiro e +16m25s a 3 de novembro. Convenção do USNO: aparente menos médio.;almanaque::licao3
+Onde está a Terra mais perto do Sol?;No início de janeiro — inverno no hemisfério norte. 0,9833 a 1,0167 UA. As estações vêm da obliquidade.;almanaque::licao3
+Erro medido do Sol deste curso contra o livro;Até 0,42′ no GHA e 0,20′ na declinação. O livro imprime a 0,1′ — logo NÃO o reproduz.;almanaque::licao3
+A que altura do centro do Sol se considera o nascer, e porquê?;−0° 50′: 34′ de refração média no horizonte + 16′ de semidiâmetro. É medição, não convenção.;almanaque::licao4
+Os três crepúsculos e para que serve o do meio;Civil −6°, náutico −12°, astronómico −18°. São convenção. O náutico é a janela com estrelas E horizonte visível.;almanaque::licao4
+Porque é que não se usa a fórmula fechada do semi-arco diurno?;Porque assume a declinação constante durante o dia. Perto do equinócio isso erra mais de um minuto de tempo.;almanaque::licao4
+Quando é que um astro é circumpolar?;Quando |φ| + |δ| ≥ 90°, com φ e δ do mesmo sinal. A altura mínima é φ + δ − 90°.;almanaque::licao4
+O dia do equinócio tem 12 horas?;Não: é mais longo em toda a parte. A refração e o semidiâmetro empurram os dois no mesmo sentido. No equador NUNCA há 12 h.;almanaque::licao4
+Quanto vale a paralaxe horizontal da Lua? E a do Sol?;Lua: 54′ a 61,5′. Sol: 0,15″. É a maior correção de toda a navegação astronómica.;almanaque::licao5
+A que altura se considera a Lua nascida, e porquê?;+0° 07,5′, positiva: −34′ (refração) −16′ (semidiâmetro) +57′ (paralaxe). A única correção do curso que muda de sinal.;almanaque::licao5
+Quanto dura um mês sinódico?;Média 29,53059 d (J2000) · real entre 29,26 e 29,80 d. Somar a média para prever a lua nova erra horas.;almanaque::licao5
+Entre que valores oscila a declinação máxima da Lua, e com que período?;±18,3° a ±28,7°, em 18,6 anos: 23,44° ∓ 5,14°. É o mesmo nodo lunar da nutação e das marés.;almanaque::licao5
+Porque é que a Lua é o corpo difícil?;É um problema de três corpos em que a perturbação do Sol é grande. As teorias modernas precisam de milhares de termos.;almanaque::licao5
+GHA de um astro, pelo método do livro;GHA = (valor da hora inteira) + (incremento à taxa nominal) + (correção v). Três consultas, duas somas, zero multiplicações.;almanaque::licao6
+O que é a coluna «v»?;O excesso da velocidade do GHA daquela hora sobre a taxa nominal da tabela de incrementos, em minutos de arco por hora.;almanaque::licao6
+As três taxas nominais da tabela de incrementos;Sol e planetas 15,0°/h · Áries 15,0410686°/h · Lua 14° 19,0′/h.;almanaque::licao6
+Como se calcula a correção de v ou de d para o minuto m?;v × (m + 0,5)/60 — o MEIO do minuto. Um valor tabelado representa um intervalo, não um instante.;almanaque::licao6
+De onde vem o sinal do «d»?;Da coluna da declinação: vê-se se ela sobe ou desce. O livro imprime o d SEM sinal.;almanaque::licao6
+As cinco correções de altura, por ordem;Erro de índice · depressão do horizonte · refração · semidiâmetro · paralaxe. A refração aplica-se à altura APARENTE.;almanaque::licao7
+Quanto vale a depressão do horizonte?;1,76 × √(altura do olho em metros), em minutos de arco. A 10 m dá 5,6′, e subtrai-se sempre.;almanaque::licao7
+O que é o intercepto, e qual é a regra do sentido?;Ho − Hc em minutos de arco = milhas náuticas, marcado ao longo do azimute. «Computed greater → away».;almanaque::licao7
+Porque é que 1 minuto de arco é 1 milha náutica?;Porque a milha náutica foi DEFINIDA como o minuto de arco de meridiano — para esta conta não precisar de fator.;almanaque::licao7
+Porque é que se tiram três observações e não duas?;Não por precisão: para tornar OBSERVÁVEL um erro constante em todas as alturas, que com duas é indistinguível de uma mudança de posição.;almanaque::licao7
+Numa tábua de marés, o que vem do céu e o que vem do porto?;Do céu vêm as frequências (σ). Do porto vêm as amplitudes (A) e as fases (φ), medidas durante pelo menos um ano.;almanaque::licao8
+Qual é o período da constituinte K1 das marés?;23,93447 h — o dia sidéreo. As constituintes são periodicidades astronómicas já conhecidas.;almanaque::licao8
+Porque é que há marés vivas de 14 em 14 dias?;É o batimento entre M2 (28,9841°/h) e S2 (30,0°/h): 14,765 dias, metade do mês sinódico, porque o alinhamento ocorre na lua nova E na cheia.;almanaque::licao8
+Porque é que caracterizar um porto exige um ano de medições?;Critério de Rayleigh: K1 e P1 diferem 0,082°/h e só se separam ao fim de meio ano. É o mesmo limite de resolução de uma FFT.;almanaque::licao8
+Porque é que a tolerância se declara antes de comparar?;Porque escolher o limiar depois de ver o resultado é escolher o que faz o resultado passar — não é medir, é justificar.;almanaque::licao9
+Que colunas do teu almanaque passam a tolerância do livro?;Passam: GHA de Áries (0,053′), paralaxe da Lua (0,077′), nascer/pôr/crepúsculos (ao minuto) e nascer/ocaso da Lua. Falham as quatro restantes.;almanaque::licao9
+Porque é que não se deve calibrar o modelo contra a referência?;Porque queima a referência: depois de ajustado ao livro, o livro já não pode avaliar o modelo.;almanaque::licao9
+Que verificações há quando não existe referência externa?;Invariantes: altura no trânsito = 90 − |φ − δ|, GHA sempre crescente, equação do tempo a passar por zero quatro vezes.;almanaque::licao9
+Quantas causas distintas há para «não há nascer do Sol hoje»?;Três: sempre acima (circumpolar), sempre abaixo (noite polar), ou o evento caiu fora daquele dia de calendário (o caso normal da Lua).;almanaque::licao9

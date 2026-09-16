@@ -326,6 +326,27 @@ figcaption a { color: var(--acento); text-decoration: underline; }
 .svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
 .svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
 
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
 /* ---------- cartões do catálogo ---------- */
 
 .cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
@@ -512,7 +533,7 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
     <code>Index Only Scan</code> — é o <code>Heap Fetches</code> que denuncia. Vais medir isso já a seguir.</p>
 
     <figure>
-      <svg viewBox="0 0 570 240" role="img" aria-labelledby="t-tres d-tres">
+      <svg viewBox="0 0 578 240" role="img" aria-labelledby="t-tres d-tres">
         <title id="t-tres">As três formas de chegar da folha do índice à linha da tabela</title>
         <desc id="d-tres">Três colunas lado a lado. Index Scan salta do índice para a tabela linha a linha.
         Bitmap Heap Scan constrói primeiro um mapa de páginas e depois lê as páginas por ordem. Index Only Scan

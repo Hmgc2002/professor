@@ -1,0 +1,122 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//professor//almanaque//PT
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Revisão — O almanaque
+X-WR-CALDESC:Repetição espaçada do tópico do almanaque. As datas cont
+ am a partir do dia em que o núcleo ficar concluído; ajusta a primeira 
+ e as outras seguem.
+BEGIN:VEVENT
+UID:almanaque-rev-1@professor
+DTSTAMP:20260916T120000Z
+DTSTART;VALUE=DATE:20261126
+DTEND;VALUE=DATE:20261127
+SUMMARY:Revisão +1 dia — O almanaque
+DESCRIPTION:O que fazer\, por esta ordem:\n1. Sem abrir nada: escreve de 
+ memória a fórmula da altura e o que cada símbolo é.\n2. Diz em voz a
+ lta o que é o ponto subastral e porque é que uma altura dá um círcul
+ o.\n3. Abre docs/almanaque/folha.html e confere só o que falhaste.\n\nP
+ ágina: docs/almanaque/index.html\nFolha: docs/almanaque/folha.html\n\nI
+ ntervalos +1/+3/+7/+21/+60 são CONVENÇÃO\, não um resultado experime
+ ntal: a evidência sustenta espaçar e expandir\, não estes números (D
+ ECISOES.md D-009).
+CATEGORIES:professor,almanaque,revisão
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +1 dia — O almanaque
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:almanaque-rev-3@professor
+DTSTAMP:20260916T120000Z
+DTSTART;VALUE=DATE:20261128
+DTEND;VALUE=DATE:20261129
+SUMMARY:Revisão +3 dias — O almanaque
+DESCRIPTION:O que fazer\, por esta ordem:\n1. Recupera de memória: as ci
+ nco escalas de tempo e para que serve cada uma.\n2. Quanto vale 1 segund
+ o de erro de relógio em milhas náuticas? E porquê?\n3. Refaz o quiz d
+ a lição 2 sem consultar.\n4. Corre codigo/ensaio.py e vê a secção 2
+  (tempo sidéreo).\n\nPágina: docs/almanaque/index.html\nFolha: docs/al
+ manaque/folha.html\n\nIntervalos +1/+3/+7/+21/+60 são CONVENÇÃO\, nã
+ o um resultado experimental: a evidência sustenta espaçar e expandir\,
+  não estes números (DECISOES.md D-009).
+CATEGORIES:professor,almanaque,revisão
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +3 dias — O almanaque
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:almanaque-rev-7@professor
+DTSTAMP:20260916T120000Z
+DTSTART;VALUE=DATE:20261202
+DTEND;VALUE=DATE:20261203
+SUMMARY:Revisão +7 dias — O almanaque
+DESCRIPTION:O que fazer\, por esta ordem:\n1. As cinco correções de alt
+ ura\, por ordem\, com os sinais. De memória.\n2. Porque é que a Lua «
+ nasce» a uma altura positiva? Escreve a soma.\n3. Refaz os quizzes das 
+ lições 5 e 7.\n4. Corre codigo/gerar.py para um dia e lê a página co
+ mo se fosse do livro.\n\nPágina: docs/almanaque/index.html\nFolha: docs
+ /almanaque/folha.html\n\nIntervalos +1/+3/+7/+21/+60 são CONVENÇÃO\, 
+ não um resultado experimental: a evidência sustenta espaçar e expandi
+ r\, não estes números (DECISOES.md D-009).
+CATEGORIES:professor,almanaque,revisão
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +7 dias — O almanaque
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:almanaque-rev-21@professor
+DTSTAMP:20260916T120000Z
+DTSTART;VALUE=DATE:20261216
+DTEND;VALUE=DATE:20261217
+SUMMARY:Revisão +21 dias — O almanaque
+DESCRIPTION:O que fazer\, por esta ordem:\n1. Faz uma consulta completa n
+ uma página diária\, à mão: hora inteira + incremento + v.\n2. Explic
+ a a alguém porque é que uma tábua de marés é local e um almanaque a
+ stronómico não é.\n3. Refaz o teste de domínio (docs/almanaque/teste
+ .html) e compara com a entrega anterior.\n4. Regista o resultado em topi
+ cos/almanaque/PROGRESSO.md.\n\nPágina: docs/almanaque/index.html\nFolha
+ : docs/almanaque/folha.html\n\nIntervalos +1/+3/+7/+21/+60 são CONVENÇ
+ ÃO\, não um resultado experimental: a evidência sustenta espaçar e e
+ xpandir\, não estes números (DECISOES.md D-009).
+CATEGORIES:professor,almanaque,revisão
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +21 dias — O almanaque
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:almanaque-rev-60@professor
+DTSTAMP:20260916T120000Z
+DTSTART;VALUE=DATE:20270124
+DTEND;VALUE=DATE:20270125
+SUMMARY:Revisão +60 dias — O almanaque
+DESCRIPTION:O que fazer\, por esta ordem:\n1. Gera o almanaque de um ano 
+ novo e compara com o PDF oficial desse ano.\n2. 🔴 Escreve a tolerânc
+ ia ANTES de correr o comparador.\n3. Confirma que os números do orçame
+ nto de erro continuam os mesmos — se mudaram\, descobre porquê.\n4. R
+ eescreve a bibliografia: o que leste desde a última vez?\n\nPágina: do
+ cs/almanaque/index.html\nFolha: docs/almanaque/folha.html\n\nIntervalos 
+ +1/+3/+7/+21/+60 são CONVENÇÃO\, não um resultado experimental: a ev
+ idência sustenta espaçar e expandir\, não estes números (DECISOES.md
+  D-009).
+CATEGORIES:professor,almanaque,revisão
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +60 dias — O almanaque
+END:VALARM
+END:VEVENT
+END:VCALENDAR

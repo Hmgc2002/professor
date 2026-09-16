@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7 · Reduzir uma altura — O almanaque</title>
+<meta name="description" content="Dois problemas diferentes com o mesmo nome: limpar uma medição, e transformá-la num lugar geométrico. O segundo foi resolvido no século XIX com uma ideia que qualquer programador reconhece — aproximar localmente por uma reta.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/almanaque/07-reduzir-uma-altura.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">O almanaque</a> <span aria-hidden="true">›</span> lição 7</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta nucleo">Lição 7 · núcleo</p>
+    <h1>Reduzir uma altura: de um ângulo medido a uma linha no mapa</h1>
+    <p class="subtitulo">Dois problemas diferentes com o mesmo nome: limpar uma medição, e transformá-la num lugar geométrico. O segundo foi resolvido no século XIX com uma ideia que qualquer programador reconhece — aproximar localmente por uma reta.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim desta lição, dada uma altura de sextante, a hora, a altura do olho e uma posição
+    assumida, <strong>produzes uma reta de altura</strong> — intercepto e azimute — com os sinais
+    certos e sem consultar; e <strong>cruzas duas</strong> para obter uma posição, sabendo dizer que
+    erro de posição resulta de 1′ de erro na altura.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>De memória.</p>
+    <ol>
+      <li>O que é que uma altura medida te diz sobre onde estás?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Que estás a <strong>90° − H</strong> do ponto subastral: um <strong>círculo</strong> de
+          posição. (Lição 0.)</p></details>
+      </li>
+      <li>Qual é a única conta do triângulo de posição?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>sin H = sin φ sin δ + cos φ cos δ cos LHA. (Lição 0.)</p></details>
+      </li>
+      <li>Que correção é que só a Lua tem em tamanho significativo, e quanto vale?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>A <strong>paralaxe</strong>, até 61,5′. No Sol vale 0,15″. (Lição 5.)</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p><strong>Porquê antes de como.</strong> Tens um ângulo lido num instrumento e queres uma linha
+    num mapa. Entre as duas coisas há dois problemas completamente diferentes, e confundi-los é o
+    que torna esta matéria difícil de aprender:</p>
+    <ol>
+      <li><strong>Limpar a medição</strong> — o número que o sextante deu não é a altura verdadeira
+        do centro do astro. Cinco correções, por ordem.</li>
+      <li><strong>Converter a medição num lugar geométrico</strong> — e aqui a ideia do século XIX que
+        transformou a navegação.</li>
+    </ol>
+
+    <h3>Parte 1: as cinco correções, e porque é que a ordem é a ordem</h3>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="As cinco correções de altura, pela ordem em que se aplicam, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>Ordem</th><th>Correção</th><th>Sinal</th><th>Tamanho típico</th><th>O que está a corrigir</th></tr></thead>
+    <tbody><tr><td>1</td><td><strong>Erro de índice</strong></td><td>±</td><td>0 a alguns minutos</td><td>Defeito do <em>instrumento</em>. Mede-se olhando para o horizonte e vendo se as duas imagens coincidem no zero</td></tr><tr><td>2</td><td><strong>Depressão do horizonte</strong> («dip»)</td><td>sempre −</td><td>1,76·√(altura em m) → 5,6′ a 10 m</td><td>Defeito da <em>referência</em>. De 10 m acima do mar vês o horizonte abaixo da horizontal, logo todas as alturas saem grandes</td></tr><tr><td>3</td><td><strong>Refração</strong></td><td>sempre −</td><td>34′ no horizonte, 1′ a 45°, 0 no zénite</td><td>Defeito da <em>atmosfera</em>. 🔴 Aplica-se à altura <em>aparente</em> — a de depois de 1 e 2 — nunca à de antes</td></tr><tr><td>4</td><td><strong>Semidiâmetro</strong></td><td>+ se bordo inferior, − se superior</td><td>16′ (Sol e Lua)</td><td>Mediste o <em>bordo</em>, queres o <em>centro</em></td></tr><tr><td>5</td><td><strong>Paralaxe</strong></td><td>sempre +</td><td>0,15″ (Sol) · até 61′ (Lua)</td><td>A efeméride é <em>geocêntrica</em> e tu estás na superfície</td></tr></tbody>
+  </table>
+</div>
+    <div class="caixa critico">
+  <span class="titulo">🔴 A ordem não é arbitrária, e uma troca custa minutos de arco</span>
+  <p>A refração depende da <strong>altura aparente</strong> do astro. Se a aplicares antes de corrigires o erro de índice e a depressão, estás a avaliá-la à altura errada. A 30° isso quase não conta; <strong>a 5° conta muito</strong>, porque a curva da refração é íngreme junto ao horizonte.</p><p>O semidiâmetro e a paralaxe vêm depois da refração porque descrevem a <em>geometria verdadeira</em> do astro, não o que a atmosfera fez ao raio.</p><p>⭐ É a mesma disciplina de qualquer <em>pipeline</em> de correções: cada passo assume que os anteriores já foram feitos, e a documentação dessa suposição é a ordem.</p>
+</div>
+
+    <p>Repara na estrutura: as três primeiras corrigem <strong>defeitos</strong> — do instrumento,
+    da referência, do meio. As duas últimas corrigem <strong>diferenças de definição</strong> —
+    mediste o bordo e queres o centro; a efeméride é geocêntrica e tu não estás no centro. São
+    naturezas diferentes, e é por isso que as três primeiras dependem de <em>como</em> observaste e
+    as duas últimas dependem de <em>que astro</em> é.</p>
+
+    <h3>Parte 2: a ideia de Marcq St Hilaire</h3>
+    ('<div class="caixa dica">\n  <span class="titulo">⭐ Porque é que uma reta substitui um círculo (e quando deixa de poder)</span>\n  <p>A lição 0 estabeleceu que uma altura medida dá um <strong>círculo</strong> de posição, centrado no ponto subastral. Para o desenhar num mapa precisarias de um círculo com milhares de milhas de raio.</p><p>O oficial da marinha francesa <strong>Marcq de Saint-Hilaire</strong> resolveu isto no último quartel do século XIX com uma ideia simples: perto de ti, um arco de um círculo com 3000 milhas de raio é <strong>indistinguível de uma reta</strong>. Escolhes uma <em>posição assumida</em> perto de onde julgas estar, calculas que altura terias aí, comparas com a medida, e desenhas uma reta perpendicular ao azimute à distância da diferença.</p><p>🔴 <strong>Quando é que deixa de poder:</strong> quando o círculo é pequeno, isto é, quando o astro está <em>muito alto</em>. Com uma altura de 87°, o círculo tem 180 milhas de raio e a aproximação por reta erra o suficiente para se notar. Por isso a navegação clássica evita alturas acima de cerca de 85° — e nessas usa-se o método do «círculo», desenhando-o mesmo.</p><p>⚠️ <strong>O ano:</strong> circula muito «1875», e também se encontra «1877». <strong>Não o confirmei.</strong> Os artigos da Wikipédia sobre o método do intercepto e sobre a redução de altura, que abri a 2026-09-16, nomeiam o método e <em>não dão ano nem biografia</em>. Prefiro escrever «século XIX» a escrever um ano que não abri.</p>\n</div>',)
+
+    <figure>
+  <svg viewBox="0 0 431 249" role="img" aria-labelledby="t-reta d-reta">
+    <title id="t-reta">A posição assumida, o intercepto ao longo do azimute, e a reta de altura perpendicular a ele</title>
+    <desc id="d-reta">À esquerda há cinco etiquetas, cada uma ligada por um fio fino ao que descreve. Um círculo aberto marca a posição assumida. Uma seta a tracejado sai dela na direção do astro, a 235 graus. Uma seta cheia sai dela no sentido contrário, mais curta: é o intercepto, que é negativo. No fim dessa seta há um ponto cheio, e por ele passa uma reta grossa perpendicular à direção do astro — a reta de altura. Por trás dela passa um arco pouco curvo, o círculo de posição, de que a reta é a tangente.</desc>
+    <defs><marker id="seta-reta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/></marker></defs>
+    <path class="svg-traco" d="M 266.87 20.29 L 268.52 21.81 L 270.17 23.33 L 271.81 24.85 L 273.44 26.39 L 275.06 27.93 L 276.69 29.47 L 278.30 31.03 L 279.91 32.59 L 281.51 34.15 L 283.11 35.72 L 284.70 37.30 L 286.28 38.89 L 287.86 40.48 L 289.43 42.08 L 290.99 43.68 L 292.55 45.29 L 294.10 46.91 L 295.64 48.53 L 297.18 50.16 L 298.71 51.79 L 300.24 53.43 L 301.76 55.08 L 303.27 56.73 L 304.77 58.39 L 306.27 60.05 L 307.76 61.73 L 309.25 63.40 L 310.73 65.09 L 312.20 66.77 L 313.66 68.47 L 315.12 70.17 L 316.57 71.88 L 318.02 73.59 L 319.46 75.30 L 320.89 77.03 L 322.31 78.76 L 323.73 80.49 L 325.14 82.23 L 326.54 83.98 L 327.94 85.73 L 329.32 87.49 L 330.71 89.25 L 332.08 91.02 L 333.45 92.79 L 334.81 94.57 L 336.16 96.36 L 337.51 98.15 L 338.85 99.94 L 340.18 101.74 L 341.51 103.55 L 342.82 105.36 L 344.13 107.18 L 345.44 109.00 L 346.73 110.83 L 348.02 112.66 L 349.30 114.50 L 350.58 116.34 L 351.84 118.19 L 353.10 120.04 L 354.35 121.90 L 355.60 123.76 L 356.83 125.63 L 358.06 127.50 L 359.29 129.38 L 360.50 131.26 L 361.71 133.15 L 362.91 135.04 L 364.10 136.94 L 365.28 138.84 L 366.46 140.74 L 367.63 142.66 L 368.79 144.57 L 369.94 146.49 L 371.09 148.42 L 372.22 150.35 L 373.35 152.28 L 374.48 154.22 L 375.59 156.16 L 376.70 158.11 L 377.80 160.06 L 378.89 162.02 L 379.97 163.98 L 381.05 165.94 L 382.12 167.91 L 383.17 169.88 L 384.23 171.86 L 385.27 173.84 L 386.31 175.83 L 387.34 177.82 L 388.36 179.81 L 389.37 181.81 L 390.37 183.82 L 391.37 185.82 L 392.36 187.83 L 393.34 189.85 L 394.31 191.86 L 395.27 193.89 L 396.23 195.91 L 397.18 197.94 L 398.12 199.97 L 399.05 202.01 L 399.97 204.05 L 400.89 206.10 L 401.79 208.15 L 402.69 210.20 L 403.58 212.25 L 404.46 214.31 L 405.34 216.37 L 406.20 218.44 L 407.06 220.51" fill="none"/>
+    <path class="svg-traco-grosso" d="M 415.70 209.32 L 280.34 16.00" fill="none"/>
+    <path class="svg-realce-traco" d="M 284.13 157.40 L 176.00 233.11" marker-end="url(#seta-reta)"/>
+    <path class="svg-traco-grosso" d="M 284.13 157.40 L 348.02 112.66" marker-end="url(#seta-reta)"/>
+    <circle class="svg-ponto" cx="284.1" cy="157.4" r="5"/>
+    <circle class="svg-ponto-forte" cx="348.0" cy="112.7" r="4"/>
+    <text class="svg-texto-pequeno" x="150" y="30.0" text-anchor="end">reta de altura</text>
+    <path class="svg-traco-fino" d="M 154.00 26.00 L 164.00 26.00 L 280.34 16.00" fill="none"/>
+    <text class="svg-texto-pequeno" x="150" y="80.8" text-anchor="end">círculo de posição</text>
+    <path class="svg-traco-fino" d="M 154.00 76.75 L 164.00 76.75 L 279.91 32.59" fill="none"/>
+    <text class="svg-texto-pequeno" x="150" y="131.5" text-anchor="end">intercepto (18,4 M)</text>
+    <path class="svg-traco-fino" d="M 154.00 127.50 L 164.00 127.50 L 316.07 135.03" fill="none"/>
+    <text class="svg-texto-pequeno" x="150" y="182.2" text-anchor="end">posição assumida</text>
+    <path class="svg-traco-fino" d="M 154.00 178.25 L 164.00 178.25 L 284.13 157.40" fill="none"/>
+    <text class="svg-texto-pequeno" x="150" y="233.0" text-anchor="end">direção do astro, Zn 235°</text>
+    <path class="svg-traco-fino" d="M 154.00 229.00 L 164.00 229.00 L 176.00 233.11" fill="none"/>
+  </svg>
+  <figcaption>A reta é a <strong>tangente</strong> ao círculo de posição no pé do intercepto. ⚠️ A curvatura do arco está <strong>exagerada no desenho</strong>: à escala real, um círculo de 3000 milhas de raio seria indistinguível da reta nesta figura — e é precisamente essa indistinguibilidade que torna o método possível. A lição 9 mede a diferença que sobra: 0,26 milhas a 45 milhas da posição assumida.</figcaption>
+</figure>
+
+    <p>O procedimento, uma vez percebido, tem quatro passos e nenhum deles é misterioso:</p>
+    <ol>
+      <li><strong>Ho</strong> — limpa a medição (as cinco correções).</li>
+      <li><strong>O almanaque</strong> — dá GHA e declinação do astro nesse instante; com a tua
+        longitude assumida, dá o LHA.</li>
+      <li><strong>Hc e Zn</strong> — «se eu estivesse na posição assumida, que altura e que azimute
+        veria?». É a fórmula da lição 0, sem mais nada.</li>
+      <li><strong>Intercepto</strong> — a diferença Ho − Hc, em minutos de arco, que são milhas
+        náuticas. Positivo: estás mais perto do astro do que a posição assumida.</li>
+    </ol>
+    <p class="destaque">A reta de altura é <strong>perpendicular ao azimute</strong>, traçada a
+    partir da posição assumida, à distância do intercepto, no sentido do astro se for positivo.</p>
+
+    <h3>Porque é que 1 minuto de arco é 1 milha náutica</h3>
+    <p>Não é coincidência nem aproximação feliz: a <strong>milha náutica foi definida</strong> como
+    o comprimento de um minuto de arco de meridiano. Toda a conversão entre ângulos medidos e
+    distâncias no mar está montada para não precisar de fator nenhum. (A definição moderna fixou-a
+    em exatamente 1852 m, porque a Terra não é uma esfera e o minuto de meridiano varia com a
+    latitude — mas a intenção original é esta.)</p>
+
+    <h3>Uma reta não chega: a geometria do cruzamento</h3>
+    <p>Duas observações dão duas retas, e o ponto onde se cruzam é a posição. Mas a
+    <strong>qualidade</strong> da fixação depende do ângulo entre elas:</p>
+    <ul>
+      <li>Com azimutes separados de <strong>90°</strong>, um erro de 1′ numa altura desloca a
+        posição 1 milha.</li>
+      <li>Com azimutes separados de <strong>10°</strong>, o mesmo erro desloca-a cerca de 6
+        milhas.</li>
+    </ul>
+    <p>⭐ Isto é exatamente o <strong>condicionamento de um sistema linear</strong>: duas retas
+    quase paralelas são duas equações quase dependentes. O navegador que escolhe astros «bem
+    espalhados pelo horizonte» está a fazer o que tu fazes ao evitar uma matriz mal condicionada, e
+    a intuição transfere-se nos dois sentidos.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <h3>Passo 1 — separar o que depende de ti do que não depende</h3>
+    <p>Antes de calcular, arrumo os dados em duas pilhas. <strong>Depende de ti:</strong> a altura
+    lida, a hora, a altura do olho, o erro de índice, o bordo que apontaste. <strong>Não depende de
+    ti:</strong> onde está o Sol. Esta separação é a razão de o método ser robusto — um erro na
+    primeira pilha não contamina a segunda, e podes verificar as duas em separado.</p>
+
+    <h3>Passo 2 — limpar a medição, por ordem</h3>
+    <p>As cinco correções do E1. A ordem não é estética: a refração depende da altura aparente.</p>
+
+    <h3>Passo 3 — perguntar ao almanaque, e depois à trigonometria</h3>
+    <p>O almanaque responde «onde está o astro»; a fórmula do triângulo responde «que altura teria
+    eu ali». Note-se que o passo 3 <strong>não usa a medição</strong> — é uma previsão pura. Só no
+    passo 4 é que os dois mundos se encontram.</p>
+
+    <h3>Passo 4 — a única comparação</h3>
+    <p>Ho − Hc. Toda a navegação astronómica se reduz a esta subtração, e a única coisa que resta é
+    não trocar o sinal. A regra é <strong>«computed greater — away»</strong>.</p>
+    <p>Está tudo no E2, com números.</p>
+
+    <h3>Passo 5 — e como é que se sabe que está certo?</h3>
+    <p>🔴 Esta é a parte que a maior parte dos manuais não faz. Uma redução sozinha não se verifica:
+    o resultado é uma reta, e uma reta não se compara com nada. A maneira de tornar o exercício
+    verificável é <strong>simular a medição a partir de uma posição conhecida</strong> — se o método
+    devolver essa posição, funciona. Está no E3.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p>Tiraste duas alturas do Sol e a fixação saiu 12 milhas ao lado do que esperavas. Queres
+      descobrir porquê.</p>
+      <ol>
+        <li><em>Dado:</em> os dois azimutes estavam separados de 85° — boa geometria, logo não é
+          condicionamento.</li>
+        <li><strong>______</strong> Se o erro fosse do <strong>relógio</strong>, que assinatura é
+          que ele deixaria nas duas retas? (Pista: o que é que um erro de hora faz ao GHA, e como é
+          que isso se projeta numa reta de altura?)</li>
+        <li><em>Dado:</em> se o erro fosse da <strong>altura do olho</strong> (dip mal estimado), ele
+          afetaria as duas alturas <em>por igual e no mesmo sentido</em>.</li>
+        <li><strong>______</strong> Que assinatura é que <em>esse</em> erro deixaria, e como a
+          distinguirias da anterior com uma <strong>terceira</strong> observação?</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2.</strong> Um erro de hora move o astro em <strong>ângulo horário</strong>,
+        e o efeito na reta de altura é proporcional a <strong>sin(azimute)</strong> — máximo para
+        astros a leste ou a oeste, quase nulo para astros no meridiano. Logo um erro de relógio
+        desloca as duas retas por quantidades <em>diferentes</em>, e a fixação move-se
+        principalmente <strong>em longitude</strong>.</p>
+        <p><strong>Passo 4.</strong> Um erro de dip (ou de índice) soma-se a <em>todas</em> as
+        alturas por igual: cada reta desloca-se da mesma quantidade, cada uma ao longo do seu
+        próprio azimute. Com dois astros isso é <strong>indistinguível</strong> de uma mudança de
+        posição — e é essa a armadilha.</p>
+        <p class="destaque">Com <strong>três</strong> astros bem espalhados, um erro constante em
+        todas as alturas abre um <strong>triângulo</strong> — o «chapéu de cocheiro». O tamanho do
+        triângulo mede o erro constante; o <em>centro</em> continua a ser a melhor posição. Com dois
+        astros não há triângulo e o erro passa despercebido.</p>
+        <p>🔴 <strong>É por isto que se tiram três observações e não duas.</strong> A terceira não
+        melhora a precisão — dá <strong>observabilidade</strong> do erro sistemático. É o mesmo
+        argumento de ter um terceiro sinal num sistema de medição qualquer.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <p>Os sinais são onde isto se estraga, e o quarto é o clássico.</p>
+<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns desta lição, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody><tr><td>«A posição assumida tem de ser boa»</td><td>Preocupação em acertar o palpite inicial.</td><td>Não tem. O método é <strong>autocorretivo</strong>: o intercepto mede exatamente o quanto estavas ao lado, na direção do azimute. O que a posição assumida tem de ser é <em>razoavelmente perto</em> (dezenas de milhas), para que a substituição do círculo por uma reta continue válida.</td></tr><tr><td>«Um astro chega»</td><td>Tirar uma altura e esperar uma posição.</td><td>Uma altura dá uma <strong>reta</strong> — sabes que estás algures nela. Precisas de <strong>duas</strong> retas com azimutes bem separados. 🔴 E o ângulo entre elas importa: com 10° de separação, um erro de 1′ numa altura desloca a fixação cerca de 6 milhas; com 90°, desloca 1.</td></tr><tr><td>«As correções aplicam-se por qualquer ordem, porque são somas»</td><td>Aplicar a refração ao valor bruto do sextante.</td><td>Não são todas somas: a <strong>refração é uma função da altura</strong>, e avaliá-la antes de corrigir o erro de índice e a depressão é avaliá-la no sítio errado. A 45° isso é desprezável; a 5° custa décimos de minuto de arco, medidos no E1.</td></tr><tr><td>«Computed greater — towards»</td><td>Trocar o sentido do intercepto.</td><td>É ao contrário: <strong>«computed greater — away»</strong>. Se a altura calculada é maior do que a observada, o astro está mais <em>baixo</em> do que devia, logo estás mais <em>longe</em> do ponto subastral do que a posição assumida. Marca-se no sentido oposto ao azimute.</td></tr><tr><td>«Um erro de relógio desloca sempre a posição»</td><td>Assumir que a hora afeta todas as observações por igual.</td><td>Um erro de hora move o astro em <strong>ângulo horário</strong>, logo o seu efeito na reta de altura depende do <strong>azimute</strong>. Um astro no meridiano (a norte ou a sul) é quase insensível à hora — é por isso que a «latitude ao meio-dia» funcionava sem cronómetro. Um astro a leste ou a oeste é maximamente sensível.</td></tr><tr><td>«O erro de índice é o erro do sextante»</td><td>Corrigir o índice e dar o instrumento por bom.</td><td>O erro de índice é o <em>zero</em> desacertado, e mede-se e corrige-se facilmente. Os erros que <strong>não</strong> se corrigem assim — erro de perpendicularidade, erro lateral, erro de graduação do arco — são outros, e não são constantes ao longo da escala.</td></tr></tbody>
+  </table>
+</div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <p>O E3 tem uma verdade de terreno construída de propósito — é o que o torna corrigível.</p>
+
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — as cinco correções, e porque é que a ordem importa</h3>
+<p>Corre o bloco e responde: <strong>a que altura é que a ordem das correções deixa de ser indiferente?</strong> Dá um número.</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import (refraccao_bennett, depressao_horizonte, altura_observada,
+                       graus_para_gm)
+
+print("Refracao de Bennett, em minutos de arco:")
+for h in (0, 1, 2, 5, 10, 20, 45, 80, 90):
+    print("  altura %2d graus -&gt; %6.2f'" % (h, refraccao_bennett(h)))
+
+print()
+print("Depressao do horizonte, em minutos de arco:")
+for m in (1.5, 3, 5, 10, 20, 30):
+    print("  olho a %4.1f m -&gt; %5.2f'" % (m, depressao_horizonte(m)))
+
+print()
+print("E a razao de a ORDEM importar: refracao avaliada a 5 graus contra a 5+dip:")
+dip = depressao_horizonte(10)/60
+print("  a 5.00 graus (errado, antes do dip): %.2f'" % refraccao_bennett(5.0))
+print("  a %.2f graus (certo, depois do dip): %.2f'" % (5.0-dip, refraccao_bennett(5.0-dip)))
+print("  diferenca: %.2f' -- so por trocar a ordem" %
+      abs(refraccao_bennett(5.0) - refraccao_bennett(5.0-dip)))
+print("  a 45 graus a mesma troca custa apenas %.3f'" %
+      abs(refraccao_bennett(45.0) - refraccao_bennett(45.0-dip)))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>Refracao de Bennett, em minutos de arco:
+  altura  0 graus -&gt;  34.48'
+  altura  1 graus -&gt;  24.33'
+  altura  2 graus -&gt;  18.22'
+  altura  5 graus -&gt;   9.88'
+  altura 10 graus -&gt;   5.39'
+  altura 20 graus -&gt;   2.70'
+  altura 45 graus -&gt;   0.99'
+  altura 80 graus -&gt;   0.17'
+  altura 90 graus -&gt;  -0.00'
+
+Depressao do horizonte, em minutos de arco:
+  olho a  1.5 m -&gt;  2.16'
+  olho a  3.0 m -&gt;  3.05'
+  olho a  5.0 m -&gt;  3.94'
+  olho a 10.0 m -&gt;  5.57'
+  olho a 20.0 m -&gt;  7.87'
+  olho a 30.0 m -&gt;  9.64'
+
+E a razao de a ORDEM importar: refracao avaliada a 5 graus contra a 5+dip:
+  a 5.00 graus (errado, antes do dip): 9.88'
+  a 4.91 graus (certo, depois do dip): 10.03'
+  diferenca: 0.15' -- so por trocar a ordem
+  a 45 graus a mesma troca custa apenas 0.003'</samp></pre>
+<details class="solucao"><summary>Solução</summary>
+<p>A refração varia muito depressa junto ao horizonte e muito devagar em cima. A 45°, trocar a ordem custa milésimos de minuto de arco — invisível. A 5°, custa décimos — visível à escala do almanaque, que trabalha a 0,1′.</p><p>⚠️ <strong>E repara no último valor da primeira tabela:</strong> a 90° a fórmula de Bennett dá <em>−0,00′</em>, um valor ligeiramente <strong>negativo</strong>. A refração real no zénite é exatamente zero e nunca negativa. É um artefacto do ajuste — a fórmula é uma <em>aproximação empírica</em>, não uma lei física, e fora do domínio para que foi ajustada comporta-se mal. Vale a pena reter: uma fórmula ajustada não tem de respeitar a física nos extremos, e cabe a quem a usa saber onde ela deixa de valer.</p><p class="destaque">A fronteira prática fica por volta dos <strong>10 a 15 graus de altura</strong>. Abaixo disso, a ordem importa — e, mais importante, abaixo disso a própria refração deixa de ser fiável, porque depende da temperatura ao nível do mar de um modo que a atmosfera-padrão não captura.</p><p>⭐ É por isso que a regra prática da navegação astronómica é <strong>não usar alturas abaixo de 15°</strong> quando há alternativa. Não é superstição: é reconhecer que a correção dominante deixou de ser calculável com a precisão pretendida.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — uma redução completa, do sextante à reta</h3>
+<p>Tens: <strong>Hs = 36° 51,2′</strong> do bordo inferior do Sol, olho a <strong>10 m</strong>, erro de índice <strong>−1,5′</strong>, às <strong>15h 22m 30s UT</strong> de 20 de março de 2026. Posição assumida: <strong>38° 00′ N, 9° 00′ W</strong>.</p><p>Calcula Ho, Hc, Zn e o intercepto, e diz em que sentido se marca a reta.</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import (altura_observada, altitude_azimute, intercepto,
+                       dia_juliano, jd_tt, sol, gha, lha, graus_para_gm)
+
+# --- o que o observador tem -------------------------------------------------
+# 🔴 Este Hs nao foi inventado: foi obtido POR INVERSAO, a partir da altura
+# verdadeira numa posicao real (38 42,5 N / 9 11,2 W, a Tapada da Ajuda).
+# Inventar uma altura da um intercepto de centenas de milhas -- e foi o que
+# aconteceu na primeira versao deste bloco, com um intercepto de 178 milhas que
+# so por si invalidava a hipotese da «posicao assumida proxima».
+Hs          = 36 + 51.2/60      # altura do bordo INFERIOR do Sol, lida no sextante
+ALTURA_OLHO = 10.0              # metros
+ERRO_INDICE = -1.5              # minutos de arco (o sextante le 1,5' a mais)
+QUANDO      = (2026, 3, 20, 15, 22, 30)   # UT
+POS_ASSUMIDA = (38.0, -9.0)     # latitude N, longitude E-positiva (Lisboa arredondada)
+
+# --- (1) Hs -&gt; Ho: as cinco correccoes --------------------------------------
+jdu = dia_juliano(*QUANDO)
+d = sol(jd_tt(jdu))
+Ho = altura_observada(Hs, altura_olho_m=ALTURA_OLHO, erro_indice_min=ERRO_INDICE,
+                      semidiametro_min=d["sd"]*60, paralaxe_min=0.15/60,
+                      bordo_inferior=True)
+print("Hs (sextante, bordo inferior) :", graus_para_gm(Hs))
+print("Ho (altura verdadeira)        :", graus_para_gm(Ho))
+print("total das correccoes          : %+.2f'" % ((Ho-Hs)*60))
+
+# --- (2) o almanaque: onde esta o Sol nesse instante -------------------------
+G = gha(d["ra"], jdu)
+L = lha(G, POS_ASSUMIDA[1])
+print()
+print("GHA do Sol   :", graus_para_gm(G))
+print("Dec do Sol   :", graus_para_gm(d["dec"]))
+print("LHA na posicao assumida:", graus_para_gm(L))
+
+# --- (3) Hc e Zn na posicao assumida ----------------------------------------
+Hc, Zn = altitude_azimute(POS_ASSUMIDA[0], d["dec"], L)
+print()
+print("Hc (altura calculada) :", graus_para_gm(Hc))
+print("Zn (azimute)          : %.1f graus" % Zn)
+
+# --- (4) o intercepto -------------------------------------------------------
+p = intercepto(Ho, Hc)
+print()
+print("intercepto = (Ho - Hc) = %+.1f milhas nauticas" % p)
+print("regra      : computed greater -&gt; AWAY" if p &lt; 0 else "regra      : observed greater -&gt; TOWARDS")
+print()
+print("Leitura: a reta de altura e perpendicular ao azimute (%.0f graus), tracada" % Zn)
+print("a %.1f milhas da posicao assumida, %s." % (abs(p), "na direccao do Sol" if p &gt; 0
+                                                 else "no sentido oposto ao Sol"))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>Hs (sextante, bordo inferior) : 36° 51.2′
+Ho (altura verdadeira)        : 36° 58.9′
+total das correccoes          : +7.67'
+
+GHA do Sol   : 48° 46.2′
+Dec do Sol   : 0° 00.8′
+LHA na posicao assumida: 39° 46.2′
+
+Hc (altura calculada) : 37° 17.2′
+Zn (azimute)          : 233.5 graus
+
+intercepto = (Ho - Hc) = -18.4 milhas nauticas
+regra      : computed greater -&gt; AWAY
+
+Leitura: a reta de altura e perpendicular ao azimute (234 graus), tracada
+a 18.4 milhas da posicao assumida, no sentido oposto ao Sol.</samp></pre>
+<details class="solucao"><summary>Solução</summary>
+<p><strong>Os quatro passos, e o que cada um faz:</strong></p><ol><li><strong>Hs → Ho</strong> limpa o <em>instrumento</em>, a <em>referência</em> e a <em>atmosfera</em>. É a única parte que depende de onde e como observaste.</li><li><strong>O almanaque</strong> diz onde está o Sol. Não depende de ti.</li><li><strong>Hc e Zn</strong> respondem à pergunta «se eu estivesse <em>ali</em>, que altura veria?». É trigonometria pura: a fórmula da lição 0.</li><li><strong>O intercepto</strong> compara as duas. É a única comparação de toda a navegação astronómica.</li></ol><p class="destaque">Repara na economia: a posição assumida entra apenas no passo 3, e sai no passo 4 como referência da reta. Podias ter escolhido outra e o resultado final — a reta no mapa — seria <strong>a mesma reta</strong>. É isso que faz o método robusto.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código: cruzar duas retas e recuperar uma posição conhecida</h3>
+<p>Faz uma fixação completa: duas observações do Sol com azimutes separados, reduzidas a partir da mesma posição assumida, e cruzadas.</p><p>🔴 <strong>Como tornar isto verificável:</strong> não inventes alturas. <em>Simula-as</em> a partir de uma posição verdadeira escolhida por ti. Se o método funcionar, tem de devolver essa posição — e o erro residual diz-te se há um bug. Um exercício de navegação sem verdade de terreno não se consegue corrigir.</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import (dia_juliano, jd_tt, sol, gha, lha, altitude_azimute,
+                       intercepto, graus_para_gm)
+import math
+
+# Duas observacoes do Sol no mesmo dia, com azimutes bem separados, cruzadas.
+# (Alturas SIMULADAS a partir de uma posicao verdadeira, para o exercicio ser
+#  verificavel: se o metodo funcionar, tem de devolver a posicao de partida.)
+VERDADEIRA = (38.7083, -9.1867)          # a posicao que queremos recuperar
+ASSUMIDA   = (38.0, -9.0)                # o palpite de partida, ~45 milhas ao lado
+OBS = [(2026, 3, 20, 9, 30, 0), (2026, 3, 20, 15, 30, 0)]
+
+retas = []
+for q in OBS:
+    jdu = dia_juliano(*q)
+    d = sol(jd_tt(jdu))
+    # "medicao" perfeita a partir da posicao verdadeira
+    Ho, _ = altitude_azimute(VERDADEIRA[0], d["dec"], lha(gha(d["ra"], jdu), VERDADEIRA[1]))
+    # reducao a partir da posicao assumida
+    Hc, Zn = altitude_azimute(ASSUMIDA[0], d["dec"], lha(gha(d["ra"], jdu), ASSUMIDA[1]))
+    p = intercepto(Ho, Hc)
+    retas.append((Zn, p))
+    print("%02d:%02d UT  Ho=%s  Hc=%s  Zn=%5.1f  intercepto=%+7.2f milhas"
+          % (q[3], q[4], graus_para_gm(Ho), graus_para_gm(Hc), Zn, p))
+
+# Cruzar duas retas de altura: resolve-se o sistema 2x2 nas coordenadas locais
+# (x para leste, y para norte), em milhas nauticas.
+(z1, p1), (z2, p2) = retas
+A = [[math.sin(math.radians(z1)), math.cos(math.radians(z1))],
+     [math.sin(math.radians(z2)), math.cos(math.radians(z2))]]
+det = A[0][0]*A[1][1] - A[0][1]*A[1][0]
+x = ( p1*A[1][1] - p2*A[0][1]) / det        # milhas para leste
+y = (-p1*A[1][0] + p2*A[0][0]) / det        # milhas para norte
+
+lat = ASSUMIDA[0] + y/60.0
+lon = ASSUMIDA[1] + (x/60.0)/math.cos(math.radians(lat))
+print()
+print("angulo entre as duas retas: %.1f graus" % abs(z1-z2))
+
+def erro_de(p):
+    return math.hypot((p[0]-VERDADEIRA[0])*60,
+                      (p[1]-VERDADEIRA[1])*60*math.cos(math.radians(p[0])))
+
+print("posicao assumida  : %.4f N  %.4f E   (a %.1f milhas da verdadeira)"
+      % (ASSUMIDA[0], ASSUMIDA[1], erro_de(ASSUMIDA)))
+print("posicao obtida    : %.4f N  %.4f E   (a %.3f milhas da verdadeira)"
+      % (lat, lon, erro_de((lat, lon))))
+print("posicao verdadeira: %.4f N  %.4f E" % VERDADEIRA)
+
+# O residuo nao e bug: e a aproximacao do circulo por uma recta, avaliada longe.
+# Cura-se ITERANDO -- a posicao obtida vira a nova posicao assumida.
+print()
+print("a iterar (a posicao obtida vira a nova assumida):")
+ass = ASSUMIDA
+for it in range(1, 5):
+    retas = []
+    for q in OBS:
+        jdu = dia_juliano(*q)
+        d = sol(jd_tt(jdu))
+        Ho, _ = altitude_azimute(VERDADEIRA[0], d["dec"], lha(gha(d["ra"], jdu), VERDADEIRA[1]))
+        Hc, Zn = altitude_azimute(ass[0], d["dec"], lha(gha(d["ra"], jdu), ass[1]))
+        retas.append((Zn, intercepto(Ho, Hc)))
+    (z1, p1), (z2, p2) = retas
+    A = [[math.sin(math.radians(z1)), math.cos(math.radians(z1))],
+         [math.sin(math.radians(z2)), math.cos(math.radians(z2))]]
+    det = A[0][0]*A[1][1] - A[0][1]*A[1][0]
+    x = ( p1*A[1][1] - p2*A[0][1]) / det
+    y = (-p1*A[1][0] + p2*A[0][0]) / det
+    la = ass[0] + y/60.0
+    lo = ass[1] + (x/60.0)/math.cos(math.radians(la))
+    ass = (la, lo)
+    print("  iteracao %d: %.5f N  %.5f E   erro %.5f milhas" % (it, la, lo, erro_de(ass)))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>09:30 UT  Ho=31° 02.0′  Hc=31° 30.2′  Zn=118.8  intercepto= -28.21 milhas
+15:30 UT  Ho=35° 48.0′  Hc=36° 05.2′  Zn=235.3  intercepto= -17.17 milhas
+
+angulo entre as duas retas: 116.6 graus
+posicao assumida  : 38.0000 N  -9.0000 E   (a 43.4 milhas da verdadeira)
+posicao obtida    : 38.7127 N  -9.1861 E   (a 0.264 milhas da verdadeira)
+posicao verdadeira: 38.7083 N  -9.1867 E
+
+a iterar (a posicao obtida vira a nova assumida):
+  iteracao 1: 38.71267 N  -9.18610 E   erro 0.26374 milhas
+  iteracao 2: 38.70830 N  -9.18670 E   erro 0.00001 milhas
+  iteracao 3: 38.70830 N  -9.18670 E   erro 0.00000 milhas
+  iteracao 4: 38.70830 N  -9.18670 E   erro 0.00000 milhas</samp></pre>
+<details class="solucao"><summary>Solução</summary>
+<p>🔴 <strong>A primeira fixação não é exata, e isso é a lição.</strong> Partindo de uma posição assumida a cerca de 45 milhas, a fixação sai a <strong>0,26 milhas</strong> da verdadeira. As «medições» foram simuladas com geometria perfeita — logo este resíduo não é erro de medição nem da astronomia: <strong>é a aproximação do círculo por uma reta</strong>, avaliada a 45 milhas do centro.</p><p>E cura-se da maneira óbvia depois de se ver: <strong>iterando</strong>. A posição obtida vira a nova posição assumida. O erro passa de <strong>0,264 milhas</strong> para <strong>0,00001 milhas</strong> na <strong>segunda</strong> iteração — quatro ordens de grandeza de uma vez, que é a assinatura de uma convergência quadrática.</p><p class="destaque">Marcq St Hilaire não é um método exato: é uma <strong>linearização em torno de um ponto</strong>, exatamente como um passo de Newton. E como qualquer linearização, o erro é de segunda ordem na distância ao ponto — e desaparece a iterar.</p><p>⭐ No papel ninguém iterava: escolhia-se a posição assumida perto o suficiente para o resíduo ficar abaixo da precisão da carta. Em código não há razão nenhuma para não iterar.</p><p><strong>O que este exercício valida e o que não valida:</strong> valida a álgebra da fixação, não a astronomia — as alturas vieram do mesmo modelo que as reduz. Para validar a astronomia é preciso uma observação real, e o diagnóstico registou que não há sextante.</p><p><strong>Experimenta a seguir, e é aqui que se aprende:</strong></p><ul><li><strong>Aproxima os azimutes.</strong> Muda as horas para 11:00 e 13:00: as duas retas ficam quase paralelas e o determinante do sistema aproxima-se de zero. Vais ver a posição saltar. É a versão geométrica de uma matriz mal condicionada, e é a razão de os navegadores escolherem astros com 60° a 120° de separação.</li><li><strong>Mete 1′ de erro numa das alturas</strong> e vê quanto a posição se desloca, com azimutes bem separados e com azimutes próximos. É o mesmo número que a tabela de erros comuns anuncia — confirma-o.</li><li><strong>Afasta a posição assumida</strong> para 200 milhas e vê que a fixação continua a convergir para o mesmo sítio, mas com resíduo maior: é a aproximação da reta a começar a doer.</li></ul>
+</details>
+</div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<p>Correção imediata.</p>
+<div class="quiz" data-quiz="almanaque-l7">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Por que ordem se aplicam as correções de altura, e porquê?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q0" value="a" data-certa="false"><span class="rotulo">Por qualquer ordem: são todas somas e a adição é comutativa.</span></label>
+          <p class="explicacao" hidden>Se fossem todas constantes, sim. Mas a refração <em>depende</em> da altura, logo avaliá-la antes ou depois de outras correções dá valores diferentes.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q0" value="b" data-certa="false"><span class="rotulo">Refração primeiro, porque é a maior, e depois as outras por tamanho decrescente.</span></label>
+          <p class="explicacao" hidden>Ordenar por tamanho é uma heurística plausível e errada aqui: a ordem vem das dependências entre as correções, não das suas magnitudes.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q0" value="c" data-certa="true"><span class="rotulo">Índice, depressão, refração, semidiâmetro, paralaxe — porque a refração é função da altura aparente, que só existe depois das duas primeiras.</span></label>
+          <p class="explicacao" hidden>Certo. Cada passo assume que os anteriores foram feitos. A 45° a troca é invisível; a 5° custa décimos de minuto de arco.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O que é o intercepto de Marcq St Hilaire?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q1" value="a" data-certa="false"><span class="rotulo">A distância entre a posição assumida e a posição verdadeira.</span></label>
+          <p class="explicacao" hidden>É a componente dessa distância <em>na direção do azimute</em>, e só essa. A componente perpendicular fica indeterminada — é por isso que uma observação dá uma reta e não um ponto.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q1" value="b" data-certa="true"><span class="rotulo">A diferença entre a altura observada e a calculada na posição assumida, convertida em milhas náuticas — 1 minuto de arco é 1 milha.</span></label>
+          <p class="explicacao" hidden>Certo, e 1′ = 1 milha não é coincidência: a milha náutica foi <em>definida</em> como o minuto de meridiano, precisamente para esta conta não ter fator de conversão.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q1" value="c" data-certa="false"><span class="rotulo">O ângulo entre o azimute do astro e o norte verdadeiro.</span></label>
+          <p class="explicacao" hidden>Isso é o azimute Zn, que se calcula ao mesmo tempo mas é outra grandeza: serve para saber em que direção traçar a reta, não a que distância.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Se a altura calculada Hc é maior do que a observada Ho, marcas a reta…</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q2" value="a" data-certa="false"><span class="rotulo">…na direção do astro, ao longo do azimute.</span></label>
+          <p class="explicacao" hidden>É o sentido contrário. A regra mnemónica inglesa existe precisamente porque este sinal se troca com facilidade.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q2" value="b" data-certa="false"><span class="rotulo">…perpendicularmente ao azimute, para leste.</span></label>
+          <p class="explicacao" hidden>A reta é perpendicular ao azimute, mas o intercepto marca-se <em>ao longo</em> do azimute. «Leste» não entra na regra.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q2" value="c" data-certa="true"><span class="rotulo">…afastada do astro, no sentido oposto ao azimute.</span></label>
+          <p class="explicacao" hidden>Certo: «<em>computed greater — away</em>». Se o calculado é maior, o astro está mais baixo do que devia, logo estás mais longe do ponto subastral do que a posição assumida.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que a navegação astronómica evita alturas abaixo de cerca de 15°?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q3" value="a" data-certa="false"><span class="rotulo">Porque o horizonte fica mais difícil de ver a alturas baixas.</span></label>
+          <p class="explicacao" hidden>O horizonte não depende da altura do astro — é a mesma linha para qualquer observação. O que muda é a refração aplicada ao astro.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q3" value="b" data-certa="true"><span class="rotulo">Porque aí a refração é grande e depende fortemente da temperatura e da pressão reais, que a atmosfera-padrão não captura.</span></label>
+          <p class="explicacao" hidden>Certo. A 5° a refração vale cerca de 10′ e o desvio da atmosfera-padrão pode chegar a décimos de minuto — mais do que toda a tolerância pretendida.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q3" value="c" data-certa="false"><span class="rotulo">Porque a fórmula do triângulo de posição perde precisão a baixas alturas.</span></label>
+          <p class="explicacao" hidden>A fórmula é exata para qualquer altura. O problema é dos <em>dados</em> — a refração — e não da trigonometria.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Duas retas de altura com azimutes separados de apenas 10°. Que problema é que isso cria?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q4" value="a" data-certa="true"><span class="rotulo">A fixação fica muito sensível a pequenos erros: um erro de 1′ numa altura desloca a posição várias milhas.</span></label>
+          <p class="explicacao" hidden>Certo — é o equivalente geométrico de um sistema mal condicionado. Por isso se escolhem astros com 60° a 120° de separação de azimute.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q4" value="b" data-certa="false"><span class="rotulo">As duas retas não se cruzam, porque são paralelas.</span></label>
+          <p class="explicacao" hidden>Com 10° de separação cruzam-se, sim — mas em ângulo muito agudo, e é isso que amplifica o erro. Só seriam paralelas com 0° ou 180°.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q4" value="c" data-certa="false"><span class="rotulo">A posição sai enviesada para o norte, porque os azimutes estão do mesmo lado.</span></label>
+          <p class="explicacao" hidden>Não há enviesamento sistemático numa direção: há amplificação do erro ao longo da direção mal determinada, que pode ser para qualquer lado.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A tua posição assumida está 200 milhas ao lado da verdadeira. A fixação funciona?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q5" value="a" data-certa="true"><span class="rotulo">Aproximadamente sim, mas com resíduo: a substituição do círculo de posição por uma reta degrada-se com a distância.</span></label>
+          <p class="explicacao" hidden>Certo — e o remédio é iterar: usar a posição obtida como nova posição assumida e repetir. Duas iterações costumam chegar.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q5" value="b" data-certa="false"><span class="rotulo">Não: a posição assumida tem de estar a menos de 1 milha para o método funcionar.</span></label>
+          <p class="explicacao" hidden>Se fosse assim o método seria inútil — quem sabe a posição a 1 milha não precisa de a calcular. É precisamente a tolerância a um palpite mau que torna o método prático.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l7-q5" value="c" data-certa="false"><span class="rotulo">Sim, exatamente: a posição assumida não afeta o resultado de maneira nenhuma.</span></label>
+          <p class="explicacao" hidden>Não afeta <em>a reta</em> enquanto a aproximação linear for válida. A 200 milhas ela já se degrada, e aparece resíduo.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+
+    <p>Vai para a entrega.</p>
+<div class="aberta">
+  <label for="feynman-l7">Explica porque é que se tiram três observações e não duas, a alguém que percebe de medição mas nunca ouviu falar de navegação.
+    <span class="pista">Sem usar «reta de altura» nem «intercepto». Se quiseres, usa um exemplo de medição do teu próprio trabalho.</span>
+  </label>
+  <textarea id="feynman-l7" data-pergunta="Explica porque é que se tiram três observações e não duas, a alguém que percebe de medição mas nunca ouviu falar de navegação."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas
+  respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e correr
+  <code>/corrigir almanaque</code>.</p>
+</div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li><strong>Cinco correções, por ordem:</strong> índice, depressão, refração, semidiâmetro,
+        paralaxe. A ordem existe porque a <strong>refração é função da altura aparente</strong>.</li>
+      <li><strong>Marcq St Hilaire:</strong> escolhe uma posição assumida, calcula Hc e Zn, compara
+        com Ho. O <strong>intercepto Ho − Hc</strong>, em minutos de arco, é milhas náuticas.</li>
+      <li>🔴 <strong>«Computed greater — away»</strong>: se o calculado é maior, marca-se no sentido
+        oposto ao azimute.</li>
+      <li>A qualidade da fixação depende do <strong>ângulo entre as retas</strong>: é
+        condicionamento de um sistema linear, com outro nome.</li>
+      <li>Tiram-se <strong>três</strong> observações, não duas — não por precisão, mas para tornar
+        <strong>observável</strong> um erro constante em todas as alturas.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Wikipédia, «Intercept method»</strong> — a fórmula de Hc, a do azimute, a
+        definição de posição assumida e a regra «<em>computed greater away</em>», citadas nesta
+        lição na forma em que lá estão. Também a nota de que «<em>the precise location of the
+        assumed position has no great impact on the result, as long as it is reasonably close</em>».
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Fórmula de refração de Bennett (1982)</strong>, R = 1/tan(h + 7,31/(h + 4,4)) em
+        minutos de arco, implementada em <code><a href="codigo/almanaque.py">codigo/almanaque.py</a></code>
+        com correção de pressão e temperatura.
+        ⚠️ <strong>Não abri o artigo original de Bennett</strong> (<em>Journal of Navigation</em>);
+        a fórmula está em circulação ampla e os valores que produz foram <em>conferidos contra o
+        comportamento conhecido</em> — 34′ no horizonte, cerca de 1′ a 45°, zero no zénite. Digo que
+        não a verifiquei na fonte, em vez de escrever uma referência que não abri.</li>
+      <li><strong><em>The Nautical Almanac</em> 2026</strong> — GHA e declinação do Sol usados no
+        E2. <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li>🔴 <strong>Fonte que não é documentação — livro:</strong> Nathaniel Bowditch,
+        <em>The American Practical Navigator</em>, capítulos da redução de altura e das retas de
+        posição. <strong>Porquê:</strong> tem o tratamento completo dos erros do sextante — o de
+        índice, o de perpendicularidade, o lateral, o de graduação — que esta lição só menciona, e
+        tem as tábuas de correção com a sua justificação. <strong>O que saltar:</strong> tudo o que
+        for eletrónica. ⚠️ <strong>Não o abri.</strong> Está listado como disponível em
+        thenauticalalmanac.com, que confirmei; o conteúdo, não.
+        <a href="bibliografia.html#bowditch">Ver a bibliografia</a>.</li>
+      <li>🔴 <strong>Fonte que não é documentação — série:</strong> <em>Longitude</em>
+        (Channel 4 / A&amp;E, 2000). <strong>Porquê aqui:</strong> as cenas de observação a bordo
+        dão a dimensão que nenhuma fórmula dá — medir um ângulo a 0,1 minutos de arco com um convés
+        a mexer é o problema de engenharia de que toda esta lição é a consequência.
+        <span class="verificado">🌐 Ficha verificada a 2026-09-16</span></li>
+    </ul>
+    <footer class="rodape">
+      <p><a href="06-ler-as-tabuas.html">← Ler as tábuas</a> · <a href="index.html">Índice do curso</a> · <a href="08-mares.html">As marés →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

@@ -3,6 +3,95 @@
 O formato é uma entrada por sessão de trabalho, com data. O que muda o que eu
 consigo aprender fica no topo da entrada; o que muda só a mecânica fica no fim.
 
+## 2026-09-16 (5) — «O almanaque»: um curso que mede o seu próprio erro contra o livro oficial
+
+Tópico novo, **`almanaque`**, 10 lições, a partir de <https://en.wikipedia.org/wiki/Almanac>.
+Passou as quatro fases.
+
+**O que o curso ensina, e porque é diferente dos outros**
+
+- O eixo não é «como se calcula a posição do Sol» — é **orçamento de erro**. Cada lição declara o que a sua
+  aproximação custa em minutos de arco e em milhas náuticas, e a lição 9 junta tudo numa tabela.
+- O resultado, medido contra a página diária de 20 de março de 2026 do *Nautical Almanac*: das seis colunas
+  tabeladas, **duas passam** os 0,1′ do livro (GHA de Áries a 0,053′, paralaxe da Lua a 0,077′) e **quatro
+  falham** (Dec do Sol 0,195′, GHA do Sol 0,415′, Dec da Lua 2,1′, GHA da Lua 5,7′). As duas colunas de
+  *eventos* — nascer/pôr/crepúsculos e nascer/ocaso da Lua — batem **ao minuto**, nas seis colunas.
+- Isso é o produto do curso, não o seu fracasso: responde com números à pergunta com que a lição 1 abre, que é
+  porque é que o livro continua a ser publicado.
+
+**O que se descobriu a correr, e que não teria aparecido a reler**
+
+- 🔴 **`gha()` usava o tempo sidéreo MÉDIO.** O almanaque publica o **aparente**. Erro sistemático de −0,09′ no
+  GHA de Áries; com o GAST desce para +0,004′, que é o arredondamento do próprio livro.
+- O ensaio do dia sidéreo media a taxa com passo de **1 segundo** e dava meio segundo a mais — cancelamento
+  catastrófico. Não era da fórmula.
+- A equação dos equinócios vale **0,263′**, não os 0,29′ que eu tinha escrito de estimativa. Corrigido em quatro
+  sítios, dois deles *docstrings*.
+- «A tabela pesa centenas de vezes mais do que o código» — medido: **30 vezes**.
+- O detetor de luas novas dava um mês sinódico de **30,48 dias**, fora do intervalo publicado. Bug do detetor.
+- O intercepto do exemplo trabalhado dava **178 milhas náuticas**, porque inventei a altura do sextante. Passou
+  a ser obtida por inversão a partir de uma posição real: 18,4 milhas.
+- A fixação de posição recupera a posição verdadeira a **0,264 milhas**, não «a menos de um milésimo». O resíduo
+  virou a melhor parte do exercício: Marcq St Hilaire é uma linearização e comporta-se como um passo de Newton —
+  0,00001 milhas à segunda iteração.
+- O `round()` do Python arredonda **ao par** e o livro não. A reconstrução da tabela de incrementos dava 0,1 onde
+  a página imprime 0,2.
+- Um exercício media uma **tautologia** (confirmava a definição de *v*, não a qualidade da interpolação).
+  Reescrito para medir a curvatura desprezada dentro da hora: 0,006′, dezasseis vezes abaixo do passo de impressão.
+- O gerador etiquetava **25 dias do ano em Lisboa como «sempre-acima»**. A Lua ali não é circumpolar — eram dias
+  em que ela saltou o nascer. `SemEvento` passou a distinguir **três** causas.
+- No equador **não existe equilux**: o dia é sempre mais longo do que a noite. E a 60° N o atraso do nascer da Lua
+  chega a ser **negativo** (a «lua da colheita»). Nenhuma das duas coisas eu esperava.
+- 🔴 O `ensaio.py` rebentou com `UnicodeEncodeError` na primeira execução, por um «Δ» numa consola `cp1252` — a
+  mesma falha que este `PROCESSO.md` já registava para o `validar.py`, repetida.
+
+**As figuras, e o que a captura a 400 px apanhou que o axe não apanha**
+
+- O mapa do curso tinha o `viewBox` escrito à mão e **as lições 6 a 9 ficavam fora dele**.
+- A figura da reta de altura precisou de **três versões**: a primeira com rótulos sobrepostos, a segunda com
+  geometria cortada pelo topo. A correção que ficou: `viewBox` calculado do envelope da geometria, e rótulos numa
+  coluna fixa ordenados pela altura do alvo.
+- Um rótulo do mapa saía truncado («O que é um almanaq»), porque era cortado com uma fatia.
+- A figura da soma de uma consulta dizia 8° 59,6′ e o valor é **8° 59,7′** — uma décima, que fazia a figura
+  discordar do bloco de código da mesma lição.
+
+**Infraestrutura: a verificação das figuras deixou de ser manual**
+
+- 🔴 O registo de falhas do `PROCESSO.md` pedia isto **três vezes**, e três vezes ficou escrito
+  «continua a ser um passo manual». Passa a haver `validar_figuras.mjs`, dentro do `validar.sh`
+  (passo 4 de 6): a 400 px, nos dois temas, mede **texto fora do `viewBox`**, **texto por cima de
+  texto**, **figuras vazias** e **marcadores de substituição por substituir** — as quatro classes de
+  erro que aparecem no registo e que o axe deixa passar, porque o axe mede contraste e não geometria.
+- Apanhou quatro erros reais neste tópico, todos em figuras que o axe aprovou.
+- O limiar de sobreposição exige cruzamento **vertical e horizontal**. Com um critério só de área,
+  acusava rótulos empilhados — que estão bem — e um validador com falsos positivos não se volta a
+  correr.
+- ⚠️ **Não substitui olhar.** Três figuras deste tópico passaram o passo automático e estavam
+  visualmente más. Com `CAPTURAS=<pasta> ./validar.sh` os PNG ficam gravados, e o `PROCESSO.md`
+  passa a dizer, na Fase 3, que é preciso vê-los.
+- 🔴 **E apanhou dois erros antigos, em tópicos que já estavam dados como prontos:**
+  em `cassete-dados/04-bits-em-som.html` o topo do rótulo «1 · por nível…» ficava 2 px acima do
+  `viewBox` e era cortado; em `indices-btree-sql/02-do-indice-a-linha.html` o rótulo «estiver
+  marcada → Heap Fetches» passava 4 px da margem direita e perdia o fim. Corrigidos, alargando o
+  `viewBox` de cada um — nada se moveu em relação a nada.
+  ⚠️ **Não levaram marca de correção na página**, e a razão fica escrita aqui em vez de ficar por
+  dizer: a regra das «correções à vista» existe para quem leu uma afirmação errada, e aqui nenhuma
+  afirmação estava errada — só alguns píxeis de um rótulo estavam cortados. Se algum dia uma destas
+  figuras estiver a dizer outra coisa, aí leva a marca.
+- Estado final: **62 páginas, 36 figuras, 0 problemas**, nos dois temas.
+
+**Mecânica**
+
+- `docs/almanaque/codigo/`: `almanaque.py` (motor), `ensaio.py` (8 secções de verificação contra fontes
+  exteriores), `gerar.py` (o projeto) e `comparar.py` (lê o PDF oficial e mede). Todos **só biblioteca padrão**.
+- `comparar.py` extrai as colunas do PDF do *Nautical Almanac* com `zlib` e `re`. 🔴 O PDF **não entra no
+  repositório**: tem direitos de autor.
+- `modelo/base.css`: classes novas `.destaque`, `.svg-traco-fino`, `.svg-traco-grosso`, `.svg-realce-traco`,
+  `.svg-ponto`, `.svg-ponto-forte`, `.svg-texto-pequeno`.
+- O passo 5 do `validar.sh` (termos sensíveis) disparou com razão numa frase do diagnóstico que dizia «não a tua
+  m·o·r·a·d·a». **Reescrevi a frase em vez de acrescentar uma exceção ao validador** — a exceção enfraquecia-o
+  para sempre e a frase não perdia nada.
+
 ## 2026-09-16 (4) — Os outros dois cursos também ganharam secção «Em vídeo»
 
 - `docs/indices-btree-sql/bibliografia.html`: a cadeira **CMU 15-445/645, Intro to Database Systems** (Andy Pavlo),

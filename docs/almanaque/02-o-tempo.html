@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 · O tempo — O almanaque</title>
+<meta name="description" content="Parece a parte aborrecida e é onde estão quase todos os erros. Duas perguntas diferentes — «onde chegou a órbita» e «quanto rodou a Terra» — não podem partilhar o mesmo relógio, e é daí que vem tudo o resto.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/almanaque/02-o-tempo.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">O almanaque</a> <span aria-hidden="true">›</span> lição 2</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta nucleo">Lição 2 · núcleo</p>
+    <h1>O tempo: cinco relógios que não concordam, e o almanaque precisa de três</h1>
+    <p class="subtitulo">Parece a parte aborrecida e é onde estão quase todos os erros. Duas perguntas diferentes — «onde chegou a órbita» e «quanto rodou a Terra» — não podem partilhar o mesmo relógio, e é daí que vem tudo o resto.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim desta lição <strong>implementas</strong> a conversão entre data civil e Dia Juliano e
+    o cálculo do tempo sidéreo de Greenwich, e <strong>reproduzes a coluna «Aries» de uma página
+    real do <em>Nautical Almanac</em> com erro inferior ao arredondamento do livro</strong>. E
+    <strong>diagnosticas</strong>, dado um resultado errado por algumas décimas de minuto de arco,
+    qual dos cinco relógios é que foi trocado.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>Antes de ler. De memória.</p>
+    <ol>
+      <li>Qual é a única conta de toda a navegação astronómica, e o que é que cada símbolo lá
+        significa?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>sin H = sin φ sin δ + cos φ cos δ cos LHA. H altura, φ latitude, δ declinação, LHA
+          ângulo horário local. (Lição 0.)</p></details>
+      </li>
+      <li>O que distingue um almanaque de uma tábua auxiliar?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>O almanaque publica o resultado já calculado; a tábua publica o método. (Lição 1.)</p>
+        </details>
+      </li>
+      <li>Na lição 0 disse-se que o LHA se mede a partir do teu meridiano. Mas o almanaque publica
+        o <strong>GHA</strong>, a partir de Greenwich. O que é que falta para ligar os dois — e
+        porque é que isso é uma pergunta sobre <em>tempo</em>?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Falta a tua longitude: LHA = GHA + longitude (com leste positivo). É uma pergunta sobre
+          tempo porque o próprio GHA só existe em relação a um instante, e o instante tem de ser
+          medido numa escala que descreva a <em>rotação</em> da Terra. É esta lição.</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p><strong>Porquê antes de como.</strong> Um almanaque é uma tabela indexada pelo tempo. Parece
+    a parte aborrecida — e é onde estão quase todos os erros, porque «o tempo» não é uma coisa: são
+    pelo menos cinco, e discordam entre si em quantidades que importam.</p>
+
+    <h3>O problema: duas perguntas diferentes, com o mesmo nome</h3>
+    <p>Quando calculas uma posição no céu estás a perguntar «<em>onde é que este corpo chegou na sua
+    órbita?</em>». Essa pergunta precisa de um tempo que corra sempre ao mesmo ritmo — se o relógio
+    acelerar, a órbita parece acelerar.</p>
+    <p>Quando calculas um GHA estás a perguntar outra coisa: «<em>quanto é que a Terra já rodou?</em>».
+    Essa pergunta precisa de um tempo que <strong>seja</strong> a rotação da Terra.</p>
+    <p>E a Terra não roda ao mesmo ritmo. Abranda por atrito das marés, acelera quando a massa se
+    aproxima do eixo, e treme com coisas que ninguém prevê. Logo as duas perguntas <strong>não podem
+    partilhar o mesmo relógio</strong>, e daí toda a complicação a seguir.</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="As escalas de tempo e para que servem, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>Escala</th><th>O que a define</th><th>Para que serve no almanaque</th><th>O que a estraga</th></tr></thead>
+    <tbody><tr><td><strong>TAI</strong></td><td>A média de centenas de relógios atómicos. Corre sempre ao mesmo ritmo</td><td>Nada, diretamente. É a régua de que as outras dependem</td><td>Nada. É a definição</td></tr><tr><td><strong>TT</strong> (Tempo Terrestre)</td><td>TAI + 32,184 s, por definição</td><td>🔴 <strong>As séries de posição correm nesta.</strong> Uma órbita precisa de um tempo que não acelere</td><td>Nada</td></tr><tr><td><strong>UT1</strong></td><td>A rotação da Terra, medida. O ângulo que a Terra rodou mesmo</td><td>🔴 <strong>O GHA corre nesta.</strong> Onde está Greenwich agora é uma pergunta sobre a rotação, não sobre a órbita</td><td>A Terra. Terramotos, o degelo, as marés, o vento no hemisfério de inverno — tudo isso mexe com o ritmo, e não se prevê</td></tr><tr><td><strong>UTC</strong></td><td>TAI menos um número inteiro de segundos, mantido a menos de 0,9 s de UT1 com segundos intercalares</td><td>É o que o teu computador tem. Converte-se para UT1 somando o DUT1 publicado pelo IERS</td><td>Os segundos intercalares, que não são previsíveis porque a rotação não é</td></tr><tr><td><strong>LMT / hora legal</strong></td><td>UT1 mais a longitude a dividir por 15; a hora legal é outra coisa e é política</td><td>As colunas de nascer e pôr do Sol do almanaque estão em LMT, e é por isso que servem em qualquer longitude</td><td>Fusos, horário de verão, decisões de governos. Nada disto é astronomia</td></tr></tbody>
+  </table>
+</div>
+
+    <div class="caixa critico">
+  <span class="titulo">🔴 ΔT não se calcula: mede-se</span>
+  <p>ΔT = TT − UT1 é a diferença entre um tempo que corre certo e a rotação da Terra. Não há fórmula que o dê, porque não há fórmula que diga quando é que um terramoto muda o momento de inércia do planeta. O IERS <strong>mede-o</strong> e publica-o.</p><p>A prova mais bonita disto está no próprio livro. As páginas diárias do <em>Nautical Almanac</em> de 2026 imprimem, no cabeçalho, o ΔT usado em cada página — e ele <strong>muda ao longo do ano</strong>:</p><p class="destaque">8 de março de 2026: ΔT = +69,1191 s · 20 de março: +69,1265 s · 21 de junho: +69,1723 s · 21 de dezembro: +69,2587 s</p><p>Ao fundo da mesma página lê-se «<em>IERS Earth Orientation data as of 13-Aug-2026</em>». Um almanaque publicado com antecedência tem de <em>prever</em> o ΔT do ano seguinte — e essa é a única coluna do livro que é uma <strong>extrapolação</strong> e não um cálculo. Este curso usa <code>DELTA_T = 69.0</code>, que erra 0,13 s no dia de março: vale 0,005″ de Sol, e é desprezável. Para 1600 seria 120 s, e nada seria desprezável.</p>
+</div>
+
+    <h3>Antes das escalas, a régua: o Dia Juliano</h3>
+    <p>Datas civis são uma péssima estrutura de dados para aritmética: meses de comprimentos
+    diferentes, anos bissextos com exceções seculares, fusos, e uma reforma de calendário a meio do
+    percurso. O <strong>Dia Juliano</strong> resolve isto do jeito que qualquer programador
+    reconhece: colapsa tudo num <em>float</em>, contado em dias a partir de um instante fixo.
+    Diferença entre dois instantes passa a ser uma subtração.</p>
+    <p>A conversão tem um truque que vale a pena ver porque é elegante: janeiro e fevereiro contam
+    como <strong>meses 13 e 14 do ano anterior</strong>. Com isso o ano começa em março, o dia
+    bissexto cai sempre no fim, e <code>floor(365.25 × ano)</code> conta os bissextos sem um único
+    <code>if</code>. A regra dos séculos — 1900 não foi bissexto, 2000 foi — entra num só termo,
+    <code>2 − A + A//4</code>, que é a correção gregoriana.</p>
+
+    <h3>O relógio das estrelas: tempo sidéreo</h3>
+    <p>O GHA de um astro é a distância angular entre o meridiano de Greenwich e o meridiano do
+    astro. Para a calcular precisas de saber para onde é que Greenwich aponta <em>agora</em>, contra
+    o fundo das estrelas. Isso é o <strong>tempo sidéreo</strong>.</p>
+    <p>A fórmula tem um número que diz tudo: a Terra roda <strong>360,98564736629° por dia
+    solar</strong>, e não 360°. Os 0,9856° a mais são o ângulo que a Terra percorreu na órbita nesse
+    dia e tem de recuperar para o Sol voltar ao meridiano. É por isso que o dia sidéreo é
+    <strong>3 min 56 s mais curto</strong> — e é por isso que, num ano, há exatamente mais um dia
+    sidéreo do que dias solares.</p>
+
+    <p class="destaque">GHA = <strong>tempo sidéreo de Greenwich</strong> − ascensão reta do astro.
+    O almanaque publica o primeiro termo na coluna «Aries», e daí sai tudo o resto.</p>
+
+    <h3>🔴 Há dois tempos sidéreos, e o almanaque usa o segundo</h3>
+    <p>O <strong>médio</strong> (GMST) trata o eixo da Terra como se apontasse sempre para o mesmo
+    sítio. Não aponta: a Lua puxa o bojo equatorial e faz o eixo oscilar com o período do nodo lunar,
+    18,6 anos. Essa oscilação chama-se <strong>nutação</strong>, e o tempo sidéreo que a inclui é o
+    <strong>aparente</strong> (GAST).</p>
+    <p>A diferença — a <em>equação dos equinócios</em> — chega a <strong>0,263 minutos de arco</strong> — medido, não
+    estimado: ver <code>codigo/ensaio.py</code>. Parece nada.
+    É <strong>três vezes</strong> a tolerância a que o almanaque imprime. O exercício E3 faz-te ver
+    esse erro aparecer e depois desaparecer.</p>
+
+    <div class="caixa aviso">
+  <span class="titulo">⚠️ O bug que este curso apanhou a correr o próprio validador</span>
+  <p>O primeiro ensaio do tempo sidéreo media a taxa de variação do GMST com um passo de <strong>um segundo</strong> e dava 86164,56 s para o dia sidéreo — meio segundo a mais. Com um passo de <strong>uma hora</strong> dá 86164,0908 s, certo à milésima.</p><p>A causa é <strong>cancelamento catastrófico</strong>, e vale a pena ver o mecanismo porque não é astronómico, é de vírgula flutuante. Em 2026, o termo <code>360.98564736629 × (JD − J2000)</code> vale cerca de 3,5 milhões de graus. Um <code>float64</code> tem cerca de 16 algarismos significativos, logo a resolução <em>absoluta</em> nessa zona é de cerca de 10⁻⁹ graus. Num sinal de 0,004° — o que o GMST anda num segundo — isso é ruído relativo de 10⁻⁷, e aparece na quarta casa do resultado.</p><p>🔴 O sintoma que o torna perigoso: <strong>o programa não rebenta</strong>. Devolve um número plausível, com casas decimais, errado na quarta.</p>
+</div>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <h3>Passo 1 — construir a régua, e prová-la contra valores de definição</h3>
+    <p>A primeira coisa a fazer não é a fórmula: é escolher <strong>contra o que</strong> a vou
+    verificar. O Dia Juliano tem uma vantagem rara — há valores de <em>definição</em>, que não são
+    medições de ninguém: JD 2451545,0 é, por definição, 2000-01-01 12:00 TT. Se o código não der
+    isso ao milionésimo, não vale a pena continuar.</p>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import dia_juliano, civil_de_jd
+
+# O Dia Juliano e uma contagem continua de dias. Sem meses, sem anos bissextos,
+# sem fusos: a diferenca entre dois instantes e uma subtracao.
+print("2000-01-01 12:00 TT -&gt;", dia_juliano(2000, 1, 1, 12), " (J2000, por definicao)")
+print("1957-10-04 19:26:24 -&gt;", dia_juliano(1957, 10, 4, 19, 26, 24))
+print("2026-03-20 14:46    -&gt;", dia_juliano(2026, 3, 20, 14, 46))
+
+# O truque: em janeiro e fevereiro conta-se como meses 13 e 14 do ano anterior.
+# Assim o ano comeca em marco e o dia bissexto cai sempre no FIM -- e
+# floor(365.25 * ano) conta os bissextos sem um unico caso especial.
+print()
+print("1900-02-28 -&gt; 1900-03-01:", dia_juliano(1900,3,1) - dia_juliano(1900,2,28), "dia(s)")
+print("2000-02-28 -&gt; 2000-03-01:", dia_juliano(2000,3,1) - dia_juliano(2000,2,28), "dia(s)")
+print("(1900 nao foi bissexto; 2000 foi. A regra dos seculos esta no termo 2 - A + A//4)")
+
+# E volta atras, para 20 000 dias seguidos, sem acumular erro:
+pior = 0.0
+for k in range(20000):
+    jd = 2440000.5 + k + 0.123456
+    pior = max(pior, abs(dia_juliano(*civil_de_jd(jd)) - jd))
+print()
+print("ida-e-volta em 20 000 dias, pior erro: %.4f milissegundos" % (pior*86400*1000))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>2000-01-01 12:00 TT -&gt; 2451545.0  (J2000, por definicao)
+1957-10-04 19:26:24 -&gt; 2436116.31
+2026-03-20 14:46    -&gt; 2461120.115277778
+
+1900-02-28 -&gt; 1900-03-01: 1.0 dia(s)
+2000-02-28 -&gt; 2000-03-01: 2.0 dia(s)
+(1900 nao foi bissexto; 2000 foi. A regra dos seculos esta no termo 2 - A + A//4)
+
+ida-e-volta em 20 000 dias, pior erro: 0.4023 milissegundos</samp></pre>
+    <p>Repara no último número: 20 000 dias de ida e volta e o pior erro é de fração de
+    milissegundo. Não é sorte — é o que se espera de um <code>float64</code> em torno de 2,44
+    milhões. E é também o aviso: <strong>essa é a resolução máxima disponível</strong>, e a próxima
+    secção mostra como se a pode deitar fora sem dar por isso.</p>
+
+    <h3>Passo 2 — o tempo sidéreo, com duas testemunhas</h3>
+    <p>Aqui não há valor de definição, por isso uso a única coisa que vale tanto: <strong>duas
+    fórmulas independentes</strong>. O polinómio da IAU de 1982 e o Ângulo de Rotação da Terra da
+    IAU de 2000 foram construídos por caminhos diferentes. Se concordarem, é porque estão certas;
+    se discordarem, a diferença tem de ter um nome — e tem: é a precessão acumulada.</p>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import dia_juliano, gmst_graus, era_graus, norm180, J2000
+
+jd = dia_juliano(2026, 6, 1)
+
+# Duas testemunhas independentes: o polinomio da IAU de 1982 e o Angulo de
+# Rotacao da Terra da IAU de 2000. Se concordassem por acaso seria milagre.
+for ano in (2000, 2026, 2050):
+    j = dia_juliano(ano, 1, 1)
+    t = (j - J2000)/36525.0
+    medido = norm180(gmst_graus(j) - era_graus(j))*3600          # segundos de arco
+    precessao = 0.014506 + 4612.156534*t + 1.3915817*t*t          # precessao acumulada
+    print("%d: GMST - ERA = %9.3f\"   precessao prevista = %9.3f\"" % (ano, medido, precessao))
+
+# O dia sidereo, medido do proprio polinomio. O passo IMPORTA (ver a caixa acima).
+print()
+for passo, rot in ((1/86400, "1 s"), (1/1440, "1 min"), (1/24, "1 h"), (1.0, "1 dia")):
+    taxa = norm180(gmst_graus(jd+passo) - gmst_graus(jd))/passo if passo &lt; 0.5 else 360.98564736629
+    print("passo de %-6s -&gt; dia sidereo = %10.4f s" % (rot, 360/taxa*86400))
+print()
+print("dia solar - dia sidereo = %.1f s = 3 min 56 s" % (86400 - 360/360.98564736629*86400))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>2000: GMST - ERA =    -0.063"   precessao prevista =    -0.049"
+2026: GMST - ERA =  1199.327"   precessao prevista =  1199.269"
+2050: GMST - ERA =  2306.566"   precessao prevista =  2306.441"
+
+passo de 1 s    -&gt; dia sidereo = 86164.5604 s
+passo de 1 min  -&gt; dia sidereo = 86164.0956 s
+passo de 1 h    -&gt; dia sidereo = 86164.0908 s
+passo de 1 dia  -&gt; dia sidereo = 86164.0905 s
+
+dia solar - dia sidereo = 235.9 s = 3 min 56 s</samp></pre>
+    <p><strong>A leitura:</strong> a diferença entre as duas não é ruído, é a precessão, e bate com
+    a expressão da precessão em ascensão reta a menos de um segundo de arco. Duas testemunhas que
+    concordam <em>e</em> cuja discordância tem uma explicação quantitativa — é o melhor que se
+    consegue sem uma terceira fonte.</p>
+    <p>Repara também na tabela dos passos: com passo de 1 segundo o dia sidéreo dá meio segundo a
+    mais. É o bug da caixa acima, à vista.</p>
+
+    <h3>Passo 3 — a prova a sério: contra o livro</h3>
+    <p>As duas testemunhas acima são minhas. A prova verdadeira é contra uma página impressa que
+    outra gente calculou. Está no exercício E3, e é o exercício mais importante desta lição.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p>Um colega escreveu isto. Comparado com a página oficial, o GHA do Sol sai errado
+      <strong>sempre para o mesmo lado</strong>, por uma quantidade que ao longo do ano varia entre
+      quase zero e cerca de <strong>0,26′</strong>:</p>
+      <pre data-rotulo="Código com um erro, rolável na horizontal"><code>jd = dia_juliano(2026, 3, 20, 12)    # hora UTC do relógio do sistema
+d  = sol(jd)                         # posicao do Sol
+gha_sol = gmst_graus(jd) - d["ra"]   # angulo horario em Greenwich</code></pre>
+      <ol>
+        <li><em>Dado:</em> o erro é <strong>sistemático</strong> (sempre do mesmo lado), não
+          aleatório. Isso elimina ruído numérico e aponta para um termo em falta.</li>
+        <li><strong>______</strong> Há <em>dois</em> erros distintos neste bloco. Identifica-os.</li>
+        <li><em>Dado:</em> um deles vale cerca de 69 segundos de tempo; o outro vale, no máximo,
+          1,05 segundos de tempo.</li>
+        <li><strong>______</strong> Qual dos dois explica o erro observado, e porque é que o outro,
+          sendo <strong>65 vezes maior em tempo</strong>, não é o culpado?</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2.</strong> (a) <code>sol()</code> recebe um JD em UTC quando devia receber
+        <strong>TT</strong>: falta <code>jd_tt(jd)</code>. (b) usa <code>gmst_graus</code>, o tempo
+        sidéreo <strong>médio</strong>, quando o almanaque usa o <strong>aparente</strong>: devia
+        ser <code>gast_graus</code>.</p>
+        <p><strong>Passo 4.</strong> É o <strong>segundo</strong> — o GMST/GAST.</p>
+        <p>E a razão de o primeiro não ser o culpado é o ponto todo do exercício. 69 segundos de
+        tempo <em>parecem</em> muito, mas o que eles afetam é a <strong>posição do Sol na
+        órbita</strong>, e o Sol move-se devagar: 0,041° por hora, ou seja 0,0008′ em 69 s. Já a
+        troca de GMST por GAST afeta a <strong>rotação da Terra</strong>, que anda 15° por hora — e
+        1,05 s disso são 0,263′.</p>
+        <p class="destaque">A mesma quantidade de tempo vale coisas muito diferentes consoante o que
+        ela indexa: uma órbita lenta ou uma rotação rápida. É por isso que trocar UT1 por TT é quase
+        inofensivo no Sol e trocar GMST por GAST não é.</p>
+        <p>⚠️ Quase inofensivo <em>no Sol</em>. Na <strong>Lua</strong>, que anda 0,55°/h, 69 s
+        valem 0,63′ — e aí já não é desprezável.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <p>Três destes apanharam-me a escrever este curso, e estão assinalados com ⚠️.</p>
+<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns desta lição, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody><tr><td>«UTC e UT1 são a mesma coisa»</td><td>Meter o relógio do sistema diretamente na fórmula do GHA.</td><td>Diferem até <strong>0,9 s</strong> por construção — é esse o limiar que dispara um segundo intercalar. 0,9 s são 0,22′ de GHA, que é o <strong>dobro</strong> da tolerância do almanaque. Na prática, hoje, o DUT1 anda nas centésimas (a página de 20 de março de 2026 declara +0,0575 s) e pode ignorar-se — mas <em>saber que se está a ignorar</em> é a diferença entre uma aproximação e um erro.</td></tr><tr><td>«ΔT calcula-se com um polinómio»</td><td>Uma função <code>delta_t(ano)</code> sem nenhuma fonte de dados por trás.</td><td>Existem polinómios de ajuste e são úteis para <em>o passado</em>. Para o futuro são extrapolações: os ajustes publicados antes de 2017 dão hoje cerca de 71,6 s para 2020 quando o valor medido foi 69,36 s, porque a Terra deixou de abrandar como se esperava. 🔴 Um ΔT sem data de medição é um palpite com casas decimais.</td></tr><tr><td>⚠️ «O tempo sidéreo é o tempo sidéreo»</td><td>Usar o GMST onde o almanaque usa o GAST.</td><td>Há dois: o <strong>médio</strong> (GMST), que ignora a nutação, e o <strong>aparente</strong> (GAST), que a inclui. A diferença — a equação dos equinócios — chega a <strong>0,263′</strong> de arco, medido. <strong>Este erro esteve na primeira versão do código deste curso</strong> e produzia um desvio sistemático de −0,09′ contra a página de 20 de março de 2026; com o GAST desce para +0,004′. Ver a nota das fases.</td></tr><tr><td>«O dia tem 24 horas, portanto a Terra roda 360° por dia»</td><td>Usar 15,0°/h em vez de 15,041°/h para o ponto vernal.</td><td>A Terra roda <strong>360,9856° por dia solar</strong>: os 0,9856° a mais são o que ela andou na órbita e tem de recuperar para o Sol voltar ao meridiano. Quem usa 15,0°/h para as estrelas acumula 4 minutos de erro por dia.</td></tr><tr><td>«Uso <code>datetime</code> e está resolvido»</td><td><code>datetime.utcnow()</code> ou <code>datetime.now(timezone.utc)</code> a alimentar diretamente uma efeméride.</td><td>O <code>datetime</code> dá-te UTC, que é o que precisas — mas não te dá TT nem UT1, não sabe o que é ΔT, e a sua aritmética de dias não é a mesma coisa que o Dia Juliano. É por isso que <code>dia_juliano()</code> neste curso não usa <code>datetime</code>: não é purismo, é que a conversão para TT tem de ser explícita e visível.</td></tr><tr><td>«Um erro de um segundo é irrelevante»</td><td>Aceitar um relógio «mais ou menos certo» para tirar uma altura.</td><td>1 segundo = 0,25 milhas náuticas de longitude no equador. A regra de cabeça é <strong>4 segundos = 1 milha</strong>. Foi por causa deste fator que se construíram cronómetros de marinha durante um século.</td></tr></tbody>
+  </table>
+</div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <p>O E3 é o exercício que fecha a lição: é lá que se compara com o livro.</p>
+
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — qual é o relógio certo para cada coisa?</h3>
+<p>Para cada cálculo, diz em que escala de tempo é que ele tem de correr, e porquê em uma linha:</p><ol><li>A longitude eclíptica do Sol pela série do Meeus.</li><li>O GHA de Áries.</li><li>A hora a que o Sol se põe, para imprimires num almanaque.</li><li>O instante em que a Lua fica cheia, para o anunciares num calendário.</li></ol>
+<details class="solucao"><summary>Solução</summary>
+<ol><li><strong>TT.</strong> É uma órbita: precisa de um tempo que não acelere. É por isso que todas as funções de posição deste curso recebem <code>jd_tt</code>.</li><li><strong>UT1.</strong> É a rotação da Terra: a pergunta «onde aponta Greenwich» só tem resposta no tempo que mede a própria rotação.</li><li><strong>As duas, e é esse o ponto do exercício.</strong> A posição do Sol vem de TT; o cruzamento com o horizonte de um sítio vem de UT1. É por isso que <code>evento()</code> recebe um JD em UT1 e converte para TT lá dentro, a cada avaliação.</li><li><strong>TT para calcular, UTC para publicar.</strong> A fase é um instante de geometria e sai em TT; mas ninguém quer ler «lua cheia às 10:02 TT». Converte-se subtraindo ΔT. Esquecer essa subtração desloca o anúncio 69 segundos — invisível numa lua cheia, fatal num eclipse, onde 69 s são centenas de quilómetros de faixa de totalidade.</li></ol>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — o custo de um relógio atrasado</h3>
+<p>Um navegador tira uma altura do Sol e anota a hora. O cronómetro está <strong>12 segundos adiantado</strong> e ele não sabe.</p><ol><li>Que erro é que isso mete no GHA do Sol?</li><li>Que erro é que isso mete na posição, à latitude de 38,7° N?</li><li>E se ele estivesse a medir a altura de uma <em>estrela</em> em vez do Sol, o erro seria o mesmo, maior ou menor? Porquê?</li></ol>
+<details class="solucao"><summary>Solução</summary>
+<ol><li>O Sol avança 15′ de GHA por minuto de tempo, ou seja 0,25′ por segundo. 12 s × 0,25′ = <strong>3,0′ de GHA</strong>.</li><li>3,0′ de GHA são 3,0 milhas de longitude no equador, e 3,0 × cos 38,7° = <strong>2,3 milhas</strong> à latitude de Lisboa. ⚠️ Cuidado: isto é o erro de <em>longitude</em>; o erro da <em>reta de altura</em> depende do azimute do astro — se o Sol estiver a norte ou a sul, um erro de hora quase não mexe na reta, e se estiver a leste ou a oeste mexe toda. A lição 7 volta a isto.</li><li><strong>Ligeiramente maior.</strong> O ponto vernal avança 15,041° por hora e o Sol só 15,0°. Uma estrela acompanha o ponto vernal, logo o seu GHA muda 0,27% mais depressa. É uma diferença pequena — 3,0′ contra 3,008′ — mas é a assinatura da diferença entre o dia solar e o dia sidéreo, e num dia inteiro dá 4 minutos.</li></ol><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code># Quanto custa um segundo de erro de relogio, em posicao?
+# O ceu roda 360 graus em 24 h =&gt; 15 graus/h =&gt; 15 minutos de arco por minuto de
+# tempo =&gt; 15 SEGUNDOS de arco por segundo de tempo =&gt; 0,25 minutos de arco.
+print("1 s de tempo  = %.2f minutos de arco de GHA" % (15/60))
+print("              = %.2f milhas nauticas de longitude NO EQUADOR" % (15/60))
+print("4 s de tempo  = 1 milha nautica   &lt;- a regra de cabeca do navegador")
+
+# Mas a longitude estreita com o cosseno da latitude:
+from math import cos, radians
+for lat in (0, 38.7, 60, 80):
+    print("  a %4.1f graus de latitude: 1 s de tempo = %.3f milhas" % (lat, 0.25*cos(radians(lat))))
+
+# E o inverso, que e o que assusta: para acertar a longitude a 1 milha em Lisboa,
+# o relogio tem de estar certo a
+print()
+print("para 1 milha de longitude a 38,7 graus N: relogio certo a %.1f s"
+      % (1/(0.25*cos(radians(38.7)))))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>1 s de tempo  = 0.25 minutos de arco de GHA
+              = 0.25 milhas nauticas de longitude NO EQUADOR
+4 s de tempo  = 1 milha nautica   &lt;- a regra de cabeca do navegador
+  a  0.0 graus de latitude: 1 s de tempo = 0.250 milhas
+  a 38.7 graus de latitude: 1 s de tempo = 0.195 milhas
+  a 60.0 graus de latitude: 1 s de tempo = 0.125 milhas
+  a 80.0 graus de latitude: 1 s de tempo = 0.043 milhas
+
+para 1 milha de longitude a 38,7 graus N: relogio certo a 5.1 s</samp></pre>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código: reproduzir a coluna «Aries» do almanaque</h3>
+<p>A coluna mais fácil de reproduzir de um almanaque náutico é o GHA de Áries, porque não depende de nenhuma órbita — só da rotação da Terra. Escreve o código que a produz para as 24 horas de um dia e compara-o com os valores oficiais.</p><p>🔴 A parte que interessa: <strong>usa primeiro o GMST, vê o erro, e só depois usa o GAST.</strong> Não saltes o passo errado — é vê-lo que faz a diferença entender-se.</p>
+<details class="solucao"><summary>Solução</summary>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import (dia_juliano, gmst_graus, gast_graus, nutacao_longitude,
+                       jd_tt, sol, cos_g, norm180, graus_para_gm)
+
+# Valores extraidos da pagina diaria oficial de 2026 March 20 do Nautical Almanac
+# (thenauticalalmanac.com). Coluna "Aries", que e o GHA do ponto vernal.
+OFICIAL = {0: 177+32.6/60, 6: 267+47.9/60 - 0.5/60, 12: 358+2.1/60, 18: 88+16.9/60}
+OFICIAL[6] = 267+47.4/60
+
+print(" h   oficial        GMST (medio)    erro      GAST (aparente)  erro")
+for h in sorted(OFICIAL):
+    jdu = dia_juliano(2026, 3, 20, h)
+    m, a = gmst_graus(jdu), gast_graus(jdu)
+    print("%2d  %-13s %-13s %+6.3f'   %-13s %+6.3f'"
+          % (h, graus_para_gm(OFICIAL[h]), graus_para_gm(m), norm180(m-OFICIAL[h])*60,
+             graus_para_gm(a), norm180(a-OFICIAL[h])*60))
+
+jdt = jd_tt(dia_juliano(2026, 3, 20))
+dpsi = nutacao_longitude(jdt)
+print()
+print("nutacao em longitude nesse dia: %+.3f\"" % dpsi)
+print("equacao dos equinocios         : %+.3f\" = %+.3f minutos de arco"
+      % (dpsi*cos_g(sol(jdt)["eps"]), dpsi*cos_g(sol(jdt)["eps"])/60))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp> h   oficial        GMST (medio)    erro      GAST (aparente)  erro
+ 0  177° 32.6′    177° 32.5′    -0.119'   177° 32.6′    -0.020'
+ 6  267° 47.4′    267° 47.3′    -0.134'   267° 47.4′    -0.036'
+12  358° 02.1′    358° 02.1′    -0.049'   358° 02.1′    +0.049'
+18  88° 16.9′     88° 16.8′     -0.065'   88° 16.9′     +0.034'
+
+nutacao em longitude nesse dia: +6.432"
+equacao dos equinocios         : +5.902" = +0.098 minutos de arco</samp></pre><p><strong>A leitura.</strong> Com o tempo sidéreo <em>médio</em>, o erro é sistemático e vale cerca de −0,09′: pequeno, mas sempre do mesmo lado, que é a assinatura de um termo em falta e não de ruído. Com o <em>aparente</em>, o erro cai para menos de 0,06′ — que é exatamente o arredondamento do livro, que imprime a 0,1′.</p><p class="destaque">Quando o erro fica do tamanho do arredondamento da fonte, acabou: não há mais nada para melhorar que se consiga <em>ver</em> com essa fonte.</p><p>⚠️ <strong>Isto aconteceu mesmo.</strong> A primeira versão do <code>almanaque.py</code> deste curso usava <code>gmst_graus</code> dentro de <code>gha()</code>. O erro só apareceu porque comparei com o livro; nenhum teste interno o apanharia, porque o código estava consistente <em>consigo próprio</em>.</p>
+</details>
+</div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<p>Correção imediata. Lê <strong>todas</strong> as explicações.</p>
+<div class="quiz" data-quiz="almanaque-l2">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Porque é que as séries de posição correm em TT e o GHA corre em UT1?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q0" value="a" data-certa="false"><span class="rotulo">Por convenção histórica: TT vem da astronomia e UT1 da navegação.</span></label>
+          <p class="explicacao" hidden>As duas vêm da astronomia. A separação não é de tradição, é física: uma mede tempo uniforme e a outra mede um ângulo de rotação que varia.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q0" value="b" data-certa="true"><span class="rotulo">Porque uma órbita precisa de um tempo que corra sempre ao mesmo ritmo, e a posição de Greenwich é uma pergunta sobre a rotação da Terra, que não corre ao mesmo ritmo.</span></label>
+          <p class="explicacao" hidden>Certo, e é a razão de as duas escalas existirem. Misturá-las mete ΔT ≈ 69 s de erro, que valem cerca de 0,28′ de ângulo horário.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q0" value="c" data-certa="false"><span class="rotulo">Porque TT é mais preciso do que UT1.</span></label>
+          <p class="explicacao" hidden>Não é uma questão de precisão: UT1 é medido com enorme precisão. É que UT1 mede uma <em>coisa diferente</em> — quanto a Terra rodou — e essa coisa não é uniforme.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O que é o ΔT e de onde vem o seu valor?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q1" value="a" data-certa="true"><span class="rotulo">É TT − UT1, e é <strong>medido</strong> pelo IERS, porque depende de variações da rotação da Terra que não se preveem.</span></label>
+          <p class="explicacao" hidden>Certo. E a prova está no livro: as páginas diárias do <em>Nautical Almanac</em> de 2026 imprimem um ΔT diferente em cada página, de +69,12 s em março a +69,26 s em dezembro, com a data dos dados do IERS ao fundo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q1" value="b" data-certa="false"><span class="rotulo">É a diferença entre UTC e UT1, mantida abaixo de 0,9 s por segundos intercalares.</span></label>
+          <p class="explicacao" hidden>Isso é o <strong>DUT1</strong>, que é outra coisa e muito mais pequena. O ΔT anda hoje nos 69 segundos; o DUT1 anda nas centésimas.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q1" value="c" data-certa="false"><span class="rotulo">É uma constante de conversão, definida como 32,184 s.</span></label>
+          <p class="explicacao" hidden>32,184 s é a diferença <em>definida</em> entre TT e TAI, essa sim fixa por convenção. O ΔT não é fixo nem definido: é observado.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o dia sidéreo é cerca de 3 min 56 s mais curto do que o dia solar?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q2" value="a" data-certa="false"><span class="rotulo">Porque a órbita da Terra é elítica e a velocidade orbital varia.</span></label>
+          <p class="explicacao" hidden>A elipticidade existe e é responsável por parte da equação do tempo, que é outro fenómeno. A diferença entre dia sidéreo e dia solar é quase constante e vem só do movimento orbital médio.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q2" value="b" data-certa="false"><span class="rotulo">Porque as estrelas também se movem, em direção contrária à rotação da Terra.</span></label>
+          <p class="explicacao" hidden>O movimento próprio das estrelas existe mas é de milissegundos de arco por ano — irrelevante aqui. As estrelas servem justamente por estarem praticamente fixas.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q2" value="c" data-certa="true"><span class="rotulo">Porque num dia a Terra também avança cerca de 1° na órbita, e tem de rodar esse grau a mais para o Sol voltar ao meridiano.</span></label>
+          <p class="explicacao" hidden>Certo. Daí o termo 360,98564736629 graus por dia na fórmula do GMST — e daí haver, num ano, mais um dia sidéreo do que dias solares.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Mediste a taxa de variação do GMST com um passo de 1 segundo e obtiveste um dia sidéreo de 86164,56 s, quando o valor correto é 86164,09 s. Qual é a causa mais provável?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q3" value="a" data-certa="false"><span class="rotulo">O polinómio da IAU de 1982 não é válido para 2026.</span></label>
+          <p class="explicacao" hidden>É válido e concorda com o Ângulo de Rotação da Terra da IAU de 2000 a menos de 0,0002°. Se o problema fosse do polinómio, o resultado não melhoraria só por se mudar o passo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q3" value="b" data-certa="false"><span class="rotulo">Falta aplicar a nutação: devia ter usado o GAST.</span></label>
+          <p class="explicacao" hidden>A nutação altera o <em>valor</em> do tempo sidéreo em até 0,263′, mas praticamente não altera a sua <em>taxa</em> — e a taxa é o que aqui se mede. Além disso o erro desaparece só por se aumentar o passo, o que nenhuma correção física explicaria.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q3" value="c" data-certa="true"><span class="rotulo">Cancelamento catastrófico: o termo em (JD − J2000) vale milhões de graus e a resolução absoluta do <code>float64</code> aí é grande demais para um sinal de 0,004°.</span></label>
+          <p class="explicacao" hidden>Certo — e é o género de bug mais perigoso que há, porque o programa não rebenta: devolve um número plausível errado na quarta casa. A correção é medir com um passo maior (ou derivar analiticamente).</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O teu cronómetro está 4 segundos errado. Que erro isso mete na longitude, no equador?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q4" value="a" data-certa="false"><span class="rotulo">4 milhas náuticas, porque cada segundo vale uma milha.</span></label>
+          <p class="explicacao" hidden>Seria assim se o céu rodasse 60′ por minuto de tempo. Roda 15′ — quatro vezes menos — porque 360° em 24 h dá 15° por hora.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q4" value="b" data-certa="false"><span class="rotulo">Nenhum erro apreciável: 4 segundos é muito pouco.</span></label>
+          <p class="explicacao" hidden>Uma milha náutica não é pouco quando se procura uma ilha. E o erro é <em>sistemático</em>: todas as observações do dia saem deslocadas para o mesmo lado.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q4" value="c" data-certa="true"><span class="rotulo">1 milha náutica.</span></label>
+          <p class="explicacao" hidden>Certo, e é a regra de cabeça que todo o navegador sabe: 4 segundos = 1 milha. Vem de o céu rodar 15′ de arco por minuto de tempo, logo 0,25′ por segundo.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que as colunas de nascer e pôr do Sol do almanaque não têm uma coluna de longitude?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q5" value="a" data-certa="true"><span class="rotulo">Porque estão em hora média local (LMT), que é a mesma para qualquer longitude — cada um converte somando a sua longitude a dividir por 15.</span></label>
+          <p class="explicacao" hidden>Certo, e é uma escolha de formato elegante: uma tabela por latitude serve o mundo inteiro. Foi assim que se verificou nesta lição que o cálculo bate com o livro à longitude 0.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q5" value="b" data-certa="false"><span class="rotulo">Porque o Sol nasce à mesma hora UT em toda a Terra.</span></label>
+          <p class="explicacao" hidden>Isso é falso de forma óbvia: o Sol nasce em Tóquio muitas horas antes de nascer em Lisboa, em UT.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l2-q5" value="c" data-certa="false"><span class="rotulo">Porque a tabela é só para o meridiano de Greenwich e quem estiver noutro sítio tem de a recalcular.</span></label>
+          <p class="explicacao" hidden>Não é preciso recalcular: em LMT os valores servem qualquer longitude. O que muda com a longitude é a hora UT do acontecimento, não a hora local média.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+
+    <p>Vai para a entrega.</p>
+<div class="aberta">
+  <label for="feynman-l2">Explica porque é que um programa que calcula posições de astros precisa de mais do que um relógio, a alguém que já trabalhou com fusos horários e acha que já viu tudo.
+    <span class="pista">Sem usar «TT», «UT1», «sidéreo» nem «nutação». Se a explicação precisa das siglas, ainda não é mecanismo.</span>
+  </label>
+  <textarea id="feynman-l2" data-pergunta="Explica porque é que um programa que calcula posições de astros precisa de mais do que um relógio, a alguém que já trabalhou com fusos horários e acha que já viu tudo."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas
+  respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e correr
+  <code>/corrigir almanaque</code>.</p>
+</div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li><strong>Duas perguntas, dois relógios:</strong> «onde chegou a órbita» corre em
+        <strong>TT</strong>; «quanto rodou a Terra» corre em <strong>UT1</strong>.</li>
+      <li><strong>ΔT = TT − UT1 mede-se, não se calcula.</strong> Vale cerca de 69 s hoje, e o
+        próprio almanaque o imprime, diferente em cada página.</li>
+      <li>O <strong>Dia Juliano</strong> transforma aritmética de calendário numa subtração; o
+        truque dos meses 13 e 14 elimina todos os casos especiais dos bissextos.</li>
+      <li>A Terra roda <strong>360,9856° por dia solar</strong>. Daí o dia sidéreo ser 3 min 56 s
+        mais curto, e daí <strong>GHA = tempo sidéreo − ascensão reta</strong>.</li>
+      <li>🔴 O almanaque usa o tempo sidéreo <strong>aparente</strong> (GAST = GMST + nutação). Usar
+        o médio custa até 0,263′ — quase três vezes a tolerância do livro.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Wikipédia, «Sidereal time»</strong> — comprimento do dia sidéreo (86164,0905 s), a
+        explicação do grau a mais por dia, e a fórmula do Ângulo de Rotação da Terra usada aqui como
+        segunda testemunha: θ = 2π(0,7790572732640 + 1,00273781191135448·t<sub>U</sub>).
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Wikipédia, «ΔT (timekeeping)»</strong> — a definição ΔT = TT − UT, as causas
+        (atrito das marés +2,3 ms/dia/século, rebound pós-glaciar −0,6), e os valores: «desde o
+        início de 2017 … ΔT manteve-se a menos de meio segundo de 69 segundos»; 63,83 s em 2000;
+        cerca de +200 s em 1500. <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong><em>The Nautical Almanac</em> 2026, páginas diárias</strong>
+        (<a href="https://thenauticalalmanac.com">thenauticalalmanac.com</a>, PDF gratuito) — fonte
+        primária dos valores de GHA de Áries usados no E3, e do ΔT e DUT1 impressos em cada página.
+        🔴 O PDF <strong>não está neste repositório</strong>: tem direitos de autor. Vai buscá-lo e
+        corre <code><a href="codigo/comparar.py">codigo/comparar.py</a></code>.
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li>🔴 <strong>Fonte que não é documentação — livro:</strong> Jean Meeus,
+        <em>Astronomical Algorithms</em>. <strong>Porquê:</strong> é o livro que explica <em>porquê</em>
+        cada uma destas conversões tem a forma que tem, e a fonte declarada do calculador solar da
+        NOAA. <strong>O que saltar:</strong> nesta lição, só os capítulos do calendário juliano e do
+        tempo sidéreo. ⚠️ <strong>Não tenho o exemplar</strong> — não cito páginas nem ISBN; os
+        coeficientes usados aqui vieram de reproduções abertas e estão <em>medidos</em> contra o
+        livro oficial em <code>codigo/ensaio.py</code>.
+        <a href="bibliografia.html#meeus">Mais na bibliografia</a>.</li>
+      <li>🔴 <strong>Fonte que não é documentação — palestra/vídeo:</strong> há uma vasta literatura
+        de divulgação sobre segundos intercalares e o fim anunciado deles em 2035.
+        ⚠️ <strong>Procurei e não confirmei nenhuma peça em vídeo que pudesse citar com ficha
+        completa</strong> (título, autor, ano, onde). Em vez de inventar uma referência, deixo dito
+        que não a tenho — é informação, não é falha. A leitura de substituição é o artigo da
+        Wikipédia «Leap second», que não abri para esta lição e por isso não uso como fonte de
+        nenhuma afirmação acima.</li>
+    </ul>
+    <footer class="rodape">
+      <p><a href="01-o-que-e-um-almanaque.html">← O que é um almanaque</a> · <a href="index.html">Índice do curso</a> · <a href="03-o-sol.html">O Sol →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

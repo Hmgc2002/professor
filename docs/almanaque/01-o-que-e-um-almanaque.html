@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1 · O que é um almanaque — O almanaque</title>
+<meta name="description" content="A invenção não foi astronómica — foi decidir que o custo do cálculo passava do leitor para o editor. É a mesma decisão que tomas quando materializas uma vista, e tem as mesmas consequências: prazo, precisão escolhida e a obrigação de estar pronta antes.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/almanaque/01-o-que-e-um-almanaque.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">O almanaque</a> <span aria-hidden="true">›</span> lição 1</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta nucleo">Lição 1 · núcleo</p>
+    <h1>O que é um almanaque: uma tabela que já fez a conta por ti</h1>
+    <p class="subtitulo">A invenção não foi astronómica — foi decidir que o custo do cálculo passava do leitor para o editor. É a mesma decisão que tomas quando materializas uma vista, e tem as mesmas consequências: prazo, precisão escolhida e a obrigação de estar pronta antes.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim desta lição explicas, sem consultar, <strong>o que distingue um almanaque de uma
+    tábua astronómica</strong>, e usas essa distinção para decidir de que lado da fronteira está
+    uma tabela qualquer que te apareça — incluindo as que tu próprio escreves. E dizes porque é que
+    o almanaque do GPS e o <em>Nautical Almanac</em> resolvem o mesmo problema de engenharia.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>Responde antes de ler, de memória. Falhar aqui é o objetivo: o esforço é o que consolida.</p>
+    <ol>
+      <li>O que é o <strong>ponto subastral</strong> de um astro, e quais são as suas coordenadas?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>O ponto da Terra onde o astro está no zénite. Latitude = declinação; longitude oeste =
+          GHA. (Lição 0.)</p></details>
+      </li>
+      <li>Medir a altura de um astro dá-te um <strong>ponto</strong> ou um <strong>círculo</strong>?
+        Porquê?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Um círculo: a altura dá a distância ao ponto subastral (90° − H) e não a direção.
+          (Lição 0.)</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p><strong>Porquê antes de como.</strong> Se leste a lição 0, já sabes <em>o que</em> um
+    almanaque náutico contém: o atlas dos pontos subastrais, hora a hora. Esta lição é sobre uma
+    pergunta diferente e mais interessante — <strong>porque é que esse objeto existe</strong>, e
+    porque é que teve de ser inventado, uma vez que a astronomia para o produzir já existia há
+    séculos.</p>
+
+    <h3>A invenção não foi astronómica. Foi de formato.</h3>
+    <p>Durante mais de mil anos, o que se publicava eram <strong>tábuas auxiliares</strong> — no
+    mundo islâmico chamavam-se <em>zij</em>. Davam-te longitudes médias, equações, argumentos: tudo
+    o que era preciso para <em>tu</em> calculares onde estava um planeta. A conta era tua, demorava,
+    e enganava-se.</p>
+    <p>Em <strong>1088</strong>, em Toledo, al-Zarqālī publica uma coisa diferente: as posições
+    diárias verdadeiras do Sol, da Lua e dos planetas, para quatro anos seguidos. A Wikipédia
+    resume a diferença numa frase que vale a pena reter à letra: nos almanaques, «as entradas dão
+    <strong>diretamente</strong> as posições dos corpos celestes e <strong>não precisam de mais
+    nenhum cálculo</strong>».</p>
+
+    <p class="destaque">Um almanaque é um <strong>resultado publicado</strong>; um <em>zij</em> é um
+    <strong>método publicado</strong>. A invenção foi decidir que o custo do cálculo passava do
+    leitor para o editor.</p>
+
+    <h3>Se isto te soa a uma decisão que já tomaste esta semana, é porque é</h3>
+    <p>Pré-calcular e publicar o resultado, em vez de distribuir o método e deixar cada cliente
+    calcular, é uma decisão de arquitetura que fazes constantemente: uma vista materializada, um
+    índice, uma tabela de <em>lookup</em>, um <em>cache</em>. E tem sempre as mesmas consequências,
+    que são exatamente as do almanaque:</p>
+    <ul>
+      <li><strong>Fica desatualizado</strong>, e por isso tem um prazo. O almanaque tem um ano.</li>
+      <li><strong>Tem de ser preenchido antes de ser preciso</strong>, e por inteiro, se quem o usa
+        não puder pedir a linha em falta. Um navio no Atlântico em 1767 não podia.</li>
+      <li><strong>Escolhe uma precisão</strong>, e essa escolha é para sempre. A 0,1′, o
+        <em>Nautical Almanac</em> cabe num livro; a 0,001′ não caberia.</li>
+      <li><strong>Serve um leitor</strong>. Almanaque náutico, aeronáutico, astronómico e agrícola
+        contêm o mesmo céu e não são intersubstituíveis.</li>
+    </ul>
+
+    <h3>O mesmo mecanismo, hoje, no teu bolso</h3>
+    <p>A mensagem de navegação que um satélite GPS transmite tem duas coisas diferentes lá dentro, e
+    a razão de terem nomes diferentes é exatamente a desta lição:</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="O almanaque como cache, comparado com o do GPS, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>Propriedade do <em>cache</em></th><th>No almanaque de papel</th><th>No almanaque do GPS</th></tr></thead>
+    <tbody><tr><td>Chave</td><td>(corpo, dia, hora UT)</td><td>(satélite)</td></tr><tr><td>Valor</td><td>GHA e declinação, a 0,1′</td><td>Parâmetros orbitais grosseiros</td></tr><tr><td>Validade (TTL)</td><td><strong>Um ano</strong> — depois compra-se outro</td><td><strong>Até duas semanas</strong> com pouca perda de precisão</td></tr><tr><td>Custo de o obter</td><td>Imprimir e distribuir um livro, com um ano de antecedência</td><td><strong>12,5 minutos</strong> de rádio para as 25 páginas da constelação</td></tr><tr><td>O que existe ao lado, mais preciso e mais volátil</td><td>As efemérides completas do <em>Astronomical Almanac</em></td><td>A <strong>efeméride</strong> do satélite: precisa, válida <strong>4 horas</strong>, descarregada em 18 a 36 s</td></tr><tr><td>Porque é que os dois existem</td><td>Precisão e tamanho puxam em sentidos opostos, e quem precisa de uma não precisa sempre da outra</td><td>Idem — e por isso o recetor frio usa o almanaque para saber <em>onde procurar</em> e só depois busca a efeméride</td></tr></tbody>
+  </table>
+</div>
+    <p>Um recetor que acaba de ser ligado não sabe onde procurar. Lê primeiro o <strong>almanaque</strong>
+    — grosseiro, mas suficiente para apontar — e só depois vai buscar a <strong>efeméride</strong>
+    precisa dos satélites que encontrou. É a mesma escada que o navegador subia: o almanaque para
+    saber onde está o corpo, a redução para saber onde estás tu.</p>
+
+    <h3>A história, e o que cada passo resolveu</h3>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Linha do tempo do almanaque, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>Quando</th><th>O quê</th><th>Que problema resolvia</th></tr></thead>
+    <tbody><tr><td>meados do II milénio a.C.</td><td><em>Hemerologias</em> no Próximo Oriente; o «Almanaque babilónico» lista dias favoráveis e desfavoráveis</td><td>Não é astronomia: é <strong>calendário de decisões</strong>. O formato — uma linha por dia do ano — nasce antes de haver o que lá pôr</td></tr><tr><td>séc. II d.C.</td><td>Ptolemeu, <em>Phaseis</em>, com um <em>parapegma</em>: datas de mudanças sazonais do tempo e de primeiras e últimas aparições de estrelas</td><td>Ligar o céu ao calendário agrícola. A palavra vem das cavilhas móveis que se enfiavam em buracos de pedra para marcar o dia</td></tr><tr><td>1088</td><td><strong>Almanaque de Azarquiel</strong>, de Abū Isḥāq Ibrāhīm al-Zarqālī, em Toledo: posições diárias verdadeiras do Sol, da Lua e dos planetas para 1088–1092</td><td>🔴 <strong>É aqui que nasce o almanaque no sentido moderno.</strong> Pela primeira vez a tabela dá a <em>posição feita</em>, e não os dados para a calcular</td></tr><tr><td>séc. XII–XIII</td><td>Tábuas de Toledo; Tábuas Afonsinas</td><td>Traduções e continuações latinas do mesmo material</td></tr><tr><td>1267</td><td>Roger Bacon usa a palavra <em>almanac</em> em latim, para «um conjunto de tábuas com os movimentos dos corpos celestes, incluindo a Lua»</td><td>A primeira ocorrência documentada da palavra. ⚠️ A etimologia continua por resolver — ver a caixa abaixo</td></tr><tr><td>1457</td><td>Primeiro almanaque <strong>impresso</strong>, em Mainz, por Gutenberg — oito anos antes da Bíblia</td><td>Uma tabela que se copia à mão ganha erros a cada cópia. A imprensa não muda a astronomia: muda a <strong>fidelidade da distribuição</strong></td></tr><tr><td>séc. XVII</td><td>Em Inglaterra, cerca de <strong>400 000 almanaques por ano</strong> a meio do século; a Stationers' Company detém o monopólio até 1775</td><td>O almanaque torna-se o primeiro produto de informação periódica em massa</td></tr><tr><td>1732–1758</td><td>Benjamin Franklin publica o <em>Poor Richard's Almanack</em> na Filadélfia</td><td>O ramo popular: tempo, agricultura, provérbios. Mesmo objeto, outro leitor</td></tr><tr><td>1763</td><td>Maskelyne, <em>The British Mariner's Guide</em>: propõe que as distâncias lunares sejam <strong>calculadas de antemão</strong> para cada ano e publicadas numa forma acessível ao navegador</td><td>A proposta é <em>exatamente</em> a decisão de arquitetura desta lição: mover a conta do utilizador para o editor</td></tr><tr><td>1767</td><td>Sai <em>The Nautical Almanac and Astronomical Ephemeris, for the year 1767</em>, fundado por Maskelyne (impresso em 1766, um ano à frente)</td><td>A longitude no mar, pelo método das distâncias lunares. Publicado <strong>com um ano de antecedência</strong> porque um almanaque que chega depois do ano não serve</td></tr><tr><td>até 1906</td><td>As distâncias lunares continuam nos almanaques oficiais britânicos</td><td>Deixam de sair quando o cronómetro e o sinal horário por rádio tornam o método desnecessário — a tabela morre quando o problema muda</td></tr><tr><td>desde 1958 (edição de 1960)</td><td>Reino Unido e Estados Unidos publicam um <em>Nautical Almanac</em> conjunto</td><td>Duas equipas a calcular o mesmo é trabalho a dobrar e duas oportunidades de divergir</td></tr></tbody>
+  </table>
+</div>
+
+    <div class="caixa aviso">
+  <span class="titulo">⚠️ A palavra: um caso em que a resposta honesta é «não se sabe»</span>
+  <p>Ouve-se muito que <em>almanaque</em> vem do árabe <em>al-manākh</em>. A Wikipédia, lida a 2026-09-16, é mais cuidadosa do que isso e vale a pena ver porquê: cita o <em>Oxford English Dictionary</em> a dizer que «a palavra não tem étimo em árabe», ainda que a evidência circunstancial aponte para um <em>al-manākh</em> do árabe de Espanha; cita John Ayto a dizer que o <em>al-</em> inicial «sugere fortemente uma origem árabe, mas não se encontrou nenhum candidato convincente»; e cita Ernest Weekley com a frase mais curta de todas: «<em>The word remains a puzzle</em>».</p><p>🔴 Porque é que isto está aqui e não é uma curiosidade: porque a forma como uma fonte trata aquilo que não sabe é o melhor indicador da forma como trata aquilo que sabe. Uma página que te desse a etimologia árabe com ar de facto estaria a esconder cinco especialistas em desacordo.</p>
+</div>
+
+    <h3>A fronteira que a palavra esconde</h3>
+    <p>«Almanaque» cobre pelo menos três objetos que quase não se falam:</p>
+    <ul>
+      <li>o <strong>astronómico</strong> (<em>The Astronomical Almanac</em>): efemérides de precisão
+        máxima, para quem calcula;</li>
+      <li>o <strong>náutico e o aeronáutico</strong>: o mesmo céu, cortado a 0,1′ e organizado por
+        hora, para quem navega — é este que este curso reproduz;</li>
+      <li>o <strong>popular</strong> (<em>Poor Richard's</em>, <em>The Old Farmer's Almanac</em>,
+        <em>Whitaker's Almanack</em>): calendário, marés, previsões, provérbios e factos.</li>
+    </ul>
+    <p>🔴 Os três partilham o formato — <em>uma linha por unidade de tempo, publicada com
+    antecedência</em> — e é só isso que partilham. Quando alguém diz que «os almanaques previam o
+    tempo», está a falar do terceiro, e a previsão meteorológica de longo prazo do terceiro não tem
+    base física; quando diz que «os almanaques davam a longitude», está a falar do segundo, e esse
+    dava mesmo.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p>Vamos ver a diferença entre os dois formatos a correr, e depois medi-la.</p>
+
+    <h3>Passo 1 — publicar o método (o <em>zij</em>)</h3>
+    <p>Pergunto primeiro «o que é que o leitor recebe», e não «que fórmula uso», porque é a resposta
+    a essa pergunta que define o género. Um <em>zij</em> entrega-te elementos: longitude média,
+    anomalia média, excentricidade. Com eles <em>podes</em> chegar à posição — mas tens de saber a
+    teoria e tens de fazer a conta.</p>
+
+    <h3>Passo 2 — publicar o resultado (o almanaque)</h3>
+    <p>Um almanaque entrega-te dois números por hora, na forma em que se somam à mão: graus e
+    minutos com uma décima.</p>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code># A diferenca entre um *zij* e um almanaque, em codigo.
+from almanaque import dia_juliano, jd_tt, sol, graus_para_gm
+
+# «Zij»: publicam-se os ELEMENTOS e o leitor faz a conta.
+def zij(jd):
+    from almanaque import seculos_j2000, sin_g, norm360
+    t = seculos_j2000(jd)
+    return {"L0": norm360(280.46646 + 36000.76983*t),   # longitude media
+            "M":  norm360(357.52911 + 35999.05029*t),   # anomalia media
+            "e":  0.016708634 - 0.000042037*t}
+
+# «Almanaque»: publica-se o RESULTADO, para um leitor que nao vai calcular nada.
+def almanaque(jd_ut):
+    from almanaque import gha
+    d = sol(jd_tt(jd_ut))
+    return graus_para_gm(gha(d["ra"], jd_ut)), graus_para_gm(d["dec"])
+
+jd = dia_juliano(2026, 3, 20, 12)
+print("o que um zij publica    :", {k: round(v, 4) for k, v in zij(jd_tt(jd)).items()})
+print("o que um almanaque publica: GHA", almanaque(jd)[0], " Dec", almanaque(jd)[1])</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>o que um zij publica    : {'L0': 358.0407, 'M': 74.6526, 'e': 0.0167}
+o que um almanaque publica: GHA 358° 08.1′  Dec -0° 02.6′</samp></pre>
+    <p><strong>O que mostrar os dois lado a lado revela:</strong> a saída do <em>zij</em> não
+    responde a nenhuma pergunta de ninguém. Nenhum navegador quer saber que a anomalia média vale
+    75,52°. A saída do almanaque é diretamente utilizável e não exige saber o que é uma anomalia.</p>
+
+    <h3>Passo 3 — medir o que isso custa</h3>
+    <p>A troca tem um preço em espaço, e o preço é grande.</p>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code># Quantos numeros tem um ano de almanaque nautico, e quanto pesam?
+# Uma pagina diaria traz, por hora e por corpo, GHA e declinacao.
+corpos = {"Sol": 2, "Lua": 4, "Aries": 1, "Venus": 2, "Marte": 2, "Jupiter": 2, "Saturno": 2}
+#          ^ a Lua traz tambem v, d e HP; Aries so traz GHA
+por_hora = sum(corpos.values())
+numeros = 365 * 24 * por_hora
+print("colunas por hora         :", por_hora)
+print("numeros tabelados por ano:", format(numeros, ",").replace(",", " "))
+
+# Cada numero e um angulo em graus e minutos com uma decima: ~6 caracteres.
+print("a 6 caracteres cada      :", round(numeros*6/1024/1024, 2), "MB de texto")
+
+# E se guardassemos so o que e preciso para RECALCULAR tudo?
+# O almanaque.py deste curso tem esta dimensao:
+import os
+n = os.path.getsize("almanaque.py")
+print("almanaque.py             :", round(n/1024, 1), "kB de codigo")
+print("razao tabela/codigo      :", round(numeros*6/n, 1), "x")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>colunas por hora         : 15
+numeros tabelados por ano: 131 400
+a 6 caracteres cada      : 0.75 MB de texto
+almanaque.py             : 27.7 kB de codigo
+razao tabela/codigo      : 27.8 x</samp></pre>
+    <p><strong>A leitura:</strong> a tabela de um ano pesa algumas <strong>dezenas</strong> de vezes
+    mais do que o código que a gera — corre o bloco e lê o número, não o aceites de mim.
+    Em 1767 não havia a opção «distribuir o código», porque o código precisa de uma máquina.
+    Hoje há — e é por isso que o almanaque impresso deixou de ser a forma normal de distribuir
+    efemérides, e passou a ser aquilo em que o GPS não nos pode deixar pendurados.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p>Estás a desenhar um serviço que devolve a posição do Sol para qualquer instante. Decides
+      entre <strong>calcular a pedido</strong> e <strong>pré-calcular uma tabela</strong>.</p>
+      <ol>
+        <li><em>Dado:</em> calcular uma posição custa cerca de 20&nbsp;µs de CPU.</li>
+        <li><strong>______</strong> Quantos pedidos por segundo é que fazem o cálculo a pedido
+          consumir um núcleo inteiro? Faz a conta.</li>
+        <li><em>Dado:</em> a tabela pré-calculada, a 1 hora de resolução, tem 8760 linhas por ano.</li>
+        <li><strong>______</strong> Que <em>terceira</em> grandeza é que decide entre os dois, e que
+          não aparece em nenhuma das linhas acima? (Pista: é a mesma que decidiu em 1767.)</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2.</strong> 1 s / 20 µs = <strong>50 000 pedidos por segundo</strong> para
+        saturar um núcleo. Ou seja: para praticamente qualquer serviço real, o cálculo a pedido é
+        grátis e a tabela não resolve problema nenhum. Esta é a conclusão certa hoje — e é a
+        oposta da de 1767, com a mesma estrutura de decisão.</p>
+        <p><strong>Passo 4.</strong> A grandeza em falta é o <strong>custo e a fiabilidade do acesso
+        ao calculador</strong>. Em 1767 o navegador tinha o resultado (o livro) mas não tinha o
+        calculador; num serviço moderno tens o calculador sempre à mão. Quando essa condição deixa
+        de valer — um dispositivo sem bateria para gastar, um recetor de GPS a frio, um navio sem
+        rede — a decisão volta a inverter-se. É por isso que o satélite transmite um almanaque e não
+        um integrador de órbitas.</p>
+        <p>⚠️ Os 20&nbsp;µs são um valor plausível para ilustrar a estrutura da decisão, e
+        <strong>não são uma medição</strong>: não os medi. Se quiseres o número a sério, mede-o na
+        tua máquina com <code>timeit</code> — é o género de número que não se aceita de ninguém.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <p>As conceções erradas que aparecem mesmo neste assunto, e como se reconhecem.</p>
+<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns desta lição, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody><tr><td>«Almanaque e efeméride são sinónimos»</td><td>Usar as duas palavras a alternar na mesma frase.</td><td>Uma <strong>efeméride</strong> dá a posição de um corpo com a precisão máxima disponível e normalmente exige interpolação ou cálculo. Um <strong>almanaque</strong> dá o valor <em>pronto a usar</em> para um leitor concreto, com a precisão que <em>esse</em> leitor precisa e não mais. A diferença é de destinatário, não de assunto.</td></tr><tr><td>«O almanaque moderno nasce com a imprensa»</td><td>Contar a história a partir de Gutenberg.</td><td>Nasce em <strong>1088</strong>, manuscrito, com al-Zarqālī em Toledo — porque o que o define é o <em>formato</em> (posição já calculada), não o suporte. A imprensa, 369 anos depois, resolve outro problema: a corrupção das cópias.</td></tr><tr><td>«As tábuas antigas eram almanaques»</td><td>Tratar um <em>zij</em> islâmico como se fosse a mesma coisa.</td><td>Um <em>zij</em> é um conjunto de <strong>tábuas auxiliares</strong>: dá-te funções e argumentos com que <em>fazes</em> a conta. O almanaque dá-te o <em>resultado</em>. É a diferença entre publicar uma biblioteca e publicar a saída de a correr.</td></tr><tr><td>«O almanaque náutico deixou de fazer sentido com o GPS»</td><td>«Isso hoje é só história».</td><td>Continua a ser publicado todos os anos, e a razão é de engenharia e não de nostalgia: é a única fonte de posição que <strong>não depende de nenhuma infraestrutura</strong> — nem satélites, nem rádio, nem eletricidade. É o <em>fallback</em> de último recurso de um sistema crítico, e os marinheiros de guerra voltaram a treiná-lo por isso.</td></tr><tr><td>«O almanaque de 1767 trazia a longitude»</td><td>Imaginar uma coluna com a longitude do navio.</td><td>Trazia <strong>distâncias lunares</strong>: o ângulo entre a Lua e certas estrelas, hora a hora, no meridiano de Greenwich. O navegador media o mesmo ângulo, procurava na tabela a que hora de Greenwich é que ele acontecia, e comparava com a sua hora local. A Lua era o relógio — um relógio caríssimo de ler, mas que ninguém podia partir.</td></tr></tbody>
+  </table>
+</div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <p>Do mais fácil ao mais difícil. O E3 corre código.</p>
+
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — de que lado da fronteira?</h3>
+<p>Classifica cada um destes como <em>tábua auxiliar</em> (estilo <em>zij</em>: dá-te o que precisas para calcular) ou <em>almanaque</em> (dá-te o resultado). Justifica em uma linha.</p><ol><li>Uma tabela de logaritmos.</li><li>A coluna «GHA do Sol» de uma página diária do <em>Nautical Almanac</em>.</li><li>As <em>Sight Reduction Tables</em> (Pub. 229), que dão a altura calculada para cada combinação de latitude, declinação e ângulo horário inteiros.</li><li>Os coeficientes da série VSOP87.</li><li>A tabela de marés do teu porto.</li></ol>
+<details class="solucao"><summary>Solução</summary>
+<ol><li><strong>Auxiliar.</strong> Um logaritmo não é a resposta a nenhuma pergunta de ninguém; é um passo intermédio de uma multiplicação.</li><li><strong>Almanaque.</strong> É a posição, feita, para a hora certa.</li><li><strong>Caso de fronteira, e é o mais interessante.</strong> Dá um resultado — a altura — mas não <em>o teu</em> resultado: dá-o para argumentos <em>inteiros</em>, e tu tens de escolher uma posição assumida que os torne inteiros. É um almanaque de uma função, não de um instante. Foi exatamente esta ideia — <em>tabelar a função e não o caso</em> — que permitiu que a redução de altura deixasse de precisar de logaritmos.</li><li><strong>Auxiliar</strong>, e no extremo: são milhares de termos periódicos com que se <em>constrói</em> uma efeméride.</li><li><strong>Almanaque</strong>, e o exemplo mais puro de todos: nem sequer é derivável de primeiros princípios, porque as amplitudes vêm de medir aquele porto. Ver a lição 8.</li></ol>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — quando é que vale a pena publicar a tabela?</h3>
+<p>Um almanaque é um <em>cache</em> pré-calculado, e todo o <em>cache</em> tem um cálculo de custo por trás. Escreve esse cálculo para o caso de 1767, em linguagem de engenharia:</p><ul><li>Quantos <em>leitores</em> tem a tabela? (quantos navios)</li><li>Quantas <em>consultas</em> faz cada leitor por viagem?</li><li>Qual é o custo de <em>uma</em> consulta se não houver tabela?</li><li>Qual é o custo de <em>produzir</em> a tabela uma vez?</li></ul><p>Depois diz qual é a condição, em símbolos, para que publicar compense — e qual é a condição <em>adicional</em> que a versão de 1767 tinha de satisfazer e que um <em>cache</em> de software não costuma ter.</p>
+<details class="solucao"><summary>Solução</summary>
+<p>Com <em>N</em> leitores, <em>q</em> consultas cada, custo <em>c</em> por consulta feita à mão e custo <em>P</em> de produzir a tabela, publicar compensa quando</p><p class="destaque"><em>N · q · c</em> &gt; <em>P</em> + <em>N · q · c′</em>, onde <em>c′</em> é o custo de <em>ler</em> uma linha.</p><p>Como <em>c′</em> ≈ 0 comparado com <em>c</em>, na prática a condição é <em>N·q·c &gt; P</em>. Com centenas de navios e dezenas de observações por viagem, <em>N·q</em> é enorme e <em>P</em> é o salário de uma equipa de calculadores durante um ano: compensa com folga. Foi por isso que a proposta de Maskelyne em 1763 era óbvia <em>depois</em> de alguém a dizer.</p><p><strong>A condição adicional, e é a que mata:</strong> a tabela tem de estar pronta <strong>antes</strong> de ser precisa, para um ano inteiro que ainda não aconteceu, e distribuída fisicamente a navios que vão estar fora de alcance. Um <em>cache</em> de software preenche-se a pedido, em falha; este tinha de ser <strong>totalmente pré-populado, sem possibilidade de falha</strong>. É por isso que o volume de 1767 foi impresso em 1766, e é por isso que o <em>Nautical Almanac</em> ainda hoje sai com antecedência.</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code># Quantos numeros tem um ano de almanaque nautico, e quanto pesam?
+# Uma pagina diaria traz, por hora e por corpo, GHA e declinacao.
+corpos = {"Sol": 2, "Lua": 4, "Aries": 1, "Venus": 2, "Marte": 2, "Jupiter": 2, "Saturno": 2}
+#          ^ a Lua traz tambem v, d e HP; Aries so traz GHA
+por_hora = sum(corpos.values())
+numeros = 365 * 24 * por_hora
+print("colunas por hora         :", por_hora)
+print("numeros tabelados por ano:", format(numeros, ",").replace(",", " "))
+
+# Cada numero e um angulo em graus e minutos com uma decima: ~6 caracteres.
+print("a 6 caracteres cada      :", round(numeros*6/1024/1024, 2), "MB de texto")
+
+# E se guardassemos so o que e preciso para RECALCULAR tudo?
+# O almanaque.py deste curso tem esta dimensao:
+import os
+n = os.path.getsize("almanaque.py")
+print("almanaque.py             :", round(n/1024, 1), "kB de codigo")
+print("razao tabela/codigo      :", round(numeros*6/n, 1), "x")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>colunas por hora         : 15
+numeros tabelados por ano: 131 400
+a 6 caracteres cada      : 0.75 MB de texto
+almanaque.py             : 27.7 kB de codigo
+razao tabela/codigo      : 27.8 x</samp></pre><p>⭐ Repara na última linha, e repara que ela é <em>medida</em> e não afirmada: a tabela de um ano pesa algumas <strong>dezenas</strong> de vezes mais do que o código que a gera. Hoje escolheríamos o código sem pensar — mas o código precisa de um computador a funcionar, e o livro precisa de luz.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código: a conta que fez a Lua servir de relógio</h3>
+<p>O método das distâncias lunares funciona assim: a Lua move-se contra o fundo de estrelas a um ritmo conhecido, logo o ângulo entre a Lua e uma estrela é uma função monótona do tempo <em>de Greenwich</em>. Mede-se esse ângulo, procura-se na tabela a que hora de Greenwich ele ocorre, compara-se com a hora local (que se obtém do Sol) e a diferença é a longitude.</p><p>Corre o bloco abaixo e responde: <strong>se conseguires medir o ângulo com um erro de 0,5′ — que era bom para um sextante do século XVIII — que erro de longitude é que isso dá?</strong> Explica porque é que este método exigia instrumentos tão bons.</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code># Porque e que a Lua servia de relogio, e porque e que doia tanto.
+from almanaque import dia_juliano, jd_tt, lua, sol, norm360, elongacao
+
+jd = dia_juliano(2026, 3, 20, 0)
+print("velocidade angular aparente, em graus por hora:")
+for nome, f in (("Sol", sol), ("Lua", lua)):
+    a = f(jd_tt(jd))["lam"]; b = f(jd_tt(jd + 1/24))["lam"]
+    print("  %-4s %6.3f" % (nome, norm360(b - a)))
+
+# A distancia lunar (Lua - Sol, aqui) muda cerca de 0,5 graus por hora.
+e0 = elongacao(jd_tt(jd)); e1 = elongacao(jd_tt(jd + 1/24))
+taxa = norm360(e1 - e0)
+print("\nelongacao Lua-Sol muda %.4f graus/h = %.2f minutos de arco por hora" % (taxa, taxa*60))
+print("logo 1 minuto de arco de erro na medida =", round(60/(taxa*60), 1), "minutos de tempo")
+# O ceu roda 15 graus por hora, logo 1 minuto de TEMPO = 15 minutos de ARCO.
+# E 1 minuto de arco de meridiano = 1 milha nautica, por definicao da milha.
+print("1 min de tempo de erro -&gt; 15 minutos de arco = 15 milhas nauticas no equador")
+print("fator de amplificacao: 1' de erro na medida vale %.0f' de longitude"
+      % (60.0/(taxa*60) * 15.0))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>velocidade angular aparente, em graus por hora:
+  Sol   0.041
+  Lua   0.592
+
+elongacao Lua-Sol muda 0.5501 graus/h = 33.01 minutos de arco por hora
+logo 1 minuto de arco de erro na medida = 1.8 minutos de tempo
+1 min de tempo de erro -&gt; 15 minutos de arco = 15 milhas nauticas no equador
+fator de amplificacao: 1' de erro na medida vale 27' de longitude</samp></pre>
+<details class="solucao"><summary>Solução</summary>
+<p>A elongação Lua−Sol muda cerca de <strong>0,5° por hora</strong>, ou seja cerca de <strong>30′ por hora</strong>, ou seja <strong>1′ cada dois minutos de tempo</strong>.</p><p>Logo um erro de 0,5′ na medida do ângulo dá cerca de <strong>1 minuto de erro na hora de Greenwich</strong>. E 1 minuto de tempo são 15′ de ângulo horário, ou seja <strong>15 milhas náuticas de longitude no equador</strong>.</p><p><strong>Porque é que isto exigia instrumentos tão bons:</strong> o fator de amplificação é de cerca de <strong>30 para 1</strong> — cada minuto de arco de erro na medida transforma-se em trinta minutos de arco de erro na longitude. Um cronómetro não tem esta amplificação: um segundo de erro de relógio é um quarto de milha e pronto. É toda a vantagem do relógio de Harrison num número, e é também por isso que as distâncias lunares sobreviveram até 1906 apesar disso: um cronómetro podia parar, e a Lua não.</p><p>⚠️ <strong>O que este exercício não faz:</strong> a distância lunar verdadeira mede-se entre a Lua e <em>estrelas</em>, não entre a Lua e o Sol, e exige «limpar» a distância das refrações e paralaxes dos dois corpos — o passo mais odiado de toda a navegação clássica. Aqui usei a elongação Lua−Sol porque tem a mesma ordem de grandeza e o código cabe numa lição; a conclusão sobre o fator de amplificação não muda.</p>
+</details>
+</div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<p>Corrige-se aqui. Lê a explicação de <strong>cada</strong> opção, também das que não escolheste — é lá que está o que faltava perceber.</p>
+<div class="quiz" data-quiz="almanaque-l1">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Qual é a diferença de fundo entre um <em>zij</em> e um almanaque?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q0" value="a" data-certa="true"><span class="rotulo">O <em>zij</em> publica o que é preciso para fazer a conta; o almanaque publica o resultado da conta já feita.</span></label>
+          <p class="explicacao" hidden>Certo — e é essa mudança de formato, e não uma descoberta astronómica, que cria o almanaque moderno em 1088. É uma decisão de arquitetura: quem paga o custo do cálculo, o editor ou o leitor.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q0" value="b" data-certa="false"><span class="rotulo">O <em>zij</em> é islâmico e o almanaque é europeu.</span></label>
+          <p class="explicacao" hidden>A geografia não define o género. O primeiro almanaque no sentido moderno foi escrito por al-Zarqālī em Toledo, em árabe — ou seja, do lado «errado» desta divisão.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q0" value="c" data-certa="false"><span class="rotulo">O <em>zij</em> é manuscrito e o almanaque é impresso.</span></label>
+          <p class="explicacao" hidden>O suporte também não: o almanaque de Azarquiel é de 1088 e a imprensa chega 369 anos depois. O primeiro almanaque impresso, em Mainz em 1457, não inventou o género — resolveu o problema das cópias corrompidas.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o <em>Nautical Almanac</em> para 1767 foi impresso em 1766?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q1" value="a" data-certa="false"><span class="rotulo">Porque os cálculos demoravam quase um ano a fazer e não davam para mais.</span></label>
+          <p class="explicacao" hidden>O prazo de produção é real, mas não é a razão de <em>publicar antes</em>: se fosse só isso, publicava-se em janeiro do próprio ano. A razão é a distribuição a quem vai estar incontactável.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q1" value="b" data-certa="false"><span class="rotulo">Por convenção da Stationers' Company, que detinha o monopólio.</span></label>
+          <p class="explicacao" hidden>O monopólio dos almanaques em Inglaterra existiu mesmo, até 1775, mas era sobre o direito de publicar — não impunha o calendário de impressão.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q1" value="c" data-certa="true"><span class="rotulo">Porque um almanaque tem de estar inteiramente pré-calculado e distribuído antes de ser preciso: um navio no mar não pode pedir a linha que lhe falta.</span></label>
+          <p class="explicacao" hidden>Certo. É a diferença entre este <em>cache</em> e um de software: aqui não existe «falha de cache» recuperável. Tem de estar 100 % preenchido antes de começar a ser usado.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O almanaque do GPS e a efeméride do GPS são ambos <em>caches</em> de posição orbital. O que os distingue?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q2" value="a" data-certa="true"><span class="rotulo">A troca entre precisão e validade: a efeméride é precisa e vale 4 horas; o almanaque é grosseiro e vale até duas semanas.</span></label>
+          <p class="explicacao" hidden>Certo. E é exatamente a mesma troca do papel: o <em>Astronomical Almanac</em> é preciso e volumoso, o <em>Nautical Almanac</em> é de 0,1′ e cabe num livro que se leva a bordo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q2" value="b" data-certa="false"><span class="rotulo">O almanaque vem do satélite e a efeméride vem da estação em terra.</span></label>
+          <p class="explicacao" hidden>Os dois vêm da mesma mensagem de navegação transmitida pelo satélite — a efeméride nas subtramas 2 e 3, o almanaque nas 4 e 5.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q2" value="c" data-certa="false"><span class="rotulo">O almanaque descarrega-se mais depressa, porque é mais pequeno.</span></label>
+          <p class="explicacao" hidden>É ao contrário, e é contraintuitivo: a efeméride de <em>um</em> satélite leva 18 a 36 segundos, e o almanaque de <em>toda</em> a constelação leva 12,5 minutos, porque são 25 páginas a uma página por trama de 30 segundos.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O que é que o <em>Nautical Almanac</em> de 1767 trazia, que resolvia a longitude?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q3" value="a" data-certa="true"><span class="rotulo">Distâncias lunares: o ângulo entre a Lua e certas estrelas, tabelado hora a hora para o meridiano de Greenwich.</span></label>
+          <p class="explicacao" hidden>Certo. A Lua servia de ponteiro de um relógio que ninguém podia partir; o preço era um fator de amplificação de cerca de 30 para 1 entre o erro de medida e o erro de longitude.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q3" value="b" data-certa="false"><span class="rotulo">Uma tabela de longitudes para as rotas comerciais mais usadas.</span></label>
+          <p class="explicacao" hidden>Uma tabela dessas não ajudaria um navio fora da rota, que é precisamente o navio perdido. O almanaque tem de dar uma referência universal, não um itinerário.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q3" value="c" data-certa="false"><span class="rotulo">A correção a aplicar ao cronómetro de marinha para o acertar em viagem.</span></label>
+          <p class="explicacao" hidden>O cronómetro de Harrison é da mesma época, mas é o método <em>rival</em>. Os dois conviveram durante mais de um século: as distâncias lunares só saíram dos almanaques britânicos em 1906.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Qual destas afirmações sobre a etimologia de «almanaque» é a defensável?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q4" value="a" data-certa="true"><span class="rotulo">A origem é disputada; o <em>OED</em> regista que a palavra não tem étimo em árabe, apesar de a evidência circunstancial apontar para o árabe de Espanha.</span></label>
+          <p class="explicacao" hidden>Certo, e a honestidade aqui é o ponto pedagógico: Weekley resume-o como «a palavra continua a ser um enigma». A primeira ocorrência documentada é de Roger Bacon, em 1267.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q4" value="b" data-certa="false"><span class="rotulo">Vem seguramente do árabe <em>al-manākh</em>, «o calendário».</span></label>
+          <p class="explicacao" hidden>É a versão que mais circula e é mais firme do que as fontes permitem: nenhum candidato árabe convincente foi encontrado, e o próprio OED o assinala.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q4" value="c" data-certa="false"><span class="rotulo">Vem do grego, onde significava «calendário».</span></label>
+          <p class="explicacao" hidden>A hipótese grega existe, mas a palavra em causa aparece uma única vez em toda a Antiguidade, em Eusébio — o que é pouco para sustentar uma derivação.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o <em>Nautical Almanac</em> continua a ser publicado na era do GPS?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q5" value="a" data-certa="false"><span class="rotulo">Por tradição e por interesse histórico dos navegadores amadores.</span></label>
+          <p class="explicacao" hidden>Há esse público, mas não explica que duas agências estatais continuem a financiar o cálculo e a validação todos os anos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q5" value="b" data-certa="false"><span class="rotulo">Porque o GPS não funciona em latitudes altas nem perto dos polos.</span></label>
+          <p class="explicacao" hidden>O GPS funciona nos polos. O que degrada em latitudes altas é a geometria dos satélites e alguns sistemas de aumento — mas não é essa a razão de o almanaque existir.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l1-q5" value="c" data-certa="true"><span class="rotulo">Porque é a única fonte de posição que não depende de infraestrutura nenhuma — nem satélites, nem rádio, nem eletricidade.</span></label>
+          <p class="explicacao" hidden>Certo. É o recurso de último nível de um sistema crítico. Vale a pena pensar nisto como engenheiro: qual é o teu equivalente disto, e continua a funcionar com tudo o resto em baixo?</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+
+    <p>Esta resposta vai para a entrega.</p>
+<div class="aberta">
+  <label for="feynman-l1">Explica a um colega de equipa porque é que o almanaque náutico e o almanaque do GPS são a mesma decisão de engenharia, tomada com 250 anos de diferença.
+    <span class="pista">Sem usar as palavras «almanaque», «efeméride» nem «astronomia». Se a explicação não sobrevive a essa proibição, ainda é vocabulário e não é mecanismo.</span>
+  </label>
+  <textarea id="feynman-l1" data-pergunta="Explica a um colega de equipa porque é que o almanaque náutico e o almanaque do GPS são a mesma decisão de engenharia, tomada com 250 anos de diferença."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas
+  respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e correr
+  <code>/corrigir almanaque</code>.</p>
+</div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Um almanaque publica <strong>resultados</strong>; uma tábua auxiliar (<em>zij</em>) publica
+        o <strong>método</strong>. A invenção, em 1088, foi de formato — não de astronomia.</li>
+      <li>É um <strong>cache pré-calculado</strong>: tem prazo (um ano), precisão escolhida (0,1′),
+        um leitor concreto, e tem de estar completo <em>antes</em> de ser preciso.</li>
+      <li>Maskelyne propõe em <strong>1763</strong> pré-calcular as distâncias lunares; o
+        <em>Nautical Almanac</em> para <strong>1767</strong> sai impresso em 1766.</li>
+      <li>As distâncias lunares duram até <strong>1906</strong>: a tabela morre quando o problema
+        que a justificava muda, não quando a astronomia muda.</li>
+      <li>O GPS faz o mesmo hoje: <strong>almanaque</strong> grosseiro válido duas semanas para
+        saber onde procurar, <strong>efeméride</strong> precisa válida quatro horas para medir.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Wikipédia, «Almanac»</strong> — o artigo que originou este curso. Origem da
+        cronologia, da distinção <em>zij</em>/almanaque («<em>the entries found in the almanacs give
+        directly the positions of the celestial bodies and need no further computation</em>»), do
+        caso de al-Zarqālī em 1088 e da discussão da etimologia.
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Wikipédia, «Nautical Almanac»</strong> — fundação em 1767 por Maskelyne, título
+        completo do primeiro volume, distâncias lunares até 1906, edição conjunta anglo-americana
+        desde 1958 (volume de 1960).
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Wikipédia, «Nevil Maskelyne»</strong> — <em>The British Mariner's Guide</em> (1763)
+        e a proposta de pré-calcular e publicar; e a nota de que a acusação de parcialidade contra
+        ele vem de Harrison e do filho.
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Wikipédia, «GPS signals»</strong> — os números do almanaque e da efeméride:
+        validade de 4 horas e de até duas semanas, 18–36 s e 12,5 min de transmissão, subtramas 2–3
+        e 4–5. <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li>🔴 <strong>Fonte que não é documentação — livro:</strong> Dava Sobel, <em>Longitude</em>
+        (1995). <strong>Porquê:</strong> é o relato que pôs esta história em circulação e lê-se numa
+        tarde; o capítulo sobre o prémio da longitude dá o contexto económico que nenhuma tábua
+        explica. <strong>O que saltar, e com que cuidado:</strong> a tese central — Maskelyne como
+        obstáculo a Harrison — é contestada, e a própria Wikipédia regista que a acusação nasce de
+        Harrison. Lê o livro pelo problema, não pelos vilões.
+        ⚠️ <strong>Não tenho o exemplar:</strong> não cito páginas, edição nem ISBN. Ver a
+        <a href="bibliografia.html#sobel">bibliografia</a>.</li>
+      <li>🔴 <strong>Fonte que não é documentação — série:</strong> <em>Longitude</em>
+        (Channel 4 / A&amp;E, 2000; realização e argumento de Charles Sturridge; Michael Gambon como
+        Harrison, Jeremy Irons como Rupert Gould, Samuel West como Maskelyne; dois episódios).
+        <strong>Porquê aqui:</strong> mostra a produção material de um instrumento de precisão no
+        séc. XVIII — o que custava, em pessoas e anos, ter um número fiável.
+        <strong>O que saltar:</strong> a linha de Gould, no séc. XX, é a melhor parte do filme e a
+        que menos tem a ver com esta lição.
+        <span class="verificado">🌐 Ficha verificada a 2026-09-16</span></li>
+    </ul>
+    <footer class="rodape">
+      <p><a href="00-esfera-celeste.html">← A esfera celeste</a> · <a href="index.html">Índice do curso</a> · <a href="02-o-tempo.html">O tempo →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

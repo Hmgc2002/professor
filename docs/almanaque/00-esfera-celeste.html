@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0 · A esfera celeste — O almanaque</title>
+<meta name="description" content="O pré-requisito que o diagnóstico encontrou em falta, e por isso é lição 0 e não uma nota de rodapé. No fim desta lição sabes o que é um ponto subastral — e com isso o almanaque náutico deixa de ser astronomia e passa a ser um atlas.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/almanaque/00-esfera-celeste.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">O almanaque</a> <span aria-hidden="true">›</span> lição 0</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta nucleo">Lição 0 · núcleo</p>
+    <h1>A esfera celeste: porque é que há duas maneiras de dizer onde está um astro</h1>
+    <p class="subtitulo">O pré-requisito que o diagnóstico encontrou em falta, e por isso é <strong>lição 0</strong> e não uma nota de rodapé. No fim desta lição sabes o que é um <strong>ponto subastral</strong> — e com isso o almanaque náutico deixa de ser astronomia e passa a ser um atlas.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim desta lição, dado um astro com <strong>declinação</strong> e <strong>ângulo horário
+    local</strong>, calculas a sua <strong>altura e azimute</strong> a partir de uma latitude — à mão,
+    com uma calculadora, e em código — e explicas, sem consultar, porque é que medir a altura de um
+    astro não te diz onde estás mas diz-te <em>a que distância</em> estás de um ponto no mapa.</p>
+
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>Esta é a primeira lição do curso e não há nada para recuperar da anterior. Há uma coisa para
+    recuperar de <strong>ti</strong> — responde antes de ler, mesmo que seja para errar. Errar aqui é
+    útil: o esforço de tentar puxar uma resposta é o que faz a explicação seguinte agarrar.</p>
+    <ol>
+      <li>Um navegador do século XVIII mede a altura do Sol acima do horizonte e escreve
+        <em>«48° 12′»</em>. Que informação é que isso lhe dá sobre onde ele está?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Diz-lhe que está a <strong>90° − 48° 12′ = 41° 48′</strong> de distância angular do ponto
+          da Terra onde o Sol está exatamente a pique naquele instante. Como um grau de meridiano é
+          60 milhas náuticas, são 2508 milhas. Não diz em que <em>direção</em>: ele está algures num
+          <strong>círculo</strong> de 2508 milhas de raio à volta desse ponto. É toda a lição em duas linhas,
+          e o resto existe para te mostrar porque é assim.</p></details>
+      </li>
+      <li>Porque é que o almanaque publica a posição dos astros em <em>graus</em> e não em «norte,
+        sul, leste, oeste»?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Porque «leste» depende de onde estás e a posição de um astro não pode depender de quem
+          o olha. O almanaque tem de dar uma posição <strong>igual para toda a gente</strong>, e
+          depois cada um converte-a para o seu próprio horizonte. É exatamente por isso que existem
+          dois sistemas de coordenadas, e é esse o mecanismo desta lição.</p></details>
+      </li>
+    </ol>
+
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p><strong>Porquê antes de como.</strong> Há duas famílias de coordenadas para o céu, e quem
+    nunca percebeu porquê anda a decorar fórmulas. A razão é simples de dizer e demora a assentar:
+    <strong>o céu roda e tu não</strong>.</p>
+
+    <h3>O problema: dois pontos de vista que discordam</h3>
+    <p>O que tu medes com um sextante é <strong>altura</strong> (quantos graus acima do horizonte) e
+    <strong>azimute</strong> (quantos graus a contar do norte, no sentido dos ponteiros). São
+    coordenadas do <em>teu</em> horizonte. Têm uma propriedade fatal: mudam a cada segundo. A mesma
+    estrela tem uma altura diferente daqui a um minuto, e uma altura completamente diferente vista de
+    Lisboa e de Tóquio no mesmo instante.</p>
+    <p>Um almanaque não pode publicar isso. Teria de publicar uma tabela por sítio e por segundo.
+    Precisa de coordenadas que <strong>não dependam de quem olha</strong> — e, se possível, que mudem
+    devagar.</p>
+
+    <h3>A solução: pendurar as coordenadas no eixo da Terra</h3>
+    <p>A Terra roda em torno de um eixo. Prolonga esse eixo até ao céu e tens os <strong>polos
+    celestes</strong>; prolonga o equador e tens o <strong>equador celeste</strong>. Agora define,
+    para um astro:</p>
+    <ul>
+      <li><strong>Declinação (δ)</strong> — quantos graus acima (norte, +) ou abaixo (sul, −) do
+        equador celeste. É a <em>latitude</em> do astro. Para uma estrela, muda tão devagar que o
+        almanaque a publica uma vez por mês; para o Sol, muda no máximo cerca de 1′ por hora.</li>
+      <li><strong>Ângulo horário em Greenwich (GHA)</strong> — quantos graus a oeste do meridiano de
+        Greenwich está o astro, contados de 0 a 360. É a <em>longitude</em> do astro, com o sinal ao
+        contrário do costume e sem números negativos.</li>
+    </ul>
+
+    <h3>O truque que torna isto geografia: o ponto subastral</h3>
+    <p>Aqui está a ideia que transforma astronomia em navegação, e que quase nunca se diz por
+    extenso. Em cada instante, cada astro tem <strong>um ponto na Terra onde ele está exatamente a
+    pique</strong>, no zénite de quem lá estiver. Chama-se <strong>ponto subastral</strong> (em
+    inglês, <em>geographical position</em>, GP). E as suas coordenadas são:</p>
+    <p class="destaque">latitude do ponto subastral = <strong>declinação</strong> ·
+    longitude oeste do ponto subastral = <strong>GHA</strong></p>
+    <p>Ou seja: <strong>o almanaque náutico não é uma tabela de astronomia, é um atlas</strong>. É a
+    lista, hora a hora, de onde é que na Terra cada astro está a pique. A lição 1 mostra que foi
+    exatamente essa mudança de formato — de «tábuas para calcular» para «posições já feitas» — que
+    inventou o almanaque moderno.</p>
+
+    <figure>
+  <svg viewBox="0 0 330 305" role="img" aria-labelledby="t-circulo d-circulo">
+    <title id="t-circulo">Globo terrestre com o ponto subastral de um astro e dois círculos de posição à volta dele</title>
+    <desc id="d-circulo">Um globo com meridianos e paralelos. Um ponto marcado é o sítio da Terra onde o astro está exatamente a pique. À volta dele há dois círculos: o mais pequeno corresponde a uma altura medida de 65 graus e o maior a 40 graus. Quanto mais baixo o astro, maior o círculo.</desc>
+    <circle class="svg-caixa" cx="165" cy="150" r="120" fill="none"/>
+    <path class="svg-traco-fino" d="M 120.41 261.39 L 122.57 262.17 L 124.85 262.91 L 127.24 263.60 L 129.73 264.26 L 132.32 264.87 L 135.00 265.43 L 137.76 265.94 L 140.60 266.40 L 143.50 266.81 L 146.46 267.17 L 149.47 267.48 L 152.53 267.73 L 155.61 267.92 L 158.73 268.06 L 161.86 268.15 L 165.00 268.18 L 168.14 268.15 L 171.27 268.06 L 174.39 267.92 L 177.47 267.73 L 180.53 267.48 L 183.54 267.17 L 186.50 266.81 L 189.40 266.40 L 192.24 265.94 L 195.00 265.43 L 197.68 264.87 L 200.27 264.26 L 202.76 263.60 L 205.15 262.91 L 207.43 262.17 L 209.59 261.39" fill="none"/>
+    <path class="svg-traco-fino" d="M 64.62 215.58 L 66.16 217.37 L 67.98 219.12 L 70.06 220.84 L 72.40 222.52 L 75.00 224.15 L 77.84 225.74 L 80.92 227.27 L 84.24 228.75 L 87.77 230.16 L 91.52 231.51 L 95.46 232.80 L 99.60 234.00 L 103.92 235.14 L 108.40 236.19 L 113.04 237.16 L 117.82 238.05 L 122.73 238.85 L 127.76 239.56 L 132.89 240.19 L 138.10 240.71 L 143.39 241.15 L 148.74 241.49 L 154.14 241.73 L 159.56 241.88 L 165.00 241.93 L 170.44 241.88 L 175.86 241.73 L 181.26 241.49 L 186.61 241.15 L 191.90 240.71 L 197.11 240.19 L 202.24 239.56 L 207.27 238.85 L 212.18 238.05 L 216.96 237.16 L 221.60 236.19 L 226.08 235.14 L 230.40 234.00 L 234.54 232.80 L 238.48 231.51 L 242.23 230.16 L 245.76 228.75 L 249.08 227.27 L 252.16 225.74 L 255.00 224.15 L 257.60 222.52 L 259.94 220.84 L 262.02 219.12 L 263.84 217.37 L 265.38 215.58" fill="none"/>
+    <path class="svg-realce-traco" d="M 45.00 150.00 L 45.16 152.15 L 45.66 154.29 L 46.48 156.42 L 47.62 158.53 L 49.09 160.62 L 50.87 162.68 L 52.97 164.71 L 55.37 166.69 L 58.08 168.63 L 61.08 170.52 L 64.36 172.35 L 67.92 174.12 L 71.74 175.83 L 75.82 177.46 L 80.15 179.02 L 84.70 180.50 L 89.48 181.90 L 94.47 183.20 L 99.64 184.42 L 105.00 185.54 L 110.52 186.57 L 116.19 187.49 L 122.00 188.32 L 127.92 189.03 L 133.94 189.64 L 140.05 190.15 L 146.23 190.54 L 152.46 190.82 L 158.72 190.99 L 165.00 191.04 L 171.28 190.99 L 177.54 190.82 L 183.77 190.54 L 189.95 190.15 L 196.06 189.64 L 202.08 189.03 L 208.00 188.32 L 213.81 187.49 L 219.48 186.57 L 225.00 185.54 L 230.36 184.42 L 235.53 183.20 L 240.52 181.90 L 245.30 180.50 L 249.85 179.02 L 254.18 177.46 L 258.26 175.83 L 262.08 174.12 L 265.64 172.35 L 268.92 170.52 L 271.92 168.63 L 274.63 166.69 L 277.03 164.71 L 279.13 162.68 L 280.91 160.62 L 282.38 158.53 L 283.52 156.42 L 284.34 154.29 L 284.84 152.15 L 285.00 150.00" fill="none"/>
+    <path class="svg-traco-fino" d="M 63.35 86.23 L 62.36 88.06 L 61.65 89.90 L 61.22 91.76 L 61.08 93.62 L 61.22 95.48 L 61.65 97.33 L 62.36 99.18 L 63.35 101.01 L 64.62 102.82 L 66.16 104.60 L 67.98 106.36 L 70.06 108.08 L 72.40 109.75 L 75.00 111.39 L 77.84 112.98 L 80.92 114.51 L 84.24 115.99 L 87.77 117.40 L 91.52 118.75 L 95.46 120.03 L 99.60 121.24 L 103.92 122.37 L 108.40 123.43 L 113.04 124.40 L 117.82 125.29 L 122.73 126.09 L 127.76 126.80 L 132.89 127.42 L 138.10 127.95 L 143.39 128.39 L 148.74 128.72 L 154.14 128.97 L 159.56 129.11 L 165.00 129.16 L 170.44 129.11 L 175.86 128.97 L 181.26 128.72 L 186.61 128.39 L 191.90 127.95 L 197.11 127.42 L 202.24 126.80 L 207.27 126.09 L 212.18 125.29 L 216.96 124.40 L 221.60 123.43 L 226.08 122.37 L 230.40 121.24 L 234.54 120.03 L 238.48 118.75 L 242.23 117.40 L 245.76 115.99 L 249.08 114.51 L 252.16 112.98 L 255.00 111.39 L 257.60 109.75 L 259.94 108.08 L 262.02 106.36 L 263.84 104.60 L 265.38 102.82 L 266.65 101.01 L 267.64 99.18 L 268.35 97.33 L 268.78 95.48 L 268.92 93.62 L 268.78 91.76 L 268.35 89.90 L 267.64 88.06 L 266.65 86.23" fill="none"/>
+    <path class="svg-traco-fino" d="M 118.37 39.43 L 116.46 40.28 L 114.68 41.17 L 113.04 42.08 L 111.54 43.03 L 110.19 44.00 L 108.99 44.99 L 107.94 46.00 L 107.04 47.03 L 106.31 48.08 L 105.74 49.13 L 105.33 50.20 L 105.08 51.27 L 105.00 52.34 L 105.08 53.42 L 105.33 54.49 L 105.74 55.55 L 106.31 56.61 L 107.04 57.66 L 107.94 58.69 L 108.99 59.70 L 110.19 60.69 L 111.54 61.66 L 113.04 62.60 L 114.68 63.52 L 116.46 64.41 L 118.37 65.26 L 120.41 66.08 L 122.57 66.85 L 124.85 67.59 L 127.24 68.29 L 129.73 68.95 L 132.32 69.55 L 135.00 70.12 L 137.76 70.63 L 140.60 71.09 L 143.50 71.50 L 146.46 71.86 L 149.47 72.17 L 152.53 72.42 L 155.61 72.61 L 158.73 72.75 L 161.86 72.84 L 165.00 72.87 L 168.14 72.84 L 171.27 72.75 L 174.39 72.61 L 177.47 72.42 L 180.53 72.17 L 183.54 71.86 L 186.50 71.50 L 189.40 71.09 L 192.24 70.63 L 195.00 70.12 L 197.68 69.55 L 200.27 68.95 L 202.76 68.29 L 205.15 67.59 L 207.43 66.85 L 209.59 66.08 L 211.63 65.26 L 213.54 64.41 L 215.32 63.52 L 216.96 62.60 L 218.46 61.66 L 219.81 60.69 L 221.01 59.70 L 222.06 58.69 L 222.96 57.66 L 223.69 56.61 L 224.26 55.55 L 224.67 54.49 L 224.92 53.42 L 225.00 52.34 L 224.92 51.27 L 224.67 50.20 L 224.26 49.13 L 223.69 48.08 L 222.96 47.03 L 222.06 46.00 L 221.01 44.99 L 219.81 44.00 L 218.46 43.03 L 216.96 42.08 L 215.32 41.17 L 213.54 40.28 L 211.63 39.43" fill="none"/>
+    <path class="svg-traco-fino" d="M 165.00 30.07 L 165.00 30.46 L 165.00 31.17 L 165.00 32.20 L 165.00 33.56 L 165.00 35.24 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 143.50 31.99 L 146.46 31.77 L 149.47 31.88 L 152.53 32.31 L 155.61 33.06 L 158.73 34.14 L 161.86 35.53 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 103.92 46.71 L 108.40 44.25 L 113.04 42.08 L 117.82 40.21 L 122.73 38.64 L 127.76 37.37 L 132.89 36.41 L 138.10 35.77 L 143.39 35.43 L 148.74 35.41 L 154.14 35.71 L 159.56 36.32 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 45.00 150.00 L 45.16 144.10 L 45.66 138.21 L 46.48 132.36 L 47.62 126.56 L 49.09 120.81 L 50.87 115.15 L 52.97 109.59 L 55.37 104.14 L 58.08 98.81 L 61.08 93.62 L 64.36 88.58 L 67.92 83.72 L 71.74 79.04 L 75.82 74.55 L 80.15 70.26 L 84.70 66.20 L 89.48 62.37 L 94.47 58.77 L 99.64 55.43 L 105.00 52.34 L 110.52 49.53 L 116.19 46.99 L 122.00 44.73 L 127.92 42.76 L 133.94 41.08 L 140.05 39.70 L 146.23 38.63 L 152.46 37.85 L 158.72 37.39 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 99.60 250.55 L 95.46 247.53 L 91.52 244.25 L 87.77 240.70 L 84.24 236.91 L 80.92 232.88 L 77.84 228.63 L 75.00 224.15 L 72.40 219.48 L 70.06 214.61 L 67.98 209.57 L 66.16 204.36 L 64.62 199.01 L 63.35 193.52 L 62.36 187.91 L 61.65 182.20 L 61.22 176.39 L 61.08 170.52 L 61.22 164.59 L 61.65 158.62 L 62.36 152.63 L 63.35 146.63 L 64.62 140.64 L 66.16 134.67 L 67.98 128.75 L 70.06 122.88 L 72.40 117.09 L 75.00 111.39 L 77.84 105.80 L 80.92 100.32 L 84.24 94.98 L 87.77 89.80 L 91.52 84.78 L 95.46 79.93 L 99.60 75.28 L 103.92 70.83 L 108.40 66.61 L 113.04 62.60 L 117.82 58.84 L 122.73 55.33 L 127.76 52.08 L 132.89 49.10 L 138.10 46.39 L 143.39 43.97 L 148.74 41.84 L 154.14 40.00 L 159.56 38.47 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 140.60 267.47 L 137.76 266.61 L 135.00 265.43 L 132.32 263.93 L 129.73 262.12 L 127.24 260.00 L 124.85 257.58 L 122.57 254.87 L 120.41 251.87 L 118.37 248.59 L 116.46 245.04 L 114.68 241.22 L 113.04 237.16 L 111.54 232.86 L 110.19 228.34 L 108.99 223.59 L 107.94 218.65 L 107.04 213.52 L 106.31 208.21 L 105.74 202.75 L 105.33 197.14 L 105.08 191.40 L 105.00 185.54 L 105.08 179.59 L 105.33 173.56 L 105.74 167.47 L 106.31 161.32 L 107.04 155.15 L 107.94 148.96 L 108.99 142.77 L 110.19 136.61 L 111.54 130.48 L 113.04 124.40 L 114.68 118.39 L 116.46 112.48 L 118.37 106.66 L 120.41 100.96 L 122.57 95.40 L 124.85 89.98 L 127.24 84.74 L 129.73 79.66 L 132.32 74.79 L 135.00 70.12 L 137.76 65.66 L 140.60 61.44 L 143.50 57.46 L 146.46 53.74 L 149.47 50.28 L 152.53 47.09 L 155.61 44.19 L 158.73 41.57 L 161.86 39.25 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 165.00 269.98 L 165.00 269.71 L 165.00 269.11 L 165.00 268.18 L 165.00 266.92 L 165.00 265.35 L 165.00 263.46 L 165.00 261.26 L 165.00 258.76 L 165.00 255.95 L 165.00 252.86 L 165.00 249.48 L 165.00 245.84 L 165.00 241.93 L 165.00 237.76 L 165.00 233.36 L 165.00 228.73 L 165.00 223.88 L 165.00 218.83 L 165.00 213.59 L 165.00 208.18 L 165.00 202.60 L 165.00 196.89 L 165.00 191.04 L 165.00 185.08 L 165.00 179.03 L 165.00 172.90 L 165.00 166.70 L 165.00 160.46 L 165.00 154.19 L 165.00 147.91 L 165.00 141.63 L 165.00 135.38 L 165.00 129.16 L 165.00 123.01 L 165.00 116.92 L 165.00 110.93 L 165.00 105.05 L 165.00 99.29 L 165.00 93.66 L 165.00 88.20 L 165.00 82.90 L 165.00 77.78 L 165.00 72.87 L 165.00 68.16 L 165.00 63.68 L 165.00 59.43 L 165.00 55.44 L 165.00 51.70 L 165.00 48.23 L 165.00 45.05 L 165.00 42.14 L 165.00 39.54 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 189.40 267.47 L 192.24 266.61 L 195.00 265.43 L 197.68 263.93 L 200.27 262.12 L 202.76 260.00 L 205.15 257.58 L 207.43 254.87 L 209.59 251.87 L 211.63 248.59 L 213.54 245.04 L 215.32 241.22 L 216.96 237.16 L 218.46 232.86 L 219.81 228.34 L 221.01 223.59 L 222.06 218.65 L 222.96 213.52 L 223.69 208.21 L 224.26 202.75 L 224.67 197.14 L 224.92 191.40 L 225.00 185.54 L 224.92 179.59 L 224.67 173.56 L 224.26 167.47 L 223.69 161.32 L 222.96 155.15 L 222.06 148.96 L 221.01 142.77 L 219.81 136.61 L 218.46 130.48 L 216.96 124.40 L 215.32 118.39 L 213.54 112.48 L 211.63 106.66 L 209.59 100.96 L 207.43 95.40 L 205.15 89.98 L 202.76 84.74 L 200.27 79.66 L 197.68 74.79 L 195.00 70.12 L 192.24 65.66 L 189.40 61.44 L 186.50 57.46 L 183.54 53.74 L 180.53 50.28 L 177.47 47.09 L 174.39 44.19 L 171.27 41.57 L 168.14 39.25 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 230.40 250.55 L 234.54 247.53 L 238.48 244.25 L 242.23 240.70 L 245.76 236.91 L 249.08 232.88 L 252.16 228.63 L 255.00 224.15 L 257.60 219.48 L 259.94 214.61 L 262.02 209.57 L 263.84 204.36 L 265.38 199.01 L 266.65 193.52 L 267.64 187.91 L 268.35 182.20 L 268.78 176.39 L 268.92 170.52 L 268.78 164.59 L 268.35 158.62 L 267.64 152.63 L 266.65 146.63 L 265.38 140.64 L 263.84 134.67 L 262.02 128.75 L 259.94 122.88 L 257.60 117.09 L 255.00 111.39 L 252.16 105.80 L 249.08 100.32 L 245.76 94.98 L 242.23 89.80 L 238.48 84.78 L 234.54 79.93 L 230.40 75.28 L 226.08 70.83 L 221.60 66.61 L 216.96 62.60 L 212.18 58.84 L 207.27 55.33 L 202.24 52.08 L 197.11 49.10 L 191.90 46.39 L 186.61 43.97 L 181.26 41.84 L 175.86 40.00 L 170.44 38.47 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 285.00 150.00 L 284.84 144.10 L 284.34 138.21 L 283.52 132.36 L 282.38 126.56 L 280.91 120.81 L 279.13 115.15 L 277.03 109.59 L 274.63 104.14 L 271.92 98.81 L 268.92 93.62 L 265.64 88.58 L 262.08 83.72 L 258.26 79.04 L 254.18 74.55 L 249.85 70.26 L 245.30 66.20 L 240.52 62.37 L 235.53 58.77 L 230.36 55.43 L 225.00 52.34 L 219.48 49.53 L 213.81 46.99 L 208.00 44.73 L 202.08 42.76 L 196.06 41.08 L 189.95 39.70 L 183.77 38.63 L 177.54 37.85 L 171.28 37.39 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 226.08 46.71 L 221.60 44.25 L 216.96 42.08 L 212.18 40.21 L 207.27 38.64 L 202.24 37.37 L 197.11 36.41 L 191.90 35.77 L 186.61 35.43 L 181.26 35.41 L 175.86 35.71 L 170.44 36.32 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 186.50 31.99 L 183.54 31.77 L 180.53 31.88 L 177.47 32.31 L 174.39 33.06 L 171.27 34.14 L 168.14 35.53 L 165.00 37.24" fill="none"/>
+    <path class="svg-traco-fino" d="M 165.00 30.07 L 165.00 30.46 L 165.00 31.17 L 165.00 32.20 L 165.00 33.56 L 165.00 35.24 L 165.00 37.24" fill="none"/>
+    <circle class="svg-ponto-forte" cx="135.81" cy="148.69" r="5"/>
+    <text class="svg-texto" x="144.81" y="142.69">ponto subastral</text>
+    <path class="svg-traco-grosso" d="M 154.38 57.60 L 157.47 57.94 L 160.55 58.39 L 163.61 58.95 L 166.66 59.62 L 169.67 60.40 L 172.66 61.29 L 175.62 62.28 L 178.54 63.39 L 181.42 64.59 L 184.26 65.90 L 187.05 67.31 L 189.79 68.82 L 192.48 70.43 L 195.11 72.13 L 197.68 73.93 L 200.19 75.82 L 202.64 77.80 L 205.01 79.87 L 207.32 82.02 L 209.55 84.25 L 211.70 86.56 L 213.77 88.95 L 215.77 91.41 L 217.67 93.94 L 219.49 96.54 L 221.22 99.20 L 222.86 101.92 L 224.40 104.70 L 225.85 107.54 L 227.21 110.42 L 228.46 113.36 L 229.61 116.33 L 230.67 119.35 L 231.62 122.40 L 232.46 125.49 L 233.20 128.60 L 233.84 131.74 L 234.36 134.90 L 234.78 138.08 L 235.10 141.27 L 235.30 144.47 L 235.40 147.68 L 235.38 150.89 L 235.26 154.09 L 235.03 157.29 L 234.70 160.48 L 234.25 163.66 L 233.70 166.82 L 233.04 169.96 L 232.27 173.07 L 231.40 176.15 L 230.43 179.20 L 229.35 182.21 L 228.17 185.19 L 226.90 188.12 L 225.52 191.00 L 224.05 193.83 L 222.48 196.61 L 220.82 199.32 L 219.07 201.98 L 217.23 204.57 L 215.30 207.10 L 213.29 209.56 L 211.20 211.94 L 209.03 214.24 L 206.78 216.47 L 204.46 218.61 L 202.07 220.67 L 199.61 222.64 L 197.08 224.52 L 194.49 226.31 L 191.85 228.01 L 189.15 229.61 L 186.39 231.11 L 183.59 232.52 L 180.74 233.82 L 177.85 235.02 L 174.92 236.11 L 171.96 237.10 L 168.96 237.98 L 165.94 238.75 L 162.89 239.41 L 159.83 239.96 L 156.74 240.41 L 153.65 240.74 L 150.54 240.96 L 147.43 241.06 L 144.32 241.06 L 141.21 240.94 L 138.10 240.71 L 135.01 240.37 L 131.93 239.92 L 128.87 239.36 L 125.82 238.69 L 122.81 237.91 L 119.82 237.02 L 116.86 236.03 L 113.94 234.92 L 111.06 233.72 L 108.22 232.41 L 105.43 231.00 L 102.69 229.49 L 100.00 227.88 L 97.37 226.18 L 94.80 224.38 L 92.29 222.49 L 89.84 220.51 L 87.47 218.44 L 85.16 216.29 L 82.93 214.06 L 80.78 211.75 L 78.71 209.36 L 76.72 206.90 L 74.81 204.37 L 72.99 201.77 L 71.26 199.11 L 69.62 196.39 L 68.08 193.61 L 66.63 190.77 L 65.27 187.89 L 64.02 184.95 L 62.87 181.98 L 61.81 178.96 L 60.86 175.91 L 60.02 172.82 L 59.28 169.71 L 58.64 166.57 L 58.12 163.41 L 57.70 160.23 L 57.38 157.04 L 57.18 153.84 L 57.08 150.63 L 57.10 147.42 L 57.22 144.22 L 57.45 141.02 L 57.79 137.83 L 58.23 134.65 L 58.78 131.49 L 59.44 128.35 L 60.21 125.24 L 61.08 122.16 L 62.05 119.11 L 63.13 116.10 L 64.31 113.12 L 65.59 110.19 L 66.96 107.31 L 68.43 104.48 L 70.00 101.70 L 71.66 98.99 L 73.41 96.33 L 75.25 93.74 L 77.18 91.21 L 79.19 88.76 L 81.28 86.37 L 83.45 84.07 L 85.70 81.84 L 88.02 79.70 L 90.41 77.64 L 92.87 75.67 L 95.40 73.79 L 97.99 72.00 L 100.63 70.30 L 103.33 68.70 L 106.09 67.20 L 108.89 65.79 L 111.74 64.49 L 114.63 63.30 L 117.56 62.20 L 120.52 61.22 L 123.52 60.33 L 126.54 59.56 L 129.59 58.90 L 132.65 58.35 L 135.74 57.91 L 138.84 57.57 L 141.94 57.35 L 145.05 57.25 L 148.16 57.25 L 151.27 57.37 L 154.38 57.60" fill="none"/>
+    <path class="svg-traco" d="M 143.04 98.30 L 144.75 98.48 L 146.44 98.73 L 148.13 99.04 L 149.81 99.41 L 151.48 99.84 L 153.13 100.33 L 154.76 100.88 L 156.37 101.49 L 157.96 102.16 L 159.52 102.88 L 161.06 103.66 L 162.57 104.49 L 164.06 105.38 L 165.51 106.32 L 166.93 107.31 L 168.32 108.35 L 169.66 109.44 L 170.97 110.58 L 172.25 111.77 L 173.48 113.00 L 174.66 114.28 L 175.81 115.59 L 176.91 116.95 L 177.96 118.35 L 178.96 119.78 L 179.91 121.25 L 180.82 122.75 L 181.67 124.28 L 182.47 125.85 L 183.22 127.44 L 183.91 129.06 L 184.55 130.70 L 185.13 132.37 L 185.65 134.05 L 186.12 135.75 L 186.53 137.47 L 186.88 139.20 L 187.17 140.94 L 187.40 142.70 L 187.57 144.46 L 187.68 146.22 L 187.74 147.99 L 187.73 149.76 L 187.66 151.53 L 187.54 153.30 L 187.35 155.06 L 187.10 156.81 L 186.80 158.55 L 186.43 160.28 L 186.01 162.00 L 185.53 163.70 L 184.99 165.38 L 184.40 167.05 L 183.75 168.69 L 183.05 170.30 L 182.29 171.89 L 181.47 173.46 L 180.61 174.99 L 179.69 176.49 L 178.73 177.95 L 177.71 179.38 L 176.65 180.78 L 175.54 182.13 L 174.39 183.44 L 173.19 184.72 L 171.95 185.94 L 170.67 187.13 L 169.35 188.26 L 167.99 189.35 L 166.60 190.39 L 165.17 191.38 L 163.71 192.31 L 162.22 193.20 L 160.70 194.02 L 159.15 194.80 L 157.58 195.52 L 155.99 196.18 L 154.37 196.78 L 152.74 197.32 L 151.08 197.81 L 149.42 198.24 L 147.74 198.60 L 146.04 198.91 L 144.34 199.15 L 142.63 199.33 L 140.92 199.45 L 139.20 199.51 L 137.49 199.51 L 135.77 199.45 L 134.06 199.32 L 132.35 199.13 L 130.65 198.88 L 128.96 198.58 L 127.29 198.20 L 125.62 197.77 L 123.97 197.28 L 122.34 196.73 L 120.73 196.13 L 119.14 195.46 L 117.58 194.74 L 116.04 193.96 L 114.52 193.13 L 113.04 192.24 L 111.59 191.30 L 110.17 190.31 L 108.78 189.27 L 107.43 188.17 L 106.12 187.04 L 104.85 185.85 L 103.62 184.62 L 102.43 183.34 L 101.29 182.03 L 100.19 180.67 L 99.14 179.27 L 98.14 177.84 L 97.18 176.37 L 96.28 174.87 L 95.43 173.33 L 94.63 171.77 L 93.88 170.18 L 93.19 168.56 L 92.55 166.92 L 91.97 165.25 L 91.45 163.57 L 90.98 161.87 L 90.57 160.15 L 90.22 158.42 L 89.93 156.67 L 89.70 154.92 L 89.53 153.16 L 89.41 151.39 L 89.36 149.62 L 89.37 147.85 L 89.44 146.09 L 89.56 144.32 L 89.75 142.56 L 90.00 140.81 L 90.30 139.06 L 90.66 137.33 L 91.09 135.62 L 91.57 133.92 L 92.10 132.23 L 92.70 130.57 L 93.35 128.93 L 94.05 127.31 L 94.81 125.72 L 95.62 124.16 L 96.49 122.63 L 97.40 121.13 L 98.37 119.67 L 99.39 118.23 L 100.45 116.84 L 101.56 115.49 L 102.71 114.17 L 103.91 112.90 L 105.15 111.67 L 106.43 110.49 L 107.75 109.36 L 109.11 108.27 L 110.50 107.23 L 111.93 106.24 L 113.39 105.31 L 114.88 104.42 L 116.40 103.59 L 117.94 102.82 L 119.52 102.10 L 121.11 101.44 L 122.73 100.84 L 124.36 100.29 L 126.01 99.81 L 127.68 99.38 L 129.36 99.02 L 131.05 98.71 L 132.76 98.47 L 134.46 98.28 L 136.18 98.16 L 137.89 98.10 L 139.61 98.11 L 141.33 98.17 L 143.04 98.30" fill="none"/>
+    <text class="svg-texto" x="10" y="292">círculo interior: altura 65° · exterior: altura 40°</text>
+  </svg>
+  <figcaption>Medir a altura de um astro não dá a posição: dá a <strong>distância ao ponto subastral</strong>, e portanto um círculo inteiro de sítios possíveis. Dois astros dão dois círculos, e dois círculos cruzam-se em dois pontos — um dos quais costuma ficar a milhares de quilómetros do mar onde estás.</figcaption>
+</figure>
+
+    <p>E agora o passo que fecha tudo. Se mediste a altura <em>H</em> de um astro, a distância
+    angular dele ao teu zénite é <strong>90° − H</strong> (chama-se <em>distância zenital</em>). Mas
+    a distância angular do astro ao teu zénite é a mesma coisa que a distância angular <strong>do
+    ponto subastral até ti</strong>, medida sobre a superfície da Terra. Logo:</p>
+    <p class="destaque">Uma altura medida = <strong>estás a (90° − H) do ponto subastral</strong>,
+    em qualquer direção. Isto é um <strong>círculo de posição</strong>.</p>
+
+    <h3>A ponte entre os dois sistemas: o triângulo de posição</h3>
+    <p>Falta ligar o que o almanaque publica (δ, GHA) ao que tu medes (altura, azimute). A ligação é
+    um triângulo desenhado na esfera, com três vértices: o <strong>polo</strong>, o teu
+    <strong>zénite</strong> e o <strong>astro</strong>.</p>
+
+    <figure>
+  <svg viewBox="0 0 400 330" role="img" aria-labelledby="t-esfera d-esfera">
+    <title id="t-esfera">Esfera celeste vista de fora, com o horizonte, o equador celeste e o triângulo de posição</title>
+    <desc id="d-esfera">Um círculo grande é o horizonte do observador. Uma curva atravessa-o em diagonal: é o caminho de um astro de declinação zero, o equador celeste. Duas curvas mais finas, uma acima e outra abaixo, são os trópicos. O zénite está em cima e o polo celeste a 39 graus de altura, que é a latitude. Três arcos grossos unem o zénite, o polo e um astro: é o triângulo de posição, e é a única coisa que se resolve em toda a navegação astronómica.</desc>
+    <circle class="svg-caixa" cx="200" cy="165" r="130" fill="none"/>
+    <path class="svg-traco" d="M 155.54 206.78 L 153.41 206.51 L 151.30 206.23 L 149.20 205.93 L 147.12 205.62 L 145.06 205.30 L 143.01 204.96 L 140.98 204.62 L 138.97 204.26 L 136.97 203.89 L 135.00 203.51 L 133.05 203.11 L 131.11 202.71 L 129.20 202.29 L 127.30 201.86 L 125.44 201.42 L 123.59 200.97 L 121.76 200.51 L 119.96 200.04 L 118.19 199.55 L 116.44 199.06 L 114.71 198.56 L 113.01 198.04 L 111.34 197.52 L 109.69 196.98 L 108.08 196.44 L 106.49 195.89 L 104.92 195.32 L 103.39 194.75 L 101.89 194.17 L 100.41 193.58 L 98.97 192.98 L 97.56 192.37 L 96.18 191.76 L 94.83 191.13 L 93.51 190.50 L 92.23 189.86 L 90.97 189.22 L 89.75 188.56 L 88.57 187.90 L 87.42 187.23 L 86.30 186.56 L 85.22 185.87 L 84.17 185.19 L 83.16 184.49 L 82.18 183.79 L 81.24 183.08 L 80.33 182.37 L 79.47 181.66 L 78.63 180.93 L 77.84 180.21 L 77.08 179.48 L 76.36 178.74 L 75.68 178.00 L 75.04 177.26 L 74.43 176.51 L 73.86 175.76 L 73.33 175.00 L 72.84 174.24 L 72.39 173.48 L 71.97 172.72 L 71.60 171.96 L 71.27 171.19 L 70.97 170.42 L 70.71 169.65 L 70.49 168.88 L 70.32 168.10 L 70.18 167.33 L 70.08 166.55 L 70.02 165.78 L 70.00 165.00 L 70.02 164.22" fill="none"/>
+    <path class="svg-traco" d="M 329.98 164.22 L 330.00 165.00 L 329.98 165.78 L 329.92 166.55 L 329.82 167.33 L 329.68 168.10 L 329.51 168.88 L 329.29 169.65 L 329.03 170.42 L 328.73 171.19 L 328.40 171.96 L 328.03 172.72 L 327.61 173.48 L 327.16 174.24 L 326.67 175.00 L 326.14 175.76 L 325.57 176.51 L 324.96 177.26 L 324.32 178.00 L 323.64 178.74 L 322.92 179.48 L 322.16 180.21 L 321.37 180.93 L 320.53 181.66 L 319.67 182.37 L 318.76 183.08 L 317.82 183.79 L 316.84 184.49 L 315.83 185.19 L 314.78 185.87 L 313.70 186.56 L 312.58 187.23 L 311.43 187.90 L 310.25 188.56 L 309.03 189.22 L 307.77 189.86 L 306.49 190.50 L 305.17 191.13 L 303.82 191.76 L 302.44 192.37 L 301.03 192.98 L 299.59 193.58 L 298.11 194.17 L 296.61 194.75 L 295.08 195.32 L 293.51 195.89 L 291.92 196.44 L 290.31 196.98 L 288.66 197.52 L 286.99 198.04 L 285.29 198.56 L 283.56 199.06 L 281.81 199.55 L 280.04 200.04 L 278.24 200.51 L 276.41 200.97 L 274.56 201.42 L 272.70 201.86 L 270.80 202.29 L 268.89 202.71 L 266.95 203.11 L 265.00 203.51 L 263.03 203.89 L 261.03 204.26 L 259.02 204.62 L 256.99 204.96 L 254.94 205.30 L 252.88 205.62 L 250.80 205.93 L 248.70 206.23 L 246.59 206.51 L 244.46 206.78 L 242.32 207.04 L 240.17 207.29 L 238.01 207.52 L 235.83 207.74 L 233.65 207.95 L 231.45 208.14 L 229.24 208.32 L 227.03 208.49 L 224.81 208.65 L 222.57 208.79 L 220.34 208.92 L 218.09 209.03 L 215.84 209.13 L 213.59 209.22 L 211.33 209.29 L 209.07 209.35 L 206.80 209.40 L 204.54 209.44 L 202.27 209.46 L 200.00 209.46 L 197.73 209.46 L 195.46 209.44 L 193.20 209.40 L 190.93 209.35 L 188.67 209.29 L 186.41 209.22 L 184.16 209.13 L 181.91 209.03 L 179.66 208.92 L 177.43 208.79 L 175.19 208.65 L 172.97 208.49 L 170.76 208.32 L 168.55 208.14 L 166.35 207.95 L 164.17 207.74 L 161.99 207.52 L 159.83 207.29 L 157.68 207.04 L 155.54 206.78" fill="none"/>
+    <path class="svg-realce-traco" d="M 298.48 80.18 L 299.82 81.73 L 301.13 83.31 L 302.40 84.91 L 303.64 86.54 L 304.86 88.19 L 306.04 89.87 L 307.19 91.57 L 308.30 93.29 L 309.38 95.03 L 310.43 96.79 L 311.45 98.58 L 312.43 100.38 L 313.38 102.20 L 314.29 104.05 L 315.17 105.91 L 316.01 107.79 L 316.82 109.69 L 317.59 111.60 L 318.33 113.53 L 319.03 115.48 L 319.69 117.44 L 320.32 119.42 L 320.91 121.40 L 321.47 123.41 L 321.98 125.42 L 322.46 127.45 L 322.91 129.49 L 323.31 131.54 L 323.68 133.60 L 324.01 135.67 L 324.30 137.75 L 324.56 139.83 L 324.77 141.93 L 324.95 144.03 L 325.09 146.14 L 325.19 148.25 L 325.26 150.37 L 325.28 152.49 L 325.27 154.62 L 325.22 156.75 L 325.13 158.88 L 325.00 161.02 L 324.84 163.16 L 324.64 165.29 L 324.40 167.43 L 324.12 169.56 L 323.80 171.70 L 323.45 173.83 L 323.06 175.96 L 322.63 178.09 L 322.16 180.21 L 321.66 182.32 L 321.12 184.44 L 320.54 186.54 L 319.92 188.64 L 319.27 190.74 L 318.58 192.82 L 317.86 194.90 L 317.10 196.96 L 316.31 199.02 L 315.48 201.07 L 314.61 203.10 L 313.71 205.13 L 312.78 207.14 L 311.81 209.14 L 310.80 211.13 L 309.77 213.10 L 308.69 215.05 L 307.59 217.00 L 306.45 218.92 L 305.28 220.83 L 304.08 222.72 L 302.85 224.60 L 301.59 226.46 L 300.29 228.29 L 298.97 230.11 L 297.61 231.91 L 296.22 233.69 L 294.81 235.45 L 293.37 237.19 L 291.89 238.90 L 290.39 240.59 L 288.87 242.26 L 287.31 243.91 L 285.73 245.53 L 284.12 247.12 L 282.49 248.70 L 280.83 250.24 L 279.15 251.76 L 277.44 253.26 L 275.71 254.72 L 273.96 256.16 L 272.18 257.57 L 270.38 258.96 L 268.56 260.31 L 266.72 261.64 L 264.86 262.94 L 262.98 264.20 L 261.08 265.44 L 259.16 266.64 L 257.23 267.82 L 255.27 268.96 L 253.30 270.07 L 251.32 271.15 L 249.31 272.20 L 247.30 273.22 L 245.26 274.20 L 243.22 275.15 L 241.16 276.06 L 239.09 276.94 L 237.00 277.79 L 234.91 278.60 L 232.80 279.38 L 230.69 280.13 L 228.57 280.83 L 226.43 281.51 L 224.29 282.15 L 222.14 282.75 L 219.99 283.31 L 217.82 283.84 L 215.66 284.34 L 213.49 284.79 L 211.31 285.22 L 209.13 285.60 L 206.95 285.95 L 204.76 286.26 L 202.58 286.53 L 200.39 286.77 L 198.21 286.97 L 196.02 287.13 L 193.84 287.26 L 191.65 287.34 L 189.47 287.40 L 187.29 287.41 L 185.12 287.38 L 182.95 287.32 L 180.79 287.23 L 178.63 287.09 L 176.48 286.92 L 174.34 286.71 L 172.20 286.46 L 170.07 286.18 L 167.95 285.86 L 165.84 285.50 L 163.75 285.10 L 161.66 284.67 L 159.58 284.21 L 157.52 283.70 L 155.47 283.16 L 153.43 282.59 L 151.41 281.97 L 149.40 281.33 L 147.41 280.64 L 145.43 279.93 L 143.47 279.17 L 141.53 278.39 L 139.61 277.56 L 137.70 276.71 L 135.81 275.82 L 133.94 274.89 L 132.10 273.93 L 130.27 272.94 L 128.46 271.92 L 126.68 270.86 L 124.92 269.77 L 123.18 268.65 L 121.46 267.50 L 119.77 266.32 L 118.10 265.10 L 116.46 263.86 L 114.84 262.58 L 113.25 261.28 L 111.69 259.95 L 110.15 258.58 L 108.64 257.19 L 107.16 255.77 L 105.71 254.33 L 104.28 252.85 L 102.88 251.35 L 101.52 249.82 L 100.18 248.27 L 98.87 246.69 L 97.60 245.09 L 96.36 243.46 L 95.14 241.81" fill="none"/>
+    <path class="svg-traco-fino" d="M 211.70 36.15 L 213.65 36.41 L 215.60 36.71 L 217.53 37.03 L 219.46 37.40 L 221.37 37.79 L 223.28 38.22 L 225.17 38.68 L 227.05 39.18 L 228.92 39.70 L 230.78 40.27 L 232.62 40.86 L 234.45 41.49 L 236.26 42.15 L 238.06 42.84 L 239.84 43.56 L 241.61 44.31 L 243.36 45.10 L 245.09 45.92 L 246.80 46.76 L 248.50 47.64 L 250.17 48.55 L 251.83 49.49 L 253.47 50.46 L 255.08 51.46 L 256.68 52.49 L 258.25 53.54 L 259.81 54.63 L 261.33 55.74 L 262.84 56.89 L 264.32 58.06 L 265.78 59.25 L 267.22 60.48 L 268.63 61.73 L 270.02 63.00 L 271.38 64.31 L 272.71 65.63 L 274.02 66.99 L 275.30 68.36 L 276.55 69.77 L 277.78 71.19 L 278.98 72.64 L 280.15 74.11 L 281.29 75.60 L 282.40 77.12 L 283.48 78.66 L 284.54 80.21 L 285.56 81.79 L 286.55 83.39 L 287.52 85.01 L 288.45 86.65 L 289.35 88.30 L 290.22 89.97 L 291.06 91.67 L 291.86 93.37 L 292.64 95.10 L 293.38 96.84 L 294.09 98.60 L 294.76 100.37 L 295.40 102.15 L 296.01 103.95 L 296.59 105.76 L 297.13 107.59 L 297.64 109.43 L 298.11 111.28 L 298.55 113.14 L 298.96 115.01 L 299.33 116.89 L 299.67 118.78 L 299.97 120.68 L 300.24 122.58 L 300.47 124.50 L 300.67 126.42 L 300.84 128.35 L 300.96 130.28 L 301.06 132.22 L 301.12 134.17 L 301.14 136.11 L 301.13 138.07 L 301.08 140.02 L 301.00 141.98 L 300.89 143.94 L 300.73 145.90 L 300.55 147.86 L 300.33 149.82 L 300.07 151.77 L 299.78 153.73 L 299.46 155.69 L 299.10 157.64 L 298.70 159.59 L 298.28 161.54 L 297.81 163.48 L 297.32 165.42 L 296.79 167.35 L 296.22 169.28 L 295.63 171.20 L 295.00 173.11 L 294.33 175.02 L 293.64 176.91 L 292.91 178.80 L 292.14 180.68 L 291.35 182.55 L 290.52 184.40 L 289.67 186.25 L 288.78 188.08 L 287.86 189.91 L 286.90 191.72 L 285.92 193.51 L 284.91 195.29 L 283.87 197.06 L 282.79 198.81 L 281.69 200.55 L 280.56 202.27 L 279.40 203.97 L 278.21 205.66 L 277.00 207.33 L 275.75 208.98 L 274.48 210.61 L 273.18 212.22 L 271.86 213.82 L 270.51 215.39 L 269.13 216.94 L 267.73 218.47 L 266.30 219.98 L 264.85 221.47 L 263.38 222.93 L 261.88 224.38 L 260.36 225.80 L 258.81 227.19 L 257.25 228.56 L 255.66 229.91 L 254.05 231.23 L 252.42 232.52 L 250.77 233.79 L 249.10 235.04 L 247.41 236.25 L 245.71 237.44 L 243.98 238.60 L 242.24 239.74 L 240.48 240.84 L 238.70 241.92 L 236.91 242.97 L 235.10 243.99 L 233.28 244.98 L 231.44 245.94 L 229.59 246.87 L 227.73 247.78 L 225.85 248.65 L 223.96 249.49 L 222.06 250.29 L 220.15 251.07 L 218.23 251.82 L 216.29 252.53 L 214.35 253.21 L 212.40 253.86 L 210.45 254.48 L 208.48 255.07 L 206.51 255.62 L 204.53 256.14 L 202.55 256.62 L 200.56 257.08 L 198.57 257.50 L 196.57 257.88 L 194.57 258.24 L 192.57 258.55 L 190.57 258.84 L 188.56 259.09 L 186.56 259.31 L 184.55 259.49 L 182.55 259.64 L 180.54 259.76 L 178.54 259.84 L 176.54 259.88 L 174.54 259.90 L 172.55 259.87 L 170.56 259.82 L 168.57 259.73 L 166.59 259.60 L 164.62 259.44 L 162.65 259.25 L 160.69 259.03 L 158.74 258.76 L 156.79 258.47 L 154.86 258.14 L 152.93 257.78 L 151.02 257.39 L 149.12 256.96 L 147.22 256.49 L 145.34 256.00 L 143.47 255.47 L 141.62 254.91 L 139.77 254.32 L 137.95 253.69 L 136.13 253.03 L 134.33 252.34 L 132.55 251.62 L 130.79 250.86 L 129.04 250.08 L 127.30 249.26 L 125.59 248.41 L 123.90 247.53 L 122.22 246.62 L 120.56 245.68 L 118.93 244.72 L 117.31 243.72 L 115.71 242.69 L 114.14 241.63 L 112.59 240.55 L 111.06 239.43 L 109.55 238.29 L 108.07 237.12 L 106.61 235.92 L 105.17 234.70 L 103.76 233.45 L 102.38 232.17 L 101.02 230.87 L 99.68 229.54 L 98.38 228.19 L 97.10 226.81 L 95.84 225.41 L 94.62 223.99 L 93.42 222.54 L 92.25 221.07 L 91.11 219.57 L 89.99 218.06 L 88.91 216.52 L 87.86 214.96 L 86.83 213.38 L 85.84 211.79 L 84.88 210.17 L 83.94 208.53 L 83.04 206.87 L 82.17 205.20 L 81.34 203.51 L 80.53 201.80 L 79.76 200.08 L 79.02 198.34 L 78.31 196.58 L 77.63 194.81 L 76.99 193.02 L 76.38 191.22 L 75.80 189.41 L 75.26 187.59 L 74.75 185.75 L 74.28 183.90 L 73.84 182.04 L 73.43 180.17 L 73.06 178.29 L 72.72 176.40 L 72.42 174.50 L 72.15 172.59 L 71.92 170.68 L 71.72 168.75 L 71.56 166.83 L 71.43 164.89 L 71.34 162.95 L 71.28 161.01 L 71.25 159.06 L 71.26 157.11 L 71.31 155.16 L 71.39 153.20 L 71.51 151.24 L 71.66 149.28 L 71.84 147.32 L 72.07 145.36 L 72.32 143.40 L 72.61 141.44 L 72.94 139.49 L 73.30 137.53 L 73.69 135.58 L 74.12 133.64 L 74.58 131.69 L 75.08 129.76 L 75.61 127.82 L 76.17 125.90 L 76.77 123.98 L 77.40 122.06 L 78.06 120.16 L 78.76 118.26 L 79.49 116.37 L 80.25 114.50 L 81.04 112.63 L 81.87 110.77 L 82.73 108.93 L 83.62 107.09 L 84.54 105.27 L 85.49 103.46 L 86.47 101.66 L 87.48 99.88 L 88.53 98.12 L 89.60 96.36 L 90.70 94.63 L 91.83 92.91 L 92.99 91.20 L 94.18 89.52 L 95.40 87.85" fill="none"/>
+    <path class="svg-traco-fino" d="M 148.43 45.69 L 150.33 44.88 L 152.25 44.10 L 154.17 43.36 L 156.10 42.64 L 158.04 41.96 L 159.99 41.31 L 161.95 40.69 L 163.91 40.11 L 165.88 39.56 L 167.86 39.04 L 169.84 38.55 L 171.83 38.10 L 173.82 37.68 L 175.82 37.29 L 177.82 36.94 L 179.82 36.62 L 181.83 36.34 L 183.83 36.09 L 185.84 35.87 L 187.84 35.68 L 189.85 35.54 L 191.85 35.42 L 193.86 35.34 L 195.86 35.29 L 197.85 35.28 L 199.85 35.30 L 201.84 35.36 L 203.82 35.45 L 205.80 35.57 L 207.78 35.73 L 209.74 35.92 L 211.70 36.15" fill="none"/>
+    <path class="svg-traco-fino" d="M 318.96 217.37 L 318.13 219.23 L 317.27 221.07 L 316.38 222.91 L 315.46 224.73 L 314.51 226.54 L 313.53 228.34 L 312.52 230.12 L 311.47 231.88 L 310.40 233.64 L 309.30 235.37 L 308.17 237.09 L 307.01 238.80 L 305.82 240.48 L 304.60 242.15 L 303.36 243.80 L 302.09 245.44 L 300.79 247.05 L 299.46 248.64 L 298.11 250.21 L 296.74 251.77 L 295.34 253.30 L 293.91 254.81 L 292.46 256.29 L 290.98 257.76 L 289.49 259.20 L 287.96 260.62 L 286.42 262.01 L 284.85 263.38 L 283.27 264.73 L 281.66 266.05 L 280.03 267.35 L 278.38 268.62 L 276.71 269.86 L 275.02 271.08 L 273.31 272.27 L 271.59 273.43 L 269.84 274.56 L 268.08 275.67 L 266.31 276.75 L 264.52 277.80 L 262.71 278.82 L 260.88 279.81 L 259.05 280.77 L 257.20 281.70 L 255.33 282.60 L 253.45 283.47 L 251.57 284.31 L 249.67 285.12 L 247.75 285.90 L 245.83 286.64 L 243.90 287.36 L 241.96 288.04 L 240.01 288.69 L 238.05 289.31 L 236.09 289.89 L 234.12 290.44 L 232.14 290.96 L 230.16 291.45 L 228.17 291.90 L 226.18 292.32 L 224.18 292.71" fill="none"/>
+    <circle class="svg-ponto" cx="200.00" cy="42.84" r="4"/>
+    <circle class="svg-ponto" cx="165.30" cy="121.23" r="4"/>
+    <text class="svg-texto" x="200.00" y="32.84" text-anchor="middle">zénite</text>
+    <text class="svg-texto" x="157.30" y="125.23" text-anchor="end">polo (alt = 39° = latitude)</text>
+    <circle class="svg-ponto-forte" cx="299.61" cy="97.06" r="5"/>
+    <text class="svg-texto" x="307.61" y="101.06">astro</text>
+    <path class="svg-traco-grosso" d="M 200.00 42.84 L 199.12 43.69 L 198.23 44.60 L 197.33 45.57 L 196.41 46.62 L 195.47 47.73 L 194.53 48.91 L 193.57 50.17 L 192.60 51.49 L 191.63 52.89 L 190.64 54.37 L 189.65 55.92 L 188.66 57.54 L 187.66 59.23 L 186.67 60.99 L 185.67 62.83 L 184.67 64.73 L 183.68 66.70 L 182.70 68.73 L 181.72 70.82 L 180.75 72.96 L 179.80 75.16 L 178.85 77.41 L 177.92 79.71 L 177.01 82.04 L 176.11 84.41 L 175.24 86.81 L 174.38 89.24 L 173.54 91.70 L 172.72 94.16 L 171.93 96.65 L 171.16 99.14 L 170.41 101.63 L 169.69 104.12 L 168.99 106.61 L 168.31 109.09 L 167.66 111.55 L 167.03 114.01 L 166.43 116.44 L 165.85 118.84 L 165.30 121.23" fill="none"/>
+    <path class="svg-traco-grosso" d="M 165.30 121.23 L 168.12 119.86 L 171.05 118.47 L 174.10 117.06 L 177.27 115.64 L 180.56 114.21 L 183.97 112.78 L 187.49 111.35 L 191.12 109.93 L 194.86 108.52 L 198.70 107.13 L 202.63 105.77 L 206.64 104.44 L 210.72 103.16 L 214.87 101.92 L 219.05 100.75 L 223.27 99.63 L 227.50 98.59 L 231.73 97.63 L 235.94 96.75 L 240.12 95.96 L 244.24 95.26 L 248.29 94.65 L 252.26 94.14 L 256.13 93.72 L 259.89 93.40 L 263.53 93.17 L 267.04 93.02 L 270.41 92.97 L 273.64 92.99 L 276.72 93.09 L 279.65 93.26 L 282.43 93.50 L 285.07 93.79 L 287.55 94.14 L 289.90 94.54 L 292.10 94.98 L 294.17 95.46 L 296.10 95.97 L 297.92 96.50 L 299.61 97.06" fill="none"/>
+    <path class="svg-traco-grosso" d="M 200.00 42.84 L 202.51 43.06 L 205.07 43.33 L 207.68 43.66 L 210.32 44.04 L 213.01 44.49 L 215.73 44.99 L 218.48 45.57 L 221.26 46.21 L 224.07 46.91 L 226.90 47.69 L 229.75 48.54 L 232.61 49.46 L 235.48 50.45 L 238.35 51.51 L 241.22 52.65 L 244.08 53.85 L 246.93 55.13 L 249.76 56.47 L 252.57 57.88 L 255.36 59.36 L 258.11 60.89 L 260.82 62.49 L 263.49 64.14 L 266.12 65.85 L 268.69 67.60 L 271.22 69.40 L 273.68 71.25 L 276.08 73.12 L 278.42 75.04 L 280.70 76.98 L 282.90 78.94 L 285.04 80.93 L 287.11 82.93 L 289.11 84.94 L 291.04 86.96 L 292.89 88.99 L 294.68 91.01 L 296.39 93.04 L 298.04 95.06 L 299.61 97.06" fill="none"/>
+  </svg>
+  <figcaption>Os três arcos grossos são o triângulo de posição. Os seus três lados são <strong>90° − latitude</strong>, <strong>90° − declinação</strong> e <strong>90° − altura</strong>; o ângulo no polo é o <strong>ângulo horário local</strong>. Sabendo três, calcula-se o quarto — e é sempre essa a conta.</figcaption>
+</figure>
+
+    <p>Os três lados medem-se em graus, e cada um é o complemento de uma grandeza que já conheces:</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Os três lados do triângulo de posição, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>Lado do triângulo</th><th>Quanto mede</th><th>Nome clássico</th></tr></thead>
+    <tbody><tr><td>polo → zénite</td><td>90° − latitude</td><td>co-latitude</td></tr><tr><td>polo → astro</td><td>90° − declinação</td><td>distância polar</td></tr><tr><td>zénite → astro</td><td>90° − altura</td><td>distância zenital</td></tr></tbody>
+  </table>
+</div>
+
+    <p>O ângulo do triângulo no vértice do polo é o <strong>ângulo horário local</strong> (LHA) — a
+    diferença entre o meridiano do astro e o teu. E o ângulo no zénite é o <strong>azimute</strong>.
+    Com três elementos, a trigonometria esférica dá os outros; a fórmula que se usa sempre é a lei
+    dos cossenos aplicada ao lado «90° − altura»:</p>
+    <p class="destaque">sin&nbsp;H = sin&nbsp;φ · sin&nbsp;δ + cos&nbsp;φ · cos&nbsp;δ · cos&nbsp;LHA</p>
+    <p>Não é uma fórmula para decorar: é a <em>única</em> conta de toda a navegação astronómica, e o
+    resto do curso é descobrir de onde vêm o δ e o LHA que lá se metem.</p>
+
+    <div class="caixa aviso">
+  <span class="titulo">⚠️ A convenção dos sinais, dita antes de morder</span>
+  <p>A náutica clássica conta a longitude <strong>positiva para oeste</strong>; toda a gente que escreve código hoje — o <code>datetime</code>, o ISO 6709, o GeoJSON, o teu telemóvel — conta <strong>positiva para leste</strong>. Este curso usa <strong>leste positivo</strong> e di-lo em todo o lado. Trocar os dois não dá um erro pequeno: dá um erro do <em>dobro</em> da tua longitude, que em Lisboa são 18 graus, mais de mil milhas náuticas.</p>
+</div>
+
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p>Vamos calcular, passo a passo, a altura e o azimute de um astro. Uso números redondos de
+    propósito, para se poder conferir de cabeça no fim.</p>
+    <p><strong>Dados:</strong> estás na latitude φ = 38° 42,5′ N (a Tapada da Ajuda, em Lisboa). Um
+    astro tem declinação δ = 20° 00,0′ N e, nesse instante, o ângulo horário local vale
+    LHA = 45° 00,0′.</p>
+
+    <h3>Passo 1 — perceber o que o LHA de 45° quer dizer, antes de somar nada</h3>
+    <p>Esta é a primeira pergunta e não «qual é a fórmula», porque um LHA mal interpretado dá um erro
+    de horas e nenhuma fórmula o apanha. LHA conta-se <strong>para oeste</strong> a partir do teu
+    meridiano. LHA = 0 é o astro a passar mesmo por cima do teu meridiano (o «meio-dia» dele);
+    LHA = 45° é o astro já <strong>45° a oeste</strong>, ou seja, passou há três horas — porque o céu
+    roda cerca de 15° por hora. Portanto espera-se um astro a descer, do lado do poente.</p>
+
+    <h3>Passo 2 — a altura, pela lei dos cossenos</h3>
+    <p>Converte os minutos para graus decimais antes de tudo (38° 42,5′ = 38,7083°), porque as
+    funções trigonométricas não sabem o que são minutos.</p>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import altitude_azimute, graus_para_gm
+
+lat, dec, lha = 38.0 + 42.5/60, 20.0, 45.0
+h, zn = altitude_azimute(lat, dec, lha)
+print("latitude  ", graus_para_gm(lat))
+print("altura  H =", graus_para_gm(h), "= %.4f graus" % h)
+print("azimute Zn=", graus_para_gm(zn), "= %.4f graus" % zn)</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>latitude   38° 42.5′
+altura  H = 47° 05.2′ = 47.0872 graus
+azimute Zn= 257° 23.5′ = 257.3910 graus</samp></pre>
+
+    <h3>Passo 3 — o azimute, e porque é que se usa <code>atan2</code> e não <code>atan</code></h3>
+    <p>A fórmula do azimute é a mesma lei resolvida para o outro ângulo. Escrita com uma tangente
+    simples, dá o ângulo certo mas <strong>perde o quadrante</strong>: a tangente de 120° e a de −60°
+    são iguais, e o programa não sabe qual queres. Com <code>atan2(y, x)</code> os dois sinais
+    entram separados e o quadrante vem de graça. Foi por isto que gerações de tábuas náuticas
+    traziam a regra «se o LHA for maior que 180°, Zn = 360° − Z»: era a maneira de fazer à mão o que
+    o <code>atan2</code> faz sozinho.</p>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>import math
+from almanaque import graus_para_rad, rad_para_graus, norm360
+
+lat, dec, lha = math.radians(38.0+42.5/60), math.radians(20.0), math.radians(45.0)
+y = -math.sin(lha)
+x = math.tan(dec)*math.cos(lat) - math.sin(lat)*math.cos(lha)
+print("com atan2 :", norm360(rad_para_graus(math.atan2(y, x))), "graus")
+print("com atan  :", rad_para_graus(math.atan(y/x)), "graus  &lt;- mesmo angulo, quadrante perdido")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>com atan2 : 257.3910365490734 graus
+com atan  : 77.3910365490734 graus  &lt;- mesmo angulo, quadrante perdido</samp></pre>
+
+    <h3>Passo 4 — conferir sem confiar</h3>
+    <p>Um resultado que não se confere é um palpite com casas decimais. Duas verificações baratas:</p>
+    <ul>
+      <li>O astro tem δ = 20° N e tu estás a 38,7° N. Quando ele passar pelo teu meridiano (LHA = 0),
+        a altura tem de ser exatamente 90° − |38,7083 − 20| = 71,29°. Se a fórmula não der isso, está
+        errada.</li>
+      <li>Com LHA = 45° (oeste) o azimute tem de ficar <strong>a oeste do sul</strong>, ou seja entre
+        180° e 270°. Se sair 110°, trocaste um sinal.</li>
+    </ul>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import altitude_azimute
+
+# 1) no transito (LHA = 0) a altura tem de ser 90 - |lat - dec|
+h0, _ = altitude_azimute(38.0+42.5/60, 20.0, 0.0)
+print("altura no transito  :", round(h0, 6))
+print("90 - |lat - dec|    :", round(90 - abs(38.0+42.5/60 - 20.0), 6))
+
+# 2) o azimute com LHA = 45 tem de cair entre 180 e 270
+_, zn = altitude_azimute(38.0+42.5/60, 20.0, 45.0)
+print("azimute             :", round(zn, 4), "-&gt; a oeste do sul?", 180 &lt; zn &lt; 270)
+
+# 3) e a simetria: LHA = -45 (ou seja 315) da a mesma altura e o azimute espelhado
+hA, zA = altitude_azimute(38.0+42.5/60, 20.0, 45.0)
+hB, zB = altitude_azimute(38.0+42.5/60, 20.0, 315.0)
+print("alturas iguais?     ", abs(hA-hB) &lt; 1e-12, " azimutes somam 360?", abs(zA+zB-360) &lt; 1e-12)</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>altura no transito  : 71.291667
+90 - |lat - dec|    : 71.291667
+azimute             : 257.391 -&gt; a oeste do sul? True
+alturas iguais?      True  azimutes somam 360? True</samp></pre>
+
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <p>O mesmo tipo de problema, com metade dos passos dados. Faz a conta antes de abrir.</p>
+
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p>Estás em <strong>φ = 60° 00,0′ N</strong>. Um astro tem <strong>δ = 60° 00,0′ N</strong>.</p>
+      <ol>
+        <li><em>Dado:</em> quando LHA = 0, a altura é 90° − |60 − 60| = <strong>90°</strong>: o astro
+          passa-te exatamente por cima.</li>
+        <li><strong>______</strong> Qual é a altura quando LHA = 180° (o astro no meridiano, do lado
+          do polo)? Faz a conta e diz o que ela significa fisicamente.</li>
+        <li><em>Dado:</em> a fórmula sin H = sin φ sin δ + cos φ cos δ cos LHA, com LHA = 180°, fica
+          sin H = sin φ sin δ − cos φ cos δ = −cos(φ + δ).</li>
+        <li><strong>______</strong> Para que valor de φ + δ é que essa altura passa a ser
+          <em>negativa</em>, e que nome tem um astro que nunca fica com altura negativa?</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2.</strong> sin H = −cos(60 + 60) = −cos 120° = +0,5, logo H = 30°. O astro
+        está a 30° de altura, a norte. Significa que <em>nunca se põe</em>: às 0 h de ângulo horário
+        está a 90°, às 12 h está a 30°, e no meio anda por valores entre os dois — sempre acima do
+        horizonte.</p>
+        <p><strong>Passo 4.</strong> −cos(φ + δ) fica negativo quando cos(φ + δ) é positivo, ou seja
+        quando <strong>φ + δ &lt; 90°</strong>. A fronteira é φ + δ = 90°: exatamente aí o astro
+        toca o horizonte no trânsito inferior. Um astro com φ + δ ≥ 90° é
+        <strong>circumpolar</strong> — nasce e põe-se nunca. É por isso que a lição 4 tem de tratar
+        «este astro não nasce hoje» como um resultado normal e não como um erro, e é por isso que a
+        função <code>evento()</code> do curso levanta <code>SemEvento</code> em vez de devolver
+        <code>None</code> em silêncio.</p>
+      </details>
+    </div>
+
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <p>Estas são as conceções erradas que aparecem mesmo quando se aprende isto — e não as que se
+    inventariam por simetria. Três delas apanharam-me a escrever este curso e estão assinaladas.</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns desta lição, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody><tr><td>«A altura do astro diz-me onde estou»</td><td>Alguém mede uma altura e espera uma posição a sair.</td><td>Diz-te a <strong>distância</strong> a um ponto, logo um círculo inteiro de posições. Precisas de <strong>dois</strong> astros (ou do mesmo duas vezes, com a tua deslocação conhecida) para cruzar dois círculos.</td></tr><tr><td>«Declinação é o mesmo que altura»</td><td>Usar o δ da tabela diretamente como altura acima do horizonte.</td><td>Só coincidem para quem está no equador com o astro no meridiano. A declinação é medida a partir do <strong>equador celeste</strong>; a altura a partir do <strong>teu horizonte</strong>. O que as liga é o triângulo.</td></tr><tr><td>«O azimute conta-se a partir do sul»</td><td>Azimutes que dão 0° quando o astro está a sul.</td><td>Houve tabelas antigas que o faziam, e daí a confusão. A convenção moderna, e a deste curso, conta do <strong>norte</strong>, no sentido dos ponteiros: N = 0°, E = 90°, S = 180°, W = 270°.</td></tr><tr><td>⚠️ «O ângulo horário e a ascensão reta são a mesma coisa com outro nome»</td><td>Meter a ascensão reta da tabela onde a fórmula pede LHA.</td><td>A ascensão reta mede-se <strong>para leste a partir do ponto vernal</strong> — uma referência que está no céu e roda com ele. O ângulo horário mede-se <strong>para oeste a partir de um meridiano da Terra</strong>. A ponte entre os dois é o tempo sidéreo, e é a lição 2 inteira. <em>Este erro apanhou-me a escrever o curso</em>: escrevi <code>gha = gmst − ra</code> com o tempo sidéreo <em>médio</em> quando o almanaque usa o <em>aparente</em>, e custou 0,3 minutos de arco — ver a nota das fases.</td></tr><tr><td>«Um astro circumpolar é um caso raro que se ignora»</td><td>Código que devolve <code>None</code> para o nascer do Sol e não explica.</td><td>Acima do círculo polar é o caso <strong>normal</strong> durante metade do ano. Um almanaque que devolve linhas em branco sem dizer porquê é um almanaque partido: ver a exceção <code>SemEvento</code> na lição 4.</td></tr></tbody>
+  </table>
+</div>
+
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <p>Do mais fácil ao mais difícil. Tenta antes de abrir a solução. O exercício E3 é código que
+    corre e é o mais importante dos três.</p>
+
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — reconhecer o ponto subastral</h3>
+<p>Às 12:00 UT de um certo dia, o almanaque diz que o Sol tem GHA = 0° 00,0′ e δ = 23° 26,0′ N. Em que ponto da Terra é que o Sol está exatamente a pique nesse instante? Que nome tem esse paralelo?</p>
+<details class="solucao"><summary>Solução</summary>
+<p>Latitude = declinação = <strong>23° 26,0′ N</strong>. Longitude = GHA para oeste = <strong>0°</strong>, ou seja o meridiano de Greenwich. O ponto fica no <strong>Trópico de Câncer</strong>, sobre o meridiano de Greenwich — no deserto da Líbia. É o solstício de junho: 23° 26′ é a obliquidade da eclíptica, e o trópico é <em>definido</em> como o paralelo onde o Sol chega ao zénite, não o contrário. Repara que o trópico anda: a obliquidade diminui cerca de 47″ por século, e o trópico desce com ela.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — a latitude pelo Sol ao meio-dia, sem almanaque nenhum</h3>
+<p>Estás algures no hemisfério norte. Ao meio-dia solar (o instante em que o Sol está mais alto) mediste a altura do Sol: <strong>51° 18,0′</strong>, virado a sul. Sabes de outra fonte que nesse dia a declinação do Sol era <strong>12° 30,0′ N</strong>. Qual é a tua latitude? Escreve a conta e diz porque é que ela funciona.</p>
+<details class="solucao"><summary>Solução</summary>
+<p>No trânsito, LHA = 0 e a fórmula colapsa em <strong>H = 90° − |φ − δ|</strong>. Com o Sol a sul e no hemisfério norte, φ &gt; δ, logo φ − δ = 90° − H.</p><p>90° − 51° 18,0′ = 38° 42,0′. Somando a declinação: φ = 38° 42,0′ + 12° 30,0′ = <strong>51° 12,0′ N</strong>.</p><p><strong>Porque funciona:</strong> no trânsito o triângulo de posição degenera — os três vértices ficam no mesmo meridiano e o triângulo achata-se numa linha. Sem triângulo não há trigonometria: é uma soma. É por isso que a latitude foi resolvida séculos antes da longitude, e é por isso que a lição 1 vai poder dizer que o almanaque nasceu por causa da <em>longitude</em>, não da latitude.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código: desenhar o círculo de posição</h3>
+<p>Escreve uma função que, dada a posição do ponto subastral (latitude e longitude) e uma altura observada, devolva pontos do <strong>círculo de posição</strong> — o conjunto de sítios de onde se mediria exatamente essa altura. Depois <strong>verifica</strong> que ela está certa: para cada ponto que ela devolve, calcula a altura com <code>altitude_azimute</code> e confirma que dá o valor pedido.</p><p>🔴 A parte que interessa é a verificação. Uma função de geodesia que «parece bem» e nunca foi conferida contra a fórmula inversa é a forma mais comum de pôr um erro de sinal num mapa.</p>
+<details class="solucao"><summary>Solução</summary>
+<p>A conta é o problema direto da geodesia esférica: a partir de um ponto, andar uma distância angular <em>d</em> = 90° − H num azimute <em>b</em>.</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>import math
+from almanaque import altitude_azimute, graus_para_rad, rad_para_graus, norm180
+
+def circulo_de_posicao(lat_gp, lon_gp, altura, passos=12):
+    """Pontos (lat, lon) de onde se mede `altura` para um astro no ponto subastral."""
+    d = graus_para_rad(90.0 - altura)          # raio angular do circulo
+    la0, lo0 = graus_para_rad(lat_gp), graus_para_rad(lon_gp)
+    fora = []
+    for k in range(passos):
+        b = 2*math.pi*k/passos                 # azimute a partir do ponto subastral
+        la = math.asin(math.sin(la0)*math.cos(d) + math.cos(la0)*math.sin(d)*math.cos(b))
+        lo = lo0 + math.atan2(math.sin(b)*math.sin(d)*math.cos(la0),
+                              math.cos(d) - math.sin(la0)*math.sin(la))
+        fora.append((rad_para_graus(la), rad_para_graus(lo)))
+    return fora
+
+# --- a verificacao, que e o exercicio a serio ---------------------------------
+LAT_GP, LON_GP, H = 20.0, -15.0, 40.0
+pior = 0.0
+for la, lo in circulo_de_posicao(LAT_GP, LON_GP, H, passos=36):
+    # o astro esta a pique em (LAT_GP, LON_GP); logo dec = LAT_GP e o GHA e -LON_GP.
+    # o LHA visto de longitude `lo` e (GHA + lo) = (-LON_GP + lo).
+    lha = norm180(-LON_GP + lo)
+    h, _ = altitude_azimute(la, LAT_GP, lha)
+    pior = max(pior, abs(h - H))
+print("36 pontos do circulo; pior desvio da altura pedida: %.3e graus" % pior)
+print("ou seja %.4f segundos de arco" % (pior*3600))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>36 pontos do circulo; pior desvio da altura pedida: 4.263e-14 graus
+ou seja 0.0000 segundos de arco</samp></pre><p><strong>O que a verificação prova:</strong> que a fórmula direta e a inversa concordam à precisão da máquina. Não prova que a convenção de sinal da longitude é a que tu queres — isso não há teste que apanhe, só um exemplo com um sítio conhecido. Por isso é que a convenção está declarada em cima, em caixa de aviso.</p>
+</details>
+</div>
+
+
+    <h2 id="quiz">8. Quiz</h2>
+<p>Corrige-se aqui, sem rede. Cada opção tem a sua explicação — também as erradas, que é onde está o que faltava perceber. Lê-as todas, mesmo quando acertas.</p>
+<div class="quiz" data-quiz="almanaque-l0">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Mediste a altura de uma estrela e obtiveste 30°. O que é que isso te diz, exatamente?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q0" value="a" data-certa="false"><span class="rotulo">Que a estrela tem declinação 30°.</span></label>
+          <p class="explicacao" hidden>A declinação é uma propriedade da estrela e não muda com quem a olha; a altura muda a cada segundo e com cada sítio. Só coincidiriam para um observador no equador com a estrela no meridiano.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q0" value="b" data-certa="false"><span class="rotulo">Que estás a 30° de latitude.</span></label>
+          <p class="explicacao" hidden>Isto é verdade num caso muito particular — a Estrela Polar, cuja altura é quase igual à latitude, porque ela está quase no polo celeste. Generalizar esse caso para qualquer estrela é o erro que a pergunta procura.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q0" value="c" data-certa="false"><span class="rotulo">Que a estrela está a 30° a leste do teu meridiano.</span></label>
+          <p class="explicacao" hidden>Isso seria o ângulo horário, que é um ângulo medido no polo, não uma altura acima do horizonte. São duas coordenadas diferentes do mesmo astro.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q0" value="d" data-certa="true"><span class="rotulo">Que estás a 60° de distância angular do ponto da Terra onde essa estrela está a pique.</span></label>
+          <p class="explicacao" hidden>Certo. 90° − 30° = 60° de distância zenital, e a distância zenital é igual à distância sobre a Terra entre ti e o ponto subastral. São 3600 milhas náuticas, em qualquer direção: um círculo.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que um almanaque publica declinação e GHA, em vez de altura e azimute?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q1" value="a" data-certa="false"><span class="rotulo">Porque altura e azimute são mais difíceis de calcular.</span></label>
+          <p class="explicacao" hidden>É ao contrário: a partir de declinação e GHA, a altura sai de uma linha de trigonometria. A dificuldade não é a conta, é o tamanho que a tabela teria.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q1" value="b" data-certa="false"><span class="rotulo">Porque a declinação não muda nunca e o GHA muda de forma perfeitamente regular.</span></label>
+          <p class="explicacao" hidden>A segunda metade é quase verdade — o GHA cresce cerca de 15° por hora — mas a primeira é falsa: a declinação do Sol varia até cerca de 1 minuto de arco por hora, e a da Lua muito mais. É por isso que as páginas diárias trazem a coluna «d».</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q1" value="c" data-certa="true"><span class="rotulo">Porque altura e azimute dependem de quem olha e de quando, e uma tabela teria de ter uma linha por sítio e por instante.</span></label>
+          <p class="explicacao" hidden>Certo, e é essa a razão de existirem dois sistemas. Declinação e GHA são iguais para toda a gente no mesmo instante; cada leitor converte-os para o seu horizonte com o triângulo de posição.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Uma estrela tem declinação 70° N e tu estás na latitude 30° N. A estrela chega a pôr-se?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q2" value="a" data-certa="false"><span class="rotulo">Sim: como a declinação (70°) é maior do que a latitude (30°), a estrela passa a norte do zénite e portanto atravessa o horizonte a norte.</span></label>
+          <p class="explicacao" hidden>Passar a norte do zénite é verdade — δ &gt; φ garante isso — mas não tem relação com pôr-se ou não. O que decide é φ + δ contra 90°, e aqui dá 100°.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q2" value="b" data-certa="false"><span class="rotulo">Sim, mas só durante parte do ano, quando a declinação dela diminui.</span></label>
+          <p class="explicacao" hidden>A declinação de uma <em>estrela</em> é praticamente fixa: muda alguns segundos de arco por ano, por precessão. Quem tem declinação a variar ao longo do ano é o Sol.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q2" value="c" data-certa="true"><span class="rotulo">Não: φ + δ = 100°, que é maior do que 90°, portanto ela é circumpolar e nunca desce abaixo do horizonte.</span></label>
+          <p class="explicacao" hidden>Certo. A altura mínima do dia dá-se no trânsito inferior e vale φ + δ − 90° = 10°: a estrela desce até 10° de altura, a norte, e volta a subir sem nunca tocar o horizonte.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Na fórmula sin H = sin φ sin δ + cos φ cos δ cos LHA, o que acontece quando LHA = 0?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q3" value="a" data-certa="false"><span class="rotulo">Fica sin H = 1, ou seja o astro está sempre no zénite.</span></label>
+          <p class="explicacao" hidden>Isso só acontece no caso particular em que φ = δ. Para qualquer outro par, o trânsito é a altura máxima do dia, mas não é 90°.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q3" value="b" data-certa="false"><span class="rotulo">A fórmula deixa de valer, porque não se pode dividir por cos LHA.</span></label>
+          <p class="explicacao" hidden>Não há divisão nenhuma na fórmula da altura — cos LHA aparece multiplicado. A divisão aparece na fórmula do azimute, e é por isso que essa se escreve com atan2.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q3" value="c" data-certa="true"><span class="rotulo">Fica sin H = cos(φ − δ), ou seja H = 90° − |φ − δ|: o astro no trânsito.</span></label>
+          <p class="explicacao" hidden>Certo. sin φ sin δ + cos φ cos δ é a identidade do cosseno da diferença. Esta é a conta que dá a latitude pela altura do Sol ao meio-dia, e é por isso que a latitude estava resolvida muito antes da longitude.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o azimute se calcula com <code>atan2(y, x)</code> e não com <code>atan(y/x)</code>?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q4" value="a" data-certa="false"><span class="rotulo">Porque <code>atan2</code> é mais preciso perto de zero.</span></label>
+          <p class="explicacao" hidden>A precisão numérica perto de zero não é a razão — ainda que <code>atan2</code> também se comporte melhor quando x tende para zero. O problema que resolve é o quadrante.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q4" value="b" data-certa="false"><span class="rotulo">Porque <code>atan</code> devolve radianos e <code>atan2</code> devolve graus.</span></label>
+          <p class="explicacao" hidden>As duas devolvem radianos em Python. A conversão para graus é responsabilidade de quem chama, nos dois casos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q4" value="c" data-certa="true"><span class="rotulo">Porque a divisão apaga os sinais de y e de x, e com eles a informação de qual dos quatro quadrantes é o certo.</span></label>
+          <p class="explicacao" hidden>Certo. <code>atan</code> devolve sempre um valor entre −90° e +90°; <code>atan2</code> recebe os dois sinais em separado e devolve o ângulo no quadrante certo. As regras «se o LHA &gt; 180° então Zn = 360° − Z» das tábuas antigas eram exatamente isto, feito à mão.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O que é o «ponto subastral» de um astro?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q5" value="a" data-certa="true"><span class="rotulo">O ponto da superfície da Terra onde esse astro está exatamente no zénite naquele instante.</span></label>
+          <p class="explicacao" hidden>Certo, e é a ideia que transforma o almanaque num atlas: as suas coordenadas são latitude = declinação, longitude oeste = GHA.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q5" value="b" data-certa="false"><span class="rotulo">O ponto do céu diretamente por baixo do horizonte do observador, oposto ao zénite.</span></label>
+          <p class="explicacao" hidden>Isso é o <strong>nadir</strong>, que é um ponto do céu e não da Terra, e que depende do observador e não do astro.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l0-q5" value="c" data-certa="false"><span class="rotulo">O ponto da órbita em que o astro está mais perto da Terra.</span></label>
+          <p class="explicacao" hidden>Isso é o perigeu (para a Lua) ou o periélio (para a Terra em torno do Sol). É uma posição na órbita, não uma posição no mapa.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+
+    <p>Explicar em voz alta, sem jargão, mostra os buracos que a leitura tapa. Esta resposta vai para
+    a entrega e é corrigida.</p>
+<div class="aberta">
+  <label for="feynman-l0">Explica a um colega que sabe programar mas nunca olhou para o céu: porque é que medir a altura de um astro te dá um círculo e não um ponto?
+    <span class="pista">Sem usar as palavras «declinação», «azimute», «ângulo horário» nem «esfera celeste». Se precisares delas, é sinal de que ainda estás a repetir e não a explicar.</span>
+  </label>
+  <textarea id="feynman-l0" data-pergunta="Explica a um colega que sabe programar mas nunca olhou para o céu: porque é que medir a altura de um astro te dá um círculo e não um ponto?"></textarea>
+</div>
+
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas
+  respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e correr
+  <code>/corrigir almanaque</code>.</p>
+</div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Há dois sistemas de coordenadas porque o céu roda e tu não: <strong>altura/azimute</strong>
+        é o que mede quem olha, <strong>declinação/GHA</strong> é o que se pode publicar.</li>
+      <li>Todo o astro tem um <strong>ponto subastral</strong> na Terra, de latitude igual à
+        declinação e longitude oeste igual ao GHA. O almanaque náutico é o atlas desses pontos.</li>
+      <li>Medir a altura <em>H</em> diz-te que estás a <strong>90° − H</strong> do ponto subastral:
+        um <strong>círculo</strong> de posições possíveis, não um ponto.</li>
+      <li>O <strong>triângulo polo–zénite–astro</strong> liga os dois sistemas. Os lados são
+        90°−φ, 90°−δ e 90°−H; o ângulo no polo é o LHA e o ângulo no zénite é o azimute.</li>
+      <li>A conta é sempre a mesma: <strong>sin H = sin φ sin δ + cos φ cos δ cos LHA</strong>. Todo
+        o resto do curso é descobrir de onde vêm δ e LHA.</li>
+    </ul>
+
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Wikipédia, «Hour angle», «Celestial coordinate system» e «Horizontal coordinate
+        system»</strong> — definições e convenções de sinal, que é onde estas coordenadas mais se
+        estragam. Fonte secundária, e diz-se que é.
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Wikipédia, «Intercept method»</strong> — a fórmula da altura calculada e a do
+        azimute, citadas nesta lição na forma exata em que lá estão, e a regra do «computed greater
+        away» que a lição 7 vai usar.
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li>🔴 <strong>Fonte que não é documentação — livro:</strong> Nathaniel Bowditch,
+        <em>The American Practical Navigator</em> («o Bowditch»), publicado desde 1802 e hoje mantido
+        e distribuído sem custo pela agência cartográfica militar dos Estados Unidos.
+        <strong>Porquê:</strong> é o texto que explica <em>porque é</em> que a navegação astronómica
+        tem esta forma, e não só como se faz a conta — a diferença entre um manual e uma referência.
+        <strong>O que saltar:</strong> tudo o que for navegação eletrónica e maré, para já.
+        ⚠️ <strong>Não o abri para escrever esta lição</strong>: está listado em
+        <a href="https://thenauticalalmanac.com">thenauticalalmanac.com</a>, que confirmei, mas não
+        descarreguei nem li o volume. Está aqui como percurso de leitura, não como fonte do que
+        acima se afirma — ver a <a href="bibliografia.html#bowditch">bibliografia</a>.</li>
+      <li>🔴 <strong>Fonte que não é documentação — série:</strong> <em>Longitude</em> (Channel 4 /
+        A&amp;E, 2000, realização de Charles Sturridge), com Michael Gambon como John Harrison e
+        Samuel West como Nevil Maskelyne. <strong>Porquê aqui:</strong> os dois primeiros minutos
+        mostram o problema que esta lição resolve — saber a latitude era fácil e saber a longitude
+        matava tripulações. <strong>O que saltar e com que cuidado:</strong> a série segue o livro de
+        Dava Sobel e trata Maskelyne como antagonista; a própria Wikipédia regista que a acusação de
+        parcialidade vem de Harrison e do filho, repetida por Sobel. Vê-a como drama, não como
+        história. Mais na <a href="bibliografia.html#longitude">bibliografia</a>.
+        <span class="verificado">🌐 Ficha verificada a 2026-09-16</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">Índice do curso</a> · <a href="01-o-que-e-um-almanaque.html">O que é um almanaque →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

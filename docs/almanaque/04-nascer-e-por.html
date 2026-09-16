@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4 · Nascer, pôr e crepúsculos — O almanaque</title>
+<meta name="description" content="A pergunta mais simples do almanaque é a que tem mais convenções escondidas. E é a única coluna que este curso reproduz exatamente — as duas coisas estão ligadas, e perceber porquê é a lição.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/almanaque/04-nascer-e-por.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">O almanaque</a> <span aria-hidden="true">›</span> lição 4</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta nucleo">Lição 4 · núcleo</p>
+    <h1>Nascer, pôr e crepúsculos: a coluna que bate ao minuto</h1>
+    <p class="subtitulo">A pergunta mais simples do almanaque é a que tem mais convenções escondidas. E é a única coluna que este curso reproduz <em>exatamente</em> — as duas coisas estão ligadas, e perceber porquê é a lição.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim desta lição <strong>reproduzes ao minuto</strong> as seis colunas de nascer, pôr e
+    crepúsculos de uma página real do <em>Nautical Almanac</em> para uma latitude dada, e
+    <strong>diagnosticas</strong> os dois casos em que a resposta não existe — sol da meia-noite e
+    noite polar — distinguindo-os um do outro em código.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>De memória.</p>
+    <ol>
+      <li>Qual é o erro que a série do Sol deste curso comete no GHA, medido contra o livro?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Até cerca de <strong>0,42′</strong>; na declinação, até 0,20′. (Lição 3.)</p></details>
+      </li>
+      <li>Um astro é circumpolar quando ____. Escreve a condição.
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Quando <strong>|φ| + |δ| ≥ 90°</strong> com φ e δ do mesmo sinal. (Lição 0.)</p></details>
+      </li>
+      <li>Porque é que a coluna de nascer e pôr do almanaque não precisa de saber a tua longitude?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Porque está em <strong>hora média local</strong> (LMT), que é a mesma para todas as
+          longitudes. (Lição 2.)</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p><strong>Porquê antes de como.</strong> «A que horas nasce o Sol» parece a pergunta mais
+    simples de um almanaque. É a que tem mais convenções escondidas — e é a única coluna do livro
+    que este curso consegue reproduzir <em>exatamente</em>. As duas coisas estão ligadas.</p>
+
+    <h3>A pergunta mal posta, e as três decisões que a tornam respondível</h3>
+    <p>«O Sol nasce» não é um acontecimento físico bem definido. Para ter uma hora, é preciso
+    decidir três coisas, e nenhuma delas é óbvia:</p>
+    <ol>
+      <li><strong>Que parte do Sol?</strong> O centro ou o bordo superior? (Escolhe-se o bordo
+        superior: é o que se vê aparecer.)</li>
+      <li><strong>Que horizonte?</strong> O geométrico, ou o que se vê através da atmosfera? (O que
+        se vê — e a atmosfera levanta o Sol cerca de 34′.)</li>
+      <li><strong>Que atmosfera?</strong> A de hoje, que ninguém conhece, ou uma padrão? (Uma
+        padrão, e por isso a hora publicada é reproduzível mas não é uma previsão exata.)</li>
+    </ol>
+    <p>As três decisões colapsam num único número — a altura do <em>centro</em> do Sol no instante
+    do acontecimento:</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Alturas convencionais de cada acontecimento, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>Acontecimento</th><th>Altura do centro do Sol</th><th>De onde vem esse número</th><th>Para que serve</th></tr></thead>
+    <tbody><tr><td><strong>Nascer / pôr</strong></td><td>−0° 50′ (= −0,833°)</td><td><strong>Medição</strong>: 34′ de refração média no horizonte + 16′ de semidiâmetro. É o instante em que o <em>bordo superior</em> toca o horizonte</td><td>A hora que toda a gente chama nascer do Sol</td></tr><tr><td><strong>Crepúsculo civil</strong></td><td>−6°</td><td><strong>Convenção</strong> internacional. Não há nada de físico nos 6°</td><td>Ainda se lê e se trabalha sem luz artificial; veem-se os planetas mais brilhantes</td></tr><tr><td><strong>Crepúsculo náutico</strong></td><td>−12°</td><td><strong>Convenção</strong></td><td>🔴 A janela em que se pode navegar pelas estrelas: há estrelas visíveis <em>e</em> ainda se distingue a linha do horizonte. É a razão de este número existir</td></tr><tr><td><strong>Crepúsculo astronómico</strong></td><td>−18°</td><td><strong>Convenção</strong></td><td>O céu já está escuro que chegue para observar fontes pontuais</td></tr><tr><td><strong>Lua</strong></td><td>+0° 07,5′ (= +0,125°)</td><td>A paralaxe da Lua (até 61′) quase cancela a refração e o semidiâmetro, e sobra uma altura <strong>positiva</strong></td><td>É a única correção do curso que muda de sinal — e a que mais surpreende</td></tr></tbody>
+  </table>
+</div>
+
+    <div class="caixa dica">
+  <span class="titulo">⭐ O que é medição e o que é convenção, dito à letra</span>
+  <p>Os <strong>−0,833°</strong> do nascer do Sol são uma <em>medição arredondada</em>: 34′ é a refração média da atmosfera-padrão junto ao horizonte, e 16′ é o semidiâmetro médio do Sol. Ambos <em>variam</em> — a refração com a temperatura e a pressão, o semidiâmetro com a distância — e o almanaque usa um valor fixo na mesma.</p><p>Os <strong>−6°, −12° e −18°</strong> são <strong>convenção pura</strong>. Não há nada na física da atmosfera que aconteça a −6° e não a −7°. São limiares acordados para que toda a gente publique a mesma coisa. Dizer isto é obrigação: uma escolha apresentada como resultado é pior do que uma escolha assumida.</p><p>⚠️ Consequência prática do primeiro parágrafo: a hora do nascer do Sol que o almanaque publica <strong>não é verificável ao segundo</strong> por observação. Num dia de inversão térmica, a refração real pode diferir da padrão o suficiente para deslocar o nascer alguns minutos. O número é reproduzível; o acontecimento não é.</p>
+</div>
+
+    <h3>Encontrar o instante: porque é que a fórmula bonita não chega</h3>
+    <p>Há uma fórmula fechada, e é a que aparece em todo o lado:</p>
+    <p class="destaque">cos H = (sin h₀ − sin φ · sin δ) / (cos φ · cos δ)</p>
+    <p>H é o semi-arco diurno: o ângulo horário a que o astro cruza a altura h₀. Nasce a −H do
+    trânsito e põe-se a +H. É exata… <strong>se δ for constante durante o dia</strong>.</p>
+    <p>Não é. A declinação do Sol muda até 1 minuto de arco por hora perto dos equinócios — nos
+    solstícios quase não muda, e é por isso que o erro desta aproximação é sazonal. O almanaque
+    publica ao minuto; o erro da aproximação é dessa ordem. Logo a aproximação está <em>mesmo</em> na
+    fronteira de importar, que é o pior sítio onde uma aproximação pode estar.</p>
+    <p>A alternativa é procurar o zero de <em>altura(t) − h₀</em> por bisseção, reavaliando a
+    posição do Sol a cada passo. Custa cerca de cem avaliações e <strong>elimina a hipótese da
+    resposta</strong>. É a troca certa: microssegundos por uma hipótese a menos.</p>
+
+    <h3>A função tem dois zeros, e um deles pode não existir</h3>
+    <p>A altura de um astro ao longo do dia é uma curva que sobe e desce. Cruza h₀ duas vezes — a
+    subir (nascer) e a descer (pôr). Mas pode não cruzar nenhuma vez, e aí há dois casos
+    completamente diferentes com o mesmo sintoma:</p>
+
+    <div class="caixa critico">
+  <span class="titulo">🔴 «O Sol não nasce hoje» é um resultado, não um erro</span>
+  <p>Acima do círculo polar, durante metade do ano, o Sol não nasce ou não se põe. Isto não é um caso raro que se trate com um <code>try/except</code> no fim: é o comportamento <strong>normal</strong> de uma parte grande do planeta.</p><p>Um almanaque de papel resolve-o com símbolos explícitos nas células — o <em>Nautical Almanac</em> imprime marcas para «sol da meia-noite» e «noite polar». Um programa que devolve <code>None</code> em silêncio produz linhas em branco que ninguém sabe interpretar.</p><p>Por isso o <code>almanaque.py</code> deste curso levanta <code>SemEvento</code>, com a altura-alvo e o sentido na mensagem. A exceção <em>diz o que procurou e não encontrou</em>, que é o mínimo que um resultado negativo tem de fazer.</p>
+</div>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <h3>Passo 1 — escolher contra o que verificar, antes de calcular</h3>
+    <p>A primeira decisão não é a fórmula: é a referência. O <em>Nautical Almanac</em> traz, em cada
+    página de três dias, uma tabela de nascer, pôr e crepúsculos por latitude, em LMT. Se calcular à
+    longitude 0, LMT e UT coincidem e a comparação é direta.</p>
+    <p>⚠️ <strong>E há uma armadilha que me apanhou:</strong> essa tabela é do <strong>dia do
+    meio</strong> dos três da página, não do primeiro. Comparei com 20 de março, vi 2 minutos de
+    diferença nas seis colunas e fui procurar um erro de refração que não existia. Com 21 de março,
+    batem todas.</p>
+
+    <h3>Passo 2 — as seis colunas</h3>
+    <p>Está no exercício E3(a). Corre e vê.</p>
+
+    <h3>Passo 3 — medir o que a aproximação fechada custaria</h3>
+    <p>Vale a pena fazer o erro aparecer, em vez de acreditar que ele existe. Está no E1.</p>
+
+    <h3>Passo 4 — partir o código de propósito</h3>
+    <p>Um almanaque que só foi testado em Lisboa não foi testado. Subir a latitude até a resposta
+    deixar de existir é a forma barata de descobrir o que o código faz quando não sabe — e a
+    resposta certa não é «rebenta» nem «devolve nada»: é «diz qual dos dois casos é». Está no
+    E3(b).</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p>Estás a gerar a tabela de nascer e pôr do teu almanaque para latitudes de 0° a 90° N.</p>
+      <ol>
+        <li><em>Dado:</em> até 66,5° N há sempre nascer e pôr, todos os dias do ano.</li>
+        <li><strong>______</strong> A partir de que latitude é que o Sol deixa de nascer no solstício
+          de dezembro? Escreve a condição em φ e δ e resolve-a.</li>
+        <li><em>Dado:</em> a condição de o Sol não nascer é que a altura máxima do dia fique abaixo
+          de h₀ = −0,833°.</li>
+        <li><strong>______</strong> A latitude que encontraste no passo 2 é exatamente 66,56°
+          (= 90° − 23,44°)? Se não, para que lado é que difere, e porquê?</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2.</strong> A altura máxima do dia é a do trânsito: H = 90° − |φ − δ|. Com
+        δ = −23,44° no solstício de dezembro e φ &gt; 0, fica H = 90° − φ − 23,44°. O Sol não nasce
+        quando H &lt; −0,833°, ou seja quando <strong>φ &gt; 67,39°</strong>.</p>
+        <p><strong>Passo 4.</strong> <strong>Não é 66,56°: é cerca de 0,83° mais a norte.</strong> E
+        a razão é a mesma de o dia do equinócio não ter 12 horas — a refração e o semidiâmetro. O
+        círculo polar «geométrico» está a 66,56°, mas como a atmosfera levanta o Sol 34′ e nós
+        contamos o bordo superior (mais 16′), há uma faixa de quase um grau onde o Sol ainda
+        aparece, ainda que já não devesse.</p>
+        <p class="destaque">O círculo polar dos mapas é uma definição geométrica; o sítio onde o Sol
+        realmente deixa de nascer está mais a norte. As duas coisas não coincidem, e quase nenhum
+        mapa o diz.</p>
+        <p>⚠️ Isto é o cálculo para o <em>solstício</em>. Para saber a latitude a partir da qual há
+        <em>algum</em> dia sem nascer, é o mesmo cálculo — mas para saber quantos dias seguidos, já
+        não há fórmula: conta-se.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <p>O último apanhou-me a escrever esta lição.</p>
+<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns desta lição, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody><tr><td>«O nascer do Sol é quando o centro do Sol está no horizonte»</td><td>Usar h₀ = 0° na fórmula.</td><td>É quando o <strong>bordo superior</strong> toca o horizonte, e a atmosfera ainda o levanta 34′. Somando o semidiâmetro de 16′, o centro está a <strong>−50′</strong>. Com h₀ = 0 erras vários minutos — em Lisboa, cerca de 4.</td></tr><tr><td>«A fórmula fechada cos H = −tan φ tan δ chega»</td><td>Uma única avaliação da declinação por dia.</td><td>Assume a declinação <em>constante</em> durante o dia. A do Sol muda até 1′/h perto dos equinócios, e o erro daí chega a mais de um minuto de tempo — que é precisamente a resolução a que o almanaque publica. O exercício E1 mede-o.</td></tr><tr><td>«Um dia tem sempre nascer e pôr»</td><td>Código que devolve <code>None</code> ou rebenta acima do círculo polar.</td><td>Acima de 66,56° há metade do ano sem um dos dois. E é preciso <strong>distinguir</strong> sol da meia-noite de noite polar, o que a ausência de cruzamento sozinha não diz — mede-se a altura ao meio-dia.</td></tr><tr><td>«No equinócio o dia tem exatamente 12 horas em toda a parte»</td><td>«Equinócio» = «noites iguais», logo 12 h.</td><td>Não tem, e por duas razões que se somam <em>ambas no mesmo sentido</em>: a refração levanta o Sol no nascer e no pôr, e mede-se o bordo e não o centro. O dia do equinócio é mais longo do que 12 h em todo o lado — cerca de 8 minutos no equador e mais ainda em latitudes altas. O E2 calcula-o.</td></tr><tr><td>«A hora do nascer do Sol é uma previsão exata»</td><td>Esperar que o Sol apareça ao segundo.</td><td>A refração real depende da temperatura e da pressão à superfície. O valor tabelado usa uma atmosfera-padrão; num dia de inversão térmica o desvio chega a minutos. O número é <strong>reproduzível</strong>; o acontecimento não é <strong>previsível</strong> com a mesma precisão.</td></tr><tr><td>⚠️ «A tabela do almanaque é para o primeiro dia da página»</td><td>Comparar o cálculo de 20 de março com a linha da página 20-21-22.</td><td>É do <strong>dia do meio</strong>. <em>Isto apanhou-me:</em> comparei com 20 de março, vi 2 minutos de diferença e fui procurar um bug que não existia. Com 21 de março, as seis colunas batem ao minuto.</td></tr></tbody>
+  </table>
+</div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <p>O E3 tem duas partes e a segunda — partir o código de propósito — é a que ensina mais.</p>
+
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — quanto custa assumir a declinação constante?</h3>
+<p>A fórmula fechada do semi-arco diurno, cos H = (sin h₀ − sin φ sin δ)/(cos φ cos δ), usa <em>um</em> valor de declinação para o dia inteiro. A busca por bisseção reavalia a declinação a cada passo. Mede a diferença entre as duas, no dia do equinócio (quando a declinação muda mais depressa) e diz se importa.</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import (dia_juliano, jd_tt, sol, gha, gast_graus, norm180,
+                       altitude_azimute, evento, H0_NASCER_POR, jd_para_hms)
+import math
+
+LAT, LON = 40.0, 0.0            # latitude N40, meridiano de Greenwich (LMT = UT)
+jd0 = dia_juliano(2026, 3, 21)  # o dia do meio da pagina de 20-21-22 de marco
+
+# --- (a) a formula fechada, que assume a declinacao CONSTANTE durante o dia ---
+d_meio = sol(jd_tt(jd0 + 0.5))                       # declinacao ao meio-dia
+cosH = ((math.sin(math.radians(H0_NASCER_POR))
+         - math.sin(math.radians(LAT))*math.sin(math.radians(d_meio["dec"])))
+        / (math.cos(math.radians(LAT))*math.cos(math.radians(d_meio["dec"]))))
+H = math.degrees(math.acos(cosH))                    # semi-arco diurno, em graus
+# transito: quando o GHA do Sol iguala -longitude
+transito = jd0 + 0.5
+for _ in range(50):
+    g = gha(sol(jd_tt(transito))["ra"], transito)
+    transito -= norm180(g + LON)/360.98564736629
+fechada_nascer = transito - H/360.98564736629
+fechada_por    = transito + H/360.98564736629
+
+# --- (b) a busca com bisseccao, que reavalia a declinacao a cada passo --------
+iter_nascer = evento(sol, LAT, LON, jd0, H0_NASCER_POR, True)
+iter_por    = evento(sol, LAT, LON, jd0, H0_NASCER_POR, False)
+
+print("declinacao ao meio-dia: %+.4f graus" % d_meio["dec"])
+print("muda %+.3f minutos de arco por hora"
+      % ((sol(jd_tt(jd0+0.5+1/24))["dec"] - d_meio["dec"])*60))
+print()
+print("            formula fechada   bisseccao     diferenca")
+for rot, a, b in (("nascer", fechada_nascer, iter_nascer), ("por", fechada_por, iter_por)):
+    print("%-7s      %s          %s       %+.1f s"
+          % (rot, jd_para_hms(a), jd_para_hms(b), (a-b)*86400))
+print()
+print("oficial (Nautical Almanac, N 40, 21 de marco de 2026): nascer 06:02  por 18:13")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>declinacao ao meio-dia: +0.3522 graus
+muda +0.988 minutos de arco por hora
+
+            formula fechada   bisseccao     diferenca
+nascer       06:02:38          06:02:02       +35.6 s
+por          18:11:42          18:12:58       -75.9 s
+
+oficial (Nautical Almanac, N 40, 21 de marco de 2026): nascer 06:02  por 18:13</samp></pre>
+<details class="solucao"><summary>Solução</summary>
+<p><strong>Importa, e mais do que eu esperava.</strong> No nascer a fórmula fechada erra cerca de <strong>+36 segundos</strong>; no pôr erra <strong>−76 segundos</strong>. Mais de um minuto — e o almanaque publica ao minuto.</p><p class="destaque">Consequência concreta: a fórmula fechada dá o pôr do Sol às <strong>18:11:42</strong>, que arredonda para <strong>18:12</strong>. O livro imprime <strong>18:13</strong>, que é o que a bisseção dá. A aproximação não erra «um pouco»: erra <em>o minuto publicado</em>.</p><p><strong>A razão de ser assimétrica</strong> — o nascer e o pôr não erram o mesmo, nem sequer para o mesmo lado — é o que vale mesmo a pena perceber. A declinação ao meio-dia está <em>entre</em> a do nascer e a do pôr: subestima num extremo e sobrestima no outro. Se a declinação fosse constante, os dois erros seriam iguais e nulos; é a <strong>variação</strong> que os cria, e por isso apontam em sentidos opostos.</p><p>⭐ Repara também no número do topo: a declinação muda <strong>+0,99′ por hora</strong> nesse dia. É praticamente o valor «d = 1,0» que o próprio almanaque imprime ao fundo da coluna do Sol nessa página — uma confirmação vinda de um sítio completamente diferente.</p><p class="destaque">A bisseção custa cerca de cem avaliações e elimina uma hipótese física da resposta. Na era do papel, cem avaliações eram uma semana de trabalho e a hipótese valia a pena; hoje custam microssegundos e não vale a pena assumir nada.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — porque é que o dia do equinócio não tem 12 horas</h3>
+<p>«Equinócio» quer dizer «noite igual». Calcula a duração do dia no equinócio de março de 2026, no equador e a 60° N, e explica a diferença. Depois encontra o dia do ano em que a duração é <em>mesmo</em> 12 h — tem nome: <em>equilux</em>.</p>
+<details class="solucao"><summary>Solução</summary>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import dia_juliano, sol, evento, H0_NASCER_POR, civil_de_jd
+
+def duracao(lat, jd0):
+    n = evento(sol, lat, 0.0, jd0, H0_NASCER_POR, True)
+    p = evento(sol, lat, 0.0, jd0, H0_NASCER_POR, False)
+    return (p - n)*24.0
+
+jd_eq = dia_juliano(2026, 3, 20)
+for lat in (0.0, 38.7, 60.0):
+    h = duracao(lat, jd_eq)
+    print("lat %4.1f N, dia do equinocio: %.4f h = 12 h + %.1f min" % (lat, h, (h-12)*60))
+
+print()
+# O equilux: o dia em que a duracao passa mesmo por 12 h.
+for lat in (0.0, 38.7, 60.0):
+    achou = None
+    minimo = min(duracao(lat, jd_eq+k) for k in range(-60, 5))
+    for k in range(-60, 5):
+        a, b = duracao(lat, jd_eq+k), duracao(lat, jd_eq+k+1)
+        if (a-12)*(b-12) &lt;= 0:
+            achou = civil_de_jd(jd_eq+k)[:3]; break
+    if achou:
+        print("lat %4.1f N: equilux a %04d-%02d-%02d" % ((lat,) + achou))
+    else:
+        print("lat %4.1f N: NAO HA EQUILUX -- o dia mais curto deste intervalo ainda tem"
+              " %.4f h (= 12 h + %.1f min)" % (lat, minimo, (minimo-12)*60))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>lat  0.0 N, dia do equinocio: 12.1086 h = 12 h + 6.5 min
+lat 38.7 N, dia do equinocio: 12.1355 h = 12 h + 8.1 min
+lat 60.0 N, dia do equinocio: 12.2103 h = 12 h + 12.6 min
+
+lat  0.0 N: NAO HA EQUILUX -- o dia mais curto deste intervalo ainda tem 12.1086 h (= 12 h + 6.5 min)
+lat 38.7 N: equilux a 2026-03-16
+lat 60.0 N: equilux a 2026-03-17</samp></pre><p><strong>Porque é que o dia é mais longo do que 12 h no equinócio:</strong> duas causas que empurram para o mesmo lado. (1) A <strong>refração</strong> levanta o Sol cerca de 34′ junto ao horizonte, logo ele aparece mais cedo e desaparece mais tarde. (2) Chamamos nascer ao instante em que o <strong>bordo superior</strong> aparece, não o centro — mais 16′ para o mesmo lado. Juntas, as duas fazem o Sol cruzar 50′ antes e 50′ depois.</p><p><strong>Porque é que o efeito cresce com a latitude:</strong> porque em latitudes altas o Sol atravessa o horizonte <em>obliquamente</em>, quase a rasar. Os mesmos 50′ de altura demoram muito mais tempo a percorrer. No equador o Sol desce a pique e despacha os 50′ depressa.</p><p>🔴 <strong>E há uma surpresa no resultado, que eu não esperava e o código me disse:</strong> <strong>no equador não existe equilux nenhum.</strong> O dia é sempre mais longo do que a noite, todos os dias do ano. A razão é limpa: no equador o Sol atravessa o horizonte sempre a pique e sempre com a mesma inclinação, logo os 50′ extra valem sempre os mesmos ~6,5 minutos — e não há nenhuma altura do ano em que alguma coisa os compense. A duração mínima do dia no equador é 12 h 6 min, e nunca desce daí.</p><p>⭐ Onde ele existe, o <strong>equilux</strong> cai <em>antes</em> do equinócio de março: cerca de <strong>16 de março</strong> a 38,7° N e <strong>17 de março</strong> a 60° N, contra o equinócio a 20 de março. Repara que a latitude mais alta fica <em>mais perto</em> do equinócio, apesar de ter um excesso maior no dia do equinócio (12,6 min contra 8,1 min). Não é contraditório: o que decide é o excesso a dividir pela <em>rapidez</em> com que a duração do dia muda, e essa rapidez cresce muito mais depressa com a latitude do que o excesso.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código: bater com a tabela oficial, e depois partir de propósito</h3>
+<p>Duas partes.</p><p><strong>(a)</strong> Reproduz as seis colunas de nascer, pôr e crepúsculos da página real do <em>Nautical Almanac</em> para a latitude N 40. <strong>(b)</strong> Depois sobe a latitude até a coisa deixar de ter resposta, e faz o teu código dizer <em>qual</em> dos dois casos degenerados ocorreu.</p>
+<details class="solucao"><summary>Solução</summary>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import (dia_juliano, sol, evento, jd_para_hm,
+                       H0_NASCER_POR, H0_CIVIL, H0_NAUTICO, H0_ASTRONOMICO)
+
+# Tabela oficial da pagina de 2026 March 20,21,22, latitude N 40, em LMT.
+# O livro da UMA linha por pagina de tres dias, e ela e do DIA DO MEIO: 21 de marco.
+OFICIAL = {"crep. nautico manha": (H0_NAUTICO,     True,  "05:03"),
+           "crep. civil manha"  : (H0_CIVIL,       True,  "05:35"),
+           "nascer do Sol"      : (H0_NASCER_POR,  True,  "06:02"),
+           "por do Sol"         : (H0_NASCER_POR,  False, "18:13"),
+           "crep. civil tarde"  : (H0_CIVIL,       False, "18:40"),
+           "crep. nautico tarde": (H0_NAUTICO,     False, "19:12")}
+
+jd0 = dia_juliano(2026, 3, 21)
+for rot, (h0, sobe, esperado) in OFICIAL.items():
+    obtido = jd_para_hm(evento(sol, 40.0, 0.0, jd0, h0, sobe))
+    print("%-22s %s   oficial %s   %s" % (rot, obtido, esperado,
+                                          "BATE" if obtido == esperado else "NAO BATE"))
+
+# E o crepusculo astronomico, que esta pagina nao imprime a N40 (so o nautico):
+print()
+print("crep. astronomico manha: %s  (o livro nao o traz nesta tabela)"
+      % jd_para_hm(evento(sol, 40.0, 0.0, jd0, H0_ASTRONOMICO, True)))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>crep. nautico manha    05:03   oficial 05:03   BATE
+crep. civil manha      05:35   oficial 05:35   BATE
+nascer do Sol          06:02   oficial 06:02   BATE
+por do Sol             18:13   oficial 18:13   BATE
+crep. civil tarde      18:40   oficial 18:40   BATE
+crep. nautico tarde    19:12   oficial 19:12   BATE
+
+crep. astronomico manha: 04:31  (o livro nao o traz nesta tabela)</samp></pre><p>As seis batem <strong>ao minuto</strong>. É a verificação mais forte de todo o curso, e vale a pena notar porquê: envolve a série do Sol, o tempo sidéreo, a refração, o semidiâmetro, a convenção da altura, a busca do cruzamento <em>e</em> a convenção do dia do meio. Se qualquer uma delas estivesse errada, alguma coluna falhava.</p><p class="destaque">Repara na diferença entre esta lição e a 3. Aqui o Sol erra os mesmos 0,4′ de sempre — mas 0,4′ de declinação convertem-se em poucos segundos de tempo, e o arredondamento ao minuto engole-os. <strong>A mesma série é insuficiente para uma coluna e exata para outra.</strong></p><p><strong>(b) Onde parte:</strong></p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import dia_juliano, sol, evento, SemEvento, jd_para_hm, H0_NASCER_POR
+
+# O circulo polar artico esta a 90 - 23,44 = 66,56 graus.
+for lat in (60.0, 66.0, 66.6, 70.0, 80.0):
+    linha = []
+    for mes, dia in ((6, 21), (12, 21)):
+        jd0 = dia_juliano(2026, mes, dia)
+        try:
+            n = jd_para_hm(evento(sol, lat, 0.0, jd0, H0_NASCER_POR, True))
+            p = jd_para_hm(evento(sol, lat, 0.0, jd0, H0_NASCER_POR, False))
+            linha.append("%s / %s" % (n, p))
+        except SemEvento:
+            # A excecao diz o que procurou. Falta saber se e sol da meia-noite
+            # ou noite polar, e isso mede-se: basta ver a altura ao meio-dia.
+            from almanaque import jd_tt, gha, lha, altitude_azimute
+            d = sol(jd_tt(jd0 + 0.5))
+            h, _ = altitude_azimute(lat, d["dec"], lha(gha(d["ra"], jd0+0.5), 0.0))
+            linha.append("sol da meia-noite" if h &gt; 0 else "noite polar     ")
+    print("lat %5.1f N  |  21 jun: %-20s |  21 dez: %s" % (lat, linha[0], linha[1]))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>lat  60.0 N  |  21 jun: 02:36 / 21:28        |  21 dez: 09:02 / 14:54
+lat  66.0 N  |  21 jun: sol da meia-noite    |  21 dez: 10:35 / 13:21
+lat  66.6 N  |  21 jun: sol da meia-noite    |  21 dez: 10:55 / 13:02
+lat  70.0 N  |  21 jun: sol da meia-noite    |  21 dez: noite polar     
+lat  80.0 N  |  21 jun: sol da meia-noite    |  21 dez: noite polar</samp></pre><p>Repara que a exceção sozinha não chega: ela diz «não houve cruzamento», o que é compatível com o Sol estar sempre em cima ou sempre em baixo. Para distinguir, mede-se a altura ao meio-dia. <strong>Um resultado negativo tem de dizer qual dos negativos é.</strong></p>
+</details>
+</div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<p>Correção imediata. Lê todas as explicações.</p>
+<div class="quiz" data-quiz="almanaque-l4">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o nascer do Sol se calcula com a altura do centro do Sol a −0° 50′?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q0" value="a" data-certa="false"><span class="rotulo">Porque é a convenção internacional acordada para o nascer do Sol, sem base física.</span></label>
+          <p class="explicacao" hidden>Os <em>crepúsculos</em> a −6°, −12° e −18° são convenção pura. Os −50′ não: são a soma de duas quantidades medidas, a refração média e o semidiâmetro.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q0" value="b" data-certa="false"><span class="rotulo">Porque o observador está a alguns metros acima do nível do mar e vê o horizonte mais abaixo.</span></label>
+          <p class="explicacao" hidden>Isso é a depressão do horizonte, que existe e entra na redução de uma altura observada (lição 7) — mas as tabelas de nascer e pôr do almanaque são calculadas para um observador ao nível do mar.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q0" value="c" data-certa="true"><span class="rotulo">Porque a refração no horizonte levanta o Sol cerca de 34′ e o bordo superior está 16′ acima do centro.</span></label>
+          <p class="explicacao" hidden>Certo: 34 + 16 = 50 minutos de arco. É uma medição arredondada e não uma convenção — ao contrário dos crepúsculos.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O crepúsculo náutico está definido a −12°. Porque é que esse limiar existe?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q1" value="a" data-certa="false"><span class="rotulo">Porque a −12° a refração atmosférica deixa de ser calculável.</span></label>
+          <p class="explicacao" hidden>A refração continua perfeitamente calculável; aliás, a −12° o Sol está bem abaixo do horizonte e a refração aplica-se ao astro que se está a observar, não ao Sol.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q1" value="b" data-certa="false"><span class="rotulo">Porque a −12° o olho humano passa a visão escotópica.</span></label>
+          <p class="explicacao" hidden>A adaptação ao escuro é gradual e não tem um limiar em −12°. O critério é operacional: ver estrelas e ver o horizonte ao mesmo tempo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q1" value="c" data-certa="true"><span class="rotulo">Porque é a janela em que há estrelas visíveis <em>e</em> ainda se distingue a linha do horizonte, que é o que uma observação de sextante precisa.</span></label>
+          <p class="explicacao" hidden>Certo. Sem horizonte não há referência para medir a altura; sem escuridão não há estrelas. O crepúsculo náutico é o intervalo em que as duas condições coexistem.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que este curso usa bisseção em vez da fórmula fechada cos H = (sin h₀ − sin φ sin δ)/(cos φ cos δ)?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q2" value="a" data-certa="false"><span class="rotulo">Porque a fórmula fechada falha quando o astro é circumpolar.</span></label>
+          <p class="explicacao" hidden>Falha mesmo — o argumento do arco-cosseno sai fora de [−1, 1] — mas isso deteta-se com um <code>if</code>. A razão de fundo é outra: a hipótese da declinação constante.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q2" value="b" data-certa="true"><span class="rotulo">Porque a fórmula fechada assume a declinação constante durante o dia, e a do Sol muda até 1′ por hora perto dos equinócios.</span></label>
+          <p class="explicacao" hidden>Certo. A bisseção reavalia a declinação a cada passo e por isso não tem essa hipótese lá dentro. Custa cerca de cem avaliações, que hoje não se sentem.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q2" value="c" data-certa="false"><span class="rotulo">Porque a bisseção é mais rápida do que avaliar um arco-cosseno.</span></label>
+          <p class="explicacao" hidden>É muito mais lenta: cerca de cem avaliações da posição do Sol contra uma. Troca-se velocidade por não ter de assumir nada.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">No dia do equinócio, o dia tem 12 horas?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q3" value="a" data-certa="false"><span class="rotulo">Sim, exatamente 12 horas em toda a Terra — é o que a palavra «equinócio» significa.</span></label>
+          <p class="explicacao" hidden>A palavra significa isso, mas descreve o instante em que o Sol cruza o equador celeste, não a duração do dia. O dia em que a duração é mesmo 12 h chama-se <em>equilux</em> e cai noutro dia.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q3" value="b" data-certa="false"><span class="rotulo">Sim no equador, e não noutras latitudes.</span></label>
+          <p class="explicacao" hidden>Nem no equador: mesmo lá, a refração e o semidiâmetro acrescentam cerca de 8 minutos. O equador é o sítio onde o efeito é <em>menor</em>, não onde desaparece.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q3" value="c" data-certa="true"><span class="rotulo">Não: é mais longo, porque a refração e o semidiâmetro empurram os dois no mesmo sentido — e o efeito cresce com a latitude.</span></label>
+          <p class="explicacao" hidden>Certo. No equador são cerca de 8 minutos a mais; em latitudes altas muito mais, porque o Sol atravessa o horizonte obliquamente e demora mais a percorrer os mesmos 50′.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O teu código não encontra nascer do Sol para uma latitude de 80° N a 21 de junho. O que deve devolver?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q4" value="a" data-certa="true"><span class="rotulo">Um resultado explícito que distinga «sol da meia-noite» de «noite polar», medindo a altura ao meio-dia.</span></label>
+          <p class="explicacao" hidden>Certo. A ausência de cruzamento é compatível com os dois casos opostos, e um almanaque que não os distingue produz uma célula em branco que ninguém sabe ler.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q4" value="b" data-certa="false"><span class="rotulo"><code>None</code>, e quem chamar que trate disso.</span></label>
+          <p class="explicacao" hidden>É a opção que produz linhas em branco sem explicação. Acima do círculo polar isto não é um caso de canto: é metade do ano.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q4" value="c" data-certa="false"><span class="rotulo">Deve levantar uma exceção e parar a geração do almanaque.</span></label>
+          <p class="explicacao" hidden>Parar é pior do que devolver <code>None</code>: um almanaque tem de conseguir imprimir a página inteira. A exceção serve para o cálculo não mentir, mas quem gera a tabela apanha-a e escreve o símbolo certo.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A série do Sol deste curso erra até 0,4′ no GHA. Porque é que as horas de nascer e pôr batem ao minuto com o livro?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q5" value="a" data-certa="false"><span class="rotulo">Porque a refração é muito maior do que 0,4′ e mascara o erro.</span></label>
+          <p class="explicacao" hidden>A refração é maior (34′), mas é uma correção <em>aplicada</em>, não ruído: não mascara nada. Se o erro de 0,4′ importasse, continuaria a importar depois da refração.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q5" value="b" data-certa="true"><span class="rotulo">Porque perto do horizonte o Sol varia de altura depressa, logo 0,4′ de erro angular convertem-se em poucos segundos de tempo, que o arredondamento ao minuto engole.</span></label>
+          <p class="explicacao" hidden>Certo — e é uma boa lição geral: o mesmo erro do modelo pesa muito ou nada, conforme a grandeza que se está a publicar.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l4-q5" value="c" data-certa="false"><span class="rotulo">Porque as tabelas de nascer e pôr do almanaque são menos rigorosas do que as de GHA.</span></label>
+          <p class="explicacao" hidden>São publicadas a uma resolução mais grossa (o minuto contra 0,1′), o que é diferente de serem menos rigorosas. A resolução escolhida é que faz o erro desaparecer.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+
+    <p>Vai para a entrega.</p>
+<div class="aberta">
+  <label for="feynman-l4">Explica porque é que «a que horas nasce o Sol» é uma pergunta que precisa de três decisões antes de ter resposta, e o que acontece a quem não as tomar.
+    <span class="pista">Sem usar «refração», «semidiâmetro» nem «declinação». Descreve o que se vê.</span>
+  </label>
+  <textarea id="feynman-l4" data-pergunta="Explica porque é que «a que horas nasce o Sol» é uma pergunta que precisa de três decisões antes de ter resposta, e o que acontece a quem não as tomar."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas
+  respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e correr
+  <code>/corrigir almanaque</code>.</p>
+</div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>O nascer e o pôr calculam-se com o centro do Sol a <strong>−0° 50′</strong>: 34′ de
+        refração (medição) + 16′ de semidiâmetro. Os crepúsculos a −6°, −12° e −18° são
+        <strong>convenção</strong>, e diz-se que são.</li>
+      <li>O crepúsculo <strong>náutico</strong> é o que interessa a bordo: é a janela em que há
+        estrelas <em>e</em> horizonte visível.</li>
+      <li>A fórmula fechada assume a declinação constante. A <strong>bisseção</strong> não assume
+        nada e custa microssegundos: é a troca certa hoje.</li>
+      <li>«Não nasce» é um <strong>resultado</strong>, e há dois: sol da meia-noite e noite polar.
+        Distinguem-se medindo a altura ao trânsito.</li>
+      <li>🔴 As seis colunas batem <strong>ao minuto</strong> com o livro — a mesma série que erra
+        0,4′ no GHA é exata aqui, porque a grandeza publicada é outra.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Wikipédia, «Sunrise equation»</strong> — a fórmula do ângulo horário e o valor
+        h₀ ≈ −0,833° = −50′, com a decomposição em «<em>atmospheric refraction ~34 arcminutes</em>»
+        e «<em>solar semidiameter ~16 arcminutes</em>».
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Wikipédia, «Twilight»</strong> — as três definições, e em particular a frase sobre
+        o crepúsculo náutico: «<em>Sailors can take reliable star sightings … when they can
+        distinguish a visible horizon for reference</em>», que é a justificação operacional do
+        limiar de −12°. <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong><em>The Nautical Almanac</em> 2026, página de 20–22 de março</strong>
+        (<a href="https://thenauticalalmanac.com">thenauticalalmanac.com</a>) — a tabela de nascer,
+        pôr e crepúsculos por latitude que esta lição reproduz ao minuto. 🔴 O PDF não está no
+        repositório: tem direitos de autor. <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>NOAA Solar Calculator, «Solar Calculation Details»</strong> — declara «<em>accurate
+        to within a minute for locations between +/- 72° latitude, and within 10 minutes outside of
+        those latitudes</em>», e avisa que «<em>the effects of the atmosphere vary with atmospheric
+        pressure, humidity and other variables</em>». É a fonte da afirmação de que a hora publicada
+        é reproduzível mas não é uma previsão exata.
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li>🔴 <strong>Fonte que não é documentação — livro:</strong> Jean Meeus,
+        <em>Astronomical Algorithms</em>, capítulo dos nascimentos e ocasos. <strong>Porquê:</strong>
+        é onde está explicado o método iterativo com interpolação a três pontos, que é a alternativa
+        clássica à bisseção usada aqui e que faz menos avaliações. <strong>O que saltar:</strong> os
+        casos dos planetas, para já. ⚠️ <strong>Não tenho o exemplar</strong>: não cito páginas.
+        <a href="bibliografia.html#meeus">Ver a bibliografia</a>.</li>
+      <li>🔴 <strong>Fonte que não é documentação — vídeo/documentário:</strong> ⚠️
+        <strong>Procurei e não encontrei</strong> nenhuma peça audiovisual sobre o crepúsculo
+        náutico ou sobre as convenções de nascer e pôr que pudesse citar com ficha completa e
+        verificada. Digo-o em vez de inventar uma referência. O que existe em abundância são vídeos
+        de divulgação sobre o sol da meia-noite, que não vi e por isso não recomendo.</li>
+    </ul>
+    <footer class="rodape">
+      <p><a href="03-o-sol.html">← O Sol</a> · <a href="index.html">Índice do curso</a> · <a href="05-a-lua.html">A Lua →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

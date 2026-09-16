@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5 · A Lua — O almanaque</title>
+<meta name="description" content="Não é «mais um astro». É a lição em que se descobre que as aproximações das lições 3 e 4 eram específicas do Sol — e onde uma correção muda de sinal.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/almanaque/05-a-lua.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">O almanaque</a> <span aria-hidden="true">›</span> lição 5</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta nucleo">Lição 5 · núcleo</p>
+    <h1>A Lua: onde tudo o que era desprezável passa a dominar</h1>
+    <p class="subtitulo">Não é «mais um astro». É a lição em que se descobre que as aproximações das lições 3 e 4 eram específicas do Sol — e onde uma correção muda de sinal.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim desta lição <strong>explicas</strong> porque é que a Lua «nasce» a uma altura
+    positiva enquanto o Sol nasce a uma altura negativa, <strong>calculas</strong> a fase e o
+    instante da lua cheia com erro medido contra valores publicados, e <strong>declaras</strong>,
+    com um número, porque é que a Lua deste curso não serve para navegar.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>De memória.</p>
+    <ol>
+      <li>Que três correções transformam a altura do centro do Sol em −50′ no nascer?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Duas: refração (−34′) e semidiâmetro (−16′). (Lição 4.)</p></details>
+      </li>
+      <li>O que é a nutação e qual é o seu período?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>A oscilação do eixo da Terra puxada pela Lua, com o período do nodo lunar:
+          <strong>18,6 anos</strong>. Vale até 17,2″ em longitude. (Lição 3.)</p></details>
+      </li>
+      <li>Porque é que o erro do Sol deste curso (0,4′ no GHA) não estraga a hora do nascer?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Porque junto ao horizonte a altura varia depressa: 0,4′ traduzem-se em segundos de
+          tempo, que o arredondamento ao minuto engole. (Lição 4.)</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p><strong>Porquê antes de como.</strong> A Lua é o corpo onde tudo o que era desprezável passa
+    a dominar. Não é uma lição sobre «mais um astro»: é a lição em que se descobre que as
+    aproximações que sustentaram as lições 3 e 4 eram <em>específicas do Sol</em>, e não verdades
+    gerais.</p>
+
+    <div class="caixa dica">
+  <span class="titulo">⭐ Porque é que a Lua é <em>o</em> problema difícil da astronomia</span>
+  <p>A Terra à volta do Sol é um problema de dois corpos com perturbações pequenas: os planetas puxam, mas de longe. A Lua à volta da Terra é um problema de <strong>três corpos</strong> em que o terceiro — o Sol — puxa com força comparável. O resultado é uma órbita que não fecha, com um perigeu que roda em 8,85 anos e um nodo que roda em 18,6.</p><p>A consequência prática: a teoria lunar moderna (ELP) tem <strong>milhares</strong> de termos periódicos. A série que este curso usa tem <strong>sete</strong> para a longitude, quatro para a latitude e cinco para a paralaxe, e declara <strong>0,5° de erro</strong> — que é o <em>dobro</em> do diâmetro aparente da Lua.</p><p>🔴 Isto é uma fronteira do curso, dita à letra: <strong>a Lua deste curso serve para saber onde apontar os olhos e para a fase. Não serve para navegar.</strong> Para navegar pela Lua, usa-se o livro.</p>
+</div>
+
+    <h3>As quatro coisas que só a Lua tem</h3>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="O que a Lua tem de diferente do Sol, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>Grandeza</th><th>No Sol</th><th>Na Lua</th><th>Porque é que a diferença existe</th></tr></thead>
+    <tbody><tr><td><strong>Paralaxe horizontal</strong></td><td>0,15″ — desprezável</td><td><strong>54′ a 61,5′</strong> — enorme</td><td>A Lua está a 60 raios terrestres; o Sol a 23 500. Vista de sítios diferentes da Terra, a Lua está num sítio diferente do céu</td></tr><tr><td><strong>Semidiâmetro</strong></td><td>15,8′ a 16,3′ (varia 3 %)</td><td>14,7′ a 16,8′ (varia 14 %)</td><td>A órbita da Lua é bem mais excêntrica, em termos relativos</td></tr><tr><td><strong>Altura a que «nasce»</strong></td><td>−0° 50′ (negativa)</td><td>🔴 <strong>+0° 07,5′ (positiva)</strong></td><td>A paralaxe (+57′ em média) <em>supera</em> a refração (−34′) e o semidiâmetro (−16′). É a única correção do curso que muda de sinal</td></tr><tr><td><strong>Velocidade em longitude</strong></td><td>0,041°/h, quase constante</td><td>0,50 a 0,68°/h — varia 30 %</td><td>Excentricidade e perturbação solar. É por isso que o almanaque tem uma coluna «v» para a Lua e não para o Sol</td></tr><tr><td><strong>Declinação máxima</strong></td><td>±23,44°, fixa</td><td><strong>±18,3° a ±28,7°</strong>, num ciclo de 18,6 anos</td><td>A órbita da Lua está inclinada 5,1° sobre a eclíptica, e o seu nodo roda em 18,6 anos. É a mesma rotação do nodo que produz a nutação da lição 3</td></tr><tr><td><strong>Dificuldade de calcular</strong></td><td>Série com 3 termos dá 0,01°</td><td>Precisa de <strong>centenas</strong> de termos para o mesmo</td><td>O Sol e a Terra são um problema de dois corpos com pequenas perturbações. A Lua é um problema de três corpos onde a perturbação do Sol é grande</td></tr></tbody>
+  </table>
+</div>
+
+    <h3>A paralaxe: a correção que muda tudo de sinal</h3>
+    <p>Todas as efemérides deste curso são <strong>geocêntricas</strong>: dão a posição vista do
+    centro da Terra. Para o Sol, a diferença entre isso e a posição vista da superfície vale 0,15
+    segundos de arco — ninguém liga.</p>
+    <p>Para a Lua vale até <strong>61,5 minutos de arco</strong>, ou seja mais do que o diâmetro
+    aparente dela. Estás a um raio terrestre do centro, e a Lua está a 60; o ângulo que isso subtende
+    é grande. E o sentido é sempre o mesmo: <strong>a paralaxe empurra a Lua para baixo</strong> no
+    teu céu, porque tu estás mais perto dela do que o centro da Terra.</p>
+    <p>É por isso que a altura a que a Lua «nasce» é positiva. Vale a pena ver a soma:</p>
+    <p class="destaque">−34′ (refração) − 16′ (semidiâmetro) + 57′ (paralaxe) = <strong>+7′</strong></p>
+    <p>Esta é a única correção em todo o curso que muda um sinal. Se te habituaste a «o astro nasce
+    quando está um bocadinho abaixo do horizonte», a Lua desmente-te.</p>
+
+    <h3>A fase é geometria, não aspeto</h3>
+    <p>A fase da Lua é a <strong>elongação</strong>: a diferença de longitude eclíptica entre a Lua
+    e o Sol. 0° é lua nova, 90° quarto crescente, 180° cheia, 270° minguante. É um instante
+    geocêntrico, <strong>igual para toda a gente no planeta</strong>.</p>
+    <p>O que muda com o sítio é a <em>orientação</em> do crescente: em Lisboa a Lua nova cresce da
+    direita, no equador parece um sorriso, no hemisfério sul cresce da esquerda. Isso não é fase — é
+    o ângulo entre o horizonte local e a eclíptica.</p>
+    <p>⚠️ E a duração de uma lunação <strong>não é 29,53 dias</strong>. Esse é o valor médio na época
+    J2000. Um mês sinódico concreto varia entre cerca de 29,26 e 29,80 dias — mais de doze horas de
+    diferença — porque a Lua anda mais depressa no perigeu e a perturbação do Sol muda de sinal ao
+    longo do ano.</p>
+
+    <h3>O ciclo de 18,6 anos, que já encontraste sem saber</h3>
+    <p>A órbita da Lua está inclinada <strong>5,14°</strong> sobre a eclíptica. A linha onde os dois
+    planos se cruzam — a linha dos nodos — <strong>roda para trás, uma volta em 18,6 anos</strong>.
+    Consequência: a declinação máxima da Lua num ano oscila entre 23,44° − 5,14° = 18,3° e
+    23,44° + 5,14° = 28,7°.</p>
+    <p>🔴 <strong>É o mesmo nodo da nutação da lição 3.</strong> A oscilação de 17,2″ no eixo da
+    Terra e a variação de 10° na declinação máxima da Lua são o mesmo fenómeno visto de dois sítios.
+    Na lição 8 vamos encontrá-lo pela terceira vez, nas marés.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <h3>Passo 1 — decidir o que a Lua deste curso pode prometer, antes de a calcular</h3>
+    <p>A primeira pergunta não é «que fórmula» — é «para que leitor». A série disponível declara
+    0,5° de erro. Isso é o dobro do diâmetro aparente da Lua. Portanto:</p>
+    <ul>
+      <li><strong>Serve</strong> para a fase, que muda 12° por dia — 0,5° é uma hora de erro.</li>
+      <li><strong>Serve</strong> para o nascer e o ocaso ao minuto, pela mesma razão da lição 4.</li>
+      <li>🔴 <strong>Não serve</strong> para uma redução de altura, que precisa de 0,1′.</li>
+    </ul>
+    <p>Decidir isto primeiro evita o erro clássico de calcular tudo e só no fim perguntar se presta.</p>
+
+    <h3>Passo 2 — medir contra o livro, e resistir à boa notícia</h3>
+    <p>Medido contra a página de 20 de março de 2026, o erro anda pelos 6 minutos de arco — cinco
+    vezes melhor do que o declarado. É tentador concluir que a série «na verdade vale 6′».</p>
+    <p>⚠️ <strong>Não vale.</strong> O erro de uma série truncada é <em>periódico</em>: um dia pode
+    calhar num mínimo. Para decidir usa-se a garantia da fonte; a medição serve para apanhar bugs de
+    implementação, que é coisa diferente. Está no E3(a).</p>
+
+    <h3>Passo 3 — o teste que a série passa bem: as fases</h3>
+    <p>Os instantes de lua cheia dependem da <em>elongação</em>, e a elongação muda 0,55° por hora —
+    depressa. Logo um erro de 0,1° de longitude dá poucos minutos de erro no instante. É o oposto do
+    que acontecia com o equinócio na lição 3, onde o Sol lento amplificava o erro angular em erro de
+    tempo. Está no E3(b).</p>
+
+    <h3>Passo 4 — desconfiar de uma média famosa</h3>
+    <p>«A Lua nasce 50 minutos mais tarde por dia» é o género de facto que se repete sem nunca se
+    medir. Mede-se no E3(c), e a variação é grande.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p>Tens uma altura da Lua medida com um sextante: <strong>Hs = 34° 12,0′</strong>, bordo
+      inferior, ao nível do mar, sem erro de índice. O almanaque dá, para esse instante,
+      <strong>HP = 59,1′</strong> e <strong>SD = 16,1′</strong>.</p>
+      <ol>
+        <li><em>Dado:</em> a refração a 34° de altura vale cerca de 1,4′, e subtrai-se.</li>
+        <li><strong>______</strong> Aplica o semidiâmetro. Qual é o sinal, e porquê?</li>
+        <li><em>Dado:</em> a paralaxe em altura é HP·cos(altura), e não HP.</li>
+        <li><strong>______</strong> Aplica a paralaxe e calcula Ho. Depois diz o que aconteceria se
+          tivesses esquecido a paralaxe.</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2.</strong> <strong>Soma-se</strong> (+16,1′): mediste o <em>bordo
+        inferior</em>, e o centro está mais <em>acima</em>. Se tivesses medido o bordo superior,
+        subtraía-se.</p>
+        <p><strong>Passo 4.</strong> A paralaxe em altura é 59,1′ × cos 34,2° = 48,9′, e
+        <strong>soma-se</strong>: a paralaxe baixou a Lua no teu céu, logo a altura verdadeira
+        (geocêntrica) é maior do que a que mediste.</p>
+        <p>Ho = 34° 12,0′ − 1,4′ + 16,1′ + 48,9′ = <strong>35° 15,6′</strong>.</p>
+        <p class="destaque">Sem a paralaxe terias 34° 26,7′ — <strong>48,9 minutos de arco</strong>
+        a menos, ou seja <strong>quase 49 milhas náuticas</strong> de erro de posição. Não é uma
+        correção fina: é a maior correção de toda a navegação astronómica.</p>
+        <p>⭐ Porque é que a paralaxe entra com cos(altura): no horizonte (altura 0) estás
+        lateralmente deslocado em relação ao centro da Terra pelo máximo possível, e a paralaxe vale
+        HP inteiro. No zénite (altura 90°) estás <em>em linha</em> com o centro da Terra e a Lua, e a
+        paralaxe não desloca a direção nenhuma — vale zero. O cosseno interpola entre os dois.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <p>Um destes é sobre como se lê uma medição, e é o mais importante da lição.</p>
+<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns desta lição, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody><tr><td>«A Lua nasce quando o centro está a −50′, como o Sol»</td><td>Usar a mesma altura-alvo para os dois.</td><td>🔴 Para a Lua a altura-alvo é <strong>positiva</strong>, cerca de +7,5′, porque a paralaxe (+57′) supera a refração (−34′) e o semidiâmetro (−16′). Usar −50′ dá um erro de vários minutos.</td></tr><tr><td>«A fase da Lua depende de onde estás na Terra»</td><td>«Aqui a lua está mais cheia».</td><td>A fase é a <strong>elongação geocêntrica</strong>: um instante de geometria, igual para toda a gente. O que muda com o sítio é a <em>orientação</em> do crescente — em Lisboa parece um C ou um D, perto do equador parece um sorriso — e isso confunde-se com a fase.</td></tr><tr><td>«O mês lunar tem 29,5 dias»</td><td>Usar 29,53 para prever a lua nova que vem.</td><td>29,53059 d é a <strong>média</strong>. Um mês sinodico concreto varia entre cerca de 29,26 e 29,80 dias — mais de <strong>12 horas</strong> de diferença. Prever a lua nova somando a média erra horas, e num eclipse isso é tudo.</td></tr><tr><td>«A Lua percorre a mesma faixa do céu que o Sol»</td><td>Assumir que a declinação da Lua também vai a ±23,44°.</td><td>A órbita da Lua está inclinada 5,14° sobre a eclíptica e o seu nodo roda em 18,6 anos. A declinação máxima oscila entre <strong>±18,3° e ±28,7°</strong>. Nos anos de lunistício maior a Lua cheia de inverno passa muito mais alto do que o Sol alguma vez passa.</td></tr><tr><td>⚠️ «Se medi 6′ de erro, o meu modelo vale 6′»</td><td>Substituir a exatidão declarada pela medição de um dia.</td><td>A série usada aqui declara 0,5° e <em>mede</em> cerca de 6′ no dia 20 de março de 2026. Uma medição num dia não é uma garantia: o erro de uma série truncada é periódico e pode estar num mínimo. <strong>Para decidir, usa-se o declarado</strong>; a medição serve para apanhar bugs, não para relaxar a tolerância.</td></tr><tr><td>«A Lua está sempre a 384 400 km»</td><td>Usar a distância média num cálculo de paralaxe.</td><td>Varia entre cerca de 56 e 64 raios terrestres, ou seja 14 % — e a paralaxe com ela, de 54′ a 61,5′. Usar a média mete até 3,5′ de erro na altura corrigida, que é 35 vezes a tolerância do livro.</td></tr></tbody>
+  </table>
+</div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <p>O E3 tem três partes e cada uma mede uma coisa diferente.</p>
+
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — porque é que a Lua «nasce» a uma altura positiva?</h3>
+<p>Para o Sol, a altura do centro no nascer é −50′. Para a Lua, o almanaque usa +7,5′. Escreve a soma que produz esse número, com o sinal de cada parcela, e explica cada sinal numa frase.</p>
+<details class="solucao"><summary>Solução</summary>
+<p>Três correções, e uma delas tem sinal contrário às outras duas:</p><ul><li><strong>Refração</strong>: <strong>−34′</strong>. A atmosfera levanta a imagem, logo a Lua parece mais alta do que está; para ela estar <em>mesmo</em> no horizonte aparente, a posição geométrica tem de estar 34′ <em>abaixo</em>.</li><li><strong>Semidiâmetro</strong>: <strong>−16′</strong>. Chamamos nascer ao instante em que o bordo superior aparece; o centro está 16′ mais abaixo.</li><li><strong>Paralaxe horizontal</strong>: <strong>+57′</strong>. Esta é a diferente. As efemérides dão a posição vista do <em>centro</em> da Terra; tu estás na superfície, um raio terrestre mais perto da Lua e «por baixo» dela. Isso empurra a Lua para <em>baixo</em> no teu céu — logo, para ela estar no teu horizonte, a posição geocêntrica tem de estar <em>acima</em>.</li></ul><p class="destaque">−34′ − 16′ + 57′ = <strong>+7′</strong>. É por isso que a altura-alvo da Lua é positiva, e é a única vez em todo o curso em que isso acontece.</p><p>⚠️ O 57′ é a paralaxe <em>média</em>. Ela varia entre 54′ e 61,5′, logo a altura-alvo correta varia entre +4′ e +11,5′. O almanaque usa um valor fixo, e o erro daí é de segundos de tempo — engolido pelo arredondamento ao minuto. Mas numa <em>altura observada</em>, na lição 7, esse mesmo erro já não é engolido por nada.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — o ciclo de 18,6 anos, e o que ele tem a ver com a lição 3</h3>
+<p>Calcula a declinação máxima da Lua em cada ano entre 2024 e 2042. Descreve o padrão, e depois explica que <em>outro</em> fenómeno deste curso tem exatamente o mesmo período — e porquê.</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import dia_juliano, jd_tt, lua
+
+# A declinacao maxima da Lua num ano, ao longo do ciclo do nodo (18,6 anos).
+print("ano   declinacao maxima da Lua")
+for ano in range(2024, 2044, 2):
+    m = max(abs(lua(jd_tt(dia_juliano(ano,1,1) + k/2.0))["dec"]) for k in range(2*366))
+    barra = "#" * int((m - 17)*4)
+    print("%d        %5.2f graus  %s" % (ano, m, barra))
+print()
+print("A obliquidade vale 23,44 graus; a orbita da Lua esta inclinada 5,14 sobre a ecliptica.")
+print("23,44 + 5,14 = %.2f  (lunisticio maior)   23,44 - 5,14 = %.2f  (menor)" % (23.44+5.14, 23.44-5.14))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>ano   declinacao maxima da Lua
+2024        28.73 graus  ##############################################
+2026        28.42 graus  #############################################
+2028        26.64 graus  ######################################
+2030        23.64 graus  ##########################
+2032        20.23 graus  ############
+2034        18.59 graus  ######
+2036        20.68 graus  ##############
+2038        23.91 graus  ###########################
+2040        26.87 graus  #######################################
+2042        28.55 graus  ##############################################
+
+A obliquidade vale 23,44 graus; a orbita da Lua esta inclinada 5,14 sobre a ecliptica.
+23,44 + 5,14 = 28.58  (lunisticio maior)   23,44 - 5,14 = 18.30  (menor)</samp></pre>
+<details class="solucao"><summary>Solução</summary>
+<p>O padrão medido é uma oscilação entre <strong>18,59°</strong> (2034) e <strong>28,73°</strong> (2024), com período de 18,6 anos. A conta simples dá 23,44° ∓ 5,14° = 28,58° e 18,30°: a obliquidade da eclíptica mais ou menos a inclinação da órbita lunar.</p><p>⚠️ <strong>Repara que o medido não bate exatamente com a conta simples</strong>, e é uma diferença a explicar em vez de arredondar: 28,73 contra 28,58, e 18,59 contra 18,30. A inclinação da órbita lunar não é uma constante de 5,14° — oscila cerca de ±0,15° com o período dos nodos —, e a obliquidade verdadeira leva a nutação. A soma de dois números redondos não descreve um sistema com três periodicidades; descreve a ordem de grandeza, e é assim que deve ser lida.</p><p><strong>O mecanismo:</strong> a órbita da Lua está inclinada 5,14° sobre a eclíptica, e a linha onde os dois planos se cruzam — a linha dos <em>nodos</em> — roda para trás, completando uma volta em 18,6 anos. Quando o nodo ascendente coincide com o equinócio de março, as duas inclinações somam-se e a Lua chega a ±28,7° (<em>lunistício maior</em>); 9,3 anos depois subtraem-se e ela só chega a ±18,3°.</p><p class="destaque">O outro fenómeno com o mesmo período é a <strong>nutação</strong> — a lição 3. E não é coincidência: a nutação <em>é</em> este nodo. A mesma órbita inclinada que faz a Lua subir e descer no céu é a que puxa o bojo equatorial da Terra e faz o eixo oscilar. Uma causa, dois efeitos em sítios muito diferentes do curso.</p><p>⭐ Isto tem consequências fora da astronomia: em maré, a constituinte nodal de 18,6 anos modula a amplitude das marés vivas, e os serviços hidrográficos aplicam-lhe «fatores nodais» — voltamos a encontrá-la na lição 8.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código: medir a Lua contra o livro, e depois contra a realidade</h3>
+<p>Três medições.</p><p><strong>(a)</strong> Compara o teu GHA, declinação e paralaxe horizontal da Lua com a página oficial de 20 de março de 2026. <strong>(b)</strong> Compara os instantes de lua cheia com os publicados. <strong>(c)</strong> Mede quanto varia o «atraso diário» do nascer da Lua, que toda a gente diz ser «cerca de 50 minutos».</p>
+<details class="solucao"><summary>Solução</summary>
+<p><strong>(a) Posição:</strong></p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import dia_juliano, jd_tt, lua, gha, graus_para_gm, norm180
+
+# Valores da pagina diaria oficial de 2026 March 20 (Nautical Almanac).
+# Colunas da Lua: GHA, v, Dec, d, HP.
+OFICIAL = {0:  (167+52.6/60,  11.6,  7+15.3/60, 16.5, 59.1),
+           6:  (254+55.4/60,  11.2,  8+53.5/60, 16.2, 59.3),
+           12: (341+55.8/60,  10.8, 10+30.2/60, 16.0, 59.3),
+           18: ( 68+54.6/60,  10.3, 12+05.7/60, 15.7, 59.4)}
+
+print(" h |    GHA oficial   o meu        erro   |   Dec erro |  HP erro")
+for h in sorted(OFICIAL):
+    g_of, v_of, d_of, d_d, hp_of = OFICIAL[h]
+    jdu = dia_juliano(2026, 3, 20, h)
+    d = lua(jd_tt(jdu))
+    print("%2d | %-12s %-12s %+7.2f'  | %+8.2f'  | %+6.2f'"
+          % (h, graus_para_gm(g_of), graus_para_gm(gha(d["ra"], jdu)),
+             norm180(gha(d["ra"], jdu) - g_of)*60, (d["dec"] - d_of)*60,
+             d["paralaxe"]*60 - hp_of))
+
+print()
+print("A serie declara 0,5 graus = 30 minutos de arco. O medido anda pelos 6'.")
+print("Melhor do que o declarado -- mas o que se usa a decidir e o DECLARADO.")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp> h |    GHA oficial   o meu        erro   |   Dec erro |  HP erro
+ 0 | 167° 52.6′   167° 46.9′     -5.68'  |    -2.10'  |  +0.08'
+ 6 | 254° 55.4′   254° 50.0′     -5.38'  |    -2.32'  |  -0.02'
+12 | 341° 55.8′   341° 50.9′     -4.92'  |    -2.40'  |  +0.07'
+18 | 68° 54.6′    68° 49.3′      -5.35'  |    -2.99'  |  +0.05'
+
+A serie declara 0,5 graus = 30 minutos de arco. O medido anda pelos 6'.
+Melhor do que o declarado -- mas o que se usa a decidir e o DECLARADO.</samp></pre><p>Erros de alguns minutos de arco — bem melhores do que os 0,5° declarados, e bem piores do que os 0,1′ do livro. A paralaxe, curiosamente, é a grandeza que sai melhor: é a que depende só da distância, e a distância é a parte «fácil» da órbita lunar.</p><p><strong>(b) Fases:</strong></p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import (dia_juliano, jd_tt, elongacao, fraccao_iluminada,
+                       norm180, jd_para_hms)
+
+# Luas cheias publicadas para 2026 (timeanddate.com, fonte secundaria, 2026-09-16).
+CHEIAS = [(2026,1,3,10,2), (2026,2,1,22,9), (2026,3,3,11,37)]
+
+def instante(alvo, perto):
+    lo, hi = perto-1.5, perto+1.5
+    f = lambda t: norm180(elongacao(jd_tt(t)) - alvo)
+    for _ in range(80):
+        meio = (lo+hi)/2
+        if f(lo)*f(meio) &lt;= 0: hi = meio
+        else: lo = meio
+    return (lo+hi)/2
+
+for (a,m,d,h,mi) in CHEIAS:
+    ref = dia_juliano(a,m,d,h,mi)
+    obt = instante(180.0, ref)
+    print("%04d-%02d-%02d  publicado %02d:%02d   calculado %s   %+6.1f min"
+          % (a,m,d,h,mi, jd_para_hms(obt), (obt-ref)*1440))
+
+# E o mes sinodico REAL, entre luas novas seguidas.
+# A primeira versao deste bloco procurava as luas novas por saltos de 29,5 dias e
+# dava um mes de 30,48 d -- FORA do intervalo publicado. Era bug do detetor, nao
+# da Lua: saltar quase um mes e depois bissectar pode cair na lunacao errada.
+# Aqui varre-se dia a dia e procura-se a passagem de norm180(elongacao) por zero
+# a SUBIR, que e exactamente a lua nova. Sem saltos, sem hipoteses.
+print()
+novas, jd0 = [], dia_juliano(2025, 12, 15)
+ant = norm180(elongacao(jd_tt(jd0)))
+for k in range(1, 420):
+    t = jd0 + k
+    act = norm180(elongacao(jd_tt(t)))
+    if ant &lt; 0 &lt;= act:
+        lo, hi = t-1, t
+        for _ in range(60):
+            meio = (lo+hi)/2
+            if norm180(elongacao(jd_tt(meio))) &lt; 0: lo = meio
+            else: hi = meio
+        novas.append((lo+hi)/2)
+    ant = act
+durs = [novas[i+1]-novas[i] for i in range(len(novas)-1)]
+print("%d luas novas encontradas; %d meses sinodicos medidos" % (len(novas), len(durs)))
+print("minimo %.4f d   maximo %.4f d   media %.4f d"
+      % (min(durs), max(durs), sum(durs)/len(durs)))
+print("publicado: media 29.53059 d em J2000; extremos 29.26 a 29.80 d")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>2026-01-03  publicado 10:02   calculado 09:59:14     -2.8 min
+2026-02-01  publicado 22:09   calculado 22:00:38     -8.4 min
+2026-03-03  publicado 11:37   calculado 11:35:37     -1.4 min
+
+15 luas novas encontradas; 14 meses sinodicos medidos
+minimo 29.2906 d   maximo 29.8117 d   media 29.5426 d
+publicado: media 29.53059 d em J2000; extremos 29.26 a 29.80 d</samp></pre><p>E repara no segundo bloco de números: o mês sinódico <strong>não</strong> é 29,53 dias. Varia mais de meio dia de mês para mês, e a média que calculei bate com a média publicada. Quem prevê a próxima lua nova somando 29,53 erra horas.</p><p><strong>(c) O atraso diário:</strong></p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import dia_juliano, lua, evento, jd_para_hm, SemEvento
+
+# A Lua nasce ~50 min mais tarde a cada dia. Mas «~50» esconde muita variacao.
+ant, atrasos = None, []
+for k in range(60):
+    jd0 = dia_juliano(2026, 3, 1) + k
+    try:
+        n = evento(lua, 40.0, 0.0, jd0, 0.125, True)
+    except SemEvento:
+        continue
+    if ant is not None and 0.5 &lt; n - ant &lt; 1.5:
+        atrasos.append((n - ant - 1.0)*1440)
+    ant = n
+print("atraso do nascer da Lua, a 40 N, em marco e abril de 2026:")
+print("  minimo %.0f min   maximo %.0f min   media %.0f min"
+      % (min(atrasos), max(atrasos), sum(atrasos)/len(atrasos)))
+print()
+print("A mesma coisa a 60 N, onde o efeito e muito maior:")
+ant, a60 = None, []
+for k in range(60):
+    jd0 = dia_juliano(2026, 3, 1) + k
+    try: n = evento(lua, 60.0, 0.0, jd0, 0.125, True)
+    except SemEvento: continue
+    if ant is not None and 0.5 &lt; n - ant &lt; 1.5: a60.append((n - ant - 1.0)*1440)
+    ant = n
+print("  minimo %.0f min   maximo %.0f min" % (min(a60), max(a60)))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>atraso do nascer da Lua, a 40 N, em marco e abril de 2026:
+  minimo 23 min   maximo 74 min   media 52 min
+
+A mesma coisa a 60 N, onde o efeito e muito maior:
+  minimo -1 min   maximo 110 min</samp></pre><p>«Cerca de 50 minutos» é uma média que esconde uma variação enorme. A 40° N o atraso vai de <strong>23 a 74 minutos</strong>; a 60° N vai de <strong>−1 a 110 minutos</strong>.</p><p class="destaque">🔴 A 60° N o atraso chega a ser <strong>negativo</strong>: há noites em que a Lua nasce <em>mais cedo</em> do que na véspera. Este é o fenómeno a que se chama <strong>lua da colheita</strong>, e não é folclore — sai do cálculo.</p><p><strong>O mecanismo</strong> é o mesmo do E2 da lição 4. O atraso do nascer não é o tempo que a Lua leva a percorrer o seu movimento próprio: é o tempo que o <em>horizonte</em> leva a alcançá-la. Quando a eclíptica faz um ângulo pequeno com o horizonte — o que acontece em latitudes altas e em certas alturas do ano — a Lua avança quase <em>paralelamente</em> ao horizonte, e o horizonte apanha-a quase de imediato. Em latitudes baixas a eclíptica cruza o horizonte quase a pique e o atraso fica perto da média.</p><p>⭐ Não escrevi «cerca de 50 minutos» e depois medi para confirmar: medi e a média deu 52 minutos a 40° N. O que interessa não é a média — é o intervalo, e o intervalo contém um valor negativo que nenhuma média deixaria ver.</p>
+</details>
+</div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<p>Correção imediata.</p>
+<div class="quiz" data-quiz="almanaque-l5">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Porque é que a altura a que a Lua «nasce» é <em>positiva</em> (+7,5′) e a do Sol é negativa (−50′)?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q0" value="a" data-certa="false"><span class="rotulo">Porque a Lua é mais brilhante e vê-se antes de estar no horizonte.</span></label>
+          <p class="explicacao" hidden>O brilho não entra em nenhuma destas contas. As três correções são geométricas e atmosféricas, não fotométricas.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q0" value="b" data-certa="true"><span class="rotulo">Porque a paralaxe horizontal da Lua, cerca de +57′, supera a refração (−34′) e o semidiâmetro (−16′) somados.</span></label>
+          <p class="explicacao" hidden>Certo: −34 − 16 + 57 = +7. A paralaxe existe porque estás na superfície e a efeméride é geocêntrica; para o Sol vale 0,15″ e não conta.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q0" value="c" data-certa="false"><span class="rotulo">Porque a Lua está mais perto e a refração afeta-a menos.</span></label>
+          <p class="explicacao" hidden>A refração depende da altura aparente do astro e da atmosfera, não da distância do astro. A distância entra pela paralaxe, que é outra coisa.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O mês sinódico médio é 29,53059 dias. Podes usá-lo para prever a próxima lua nova?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q1" value="a" data-certa="false"><span class="rotulo">Sim: a média é exata por definição, é o erro de medição que varia.</span></label>
+          <p class="explicacao" hidden>A média é uma média de valores que variam mesmo — não é uma definição. Cada lunação tem a sua duração, e a diferença entre a mais curta e a mais longa é de meio dia.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q1" value="b" data-certa="false"><span class="rotulo">Sim, desde que se corrija pela precessão dos equinócios.</span></label>
+          <p class="explicacao" hidden>A precessão tem período de 26 000 anos e não tem nada a ver com a variação de lunação para lunação, que é mensal.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q1" value="c" data-certa="true"><span class="rotulo">Não com precisão: um mês concreto varia entre cerca de 29,26 e 29,80 dias, mais de 12 horas de diferença.</span></label>
+          <p class="explicacao" hidden>Certo. A variação vem da excentricidade da órbita lunar e da perturbação do Sol. Para uma data aproximada chega; para um eclipse, 12 horas é a diferença entre ver e não ver.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A declinação máxima da Lua varia entre ±18,3° e ±28,7° num ciclo de 18,6 anos. De onde vêm esses dois números?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q2" value="a" data-certa="false"><span class="rotulo">Da variação da distância da Lua entre perigeu e apogeu.</span></label>
+          <p class="explicacao" hidden>A distância varia 14 % e afeta a paralaxe e o semidiâmetro, não a declinação. Declinação é um ângulo de direção, não depende do raio.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q2" value="b" data-certa="false"><span class="rotulo">Da precessão do eixo da Terra, que tem período de 26 000 anos.</span></label>
+          <p class="explicacao" hidden>A precessão altera a obliquidade e a posição do equinócio muito lentamente. 18,6 anos é o período do nodo lunar, que é outro fenómeno — o mesmo que produz a nutação.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q2" value="c" data-certa="true"><span class="rotulo">De 23,44° (obliquidade) menos e mais 5,14° (inclinação da órbita lunar sobre a eclíptica).</span></label>
+          <p class="explicacao" hidden>Certo. O nodo da órbita lunar roda em 18,6 anos, e conforme ele se alinha ou se opõe ao equinócio, as duas inclinações somam-se ou subtraem-se.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Mediste o erro da tua Lua contra o livro e deu 6′, mas a fonte da série declara 0,5°. Que número usas para decidir se ela serve?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q3" value="a" data-certa="false"><span class="rotulo">O medido, 6′: os números medidos valem sempre mais do que os prometidos.</span></label>
+          <p class="explicacao" hidden>Valem mais para <em>detetar erros</em>. Para <em>garantir</em> comportamento, uma medição num ponto não diz nada sobre os outros pontos — sobretudo quando se sabe que o erro é periódico.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q3" value="b" data-certa="true"><span class="rotulo">O declarado, 0,5°: o erro de uma série truncada é periódico e a medição de um dia pode ter apanhado um mínimo.</span></label>
+          <p class="explicacao" hidden>Certo — e é uma regra geral, não uma cautela astronómica. Uma medição pontual apanha bugs; uma garantia da fonte cobre o caso mau, que é o que interessa a decidir.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q3" value="c" data-certa="false"><span class="rotulo">A média dos dois, cerca de 18′, como compromisso.</span></label>
+          <p class="explicacao" hidden>Fazer a média de uma garantia com uma medição não produz nenhuma grandeza com significado. É um número sem interpretação.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o almanaque tem uma coluna «v» para a Lua e não para o Sol?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q4" value="a" data-certa="true"><span class="rotulo">Porque a velocidade da Lua em ângulo horário varia bastante de hora para hora, e a do Sol é praticamente constante.</span></label>
+          <p class="explicacao" hidden>Certo. A coluna «v» é exatamente a diferença entre a velocidade real daquela hora e a velocidade nominal da tabela de incrementos. Para o Sol essa diferença é pequena de mais para ter coluna própria.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q4" value="b" data-certa="false"><span class="rotulo">Porque a Lua tem paralaxe e o Sol não.</span></label>
+          <p class="explicacao" hidden>A paralaxe tem coluna própria, «HP», e é outra grandeza. O «v» é sobre a taxa de variação do GHA, não sobre a distância.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q4" value="c" data-certa="false"><span class="rotulo">Porque a Lua muda de fase e o Sol não.</span></label>
+          <p class="explicacao" hidden>A fase não entra em nenhuma das colunas de posição. O «v» é puramente cinemático.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que a Lua é muito mais difícil de calcular do que o Sol?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q5" value="a" data-certa="false"><span class="rotulo">Porque a Lua está muito mais perto e os erros ampliam-se.</span></label>
+          <p class="explicacao" hidden>Estar perto torna a <em>paralaxe</em> grande, mas isso é uma correção geométrica bem definida e fácil. A dificuldade é dinâmica, não de escala.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q5" value="b" data-certa="true"><span class="rotulo">Porque é um problema de três corpos em que a perturbação do Sol é grande, e não um problema de dois corpos com perturbações pequenas.</span></label>
+          <p class="explicacao" hidden>Certo. Daí a órbita não fechar: o perigeu roda em 8,85 anos e o nodo em 18,6. As teorias lunares modernas precisam de milhares de termos periódicos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l5-q5" value="c" data-certa="false"><span class="rotulo">Porque a Lua tem uma órbita retrógrada.</span></label>
+          <p class="explicacao" hidden>A Lua orbita no mesmo sentido da rotação da Terra e da translação da Terra. O que é retrógrado é o movimento do <em>nodo</em>, e isso é uma consequência da perturbação solar, não a causa da dificuldade.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+
+    <p>Vai para a entrega.</p>
+<div class="aberta">
+  <label for="feynman-l5">Explica porque é que a Lua tem de ser tratada de maneira diferente de todos os outros astros, a alguém que já percebeu como se calcula o Sol.
+    <span class="pista">Sem usar «paralaxe» nem «três corpos». Descreve o que muda e porquê.</span>
+  </label>
+  <textarea id="feynman-l5" data-pergunta="Explica porque é que a Lua tem de ser tratada de maneira diferente de todos os outros astros, a alguém que já percebeu como se calcula o Sol."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas
+  respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e correr
+  <code>/corrigir almanaque</code>.</p>
+</div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>A Lua é um problema de <strong>três corpos</strong>: a teoria moderna precisa de milhares
+        de termos. A série deste curso tem sete e declara <strong>0,5°</strong>.</li>
+      <li>🔴 <strong>A Lua deste curso não serve para navegar.</strong> Serve para a fase e para o
+        nascer e o ocaso ao minuto — e isso está medido, não prometido.</li>
+      <li>A <strong>paralaxe horizontal</strong> vale até 61,5′ e empurra a Lua para baixo. Por isso
+        a altura a que ela «nasce» é <strong>positiva</strong>: −34 − 16 + 57 = +7′.</li>
+      <li>A <strong>fase</strong> é a elongação geocêntrica, igual para todo o planeta. O mês
+        sinódico varia entre 29,26 e 29,80 dias — a média 29,53 não prevê nada com precisão.</li>
+      <li>O <strong>nodo lunar</strong> roda em 18,6 anos: declinação máxima entre ±18,3° e ±28,7°.
+        É o mesmo nodo da nutação (lição 3) e o mesmo das marés (lição 8).</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Fórmulas de baixa precisão da Lua, <em>The Astronomical Almanac</em> pág. D46
+        (ed. de 1992)</strong> — transcritas da função <code>lpmoon</code> do <code>skycalc.c</code>
+        de John Thorstensen (Dartmouth), que cita a página e o ano.
+        ⚠️ <strong>Fonte primária que não abri</strong>; o que abri foi o código-fonte que a
+        reproduz. A exatidão de «cerca de 0,5° entre 1900 e 2100» está declarada em
+        <code>celestialprogramming.com</code> para o algoritmo equivalente da pág. D22.
+        <span class="verificado">🌐 Ambos verificados a 2026-09-16</span></li>
+      <li><strong>Wikipédia, «New moon»</strong> — o comprimento médio da lunação («<em>at the
+        J2000.0 epoch, the average length of a lunation is 29.53059 days</em>») e a sua variação
+        («<em>can vary from 29.26 to 29.80 days</em>»), e a numeração de lunações do Meeus com a
+        lunação 0 a começar a 6 de janeiro de 2000, cerca das 18:14 UTC.
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong><em>The Nautical Almanac</em> 2026, página de 20–22 de março</strong> — colunas
+        GHA, v, Dec, d e HP da Lua, e a tabela de nascer e ocaso por latitude, usadas aqui como
+        referência. 🔴 PDF não incluído no repositório (direitos de autor).
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>timeanddate.com — fases da Lua de 2026</strong>: instantes de lua cheia usados no
+        E3(b). ⚠️ <strong>Fonte secundária</strong>, e diz-se que é: não é uma efeméride oficial. O
+        que ela permite verificar é a ordem de grandeza do erro, não décimos de minuto.
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li>🔴 <strong>Fonte que não é documentação — livro:</strong> Jean Meeus,
+        <em>Astronomical Algorithms</em>, capítulos da posição da Lua e das fases.
+        <strong>Porquê:</strong> traz a série truncada da ELP com dezenas de termos, que é o passo
+        seguinte a partir daqui, e explica <em>porque</em> os termos têm os argumentos que têm — D,
+        M, M′, F — em vez de os dar como constantes mágicas. <strong>O que saltar:</strong> os
+        eclipses, para já. ⚠️ Não tenho o exemplar: não cito páginas.
+        <a href="bibliografia.html#meeus">Ver a bibliografia</a>.</li>
+      <li>🔴 <strong>Fonte que não é documentação — série:</strong> <em>Longitude</em> (Channel 4 /
+        A&amp;E, 2000). <strong>Porquê aqui:</strong> o método das distâncias lunares, que a série
+        retrata, existe precisamente porque a Lua é o corpo que se move depressa no céu — o assunto
+        desta lição visto pelo lado de quem o tinha de usar às escuras num convés.
+        <strong>O que saltar:</strong> tudo o que for tribunal e prémio.
+        <span class="verificado">🌐 Ficha verificada a 2026-09-16</span></li>
+    </ul>
+    <footer class="rodape">
+      <p><a href="04-nascer-e-por.html">← Nascer, pôr e crepúsculos</a> · <a href="index.html">Índice do curso</a> · <a href="06-ler-as-tabuas.html">Ler as tábuas →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

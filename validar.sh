@@ -16,18 +16,18 @@ por_validar=""
 passo() { printf '\n%s▸ %s%s\n' "$C" "$1" "$Z"; }
 
 # ---------------------------------------------------------------- 0. sincronia
-passo "0/5  CSS e JS inline em sincronia com modelo/ (DECISOES.md D-005)"
+passo "0/6  CSS e JS inline em sincronia com modelo/ (DECISOES.md D-005)"
 if ! python3 sincronizar.py --verificar; then
   echo "${V}corre: python3 sincronizar.py${Z}"
   falhou=1
 fi
 
 # ---------------------------------------------------------------- 1-2-5-6. estrutura
-passo "1/5  âncoras, ligações, quiz, soluções fechadas, INDICE.md"
+passo "1/6  âncoras, ligações, quiz, soluções fechadas, INDICE.md"
 python3 validar.py || falhou=1
 
 # ---------------------------------------------------------------- 3. HTML
-passo "2/5  HTML bem formado (tidy do Homebrew — o /usr/bin/tidy é de 2006 e não conhece HTML5)"
+passo "2/6  HTML bem formado (tidy do Homebrew — o /usr/bin/tidy é de 2006 e não conhece HTML5)"
 TIDY=""
 # Fora do macOS (Windows, Linux sem Homebrew) aponta-se para um tidy-html5 5.x com
 # TIDY_PARA_VALIDAR=/caminho/para/tidy — explícito de propósito, para não apanhar
@@ -63,7 +63,7 @@ else
 fi
 
 # ---------------------------------------------------------------- 4. acessibilidade
-passo "3/5  acessibilidade (axe-core, WCAG A/AA, nos dois temas, a 400 e 1280 px)"
+passo "3/6  acessibilidade (axe-core, WCAG A/AA, nos dois temas, a 400 e 1280 px)"
 if [ ! -d node_modules/axe-core ] || [ ! -d node_modules/puppeteer ]; then
   echo "${A}axe-core/puppeteer não instalados — corre: npm install${Z}"
   echo "${A}🔴 A acessibilidade FICOU POR VALIDAR. Não publiques um tópico novo sem correr isto.${Z}"
@@ -87,8 +87,30 @@ else
   fi
 fi
 
+# ---------------------------------------------------------------- 3b. geometria das figuras
+passo "4/6  geometria das figuras SVG a 400 px, nos dois temas"
+# Porquê um passo próprio: o axe mede contraste e nomes acessíveis, NÃO mede
+# geometria. O registo de falhas do PROCESSO.md pediu isto três vezes — texto
+# cortado, texto sobreposto, e uma figura completamente vazia que o axe deixou
+# passar. ⚠️ Continua a não substituir olhar para a imagem: define CAPTURAS=<pasta>
+# para gravar os PNG e vê-os.
+if [ ! -d node_modules/puppeteer ]; then
+  echo "${A}puppeteer não instalado — corre: npm install${Z}"
+  echo "${A}🔴 A geometria das figuras FICOU POR VALIDAR.${Z}"
+  por_validar="${por_validar:+$por_validar, }geometria das figuras (puppeteer não instalado)"
+else
+  node validar_figuras.mjs docs/*/ modelo
+  estado=$?
+  if [ $estado -eq 1 ]; then
+    falhou=1
+  elif [ $estado -ne 0 ]; then
+    echo "${A}o verificador de figuras não chegou a correr (código $estado) — ver a nota do passo anterior sobre o Chrome.${Z}"
+    por_validar="${por_validar:+$por_validar, }geometria das figuras (o browser não arrancou)"
+  fi
+fi
+
 # ---------------------------------------------------------------- 5. ficheiros do tópico
-passo "4/5  cada tópico com folha, teste, flashcards e calendário"
+passo "5/6  cada tópico com folha, teste, flashcards e calendário"
 for d in docs/*/; do
   [ -e "$d/index.html" ] || continue
   nome=$(basename "$d")
@@ -116,7 +138,7 @@ done
 echo "${G}✓${Z} ficheiros de fim de tópico verificados"
 
 # ---------------------------------------------------------------- 6. nada de privado
-passo "5/5  nada de pessoal no que vai para um repositório público (DECISOES.md D-001)"
+passo "6/6  nada de pessoal no que vai para um repositório público (DECISOES.md D-001)"
 # -w: palavra inteira. Sem isto, «nif» apanha «sig{nif}icam» — e um validador
 # que grita por causa de «significam» é um validador que se deixa de correr.
 if grep -rwniE 'morada|código postal|nif|iban|contribuinte|cartão de cidadão|palavra-passe|password|api[_-]?key|secret|token' \

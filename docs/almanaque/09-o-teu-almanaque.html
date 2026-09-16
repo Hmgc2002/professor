@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9 · O teu almanaque — O almanaque</title>
+<meta name="description" content="A lição sem matéria nova e com o mecanismo que liga tudo: como se decide se um resultado presta. Quatro das seis colunas tabeladas não passam a tolerância do livro — e saber quais, por quanto e porquê é o produto do curso.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/almanaque/09-o-teu-almanaque.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">O almanaque</a> <span aria-hidden="true">›</span> lição 9</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta nucleo">Lição 9 · núcleo</p>
+    <h1>O teu almanaque: declarar a tolerância antes de a medir</h1>
+    <p class="subtitulo">A lição sem matéria nova e com o mecanismo que liga tudo: como se decide se um resultado presta. Quatro das seis colunas tabeladas não passam a tolerância do livro — e saber quais, por quanto e porquê é o produto do curso.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim desta lição <strong>produziste um almanaque anual</strong> para uma posição à tua
+    escolha, <strong>declaraste uma tolerância por coluna antes de comparar</strong>, e
+    <strong>escreveste um relatório</strong> que diz, com números, que colunas passam, que colunas
+    falham e porquê — incluindo as que falham por razões que já sabias desde a lição 3.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>De memória, e estas são as que importam.</p>
+    <ol>
+      <li>Qual é o erro do teu Sol contra o livro, em GHA e em declinação?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Até <strong>0,42′</strong> no GHA e <strong>0,20′</strong> na declinação, medidos contra
+          a página de 20 de março de 2026. (Lição 3.)</p></details>
+      </li>
+      <li>E o da Lua? E que exatidão é que a fonte declara?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Medido: cerca de <strong>5′</strong> no GHA. Declarado pela fonte:
+          <strong>0,5°</strong>. Usa-se o declarado a decidir. (Lição 5.)</p></details>
+      </li>
+      <li>Que coluna é que o curso reproduz <em>exatamente</em>, e porquê?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>O <strong>nascer, o pôr e os crepúsculos</strong>, ao minuto: junto ao horizonte o erro
+          angular converte-se em segundos de tempo. E o <strong>GHA de Áries</strong>, a 0,06′,
+          porque o tempo sidéreo é um polinómio de definição. (Lições 2 e 4.)</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p><strong>Porquê antes de como.</strong> Esta lição não tem matéria nova. Tem o mecanismo que
+    liga tudo o resto: <strong>como se decide se um resultado presta</strong>. É a diferença entre
+    ter um programa que produz tabelas e ter um almanaque.</p>
+
+    <div class="caixa critico">
+  <span class="titulo">🔴 Escreve a tolerância ANTES. Isto não é formalidade.</span>
+  <p>O critério de sucesso que registaste no diagnóstico foi: «produzo um almanaque anual para uma posição dada, com números que batem com fonte oficial <strong>dentro de tolerância declarada</strong>».</p><p>A ordem das palavras é o que importa. Se correres a comparação primeiro e escolheres o limiar depois, não mediste nada — <strong>escolheste o limiar que faz o teu resultado passar</strong>. É a forma mais educada de não avaliar coisa nenhuma, e é comuníssima.</p><p>Por isso o primeiro passo do projeto é escrever um ficheiro <code>TOLERANCIA.md</code> com uma linha por coluna, <em>antes</em> de correr o comparador. Guarda-o em Git com data. Depois compara e regista o que passou e o que não passou — incluindo o que não passou.</p><p>⭐ Se achares isto exagerado para um projeto de estudo, repara que é exatamente o que distingue uma medição de uma demonstração, e que o mesmo raciocínio se aplica a qualquer limiar que definas no trabalho: latência, taxa de erro, cobertura.</p>
+</div>
+
+    <h3>O orçamento de erro, todo junto</h3>
+    <p>Este quadro é o produto intelectual do curso. Cada linha foi medida, e cada uma foi medida
+    contra uma fonte exterior — não contra outra parte do mesmo código.</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Orçamento de erro do curso, coluna a coluna, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>O que se publica</th><th>Erro medido contra o livro</th><th>O livro imprime a</th><th>Passa?</th><th>Porquê</th></tr></thead>
+    <tbody><tr><td><strong>GHA de Áries</strong> <em>(tabelada)</em></td><td>0,053′</td><td>0,1′</td><td>✅ <strong>Sim</strong></td><td>O tempo sidéreo é um polinómio de definição, não uma órbita truncada</td></tr><tr><td><strong>Paralaxe da Lua</strong> <em>(tabelada)</em></td><td>0,077′</td><td>0,1′</td><td>✅ <strong>Sim</strong></td><td>Depende só da distância, que é a parte fácil da órbita lunar</td></tr><tr><td><strong>Dec do Sol</strong> <em>(tabelada)</em></td><td>0,195′</td><td>0,1′</td><td>❌ <strong>Não</strong></td><td>Duas vezes a tolerância. A série do Meeus cap. 25 declara 0,01° e cumpre-o</td></tr><tr><td><strong>GHA do Sol</strong> <em>(tabelada)</em></td><td>0,415′</td><td>0,1′</td><td>❌ <strong>Não</strong></td><td>Quatro vezes. É o mesmo erro de longitude visto noutra projeção</td></tr><tr><td><strong>Dec da Lua</strong> <em>(tabelada)</em></td><td>2,1′</td><td>0,1′</td><td>❌ <strong>Não</strong></td><td>Vinte vezes</td></tr><tr><td><strong>GHA da Lua</strong> <em>(tabelada)</em></td><td>5,7′</td><td>0,1′</td><td>❌❌ <strong>Nem perto</strong></td><td>Cinquenta e sete vezes. A série da pág. D46 declara 0,5°; sete termos não fazem uma teoria lunar</td></tr><tr><td><strong>Nascer, pôr e crepúsculos</strong> <em>(evento)</em></td><td>0 min, nas seis colunas</td><td>1 min</td><td>✅ <strong>Sim</strong></td><td>Junto ao horizonte, 0,4′ de erro angular traduzem-se em segundos — engolidos pelo arredondamento ao minuto</td></tr><tr><td><strong>Nascer e ocaso da Lua</strong> <em>(evento)</em></td><td>≤ 1 min</td><td>1 min</td><td>✅ <strong>Sim</strong></td><td>Pela mesma razão, apesar de a Lua errar 5,7′ em posição</td></tr></tbody>
+  </table>
+</div>
+
+    <p class="destaque">🔴 <strong>Quatro das seis colunas tabeladas não passam</strong> a tolerância a
+    que o livro publica; as duas colunas de <em>eventos</em> (nascer/pôr e nascer/ocaso da Lua)
+    passam ao minuto. Isto é o resultado do curso, não o seu fracasso: sabes exatamente quais, por
+    quanto, e porquê — e sabes o que seria preciso para as corrigir (VSOP87 para o Sol, uma teoria
+    ELP truncada para a Lua), e que isso não cabe numa lição.</p>
+
+    <h3>Porque é que isto responde à pergunta com que o curso começou</h3>
+    <p>A lição 1 perguntou porque é que o <em>Nautical Almanac</em> continua a ser publicado. Uma
+    resposta é a infraestrutura: é a única fonte de posição que não depende de nada. A outra
+    resposta é esta tabela: <strong>o cálculo que o produz não cabe numa lição, nem em duas, nem no
+    fim de semana de ninguém</strong>. A diferença entre 0,4′ e 0,1′ é a diferença entre sete termos
+    e umas centenas, entre uma tarde e uma equipa.</p>
+
+    <div class="caixa dica">
+  <span class="titulo">⭐ O `skyfield` entra aqui — e só aqui</span>
+  <p>Todo o código deste curso é biblioteca padrão, de propósito: um almanaque construído sobre uma biblioteca de efemérides funciona e não ensina nada.</p><p>Agora que já sabes o que está lá dentro, o <code>skyfield</code> passa a ser útil por uma razão diferente: é uma <strong>terceira testemunha</strong>. Ele usa as efemérides numéricas do JPL, que é o que o <em>Nautical Almanac</em> também usa. Se o teu código e o <code>skyfield</code> discordarem, sabes que és tu; se concordarem e ambos discordarem do livro, é hora de suspeitar da tua leitura do livro.</p><p>⚠️ <strong>Não corri o <code>skyfield</code> para escrever esta lição</strong> — o ambiente onde este curso foi construído não tinha acesso à rede para o instalar nem para descarregar os ficheiros de efemérides do JPL. Por isso não há aqui nenhum bloco com saída dele, e não afirmo nada sobre os números que ele dá. O que está descrito é o <em>procedimento</em>; a execução é tua.</p>
+</div>
+
+    <h3>O que fazer quando não há referência</h3>
+    <p>Nem sempre há um livro oficial com que comparar. O que há sempre são <strong>invariantes</strong>:
+    propriedades que a resposta certa tem obrigatoriamente de ter, e que se podem testar sem saber
+    a resposta.</p>
+    <ul>
+      <li>No trânsito, a altura <strong>tem</strong> de ser 90° − |φ − δ|. Não há margem.</li>
+      <li>O GHA <strong>tem</strong> de crescer sempre.</li>
+      <li>A equação do tempo <strong>tem</strong> de passar por zero quatro vezes por ano.</li>
+      <li>A soma de duas alturas simétricas em ângulo horário <strong>tem</strong> de ser igual.</li>
+    </ul>
+    <p>⭐ É o mesmo raciocínio de um teste baseado em propriedades. É mais fraco do que uma
+    referência externa — não apanha um erro sistemático que respeite todos os invariantes — e é o
+    que resta quando não há mais nada. E está disponível sempre.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <h3>Passo 1 — escrever a tolerância, e fazer commit dela</h3>
+    <p>Antes de qualquer outra coisa. O E1 tem um exemplo, e o que o torna honesto é cada limiar ter
+    uma razão que não seja «é o que o meu código dá».</p>
+
+    <h3>Passo 2 — gerar</h3>
+    <p><code>codigo/gerar.py</code> produz dois CSV — um por hora, um por dia — e imprime uma página
+    diária no formato do livro, para se poder comparar à vista antes de comparar por programa.</p>
+
+    <h3>Passo 3 — comparar, e não desviar o olhar</h3>
+    <p><code>codigo/comparar.py</code> lê o PDF oficial e imprime a diferença coluna a coluna.
+    Compara pelo menos quatro datas espalhadas pelo ano: os erros das séries são
+    <strong>periódicos</strong>, e uma só data pode calhar num mínimo — foi exatamente esse o aviso
+    da lição 5.</p>
+
+    <h3>Passo 4 — escrever o relatório com as falhas à cabeça</h3>
+    <p>🔴 Um relatório que enterra o que falhou já está a mentir pela ordem em que apresenta as
+    coisas. Começa pelas três colunas que não passam, diz por quanto, e só depois diz o que
+    passou.</p>
+
+    <h3>Passo 5 — e depois, o que <em>não</em> fazer</h3>
+    <p>Não acrescentes um termo de correção empírico até os números baterem. Isso chama-se calibrar
+    contra a referência: funciona, é legítimo quando declarado, e <strong>queima a referência</strong>
+    — a partir daí ela já não te pode avaliar. Se quiseres reduzir o erro, acrescenta física, com
+    fonte aberta e datada, como se fez em todas as outras lições.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p>Comparaste o teu almanaque com o livro em <strong>quatro</strong> datas e o erro do GHA do
+      Sol deu −0,42′, −0,27′, +0,16′ e −0,14′.</p>
+      <ol>
+        <li><em>Dado:</em> o erro muda de sinal ao longo do ano e a sua amplitude é de cerca de
+          0,6′ pico a pico.</li>
+        <li><strong>______</strong> Que forma tem provavelmente este erro em função do dia do ano, e
+          o que é que isso diz sobre a sua causa?</li>
+        <li><em>Dado:</em> se corrigisses o erro somando a média (−0,17′) a todos os valores, o pior
+          erro passaria de 0,42′ para cerca de 0,33′.</li>
+        <li><strong>______</strong> Vale a pena fazer isso? Escreve o argumento dos dois lados e
+          decide.</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2.</strong> Um erro que muda de sinal ao longo do ano com amplitude
+        constante é <strong>periódico com período anual</strong> — quase de certeza uma sinusoide.
+        Isso aponta para um <strong>termo de período anual em falta na série</strong>, e não para um
+        erro de tempo (que cresceria) nem para arredondamento (que saltaria ao acaso).</p>
+        <p><strong>Passo 4.</strong> <strong>A favor:</strong> reduz o pior erro em cerca de 20 % por
+        uma linha de código, e a média de um erro é uma quantidade legítima de estimar.</p>
+        <p><strong>Contra, e é mais forte:</strong> (a) a média foi estimada de <em>quatro</em>
+        pontos, o que é pouquíssimo para caracterizar uma sinusoide anual; (b) a correção é uma
+        constante e o erro não é — logo melhora nuns sítios e piora noutros; (c) e, sobretudo,
+        <strong>queima a referência</strong>: a partir do momento em que o teu modelo foi ajustado
+        ao livro, o livro deixa de o poder avaliar.</p>
+        <p class="destaque">A decisão: <strong>não fazer</strong>, e escrever no relatório que o erro
+        tem forma anual com cerca de 0,6′ pico a pico. Essa frase vale mais do que os 20 % — é uma
+        descrição do <em>mecanismo</em> do erro, e é o que permite a alguém (ou a ti, mais tarde)
+        atacá-lo pela física em vez de pelo ajuste.</p>
+        <p>⚠️ Se decidisses fazer, a obrigação era: declarar no ficheiro que o modelo está
+        <em>calibrado</em> contra o livro, e arranjar <strong>outra</strong> referência para o
+        validar.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <p>O quinto apanhou-me a construir o gerador deste curso.</p>
+<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns do projeto, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody><tr><td>«Vou afinar até bater com o livro»</td><td>Acrescentar um termo empírico para o erro desaparecer.</td><td>🔴 Isso é <strong>calibrar contra a referência</strong>, e destrói o valor da referência: a partir daí já não podes usá-la para te avaliares. Se quiseres reduzir o erro, acrescenta <em>física</em> (mais termos da série, com fonte); se quiseres só o número bonito, estás a fazer outra coisa e tens de a declarar.</td></tr><tr><td>«O projeto está feito quando o código corre»</td><td>Entregar o gerador sem a comparação.</td><td>O produto do projeto não é o CSV: é o <strong>ficheiro de tolerância mais o relatório do que passou e do que falhou</strong>. Um gerador que ninguém comparou é uma opinião em formato tabular.</td></tr><tr><td>«Se falha a tolerância, falhei»</td><td>Esconder as colunas que não passam.</td><td>Quatro das seis colunas tabeladas <strong>não passam</strong> os 0,1′ do livro, e isso é o resultado esperado e <em>declarado desde a lição 3</em>. O que seria falhar era não saber quais, nem por quanto.</td></tr><tr><td>«Comparar com o <code>skyfield</code> chega»</td><td>Substituir o livro por outra biblioteca.</td><td>O <code>skyfield</code> e o livro usam a mesma família de efemérides do JPL, logo concordar com um é quase concordar com o outro. É uma boa <em>terceira</em> testemunha — não é uma referência independente.</td></tr><tr><td>⚠️ «Um resultado negativo não precisa de causa»</td><td>Uma célula vazia ou um <code>None</code> onde não há nascer do Sol.</td><td>Há <strong>três</strong> causas distintas e o programa tem de dizer qual: circumpolar, nunca sobe, ou o evento caiu fora daquele dia de calendário. <em>Isto apanhou-me:</em> a primeira versão do gerador etiquetava 25 dias em Lisboa como «sempre-acima» quando a Lua ali não é circumpolar — eram dias em que ela simplesmente saltou o nascer.</td></tr><tr><td>«Preciso do livro para verificar seja o que for»</td><td>Não fazer nada enquanto não se tem o PDF.</td><td>Há verificações de <strong>autoconsistência</strong> que não precisam de referência nenhuma: a altura no trânsito tem de ser 90 − |φ − δ|, o GHA tem de crescer sempre, a equação do tempo tem de passar por zero quatro vezes. São mais fracas do que uma referência externa e apanham a maior parte dos bugs.</td></tr></tbody>
+  </table>
+</div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <p>O E1 faz-se <strong>antes</strong> do E2. A ordem é a lição.</p>
+
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — escrever a tolerância, antes de tudo</h3>
+<p>Cria <code>TOLERANCIA.md</code> no teu repositório, com uma linha por coluna e o <strong>porquê</strong> de cada limiar. Não copies a minha: pensa para que é que queres o almanaque.</p><p>Perguntas que ajudam a decidir cada linha:</p><ul><li>Vou usar isto para <em>navegar</em>, para <em>planear</em>, ou para <em>aprender</em>?</li><li>Que erro de posição é que estou disposto a aceitar? (1′ de GHA ≈ 1 milha náutica no equador)</li><li>Há colunas para as quais «errado» não faz diferença nenhuma?</li></ul><p>Faz <em>commit</em> do ficheiro <strong>antes</strong> de correres o comparador. A data do commit é a prova de que declaraste primeiro.</p>
+<details class="solucao"><summary>Solução</summary>
+<p>Não há solução única — há soluções honestas e desonestas. Uma honesta, para o critério «aprender e planear»:</p><pre data-rotulo="Exemplo de ficheiro de tolerância"><code># TOLERANCIA.md — declarado a 2027-01-05, antes de comparar
+
+| Coluna              | Tolerância | Porquê |
+|---------------------|-----------|--------|
+| GHA de Áries        | 0,1′      | É um polinómio de definição; se falhar, é bug meu |
+| GHA e Dec do Sol    | 0,5′      | Meio minuto = meia milha. Chega para planear, não para navegar |
+| GHA e Dec da Lua    | 30′       | A série declara 0,5°. Exigir menos seria exigir o impossível |
+| Nascer/pôr/crepúsc. | 1 min     | É a resolução a que o livro publica |
+| Paralaxe da Lua     | 0,5′      | Depende só da distância, que é a parte fácil |
+
+Não vou usar isto para navegar. Se um dia for, esta tabela tem de ser reescrita
+e as colunas do Sol e da Lua têm de descer para 0,1′ — o que exige VSOP87 e ELP,
+que não implementei.</code></pre><p>🔴 <strong>O que torna esta tabela honesta:</strong> cada limiar tem uma razão que não é «é o que o meu código dá». A linha da Lua aceita 30′ porque <em>a fonte declara</em> 0,5°, não porque o resultado deu isso. E a última frase diz o que teria de mudar se o objetivo mudasse.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — gerar o ano e comparar com o livro</h3>
+<p>Corre o gerador para um ano inteiro, descarrega o PDF oficial desse ano de <a href="https://thenauticalalmanac.com">thenauticalalmanac.com</a>, e compara pelo menos <strong>quatro datas espalhadas pelo ano</strong> — perto dos dois equinócios e dos dois solstícios, porque é aí que os erros sazonais são extremos.</p><pre data-rotulo="Comandos do projeto"><code>python3 gerar.py 2027 --lat 38.7083 --lon -9.1867
+python3 comparar.py 2027_Nautical_Almanac.pdf 2027-03-20 2027-06-21 2027-09-23 2027-12-22</code></pre><p>O formato de uma página diária gerada é este:</p>
+<details class="solucao"><summary>Solução</summary>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code># O gerador do projecto, num dia, para se ver o formato.
+# (o ficheiro completo esta em codigo/gerar.py e faz tambem os CSV do ano)
+import subprocess, sys
+r = subprocess.run([sys.executable, "gerar.py", "2026", "--dia", "2026-03-20"],
+                   capture_output=True, text=True, encoding="utf-8")
+# 🔴 Verificar o codigo de saida. Sem isto, um subprocesso que falha imprime
+# um stdout vazio e o bloco parece ter corrido -- foi o que aconteceu na
+# primeira versao desta licao, e so o `tidy` o apanhou (&lt;samp&gt; vazio).
+if r.returncode != 0:
+    raise SystemExit("gerar.py falhou (%d):" % r.returncode + chr(10) + r.stderr)
+print(r.stdout.rstrip())</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>
+2026 March 20  —  página diária (UT)
+ΔT usado: 69,0 s  ·  posição: 38° 42.5′ N, 9° 11.2′ W
+
+ h |  GHA Áries   |   GHA Sol    |   Dec Sol   |   GHA Lua    |    v |   Dec Lua   |    d |   HP
+---+--------------+--------------+-------------+--------------+------+-------------+------+------
+ 0 | 177° 32.6′   | 178° 05.9′   | -0° 14.4′   | 167° 46.9′   | 11.7 | 7° 13.2′    | 16.4 | 59.2
+ 1 | 192° 35.0′   | 193° 06.1′   | -0° 13.5′   | 182° 17.6′   | 11.6 | 7° 29.6′    | 16.4 | 59.2
+ 2 | 207° 37.5′   | 208° 06.3′   | -0° 12.5′   | 196° 48.2′   | 11.5 | 7° 46.0′    | 16.3 | 59.2
+ 3 | 222° 40.0′   | 223° 06.4′   | -0° 11.5′   | 211° 18.7′   | 11.5 | 8° 02.3′    | 16.3 | 59.2
+ 4 | 237° 42.4′   | 238° 06.6′   | -0° 10.5′   | 225° 49.2′   | 11.4 | 8° 18.7′    | 16.3 | 59.2
+ 5 | 252° 44.9′   | 253° 06.8′   | -0° 09.5′   | 240° 19.7′   | 11.4 | 8° 34.9′    | 16.2 | 59.3
+ 6 | 267° 47.4′   | 268° 07.0′   | -0° 08.5′   | 254° 50.0′   | 11.3 | 8° 51.2′    | 16.2 | 59.3
+ 7 | 282° 49.8′   | 283° 07.2′   | -0° 07.5′   | 269° 20.3′   | 11.2 | 9° 07.4′    | 16.2 | 59.3
+ 8 | 297° 52.3′   | 298° 07.4′   | -0° 06.5′   | 283° 50.6′   | 11.2 | 9° 23.6′    | 16.1 | 59.3
+ 9 | 312° 54.8′   | 313° 07.5′   | -0° 05.5′   | 298° 20.7′   | 11.1 | 9° 39.7′    | 16.1 | 59.3
+10 | 327° 57.2′   | 328° 07.7′   | -0° 04.6′   | 312° 50.9′   | 11.0 | 9° 55.8′    | 16.0 | 59.3
+11 | 342° 59.7′   | 343° 07.9′   | -0° 03.6′   | 327° 20.9′   | 11.0 | 10° 11.8′   | 16.0 | 59.4
+12 | 358° 02.1′   | 358° 08.1′   | -0° 02.6′   | 341° 50.9′   | 10.9 | 10° 27.8′   | 15.9 | 59.4
+13 | 13° 04.6′    | 13° 08.3′    | -0° 01.6′   | 356° 20.8′   | 10.8 | 10° 43.8′   | 15.9 | 59.4
+14 | 28° 07.1′    | 28° 08.5′    | -0° 00.6′   | 10° 50.6′    | 10.8 | 10° 59.6′   | 15.8 | 59.4
+15 | 43° 09.5′    | 43° 08.7′    | 0° 00.4′    | 25° 20.4′    | 10.7 | 11° 15.5′   | 15.8 | 59.4
+16 | 58° 12.0′    | 58° 08.8′    | 0° 01.4′    | 39° 50.1′    | 10.6 | 11° 31.3′   | 15.7 | 59.4
+17 | 73° 14.5′    | 73° 09.0′    | 0° 02.4′    | 54° 19.7′    | 10.5 | 11° 47.0′   | 15.7 | 59.4
+18 | 88° 16.9′    | 88° 09.2′    | 0° 03.3′    | 68° 49.3′    | 10.5 | 12° 02.7′   | 15.6 | 59.4
+19 | 103° 19.4′   | 103° 09.4′   | 0° 04.3′    | 83° 18.7′    | 10.4 | 12° 18.3′   | 15.6 | 59.5
+20 | 118° 21.9′   | 118° 09.6′   | 0° 05.3′    | 97° 48.1′    | 10.3 | 12° 33.9′   | 15.5 | 59.5
+21 | 133° 24.3′   | 133° 09.8′   | 0° 06.3′    | 112° 17.4′   | 10.2 | 12° 49.4′   | 15.4 | 59.5
+22 | 148° 26.8′   | 148° 09.9′   | 0° 07.3′    | 126° 46.7′   | 10.2 | 13° 04.8′   | 15.4 | 59.5
+23 | 163° 29.3′   | 163° 10.1′   | 0° 08.3′    | 141° 15.8′   | 10.1 | 13° 20.2′   | 15.3 | 59.5
+---+--------------+--------------+-------------+--------------+------+-------------+------+------
+SD do Sol 16.1′   ·   Eq. do tempo -7.5 min   ·   fase 19.0° (3% iluminada)
+
+Na latitude 38° 42.5′ (hora local média):
+  crepúsculo náutico (manhã) 05:06
+  crepúsculo civil (manhã) 05:37
+  nascer do Sol (manhã) 06:04
+  pôr do Sol (tarde)   18:12
+  crepúsculo civil (tarde) 18:38
+  crepúsculo náutico (tarde) 19:09
+  nascer da Lua        06:33
+  ocaso da Lua         20:10</samp></pre><p>E a comparação, com a tolerância a decidir e não a descrever:</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code># Comparar as TUAS colunas com as do livro, hora a hora.
+# Os valores oficiais foram extraidos do PDF pelo comparar.py; aqui estao colados
+# para o bloco correr sem o PDF a mao.
+from almanaque import dia_juliano, jd_tt, sol, lua, gha, gast_graus, norm180
+import statistics as st
+
+ARIES = [177.5433,192.5833,207.6250,222.6667,237.7067,252.7483,267.7900,282.8300,
+         297.8717,312.9133,327.9533,342.9950,358.0350,13.0767,28.1183,43.1583,
+         58.2000,73.2417,88.2817,103.3233,118.3650,133.4050,148.4467,163.4867]
+SOL = [(178.1050,-0.2433),(193.1067,-0.2267),(208.1100,-0.2100),(223.1133,-0.1933),
+       (238.1167,-0.1767),(253.1200,-0.1600),(268.1233,-0.1450),(283.1250,-0.1283),
+       (298.1283,-0.1117),(313.1317,-0.0950),(328.1350,-0.0783),(343.1383,-0.0617),
+       (358.1417,-0.0450),(13.1433,-0.0283),(28.1467,-0.0133),(43.1500,0.0033),
+       (58.1533,0.0200),(73.1567,0.0367),(88.1600,0.0533),(103.1617,0.0700),
+       (118.1650,0.0867),(133.1683,0.1033),(148.1717,0.1200),(163.1750,0.1350)]
+LUA_0H = (167+52.6/60, 7+15.3/60, 59.1)   # GHA, Dec, HP as 0h
+
+# ---- a tolerancia, DECLARADA ANTES (e o que este ficheiro representa) --------
+TOLERANCIA = {"gha_aries": 0.10, "gha_sol": 0.10, "dec_sol": 0.10,
+              "gha_lua": 0.10, "dec_lua": 0.10, "hp_lua": 0.10}
+
+erros = {k: [] for k in TOLERANCIA}
+for h in range(24):
+    jdu = dia_juliano(2026, 3, 20, h)
+    s = sol(jd_tt(jdu))
+    erros["gha_aries"].append(norm180(gast_graus(jdu) - ARIES[h])*60)
+    erros["gha_sol"].append(norm180(gha(s["ra"], jdu) - SOL[h][0])*60)
+    erros["dec_sol"].append((s["dec"] - SOL[h][1])*60)
+jdu = dia_juliano(2026, 3, 20, 0)
+l = lua(jd_tt(jdu))
+erros["gha_lua"] = [norm180(gha(l["ra"], jdu) - LUA_0H[0])*60]
+erros["dec_lua"] = [(l["dec"] - LUA_0H[1])*60]
+erros["hp_lua"]  = [l["paralaxe"]*60 - LUA_0H[2]]
+
+print("coluna     | tolerancia | erro medio | pior erro | veredicto")
+falhas = 0
+for k in ("gha_aries", "gha_sol", "dec_sol", "gha_lua", "dec_lua", "hp_lua"):
+    v = erros[k]; pior = max(map(abs, v))
+    ok = pior &lt;= TOLERANCIA[k]
+    falhas += not ok
+    print("%-10s | %9.2f' | %+9.3f' | %8.3f' | %s"
+          % (k, TOLERANCIA[k], st.mean(v), pior, "PASSA" if ok else "FALHA"))
+print()
+print("%d de %d colunas falham a tolerancia de 0,1' que o livro usa." % (falhas, len(TOLERANCIA)))
+print("Isto NAO e um bug do codigo: e o resultado, e e o que ha para aprender.")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>coluna     | tolerancia | erro medio | pior erro | veredicto
+gha_aries  |      0.10' |    +0.005' |    0.053' | PASSA
+gha_sol    |      0.10' |    -0.360' |    0.415' | FALHA
+dec_sol    |      0.10' |    +0.147' |    0.195' | FALHA
+gha_lua    |      0.10' |    -5.675' |    5.675' | FALHA
+dec_lua    |      0.10' |    -2.095' |    2.095' | FALHA
+hp_lua     |      0.10' |    +0.077' |    0.077' | PASSA
+
+4 de 6 colunas falham a tolerancia de 0,1' que o livro usa.
+Isto NAO e um bug do codigo: e o resultado, e e o que ha para aprender.</samp></pre><p><strong>Quatro das seis colunas tabeladas falham os 0,1′ do livro.</strong> Isso é o resultado, e está anunciado desde a lição 3. O que o projeto produz não é um «passou»: é <strong>o número de cada coluna e a decisão de o aceitar ou não</strong>.</p><p class="destaque">Escreve o relatório com as que falham <em>à cabeça</em>, não no fim. Um relatório que enterra o que falhou já está a mentir pela ordem.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — verificar sem referência nenhuma</h3>
+<p>E se não tiveres o PDF? Há verificações de <strong>autoconsistência</strong> que não precisam de fonte externa e apanham a maior parte dos bugs. Implementa três e corre-as sobre o ano inteiro.</p><p>Sugestões: (a) no trânsito, a altura tem de ser exatamente 90° − |φ − δ|; (b) o nascer e o pôr têm de ser <em>quase</em> simétricos em torno do trânsito; (c) o GHA de qualquer astro tem de crescer sempre.</p>
+<details class="solucao"><summary>Solução</summary>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code># Uma verificacao que nao precisa do livro nenhum: o almanaque tem de ser
+# consistente CONSIGO PROPRIO. Tres invariantes que valem sempre.
+from almanaque import (dia_juliano, jd_tt, sol, lua, gha, gast_graus, evento,
+                       transito, altitude_azimute, lha, norm180, SemEvento,
+                       H0_NASCER_POR)
+
+LAT, LON = 38.7083, -9.1867
+falhas = []
+
+# (1) No transito, a altura tem de ser exactamente 90 - |lat - dec|.
+pior = 0.0
+for k in range(0, 365, 7):
+    jd0 = dia_juliano(2026, 1, 1) + k
+    tr = transito(sol, LON, jd0)
+    d = sol(jd_tt(tr))
+    h, _ = altitude_azimute(LAT, d["dec"], lha(gha(d["ra"], tr), LON))
+    pior = max(pior, abs(h - (90 - abs(LAT - d["dec"])))*3600)
+print("(1) altura no transito contra 90-|lat-dec|: pior %.3f segundos de arco" % pior)
+if pior &gt; 1.0: falhas.append("transito")
+
+# (2) O nascer e o por tem de ser simetricos em torno do transito, a menos do
+#     que a declinacao mudou durante o dia.
+piorsim = 0.0
+for k in range(0, 365, 7):
+    jd0 = dia_juliano(2026, 1, 1) + k
+    n = evento(sol, LAT, LON, jd0, H0_NASCER_POR, True)
+    p = evento(sol, LAT, LON, jd0, H0_NASCER_POR, False)
+    tr = transito(sol, LON, jd0)
+    piorsim = max(piorsim, abs((tr - n) - (p - tr))*86400)
+print("(2) assimetria nascer/por em torno do transito: ate %.1f segundos" % piorsim)
+print("    (nao e zero, e nao devia ser: a declinacao muda durante o dia)")
+
+# (3) O GHA de qualquer astro tem de crescer sempre. Se alguma vez descer
+#     (fora do salto 360-&gt;0), ha um bug de normalizacao.
+mau = 0
+for k in range(0, 365, 3):
+    jd0 = dia_juliano(2026, 1, 1) + k
+    for corpo in (sol, lua):
+        ant = None
+        for h in range(25):
+            t = jd0 + h/24.0
+            g = gha(corpo(jd_tt(t))["ra"], t)
+            if ant is not None and norm180(g - ant) &lt;= 0: mau += 1
+            ant = g
+print("(3) GHA a andar para tras (fora do salto 360-&gt;0): %d ocorrencias em %d"
+      % (mau, 2*25*len(range(0,365,3))))
+if mau: falhas.append("gha nao monotono")
+
+print()
+print("FALHAS:", falhas if falhas else "nenhuma")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>(1) altura no transito contra 90-|lat-dec|: pior 0.000 segundos de arco
+(2) assimetria nascer/por em torno do transito: ate 39.7 segundos
+    (nao e zero, e nao devia ser: a declinacao muda durante o dia)
+(3) GHA a andar para tras (fora do salto 360-&gt;0): 0 ocorrencias em 6100
+
+FALHAS: nenhuma</samp></pre><p><strong>Repara na verificação (2) e no que ela ensina.</strong> A assimetria entre o nascer e o pôr em torno do trânsito <strong>não é zero</strong> — e não devia ser. Se desse zero, seria sinal de que a declinação estava a ser tratada como constante durante o dia, que é exatamente o erro que a lição 4 desmontou.</p><p class="destaque">Um invariante que dá <em>exatamente</em> zero quando não devia é tão suspeito como um que falha. Um bom teste tem de saber qual dos dois espera.</p><p>⭐ Isto é o mesmo raciocínio de um <em>property-based test</em>: em vez de comparar com valores esperados, verificam-se propriedades que a resposta certa tem de ter. É mais fraco do que uma referência e é o que resta quando não há referência — e está disponível sempre.</p>
+</details>
+</div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<p>Correção imediata.</p>
+<div class="quiz" data-quiz="almanaque-l9">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Porque é que a tolerância se escreve antes de correr a comparação?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q0" value="a" data-certa="false"><span class="rotulo">Por organização: é mais prático ter o ficheiro pronto.</span></label>
+          <p class="explicacao" hidden>A praticidade não é a razão. O ficheiro podia ser escrito em qualquer altura sem custo de organização; o que importa é a <em>ordem</em> em relação à medição.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q0" value="b" data-certa="true"><span class="rotulo">Porque escolher o limiar depois de ver o resultado é escolher o limiar que faz o resultado passar — não é medir, é justificar.</span></label>
+          <p class="explicacao" hidden>Certo. É o mesmo princípio do pré-registo em ciência experimental, e aplica-se a qualquer limiar que definas: latência, taxa de erro, cobertura.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q0" value="c" data-certa="false"><span class="rotulo">Para o comparador saber que colunas comparar.</span></label>
+          <p class="explicacao" hidden>O comparador compara todas. A tolerância não altera o que ele calcula — altera o que tu concluis.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Quatro das seis colunas tabeladas do teu almanaque falham os 0,1′ do livro. O que é que isso significa?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q1" value="a" data-certa="false"><span class="rotulo">Que há um bug algures no cálculo do Sol e da Lua.</span></label>
+          <p class="explicacao" hidden>Os erros estão dentro da exatidão declarada de cada série — o Meeus cumpre os 0,01° e a série lunar cumpre os 0,5°. Não há nada a corrigir, há o limite a declarar.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q1" value="b" data-certa="false"><span class="rotulo">Que se deve acrescentar um termo de correção empírico até os números baterem.</span></label>
+          <p class="explicacao" hidden>Isso é calibrar contra a referência, e destrói a referência: a partir daí ela já não pode ser usada para avaliar nada.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q1" value="c" data-certa="true"><span class="rotulo">Que o projeto correu bem: sabes exatamente quais falham, por quanto, e porquê.</span></label>
+          <p class="explicacao" hidden>Certo. O resultado esperado, anunciado desde a lição 3, é que uma série que cabe numa lição não reproduz o livro. O que seria falhar era não saber quais nem por quanto.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Descobres que o teu GHA do Sol erra sempre −0,4′. Podes acrescentar +0,4′ ao resultado?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q2" value="a" data-certa="false"><span class="rotulo">Não, nunca: alterar o resultado de um modelo é sempre fraude.</span></label>
+          <p class="explicacao" hidden>É demasiado absoluto. Calibrar um modelo contra medições é prática corrente em engenharia — o requisito é <em>declarar</em> que se fez, e não voltar a usar a mesma referência para validar.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q2" value="b" data-certa="true"><span class="rotulo">Podes, mas passa a ser uma calibração contra o livro — e tens de o declarar, e perdes o livro como referência independente.</span></label>
+          <p class="explicacao" hidden>Certo. A calibração é uma técnica legítima quando declarada; o que não é legítimo é apresentar o resultado calibrado como se fosse o modelo a acertar.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q2" value="c" data-certa="false"><span class="rotulo">Sim, e é a coisa certa a fazer: o objetivo é bater com o livro.</span></label>
+          <p class="explicacao" hidden>O objetivo é saber onde o teu modelo está. Um modelo ajustado ao livro num dia não acerta noutro, porque o erro é periódico e não constante.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O teu gerador não encontra nascer do Sol num certo dia. O que deve a célula dizer?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q3" value="a" data-certa="false"><span class="rotulo"><code>None</code>, para quem consome tratar como quiser.</span></label>
+          <p class="explicacao" hidden>Produz células em branco que ninguém sabe ler. Um almanaque de papel imprime símbolos distintos precisamente por isto.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q3" value="b" data-certa="true"><span class="rotulo">Qual das três causas: circumpolar, nunca sobe, ou o evento caiu fora daquele dia de calendário.</span></label>
+          <p class="explicacao" hidden>Certo. A terceira causa é o caso normal da Lua cerca de uma vez por mês, e confundi-la com circumpolar é um erro de classificação — que aconteceu na primeira versão deste curso.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q3" value="c" data-certa="false"><span class="rotulo">«circumpolar», que cobre todos os casos em que não há nascer.</span></label>
+          <p class="explicacao" hidden>Não cobre: a Lua em Lisboa não é circumpolar e há 25 dias por ano em que ela não nasce no dia de calendário. Etiquetar isso como circumpolar é dar uma explicação falsa.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Não tens o PDF oficial. Consegues verificar alguma coisa?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q4" value="a" data-certa="false"><span class="rotulo">Não: sem referência não há verificação possível.</span></label>
+          <p class="explicacao" hidden>Há uma classe inteira de verificações que não precisam de referência — as que testam propriedades que a resposta certa tem obrigatoriamente de ter.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q4" value="b" data-certa="true"><span class="rotulo">Sim: invariantes de autoconsistência — altura no trânsito igual a 90 − |φ − δ|, GHA sempre crescente, equação do tempo a passar por zero quatro vezes.</span></label>
+          <p class="explicacao" hidden>Certo. São mais fracos do que uma referência externa e apanham a maior parte dos bugs. É o mesmo raciocínio de um teste baseado em propriedades.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q4" value="c" data-certa="false"><span class="rotulo">Sim, comparando duas implementações minhas do mesmo cálculo.</span></label>
+          <p class="explicacao" hidden>Duas implementações tuas partilham as tuas conceções erradas. É útil contra erros de transcrição e inútil contra erros de compreensão.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o <code>skyfield</code> não substitui o livro como referência?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q5" value="a" data-certa="false"><span class="rotulo">Porque é menos preciso do que o livro.</span></label>
+          <p class="explicacao" hidden>É tipicamente mais preciso do que o livro impresso, que arredonda a 0,1′. A questão não é precisão, é independência.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q5" value="b" data-certa="true"><span class="rotulo">Porque usa a mesma família de efemérides do JPL que o livro, logo não é uma testemunha independente.</span></label>
+          <p class="explicacao" hidden>Certo — é uma boa <em>terceira</em> testemunha, e muito prática, mas concordar com ela é quase a mesma coisa que concordar com o livro.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l9-q5" value="c" data-certa="false"><span class="rotulo">Porque precisa de rede para descarregar as efemérides.</span></label>
+          <p class="explicacao" hidden>É um inconveniente prático real, mas não é a razão metodológica. Mesmo com os ficheiros em disco, a falta de independência mantinha-se.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+
+    <p>Esta é a última entrega do curso, e é a que vale mais.</p>
+<div class="aberta">
+  <label for="feynman-l9">Escreve o relatório do teu projeto: que colunas passaram a tolerância que declaraste, que colunas falharam, por quanto, e o que seria preciso para as corrigir.
+    <span class="pista">Começa pelas que falharam. Um relatório que enterra o que falhou já está a mentir pela ordem.</span>
+  </label>
+  <textarea id="feynman-l9" data-pergunta="Escreve o relatório do teu projeto: que colunas passaram a tolerância que declaraste, que colunas falharam, por quanto, e o que seria preciso para as corrigir."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas
+  respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e correr
+  <code>/corrigir almanaque</code>.</p>
+</div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>🔴 <strong>A tolerância declara-se antes de comparar.</strong> Escolher o limiar depois de
+        ver o resultado não é medir — é justificar.</li>
+      <li>O orçamento de erro do curso: das seis colunas <strong>tabeladas</strong>, passam duas (GHA
+        de Áries e paralaxe da Lua) e <strong>falham quatro</strong> (GHA e Dec do Sol, GHA e Dec
+        da Lua). As duas colunas de <strong>eventos</strong> — nascer/pôr e nascer/ocaso da Lua —
+        passam ao minuto.</li>
+      <li>Isso é o <strong>resultado</strong>, não o fracasso: sabes quais, por quanto, e o que
+        seria preciso — VSOP87 e ELP, que não cabem numa lição.</li>
+      <li><strong>Não calibres contra a referência.</strong> Funciona, é legítimo quando declarado,
+        e queima a referência.</li>
+      <li>Sem referência, restam os <strong>invariantes</strong>: altura no trânsito, GHA crescente,
+        equação do tempo a passar por zero quatro vezes. Mais fracos, e sempre disponíveis.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong><em>The Nautical Almanac</em></strong>, páginas diárias de 2000 a 2030 em PDF
+        gratuito (<a href="https://thenauticalalmanac.com">thenauticalalmanac.com</a>) — a
+        referência contra a qual o projeto se mede. 🔴 O PDF <strong>não está no repositório</strong>:
+        tem direitos de autor. O leitor está em
+        <code><a href="codigo/comparar.py">codigo/comparar.py</a></code> e usa só a biblioteca
+        padrão. <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Código deste curso:</strong>
+        <a href="codigo/almanaque.py">almanaque.py</a> (o motor),
+        <a href="codigo/ensaio.py">ensaio.py</a> (o que prova que está certo),
+        <a href="codigo/gerar.py">gerar.py</a> (o projeto),
+        <a href="codigo/comparar.py">comparar.py</a> (a medição contra o livro).
+        Todos de biblioteca padrão.</li>
+      <li><strong><code>skyfield</code></strong> — biblioteca de efemérides baseada nas efemérides
+        numéricas do JPL, sugerida como terceira testemunha.
+        ⚠️ <strong>Não a corri</strong>: o ambiente onde este curso foi construído não tinha acesso
+        à rede para a instalar nem para descarregar os ficheiros do JPL. Não afirmo nada sobre os
+        números que ela produz; o que está descrito é o procedimento.</li>
+      <li>🔴 <strong>Fonte que não é documentação — livro:</strong> Jean Meeus,
+        <em>Astronomical Algorithms</em>. <strong>Porquê aqui:</strong> é o caminho para as três
+        colunas que falham — a série solar de alta exatidão (VSOP87 truncado) e a série lunar com
+        dezenas de termos estão lá. <strong>O que saltar:</strong> nada, se o objetivo for baixar as
+        tolerâncias. ⚠️ Não tenho o exemplar: não cito páginas.
+        <a href="bibliografia.html#meeus">Ver a bibliografia</a>.</li>
+      <li>🔴 <strong>Fonte que não é documentação — série:</strong> <em>Longitude</em>
+        (Channel 4 / A&amp;E, 2000). <strong>Porquê no fim:</strong> o curso acabou a medir o seu
+        próprio erro contra um livro; a série mostra o que custou, em vidas e décadas, produzir a
+        primeira versão desse livro. É o enquadramento certo para ler a tua própria tabela de
+        tolerâncias. <span class="verificado">🌐 Ficha verificada a 2026-09-16</span></li>
+    </ul>
+    <footer class="rodape">
+      <p><a href="08-mares.html">← As marés</a> · <a href="index.html">Índice do curso</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

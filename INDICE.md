@@ -140,6 +140,196 @@ o que já está escrito.
   - [C · Diagnosticar](docs/abstracts-e-resumos/teste.html#parte-c)
   - [Entregar](docs/abstracts-e-resumos/teste.html#entregar)
 
+## `docs/almanaque/00-esfera-celeste.html` — 0 · A esfera celeste — O almanaque
+
+  - [1. Objetivo](docs/almanaque/00-esfera-celeste.html#objetivo)
+  - [2. Recuperar](docs/almanaque/00-esfera-celeste.html#recuperar)
+  - [3. O mecanismo](docs/almanaque/00-esfera-celeste.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/almanaque/00-esfera-celeste.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/almanaque/00-esfera-celeste.html#lacunas)
+  - [6. Erros comuns](docs/almanaque/00-esfera-celeste.html#erros)
+  - [7. Praticar](docs/almanaque/00-esfera-celeste.html#praticar)
+  - [8. Quiz](docs/almanaque/00-esfera-celeste.html#quiz)
+  - [9. Explica por palavras tuas](docs/almanaque/00-esfera-celeste.html#feynman)
+  - [10. Resumo](docs/almanaque/00-esfera-celeste.html#resumo)
+  - [11. Fontes](docs/almanaque/00-esfera-celeste.html#fontes)
+
+## `docs/almanaque/01-o-que-e-um-almanaque.html` — 1 · O que é um almanaque — O almanaque
+
+  - [1. Objetivo](docs/almanaque/01-o-que-e-um-almanaque.html#objetivo)
+  - [2. Recuperar](docs/almanaque/01-o-que-e-um-almanaque.html#recuperar)
+  - [3. O mecanismo](docs/almanaque/01-o-que-e-um-almanaque.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/almanaque/01-o-que-e-um-almanaque.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/almanaque/01-o-que-e-um-almanaque.html#lacunas)
+  - [6. Erros comuns](docs/almanaque/01-o-que-e-um-almanaque.html#erros)
+  - [7. Praticar](docs/almanaque/01-o-que-e-um-almanaque.html#praticar)
+  - [8. Quiz](docs/almanaque/01-o-que-e-um-almanaque.html#quiz)
+  - [9. Explica por palavras tuas](docs/almanaque/01-o-que-e-um-almanaque.html#feynman)
+  - [10. Resumo](docs/almanaque/01-o-que-e-um-almanaque.html#resumo)
+  - [11. Fontes](docs/almanaque/01-o-que-e-um-almanaque.html#fontes)
+
+## `docs/almanaque/02-o-tempo.html` — 2 · O tempo — O almanaque
+
+  - [1. Objetivo](docs/almanaque/02-o-tempo.html#objetivo)
+  - [2. Recuperar](docs/almanaque/02-o-tempo.html#recuperar)
+  - [3. O mecanismo](docs/almanaque/02-o-tempo.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/almanaque/02-o-tempo.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/almanaque/02-o-tempo.html#lacunas)
+  - [6. Erros comuns](docs/almanaque/02-o-tempo.html#erros)
+  - [7. Praticar](docs/almanaque/02-o-tempo.html#praticar)
+  - [8. Quiz](docs/almanaque/02-o-tempo.html#quiz)
+  - [9. Explica por palavras tuas](docs/almanaque/02-o-tempo.html#feynman)
+  - [10. Resumo](docs/almanaque/02-o-tempo.html#resumo)
+  - [11. Fontes](docs/almanaque/02-o-tempo.html#fontes)
+
+## `docs/almanaque/03-o-sol.html` — 3 · O Sol — O almanaque
+
+  - [1. Objetivo](docs/almanaque/03-o-sol.html#objetivo)
+  - [2. Recuperar](docs/almanaque/03-o-sol.html#recuperar)
+  - [3. O mecanismo](docs/almanaque/03-o-sol.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/almanaque/03-o-sol.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/almanaque/03-o-sol.html#lacunas)
+  - [6. Erros comuns](docs/almanaque/03-o-sol.html#erros)
+  - [7. Praticar](docs/almanaque/03-o-sol.html#praticar)
+  - [8. Quiz](docs/almanaque/03-o-sol.html#quiz)
+  - [9. Explica por palavras tuas](docs/almanaque/03-o-sol.html#feynman)
+  - [10. Resumo](docs/almanaque/03-o-sol.html#resumo)
+  - [11. Fontes](docs/almanaque/03-o-sol.html#fontes)
+
+## `docs/almanaque/04-nascer-e-por.html` — 4 · Nascer, pôr e crepúsculos — O almanaque
+
+  - [1. Objetivo](docs/almanaque/04-nascer-e-por.html#objetivo)
+  - [2. Recuperar](docs/almanaque/04-nascer-e-por.html#recuperar)
+  - [3. O mecanismo](docs/almanaque/04-nascer-e-por.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/almanaque/04-nascer-e-por.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/almanaque/04-nascer-e-por.html#lacunas)
+  - [6. Erros comuns](docs/almanaque/04-nascer-e-por.html#erros)
+  - [7. Praticar](docs/almanaque/04-nascer-e-por.html#praticar)
+  - [8. Quiz](docs/almanaque/04-nascer-e-por.html#quiz)
+  - [9. Explica por palavras tuas](docs/almanaque/04-nascer-e-por.html#feynman)
+  - [10. Resumo](docs/almanaque/04-nascer-e-por.html#resumo)
+  - [11. Fontes](docs/almanaque/04-nascer-e-por.html#fontes)
+
+## `docs/almanaque/05-a-lua.html` — 5 · A Lua — O almanaque
+
+  - [1. Objetivo](docs/almanaque/05-a-lua.html#objetivo)
+  - [2. Recuperar](docs/almanaque/05-a-lua.html#recuperar)
+  - [3. O mecanismo](docs/almanaque/05-a-lua.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/almanaque/05-a-lua.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/almanaque/05-a-lua.html#lacunas)
+  - [6. Erros comuns](docs/almanaque/05-a-lua.html#erros)
+  - [7. Praticar](docs/almanaque/05-a-lua.html#praticar)
+  - [8. Quiz](docs/almanaque/05-a-lua.html#quiz)
+  - [9. Explica por palavras tuas](docs/almanaque/05-a-lua.html#feynman)
+  - [10. Resumo](docs/almanaque/05-a-lua.html#resumo)
+  - [11. Fontes](docs/almanaque/05-a-lua.html#fontes)
+
+## `docs/almanaque/06-ler-as-tabuas.html` — 6 · Ler as tábuas — O almanaque
+
+  - [1. Objetivo](docs/almanaque/06-ler-as-tabuas.html#objetivo)
+  - [2. Recuperar](docs/almanaque/06-ler-as-tabuas.html#recuperar)
+  - [3. O mecanismo](docs/almanaque/06-ler-as-tabuas.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/almanaque/06-ler-as-tabuas.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/almanaque/06-ler-as-tabuas.html#lacunas)
+  - [6. Erros comuns](docs/almanaque/06-ler-as-tabuas.html#erros)
+  - [7. Praticar](docs/almanaque/06-ler-as-tabuas.html#praticar)
+  - [8. Quiz](docs/almanaque/06-ler-as-tabuas.html#quiz)
+  - [9. Explica por palavras tuas](docs/almanaque/06-ler-as-tabuas.html#feynman)
+  - [10. Resumo](docs/almanaque/06-ler-as-tabuas.html#resumo)
+  - [11. Fontes](docs/almanaque/06-ler-as-tabuas.html#fontes)
+
+## `docs/almanaque/07-reduzir-uma-altura.html` — 7 · Reduzir uma altura — O almanaque
+
+  - [1. Objetivo](docs/almanaque/07-reduzir-uma-altura.html#objetivo)
+  - [2. Recuperar](docs/almanaque/07-reduzir-uma-altura.html#recuperar)
+  - [3. O mecanismo](docs/almanaque/07-reduzir-uma-altura.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/almanaque/07-reduzir-uma-altura.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/almanaque/07-reduzir-uma-altura.html#lacunas)
+  - [6. Erros comuns](docs/almanaque/07-reduzir-uma-altura.html#erros)
+  - [7. Praticar](docs/almanaque/07-reduzir-uma-altura.html#praticar)
+  - [8. Quiz](docs/almanaque/07-reduzir-uma-altura.html#quiz)
+  - [9. Explica por palavras tuas](docs/almanaque/07-reduzir-uma-altura.html#feynman)
+  - [10. Resumo](docs/almanaque/07-reduzir-uma-altura.html#resumo)
+  - [11. Fontes](docs/almanaque/07-reduzir-uma-altura.html#fontes)
+
+## `docs/almanaque/08-mares.html` — 8 · As marés — O almanaque
+
+  - [1. Objetivo](docs/almanaque/08-mares.html#objetivo)
+  - [2. Recuperar](docs/almanaque/08-mares.html#recuperar)
+  - [3. O mecanismo](docs/almanaque/08-mares.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/almanaque/08-mares.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/almanaque/08-mares.html#lacunas)
+  - [6. Erros comuns](docs/almanaque/08-mares.html#erros)
+  - [7. Praticar](docs/almanaque/08-mares.html#praticar)
+  - [8. Quiz](docs/almanaque/08-mares.html#quiz)
+  - [9. Explica por palavras tuas](docs/almanaque/08-mares.html#feynman)
+  - [10. Resumo](docs/almanaque/08-mares.html#resumo)
+  - [11. Fontes](docs/almanaque/08-mares.html#fontes)
+
+## `docs/almanaque/09-o-teu-almanaque.html` — 9 · O teu almanaque — O almanaque
+
+  - [1. Objetivo](docs/almanaque/09-o-teu-almanaque.html#objetivo)
+  - [2. Recuperar](docs/almanaque/09-o-teu-almanaque.html#recuperar)
+  - [3. O mecanismo](docs/almanaque/09-o-teu-almanaque.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/almanaque/09-o-teu-almanaque.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/almanaque/09-o-teu-almanaque.html#lacunas)
+  - [6. Erros comuns](docs/almanaque/09-o-teu-almanaque.html#erros)
+  - [7. Praticar](docs/almanaque/09-o-teu-almanaque.html#praticar)
+  - [8. Quiz](docs/almanaque/09-o-teu-almanaque.html#quiz)
+  - [9. Explica por palavras tuas](docs/almanaque/09-o-teu-almanaque.html#feynman)
+  - [10. Resumo](docs/almanaque/09-o-teu-almanaque.html#resumo)
+  - [11. Fontes](docs/almanaque/09-o-teu-almanaque.html#fontes)
+
+## `docs/almanaque/bibliografia.html` — Bibliografia — O almanaque
+
+  - [1. Por onde começar](docs/almanaque/bibliografia.html#comecar)
+    - [Wikipédia, «Almanac» · fonte secundária](docs/almanaque/bibliografia.html#wikipedia-almanac)
+    - [Dava Sobel, (1995) · 🔴 Longitudelivro](docs/almanaque/bibliografia.html#sobel)
+    - [Série (Channel 4 / A&E, 2000) · 🔴 Longitudesérie](docs/almanaque/bibliografia.html#longitude)
+  - [2. Para calcular](docs/almanaque/bibliografia.html#calcular)
+    - [Jean Meeus, · 🔴 Astronomical Algorithmslivro](docs/almanaque/bibliografia.html#meeus)
+    - [«Low precision formulae», · The Astronomical Almanacfonte primária](docs/almanaque/bibliografia.html#astronomical-almanac)
+    - [, páginas diárias · The Nautical Almanacfonte primária](docs/almanaque/bibliografia.html#nautical)
+    - [NOAA, «Solar Calculation Details» · documentação](docs/almanaque/bibliografia.html#noaa-solar)
+  - [3. Para navegar](docs/almanaque/bibliografia.html#navegar)
+    - [Nathaniel Bowditch, · 🔴 The American Practical Navigatorlivro](docs/almanaque/bibliografia.html#bowditch)
+    - [Wikipédia, «Intercept method» · fonte secundária](docs/almanaque/bibliografia.html#wikipedia-intercept)
+  - [4. Para as marés (extensão)](docs/almanaque/bibliografia.html#mares-biblio)
+    - [Wikipédia, «Theory of tides» · fonte secundária](docs/almanaque/bibliografia.html#wikipedia-tides)
+    - [NOAA Tides & Currents · documentação oficial](docs/almanaque/bibliografia.html#noaa-tides)
+    - [Kowalik & Luick, · 🔴 Modern Theory and Practice of Tide Analysis and Tidal Powerlivro](docs/almanaque/bibliografia.html#kowalik)
+  - [5. O que procurei e não encontrei](docs/almanaque/bibliografia.html#nao-encontrei)
+
+## `docs/almanaque/folha.html` — Folha de consulta — O almanaque
+
+  - [A conta](docs/almanaque/folha.html#conta)
+  - [Tempos](docs/almanaque/folha.html#tempos)
+  - [Alturas convencionais](docs/almanaque/folha.html#alturas)
+  - [Correções de altura — pela ordem](docs/almanaque/folha.html#correccoes)
+  - [Ler uma página diária](docs/almanaque/folha.html#tabuas)
+  - [Números que interessam](docs/almanaque/folha.html#numeros)
+  - [Orçamento de erro deste curso](docs/almanaque/folha.html#erro)
+  - [Marés (extensão)](docs/almanaque/folha.html#mares)
+
+## `docs/almanaque/index.html` — O almanaque — professor
+
+  - [O que vais conseguir fazer no fim](docs/almanaque/index.html#conseguir)
+  - [O que este curso não é](docs/almanaque/index.html#nao-e)
+  - [O que assumi](docs/almanaque/index.html#assumi)
+  - [O mapa](docs/almanaque/index.html#mapa)
+  - [O plano no tempo](docs/almanaque/index.html#plano)
+  - [Nota das fases](docs/almanaque/index.html#fases)
+    - [Fase 0 — Verificar](docs/almanaque/index.html#fase0)
+    - [Fase 1 — Criar](docs/almanaque/index.html#fase1)
+    - [Fase 2 — Aprofundar](docs/almanaque/index.html#fase2)
+    - [Fase 3 — Validar](docs/almanaque/index.html#fase3)
+
+## `docs/almanaque/teste.html` — Teste de domínio — O almanaque
+
+  - [As quinze](docs/almanaque/teste.html#perguntas)
+  - [Três perguntas abertas](docs/almanaque/teste.html#abertas)
+  - [Depois do teste](docs/almanaque/teste.html#depois)
+
 ## `docs/cassete-captura/00-espetro.html` — 0 · Ver as frequências de um sinal — Digitalizar cassetes
 
   - [1. Objetivo](docs/cassete-captura/00-espetro.html#objetivo)

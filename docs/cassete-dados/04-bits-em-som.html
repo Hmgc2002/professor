@@ -326,6 +326,27 @@ figcaption a { color: var(--acento); text-decoration: underline; }
 .svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
 .svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
 
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
 /* ---------- cartões do catálogo ---------- */
 
 .cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
@@ -509,7 +530,7 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
     </ol>
 
     <figure>
-      <svg viewBox="0 0 520 285" role="img" aria-labelledby="t-mod d-mod">
+      <svg viewBox="0 -4 520 289" role="img" aria-labelledby="t-mod d-mod">
         <title id="t-mod">Três esquemas de gravar os mesmos bits, e o que sobra de cada um depois da fita</title>
         <desc id="d-mod">Três painéis com os mesmos oito bits. No primeiro, por nível, a linha de cima é o que se
         envia, patamares altos e baixos; a de baixo é o que a fita devolve: um pico curto em cada mudança e linha

@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 · O Sol — O almanaque</title>
+<meta name="description" content="A lição onde o curso mede o seu próprio erro contra uma página real do Nautical Almanac, e onde se descobre que 0,01° de exatidão declarada dá três números diferentes conforme onde se olhe. É aqui que se resolve a tensão do diagnóstico.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/almanaque/03-o-sol.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">O almanaque</a> <span aria-hidden="true">›</span> lição 3</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta nucleo">Lição 3 · núcleo</p>
+    <h1>O Sol: uma posição média e uma pilha de correções</h1>
+    <p class="subtitulo">A lição onde o curso mede o seu próprio erro contra uma página real do <em>Nautical Almanac</em>, e onde se descobre que 0,01° de exatidão declarada dá três números diferentes conforme onde se olhe. É aqui que se resolve a tensão do diagnóstico.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim desta lição <strong>implementas</strong> a posição do Sol a partir de uma data,
+    <strong>medes</strong> o erro do teu resultado contra uma página real do <em>Nautical Almanac</em>
+    em minutos de arco, e <strong>explicas</strong> porque é que uma série com 0,01° de exatidão
+    declarada produz 0,4′ de erro no GHA, 0,2′ na declinação e 11 minutos no instante do equinócio —
+    três números que parecem incompatíveis e descrevem o mesmo erro.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>De memória, antes de ler.</p>
+    <ol>
+      <li>Em que escala de tempo é que corre uma série de posição, e em que escala corre o GHA?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Posição em <strong>TT</strong>; GHA em <strong>UT1</strong>. A diferença é o ΔT, que é
+          medido. (Lição 2.)</p></details>
+      </li>
+      <li>GHA = ____ − ascensão reta. O que vai no espaço em branco, e qual dos dois tempos
+        sidéreos?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>GHA = <strong>GAST</strong> − α: o tempo sidéreo <strong>aparente</strong>, que inclui
+          a nutação. Usar o médio custa até 0,263′. (Lição 2.)</p></details>
+      </li>
+      <li>O que é que a declinação do Sol tem a ver com o ponto subastral?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>É a <em>latitude</em> do ponto subastral: o paralelo onde o Sol está a pique nesse
+          instante. (Lição 0.)</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p><strong>Porquê antes de como.</strong> O Sol é o corpo mais fácil de calcular e o mais
+    instrutivo, porque expõe a estrutura que todas as efemérides têm: uma <strong>posição média
+    simples</strong> mais uma pilha de <strong>correções de tamanhos muito diferentes</strong>. O
+    que distingue uma efeméride de 1′ de uma de 0,001″ não é a fórmula — é onde se corta a pilha.</p>
+
+    <h3>A pilha, camada a camada</h3>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="As camadas do cálculo do Sol e o que cada uma vale, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>Camada</th><th>O que acrescenta</th><th>Quanto vale</th><th>Se a saltares</th></tr></thead>
+    <tbody><tr><td><strong>Longitude média</strong> L₀</td><td>Onde o Sol estaria se a Terra andasse a velocidade constante</td><td>0 a 360°, cresce 0,9856°/dia</td><td>Não tens Sol nenhum</td></tr><tr><td><strong>Equação do centro</strong> C</td><td>A correção da órbita ser uma elipse: a Terra anda mais depressa no periélio (janeiro)</td><td>até <strong>±1,91°</strong></td><td>Erras até 1,91° — cerca de 115′, mais de mil vezes a tolerância do livro</td></tr><tr><td><strong>Nutação</strong> Δψ</td><td>O eixo da Terra oscila com o período do nodo lunar, 18,6 anos</td><td>até ±17,2″ = <strong>0,29′</strong></td><td>Erras até três vezes a tolerância</td></tr><tr><td><strong>Aberração</strong></td><td>A luz demora 8 min 19 s a chegar: vês o Sol onde ele estava</td><td>−20,5″ = <strong>0,34′</strong>, quase constante</td><td>Erras três vezes a tolerância, sempre para o mesmo lado</td></tr><tr><td><strong>Obliquidade</strong> ε</td><td>Roda da eclíptica para o equador</td><td>23,44°, a diminuir 47″ por século</td><td>A declinação sai completamente errada</td></tr><tr><td><strong>Perturbações planetárias</strong></td><td>Vénus, Júpiter e a Lua puxam a Terra</td><td>alguns segundos de arco</td><td>É o que fica de fora nesta lição, e é por isso que o erro final não desce abaixo de ~0,4′</td></tr></tbody>
+  </table>
+</div>
+
+    <p>Repara na razão de escalas. A primeira correção vale <strong>1,91 graus</strong>; a segunda e
+    a terceira valem <strong>20 segundos de arco</strong> — trezentas e quarenta vezes menos. Isto é
+    típico: uma série de efemérides é dominada por um punhado de termos e depois tem uma cauda longa
+    de termos minúsculos, e é na cauda que está toda a dificuldade.</p>
+
+    <h3>Porque é que a equação do centro existe</h3>
+    <p>A Terra não anda em torno do Sol a velocidade constante. Pela segunda lei de Kepler, varre
+    áreas iguais em tempos iguais — logo anda mais depressa quando está perto (periélio, princípio
+    de janeiro) e mais devagar quando está longe (afélio, princípio de julho). A
+    <strong>longitude média</strong> é onde o Sol estaria se a velocidade fosse constante; a
+    <strong>equação do centro</strong> é a diferença entre isso e a realidade.</p>
+    <p>A sua forma, C ≈ 2e·sin M + (5e²/4)·sin 2M + …, não é um ajuste empírico: é o
+    desenvolvimento em série da solução da equação de Kepler em potências da excentricidade. Com
+    e = 0,0167, o primeiro termo vale 2e = 0,0334 rad = 1,914° — que é exatamente o coeficiente que
+    aparece no código.</p>
+
+    <h3>As duas correções que ninguém vê e todos esquecem</h3>
+    <p><strong>Nutação:</strong> o eixo da Terra não aponta sempre para o mesmo sítio. A Lua puxa o
+    bojo equatorial e faz o eixo descrever uma pequena oscilação com o período do nodo lunar, 18,6
+    anos. Isto desloca o próprio sistema de coordenadas, e portanto a longitude de <em>todos</em> os
+    astros, em até 17,2 segundos de arco.</p>
+    <p><strong>Aberração:</strong> a luz do Sol demora 8 minutos e 19 segundos a chegar. Vês o Sol
+    onde ele estava, não onde está. Como ele anda 0,041° por hora, 499 segundos valem 20,5 segundos
+    de arco — sempre para trás. É uma correção quase constante, e por isso é a mais fácil de
+    esquecer e a que dá um desvio sistemático mais limpo.</p>
+
+    <h3>O último passo: da eclíptica para o equador</h3>
+    <p>A série dá <strong>longitude eclíptica</strong> λ — o ângulo medido sobre o plano da órbita.
+    O almanaque quer <strong>ascensão reta</strong> e <strong>declinação</strong> — ângulos medidos
+    sobre o equador. A rotação entre os dois planos é a obliquidade ε ≈ 23,44°:</p>
+    <p class="destaque">α = atan2(cos ε · sin λ, cos λ) · sin δ = sin ε · sin λ</p>
+    <p>E depois, com o tempo sidéreo da lição 2: <strong>GHA = GAST − α</strong>. Está feito o
+    almanaque do Sol.</p>
+
+    <h3>A equação do tempo, que sai de graça</h3>
+    <p>Se já tens a longitude média (o Sol «do relógio») e a ascensão reta (o Sol «do céu»), a
+    diferença entre as duas é a <strong>equação do tempo</strong>: quanto é que o Sol verdadeiro
+    está à frente ou atrás do Sol médio. Na convenção do USNO é <em>aparente menos médio</em>, logo
+    positivo quando o Sol vai à frente do relógio.</p>
+    <p>É a mesma grandeza que faz o analema — e é o melhor teste que existe para uma série solar,
+    por uma razão subtil: é uma <strong>diferença</strong> entre duas quantidades do mesmo modelo,
+    portanto os erros comuns às duas cancelam-se e o que sobra é a forma da órbita e a obliquidade,
+    que é precisamente o que se quer testar.</p>
+
+    <div class="caixa critico">
+  <span class="titulo">🔴 O orçamento de erro: o eixo deste curso</span>
+  <p>O diagnóstico registou uma tensão: queres <em>calcular tu</em> e queres <em>usar um almanaque náutico a sério</em>. Esta é a lição onde essa tensão se resolve, com números medidos e não com uma promessa.</p><p>A série do Meeus cap. 25 declara <strong>0,01° = 36″</strong> de erro em longitude eclíptica. Medida contra os instantes publicados dos equinócios e solstícios de 2025–2027, erra entre −8″ e +28″ — dentro do declarado. Medida contra a página de 20 de março de 2026 do <em>Nautical Almanac</em>, dá <strong>até 0,42′ no GHA e 0,20′ na declinação</strong>.</p><p class="destaque">O livro imprime a <strong>0,1′</strong>. O teu código chega a <strong>0,4′</strong>. Não reproduz o livro coluna a coluna, e <em>nenhuma</em> série que caiba numa lição reproduz.</p><p><strong>O que isto significa na prática:</strong> 0,4′ de GHA é 0,4 milhas náuticas de longitude no equador. Para uma aterragem, é irrelevante. Para reproduzir o livro, não chega. Para o nascer e o pôr do Sol — lição 4 — o erro traduz-se em <em>segundos</em> de tempo e desaparece no arredondamento ao minuto.</p><p>🔴 A regra que fica: <strong>uma efeméride sem erro declarado é um número com ar de facto.</strong> Cada função do <code>almanaque.py</code> traz o seu, e cada um foi medido.</p>
+</div>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <h3>Passo 1 — construir a posição por camadas, e ver cada uma</h3>
+    <p>Pergunto primeiro «quanto vale cada correção» e não «qual é a fórmula final», porque é o
+    tamanho relativo que me diz onde posso cortar. Uma correção que vale menos do que a tolerância
+    do meu leitor não tem de ser calculada.</p>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import dia_juliano, jd_tt, seculos_j2000, sin_g, cos_g, norm360, norm180
+
+jd = jd_tt(dia_juliano(2026, 3, 20, 12))
+t  = seculos_j2000(jd)
+
+L0 = 280.46646 + 36000.76983*t + 0.0003032*t*t          # longitude media
+M  = 357.52911 + 35999.05029*t - 0.0001537*t*t          # anomalia media
+C  = ((1.914602 - 0.004817*t - 0.000014*t*t)*sin_g(M)   # equacao do centro
+      + (0.019993 - 0.000101*t)*sin_g(2*M)
+      + 0.000289*sin_g(3*M))
+verdadeira = L0 + C
+omega = 125.04 - 1934.136*t
+nutacao   = -0.00478*sin_g(omega)
+aberracao = -0.00569
+aparente  = verdadeira + nutacao + aberracao
+
+print("longitude media   L0 = %10.4f graus" % norm360(L0))
+print("anomalia media    M  = %10.4f graus" % norm360(M))
+print("equacao do centro C  = %+10.4f graus = %+8.2f minutos de arco" % (C, C*60))
+print("longitude verdadeira = %10.4f graus" % norm360(verdadeira))
+print("  + nutacao          = %+10.6f graus = %+6.2f segundos de arco" % (nutacao, nutacao*3600))
+print("  + aberracao        = %+10.6f graus = %+6.2f segundos de arco" % (aberracao, aberracao*3600))
+print("longitude APARENTE   = %10.4f graus" % norm360(aparente))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>longitude media   L0 =   358.0407 graus
+anomalia media    M  =    74.6526 graus
+equacao do centro C  =    +1.8551 graus =  +111.31 minutos de arco
+longitude verdadeira =   359.8958 graus
+  + nutacao          =  +0.001790 graus =  +6.44 segundos de arco
+  + aberracao        =  -0.005690 graus = -20.48 segundos de arco
+longitude APARENTE   =   359.8919 graus</samp></pre>
+    <p><strong>A leitura:</strong> a equação do centro vale mais de 100 minutos de arco; a nutação e
+    a aberração valem cerca de 20 segundos de arco <em>cada</em>. Se o teu leitor tolera 1 grau,
+    podes deitar fora as duas últimas. Se tolera 0,1 minutos de arco, não podes deitar fora
+    nenhuma — e ainda assim não chegas lá, como o passo 3 vai mostrar.</p>
+
+    <h3>Passo 2 — conferir contra uma grandeza publicada com data</h3>
+    <p>A equação do tempo tem quatro extremos e quatro passagens por zero, todos publicados
+    <strong>com data</strong>. A data é um teste mais apertado do que o valor, porque depende da
+    <em>fase</em> das componentes e não da sua amplitude — um erro de amplitude passa despercebido
+    num valor e desloca uma data.</p>
+<pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import dia_juliano, jd_tt, sol, civil_de_jd
+
+# A equacao do tempo: Sol aparente MENOS Sol medio (convencao do USNO).
+# Positivo = o Sol vai a frente do relogio.
+eq = [(sol(jd_tt(dia_juliano(2026,1,1) + k/24.0))["eqt"], k/24.0) for k in range(24*365)]
+
+def extremo(func, lo, hi):
+    v, k = func(e for e in eq if lo &lt;= e[1] &lt; hi)
+    return v, civil_de_jd(dia_juliano(2026,1,1) + k)[:3]
+
+for rot, f, lo, hi, publicado in (("minimo de fevereiro", min,   0, 100, "-14 min 15 s a 11 de fevereiro"),
+                                  ("maximo de maio",      max, 100, 180, "+3 min 41 s a 14 de maio"),
+                                  ("minimo de julho",     min, 180, 250, "-6 min 30 s a 26 de julho"),
+                                  ("maximo de novembro",  max, 250, 366, "+16 min 25 s a 3 de novembro")):
+    v, (a,m,d) = extremo(f, lo, hi)
+    print("%-20s %+7.2f min a %02d-%02d   | publicado: %s" % (rot, v, m, d, publicado))
+
+print()
+zeros = [civil_de_jd(dia_juliano(2026,1,1)+eq[i][1])[:3]
+         for i in range(1,len(eq)) if (eq[i-1][0] &lt; 0) != (eq[i][0] &lt; 0)]
+print("passa por zero a:", ", ".join("%02d-%02d" % (z[1],z[2]) for z in zeros))
+print("publicado       : 04-15, 06-13, 09-01, 12-25 (a fonte diz que variam um dia)")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>minimo de fevereiro   -14.22 min a 02-11   | publicado: -14 min 15 s a 11 de fevereiro
+maximo de maio         +3.62 min a 05-14   | publicado: +3 min 41 s a 14 de maio
+minimo de julho        -6.59 min a 07-26   | publicado: -6 min 30 s a 26 de julho
+maximo de novembro    +16.42 min a 11-03   | publicado: +16 min 25 s a 3 de novembro
+
+passa por zero a: 04-15, 06-12, 09-01, 12-25
+publicado       : 04-15, 06-13, 09-01, 12-25 (a fonte diz que variam um dia)</samp></pre>
+    <p><strong>Os quatro extremos batem, e as datas também.</strong> Isto é a melhor prova que tenho
+    de que a série está bem implementada: são oito coincidências independentes.</p>
+    <p>⚠️ Uma passagem por zero sai a 12 de junho contra 13 de junho publicado. A própria fonte diz
+    que estas datas «<em>podem variar um dia de ano para ano</em>», e os valores publicados são
+    para a época 2000 — logo isto está dentro do que a fonte declara, e não é um desvio a explicar.
+    Registo-o na mesma, porque não registar o que quase falhou é como não ter medido.</p>
+
+    <h3>Passo 3 — a prova que interessa: contra o livro, hora a hora</h3>
+    <p>Está no exercício E3, e é o exercício central do curso.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p>Queres publicar um almanaque do Sol para <strong>planear fotografia de paisagem</strong>:
+      o utilizador quer saber onde é que o Sol vai estar, com precisão suficiente para enquadrar.</p>
+      <ol>
+        <li><em>Dado:</em> o disco do Sol tem cerca de <strong>32 minutos de arco</strong> de
+          diâmetro aparente.</li>
+        <li><strong>______</strong> Que tolerância é que faz sentido declarar para este leitor, e
+          porquê? (Pista: a resposta não é «a melhor possível».)</li>
+        <li><em>Dado:</em> as fórmulas de baixa precisão do <em>Astronomical Almanac</em> declaram
+          1° de erro entre 1950 e 2050.</li>
+        <li><strong>______</strong> Chegam? E o que é que essa resposta muda no código que
+          escreves?</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2.</strong> Uma tolerância razoável é <strong>alguns minutos de arco</strong>
+        — digamos 5′, que é cerca de um sexto do diâmetro do Sol. Abaixo disso o utilizador não
+        distingue, e acima disso o Sol aparece visivelmente noutro sítio do enquadramento. Declarar
+        «a melhor possível» é a resposta errada porque não é uma tolerância: não permite decidir
+        nada.</p>
+        <p><strong>Passo 4.</strong> <strong>Não chegam.</strong> 1° = 60′ é quase o dobro do
+        diâmetro do Sol — o utilizador veria o Sol num sítio claramente diferente do previsto.
+        Precisas da série do Meeus, que dá 0,4′.</p>
+        <p>E o que isso muda no código é mais do que trocar uma função: obriga-te a calcular a
+        <strong>refração</strong> (lição 4), porque perto do horizonte — que é quando se fotografa —
+        a refração vale até 34′ e é <em>maior do que toda a tolerância que declaraste</em>. Uma
+        tolerância apertada não puxa só por mais termos na série: puxa por correções de natureza
+        completamente diferente.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <p>Um destes apanhou-me a escrever esta lição, e está assinalado.</p>
+<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns desta lição, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody><tr><td>«A equação do tempo existe porque a órbita é elítica»</td><td>Explicar o analema só com Kepler.</td><td>São <strong>duas</strong> causas somadas e é por isso que o analema é um oito e não uma elipse. A <strong>obliquidade</strong> dá uma componente de período <em>semestral</em> (o Sol anda na eclíptica e projeta-se no equador com um fator que varia); a <strong>excentricidade</strong> dá uma componente <em>anual</em>. Se só houvesse excentricidade, o analema seria um traço.</td></tr><tr><td>«O Sol está mais perto no verão»</td><td>Explicar as estações pela distância.</td><td>O periélio é no <strong>início de janeiro</strong> — inverno no hemisfério norte. Corre o ensaio: a distância vai de 0,9833 a 1,0167 UA, cerca de 3,4 % de variação, ou seja 7 % na irradiância. As estações vêm da <strong>obliquidade</strong>, não da distância.</td></tr><tr><td>«Meio-dia é às 12:00»</td><td>Assumir que o Sol transita ao meio-dia do relógio.</td><td>O trânsito solar afasta-se do meio-dia médio até <strong>16 minutos</strong> pela equação do tempo, mais a diferença entre o teu meridiano e o do fuso, mais o horário de verão. Em Lisboa no verão, o Sol transita perto das 14:00 do relógio.</td></tr><tr><td>⚠️ «Se a série declara 0,01° de erro, então erra 0,01° em tudo»</td><td>Usar a exatidão declarada como se fosse uniforme.</td><td>0,01° de erro em <strong>longitude eclíptica</strong> transforma-se em quantidades muito diferentes: na <strong>declinação</strong> vale 0,01°·sin ε ≈ 0,2′ perto do equinócio e quase <strong>zero</strong> no solstício; no <strong>instante do equinócio</strong> vale 15 minutos de tempo. <em>Medi as três</em> e dão números que parecem incompatíveis e não são.</td></tr><tr><td>«A aberração é a refração»</td><td>Confundir as duas correções.</td><td>A <strong>aberração</strong> é a luz demorar 8 min 19 s a chegar: vês o Sol onde ele estava, e é geométrica, vale −20,5″ e aplica-se à posição <em>geocêntrica</em>. A <strong>refração</strong> é a atmosfera a entortar o raio, vale até 34′ no horizonte e aplica-se à altura <em>observada</em>. Uma entra na lição 3, a outra na 4 e na 7.</td></tr></tbody>
+  </table>
+</div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <p>O E3 é o exercício central do curso inteiro. Não o saltes.</p>
+
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — de que tamanho é cada correção?</h3>
+<p>Sem correr nada: ordena estas quatro correções da maior para a menor, e diz para cada uma se ela é <em>periódica</em> ou <em>praticamente constante</em>.</p><ol><li>equação do centro</li><li>nutação em longitude</li><li>aberração</li><li>a diferença entre a longitude média e a longitude aparente no solstício de junho</li></ol>
+<details class="solucao"><summary>Solução</summary>
+<p>Por tamanho: <strong>equação do centro</strong> (±1,91° = ±115′), depois a <strong>aberração</strong> (−20,5″ = −0,34′) e a <strong>nutação</strong> (±17,2″ = ±0,29′) quase empatadas, sendo a aberração ligeiramente maior.</p><p>Periódicas: a equação do centro (anual) e a nutação (18,6 anos, e por isso <em>parece</em> constante dentro de um ano mas não é). Praticamente constante: a aberração, que só varia com 1/R, ou seja ±0,35″.</p><p>A quarta é uma pergunta armadilhada: no solstício de junho a anomalia média vale cerca de 175°, logo sin M ≈ 0,09 e a equação do centro está quase no seu <em>zero</em>. A diferença entre longitude média e aparente é aí pequena — não é o máximo. O máximo da equação do centro dá-se onde sin M = ±1, ou seja cerca de três meses depois do periélio (início de abril) e do afélio (início de outubro).</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import dia_juliano, jd_tt, seculos_j2000, sin_g, cos_g, norm360, norm180
+
+jd = jd_tt(dia_juliano(2026, 3, 20, 12))
+t  = seculos_j2000(jd)
+
+L0 = 280.46646 + 36000.76983*t + 0.0003032*t*t          # longitude media
+M  = 357.52911 + 35999.05029*t - 0.0001537*t*t          # anomalia media
+C  = ((1.914602 - 0.004817*t - 0.000014*t*t)*sin_g(M)   # equacao do centro
+      + (0.019993 - 0.000101*t)*sin_g(2*M)
+      + 0.000289*sin_g(3*M))
+verdadeira = L0 + C
+omega = 125.04 - 1934.136*t
+nutacao   = -0.00478*sin_g(omega)
+aberracao = -0.00569
+aparente  = verdadeira + nutacao + aberracao
+
+print("longitude media   L0 = %10.4f graus" % norm360(L0))
+print("anomalia media    M  = %10.4f graus" % norm360(M))
+print("equacao do centro C  = %+10.4f graus = %+8.2f minutos de arco" % (C, C*60))
+print("longitude verdadeira = %10.4f graus" % norm360(verdadeira))
+print("  + nutacao          = %+10.6f graus = %+6.2f segundos de arco" % (nutacao, nutacao*3600))
+print("  + aberracao        = %+10.6f graus = %+6.2f segundos de arco" % (aberracao, aberracao*3600))
+print("longitude APARENTE   = %10.4f graus" % norm360(aparente))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>longitude media   L0 =   358.0407 graus
+anomalia media    M  =    74.6526 graus
+equacao do centro C  =    +1.8551 graus =  +111.31 minutos de arco
+longitude verdadeira =   359.8958 graus
+  + nutacao          =  +0.001790 graus =  +6.44 segundos de arco
+  + aberracao        =  -0.005690 graus = -20.48 segundos de arco
+longitude APARENTE   =   359.8919 graus</samp></pre>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — o analema, e porque é que é um oito</h3>
+<p>Desenha, ou pelo menos calcula, o par (equação do tempo, declinação) para cada dia do ano. Depois responde: <strong>porque é que a figura é um oito, e porque é que o laço de baixo é maior do que o de cima?</strong></p>
+<details class="solucao"><summary>Solução</summary>
+<figure>
+  <svg viewBox="0 0 340 320" role="img" aria-labelledby="t-analema d-analema">
+    <title id="t-analema">Analema: a curva em oito que a posição do Sol ao meio-dia do relógio descreve ao longo de um ano</title>
+    <desc id="d-analema">Gráfico com a equação do tempo no eixo horizontal, de cerca de menos catorze a mais dezasseis minutos, e a declinação do Sol no vertical, de menos vinte e três a mais vinte e três graus. A curva fecha-se sobre si própria e tem a forma de um oito assimétrico, com o laço de baixo muito maior do que o de cima.</desc>
+    <path class="svg-traco-fino" d="M 185.99 25.00 L 185.99 275.00" fill="none"/>
+    <path class="svg-traco-fino" d="M 70.00 150.00 L 320.00 150.00" fill="none"/>
+    <path class="svg-traco-grosso" d="M 156.66 272.54 L 145.36 271.00 L 134.57 269.11 L 124.39 266.86 L 114.91 264.27 L 106.20 261.35 L 98.34 258.12 L 91.39 254.57 L 85.38 250.74 L 80.34 246.63 L 76.29 242.26 L 73.25 237.64 L 71.19 232.80 L 70.12 227.75 L 70.00 222.50 L 70.80 217.07 L 72.48 211.48 L 75.00 205.74 L 78.29 199.88 L 82.31 193.90 L 86.98 187.83 L 92.25 181.67 L 98.04 175.45 L 104.27 169.18 L 110.89 162.88 L 117.81 156.56 L 124.95 150.23 L 132.25 143.91 L 139.63 137.62 L 147.01 131.37 L 154.33 125.17 L 161.50 119.03 L 168.47 112.98 L 175.16 107.02 L 181.51 101.17 L 187.46 95.45 L 192.96 89.85 L 197.95 84.41 L 202.39 79.13 L 206.23 74.02 L 209.45 69.10 L 212.00 64.38 L 213.88 59.88 L 215.06 55.60 L 215.54 51.55 L 215.32 47.76 L 214.41 44.23 L 212.84 40.96 L 210.63 37.98 L 207.83 35.29 L 204.46 32.89 L 200.60 30.80 L 196.31 29.03 L 191.64 27.57 L 186.69 26.44 L 181.52 25.63 L 176.23 25.15 L 170.89 25.00 L 165.59 25.18 L 160.43 25.69 L 155.48 26.53 L 150.83 27.70 L 146.56 29.18 L 142.73 30.98 L 139.42 33.08 L 136.67 35.49 L 134.55 38.18 L 133.09 41.16 L 132.33 44.42 L 132.29 47.93 L 132.99 51.70 L 134.43 55.71 L 136.61 59.95 L 139.53 64.41 L 143.16 69.08 L 147.48 73.94 L 152.46 78.98 L 158.06 84.18 L 164.24 89.55 L 170.95 95.06 L 178.14 100.69 L 185.75 106.45 L 193.71 112.31 L 201.97 118.26 L 210.46 124.30 L 219.11 130.39 L 227.84 136.55 L 236.59 142.74 L 245.28 148.95 L 253.84 155.18 L 262.18 161.41 L 270.24 167.62 L 277.94 173.81 L 285.21 179.95 L 291.97 186.03 L 298.16 192.04 L 303.70 197.97 L 308.52 203.79 L 312.58 209.49 L 315.80 215.06 L 318.14 220.48 L 319.56 225.74 L 320.00 230.81 L 319.44 235.69 L 317.87 240.35 L 315.25 244.78 L 311.60 248.96 L 306.92 252.89 L 301.22 256.53 L 294.54 259.89 L 286.93 262.94 L 278.44 265.67 L 269.14 268.07 L 259.11 270.12 L 248.45 271.83 L 237.25 273.18 L 225.63 274.16 L 213.70 274.77 L 201.59 275.00 L 189.41 274.86 L 177.31 274.34 L 165.39 273.45 Z" fill="none"/>
+    <text class="svg-texto-pequeno" x="104.4" y="291" text-anchor="middle">-10</text>
+    <text class="svg-texto-pequeno" x="145.2" y="291" text-anchor="middle">-5</text>
+    <text class="svg-texto-pequeno" x="186.0" y="291" text-anchor="middle">+0</text>
+    <text class="svg-texto-pequeno" x="226.8" y="291" text-anchor="middle">+5</text>
+    <text class="svg-texto-pequeno" x="267.6" y="291" text-anchor="middle">+10</text>
+    <text class="svg-texto-pequeno" x="308.4" y="291" text-anchor="middle">+15</text>
+    <text class="svg-texto-pequeno" x="64" y="260.7" text-anchor="end">-20°</text>
+    <text class="svg-texto-pequeno" x="64" y="207.3" text-anchor="end">-10°</text>
+    <text class="svg-texto-pequeno" x="64" y="154.0" text-anchor="end">+0°</text>
+    <text class="svg-texto-pequeno" x="64" y="100.7" text-anchor="end">+10°</text>
+    <text class="svg-texto-pequeno" x="64" y="47.3" text-anchor="end">+20°</text>
+    <text class="svg-texto" x="195" y="311" text-anchor="middle">equação do tempo (min)</text>
+    <text class="svg-texto" x="14" y="16">declinação</text>
+  </svg>
+  <figcaption>Cada ponto é um dia do ano. O <strong>oito é assimétrico</strong> porque duas coisas diferentes o desenham: a obliquidade dá a parte simétrica de período semestral, e a excentricidade da órbita dá a parte anual que o entorta. Calculado com o código da lição 3.</figcaption>
+</figure><p><strong>Porque é um oito:</strong> a equação do tempo é a soma de duas ondas de períodos diferentes. A componente da <strong>obliquidade</strong> tem período <em>semestral</em> — o Sol percorre a eclíptica a velocidade quase uniforme, mas a sua projeção no equador não, e esse efeito repete-se duas vezes por ano. A componente da <strong>excentricidade</strong> tem período <em>anual</em>. Somar uma onda de período 6 meses com outra de período 12 meses e cruzar o resultado com a declinação (que também é anual) dá uma curva que se auto-interseta: um oito.</p><p><strong>Porque o laço de baixo é maior:</strong> porque as duas componentes se somam no inverno do hemisfério norte e se subtraem no verão. O periélio é em janeiro, perto do solstício de dezembro — as duas causas apontam para o mesmo lado. Se o periélio caísse num equinócio, o analema seria quase simétrico.</p><p>⭐ Se a Terra tivesse órbita circular, o analema seria um <strong>oito perfeitamente simétrico</strong>. Se tivesse obliquidade zero, seria um <strong>segmento de reta horizontal</strong>. As duas figuras degeneradas são a melhor maneira de ver que são mesmo duas causas.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código: medir o teu erro contra a página oficial</h3>
+<p>Este é o exercício central do curso. Compara o teu Sol, hora a hora, com uma página diária real do <em>Nautical Almanac</em>, e escreve a conclusão em <strong>minutos de arco</strong> e em <strong>milhas náuticas</strong>.</p><p>🔴 <strong>Declara a tolerância antes de olhar para o resultado.</strong> Escreve num papel, agora: «considero que o meu Sol chega se errar menos de ___ minutos de arco no GHA». Só depois corre. Escolher o limiar depois de ver o número não é medir — é justificar.</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>REF = {
+ 0:(178.1050,-0.2433), 1:(193.1067,-0.2267), 2:(208.1100,-0.2100), 3:(223.1133,-0.1933),
+ 4:(238.1167,-0.1767), 5:(253.1200,-0.1600), 6:(268.1233,-0.1450), 7:(283.1250,-0.1283),
+ 8:(298.1283,-0.1117), 9:(313.1317,-0.0950),10:(328.1350,-0.0783),11:(343.1383,-0.0617),
+12:(358.1417,-0.0450),13:( 13.1433,-0.0283),14:( 28.1467,-0.0133),15:( 43.1500, 0.0033),
+16:( 58.1533, 0.0200),17:( 73.1567, 0.0367),18:( 88.1600, 0.0533),19:(103.1617, 0.0700),
+20:(118.1650, 0.0867),21:(133.1683, 0.1033),22:(148.1717, 0.1200),23:(163.1750, 0.1350)}
+
+from almanaque import dia_juliano, jd_tt, sol, sol_baixa_precisao, gha, norm180
+import statistics as st
+
+print(" h |        Meeus cap. 25        |   baixa precisao (C5)")
+print("   |   erro GHA    erro Dec      |   erro GHA    erro Dec")
+eg=[];ed=[];eg2=[];ed2=[]
+for h in range(24):
+    g_of, d_of = REF[h]
+    jdu = dia_juliano(2026, 3, 20, h)
+    a, b = sol(jd_tt(jdu)), sol_baixa_precisao(jd_tt(jdu))
+    e1 = norm180(gha(a["ra"], jdu) - g_of)*60; e2 = (a["dec"] - d_of)*60
+    e3 = norm180(gha(b["ra"], jdu) - g_of)*60; e4 = (b["dec"] - d_of)*60
+    eg.append(e1); ed.append(e2); eg2.append(e3); ed2.append(e4)
+    if h % 4 == 0:
+        print("%2d | %+9.3f'  %+9.3f'    | %+9.3f'  %+9.3f'" % (h, e1, e2, e3, e4))
+print()
+print("Meeus        : GHA medio %+.3f'  pior %.3f'  | Dec medio %+.3f'  pior %.3f'"
+      % (st.mean(eg), max(map(abs,eg)), st.mean(ed), max(map(abs,ed))))
+print("baixa precisao: GHA medio %+.3f'  pior %.3f'  | Dec medio %+.3f'  pior %.3f'"
+      % (st.mean(eg2), max(map(abs,eg2)), st.mean(ed2), max(map(abs,ed2))))
+print()
+print("O livro imprime a 0,1', logo +-0,05' e arredondamento e nao erro nosso.")
+print("Em milhas nauticas de longitude no equador, o pior erro do GHA vale %.2f milhas."
+      % max(map(abs,eg)))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp> h |        Meeus cap. 25        |   baixa precisao (C5)
+   |   erro GHA    erro Dec      |   erro GHA    erro Dec
+ 0 |    -0.415'     +0.159'    |    -0.392'     +0.152'
+ 4 |    -0.380'     +0.117'    |    -0.358'     +0.109'
+ 8 |    -0.339'     +0.170'    |    -0.317'     +0.162'
+12 |    -0.404'     +0.121'    |    -0.383'     +0.112'
+16 |    -0.361'     +0.174'    |    -0.340'     +0.164'
+20 |    -0.323'     +0.124'    |    -0.302'     +0.114'
+
+Meeus        : GHA medio -0.360'  pior 0.415'  | Dec medio +0.147'  pior 0.195'
+baixa precisao: GHA medio -0.339'  pior 0.392'  | Dec medio +0.138'  pior 0.186'
+
+O livro imprime a 0,1', logo +-0,05' e arredondamento e nao erro nosso.
+Em milhas nauticas de longitude no equador, o pior erro do GHA vale 0.41 milhas.</samp></pre>
+<details class="solucao"><summary>Solução</summary>
+<p><strong>O que se lê nestes números, por ordem de importância:</strong></p><ol><li>O erro do GHA é <strong>sistemático</strong>, não ruído: quase o mesmo em todas as 24 horas. Isso diz que não é um problema de tempo nem de arredondamento — é um termo em falta na série.</li><li>A série do Meeus e a de baixa precisão dão <strong>quase o mesmo erro</strong>. Isso é informação forte: duas séries independentes a concordarem entre si e a discordarem do livro significa que o livro usa uma teoria de outra ordem de grandeza (VSOP87 e as efemérides do JPL), e não que uma delas tem um bug.</li><li>O erro da declinação é <strong>metade</strong> do erro do GHA. Não é coincidência: um erro dλ de longitude eclíptica aparece na declinação multiplicado por sin ε ≈ 0,40 perto do equinócio. A mesma causa, vista em dois sítios, com tamanhos diferentes.</li></ol><p class="destaque">Se declaraste uma tolerância de <strong>0,5′</strong>, passas. Se declaraste <strong>0,1′</strong> — igual ao livro — <strong>falhas</strong>, e falhar aqui é o resultado certo: mostra que reproduzir um almanaque oficial exige uma teoria que não cabe numa lição, e é por isso que o livro continua a ser publicado.</p>
+</details>
+</div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<p>Correção imediata, com explicação em cada opção.</p>
+<div class="quiz" data-quiz="almanaque-l3">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">A série do Meeus cap. 25 declara 0,01° de erro em longitude eclíptica. Medida contra o instante publicado do equinócio de março, dá 11 minutos de erro. Isto é um bug?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q0" value="a" data-certa="true"><span class="rotulo">Não: o Sol move-se 0,9856°/dia, logo 0,01° de longitude são cerca de 15 minutos de tempo. 11 minutos está dentro do declarado.</span></label>
+          <p class="explicacao" hidden>Certo, e é a armadilha que torna o instante do equinócio um mau teste para uma série solar: amplifica o erro de ângulo num erro de tempo por um fator grande. O bom teste é medir o ângulo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q0" value="b" data-certa="false"><span class="rotulo">Sim: 11 minutos é muito mais do que 0,01 graus.</span></label>
+          <p class="explicacao" hidden>Está a comparar minutos de <em>tempo</em> com graus de <em>ângulo</em>, que são grandezas diferentes. A conversão passa pela velocidade do Sol: 0,9856°/dia.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q0" value="c" data-certa="false"><span class="rotulo">Não, porque os instantes publicados dos equinócios são arredondados ao minuto e o erro está dentro desse arredondamento.</span></label>
+          <p class="explicacao" hidden>O arredondamento ao minuto dá ±30 segundos, e o erro observado é de 11 minutos — vinte vezes mais. O arredondamento não explica nada aqui.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o analema é um oito e não uma linha ou uma elipse simples?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q1" value="a" data-certa="false"><span class="rotulo">Porque a Terra tem dois movimentos, rotação e translação.</span></label>
+          <p class="explicacao" hidden>Todos os planetas têm os dois e nem todos têm analema em oito. O que produz a forma são as duas <em>irregularidades</em>: a inclinação do eixo e a forma da órbita.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q1" value="b" data-certa="false"><span class="rotulo">Porque o Sol cruza o equador duas vezes por ano.</span></label>
+          <p class="explicacao" hidden>Cruzar o equador duas vezes explica a declinação subir e descer, o que dá a extensão vertical da figura — mas não explica o laço, que vem do eixo horizontal.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q1" value="c" data-certa="true"><span class="rotulo">Porque a equação do tempo é a soma de uma componente semestral (obliquidade) com uma anual (excentricidade), e o cruzamento dessa soma com a declinação auto-interseta-se.</span></label>
+          <p class="explicacao" hidden>Certo. Anular qualquer uma das duas causas degenera a figura: sem excentricidade fica um oito simétrico, sem obliquidade fica um segmento de reta horizontal.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O erro do teu GHA do Sol contra a página oficial é de −0,41′ às 0 h e de −0,39′ às 23 h. O que é que a constância deste erro te diz?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q2" value="a" data-certa="true"><span class="rotulo">Que a causa é um termo em falta na série da posição, e não um erro de tempo ou de arredondamento — esses variariam ao longo do dia.</span></label>
+          <p class="explicacao" hidden>Certo. Um erro de relógio cresceria com a hora; um erro de arredondamento saltaria ao acaso entre ±0,05′. Um patamar quase plano é a assinatura de um termo de período longo que falta.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q2" value="b" data-certa="false"><span class="rotulo">Que há um erro de sinal algures, porque o erro é sempre negativo.</span></label>
+          <p class="explicacao" hidden>Um erro de sinal daria tipicamente o dobro do valor, ou um erro que muda de sinal com a grandeza. Um desvio constante e pequeno é outra coisa: é um termo em falta.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q2" value="c" data-certa="false"><span class="rotulo">Que a página oficial está errada.</span></label>
+          <p class="explicacao" hidden>É possível em princípio, mas é a hipótese que se testa por último — e aqui há uma explicação muito mais simples, que é a exatidão declarada da própria série que usamos.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Onde é que a Terra está mais perto do Sol?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q3" value="a" data-certa="false"><span class="rotulo">No início de julho, no verão do hemisfério norte.</span></label>
+          <p class="explicacao" hidden>É o afélio, o ponto mais <em>longe</em>. A intuição «verão = mais perto» é provavelmente a conceção errada mais comum de toda a astronomia elementar.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q3" value="b" data-certa="true"><span class="rotulo">No início de janeiro — inverno no hemisfério norte.</span></label>
+          <p class="explicacao" hidden>Certo. A distância varia entre cerca de 0,9833 e 1,0167 UA, o que é 3,4 %: as estações não vêm daí, vêm da obliquidade de 23,44°.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q3" value="c" data-certa="false"><span class="rotulo">No equinócio de março, quando o Sol cruza o equador.</span></label>
+          <p class="explicacao" hidden>Os equinócios são definidos pela geometria do eixo, não pela distância. O periélio pode cair em qualquer altura do ano — e de facto anda, por precessão, cerca de um dia a cada 58 anos.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O que é a «aberração» na posição do Sol, e quanto vale?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q4" value="a" data-certa="false"><span class="rotulo">É a atmosfera a desviar o raio de luz, e vale até 34 minutos de arco no horizonte.</span></label>
+          <p class="explicacao" hidden>Isso é a <strong>refração</strong>, que é outra coisa: depende da altura do astro, da pressão e da temperatura, e aplica-se à altura observada e não à posição geocêntrica.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q4" value="b" data-certa="true"><span class="rotulo">É veres o Sol onde ele estava há 8 min 19 s, porque a luz demora esse tempo: vale cerca de −20,5 segundos de arco.</span></label>
+          <p class="explicacao" hidden>Certo. É praticamente constante — só varia com a distância — e por isso é fácil de esquecer e dá um desvio sistemático de 0,34′, que é mais do que o triplo da tolerância do almanaque.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q4" value="c" data-certa="false"><span class="rotulo">É o erro que a série comete por truncar os termos periódicos mais pequenos.</span></label>
+          <p class="explicacao" hidden>Esse é o erro de truncatura, que é o que sobra <em>depois</em> de todas as correções físicas. A aberração é uma correção física, não um erro.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que 0,01° de erro em longitude eclíptica dá quase zero de erro na declinação no solstício, e 0,2′ perto do equinócio?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q5" value="a" data-certa="true"><span class="rotulo">Porque a declinação varia com a longitude à taxa sin ε · cos λ, que é máxima no equinócio (λ ≈ 0°) e zero no solstício (λ ≈ 90°).</span></label>
+          <p class="explicacao" hidden>Certo — e é a razão de a declinação solar estar tabelada com um «d» que varia de 1,0′/h nos equinócios para quase 0 nos solstícios. A mesma taxa, vista de outro sítio.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q5" value="b" data-certa="false"><span class="rotulo">Porque no solstício o Sol está mais longe e o erro angular pesa menos.</span></label>
+          <p class="explicacao" hidden>A distância não entra: a declinação é um ângulo e não depende do raio. E de qualquer modo a variação de distância é de 3,4 %, não de um fator de dez.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l3-q5" value="c" data-certa="false"><span class="rotulo">Porque a série do Meeus tem termos especiais para os solstícios.</span></label>
+          <p class="explicacao" hidden>Não tem, nem faria sentido: é uma série trigonométrica contínua. O efeito vem da geometria da projeção, não da fórmula.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+
+    <p>Vai para a entrega.</p>
+<div class="aberta">
+  <label for="feynman-l3">Explica porque é que dizer «esta série tem 0,01 graus de erro» não chega para decidir se ela serve, e o que é que é preciso dizer em vez disso.
+    <span class="pista">Usa um exemplo concreto do teu próprio trabalho — uma medida, um limite, uma métrica — em vez de um exemplo astronómico.</span>
+  </label>
+  <textarea id="feynman-l3" data-pergunta="Explica porque é que dizer «esta série tem 0,01 graus de erro» não chega para decidir se ela serve, e o que é que é preciso dizer em vez disso."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas
+  respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e correr
+  <code>/corrigir almanaque</code>.</p>
+</div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Uma efeméride é uma <strong>posição média</strong> mais uma pilha de correções de tamanhos
+        muito diferentes: 1,91° para a equação do centro, 20″ para a nutação e a aberração.</li>
+      <li>A <strong>equação do centro</strong> é a segunda lei de Kepler escrita como série em
+        potências da excentricidade; 2e = 1,914° é o seu primeiro coeficiente.</li>
+      <li><strong>α = atan2(cos ε sin λ, cos λ)</strong>, <strong>sin δ = sin ε sin λ</strong>,
+        <strong>GHA = GAST − α</strong>. É o almanaque do Sol, em três linhas.</li>
+      <li>A <strong>equação do tempo</strong> é o melhor teste de uma série solar, porque é uma
+        diferença interna que cancela os erros comuns. Os quatro extremos e as suas datas batem.</li>
+      <li>🔴 Medido contra a página oficial: <strong>até 0,42′ no GHA e 0,20′ na declinação</strong>.
+        O livro imprime a 0,1′. <strong>Não reproduzes o livro</strong> — e saber isso com um número
+        é o objetivo desta lição.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>«Low precision formulae for the Sun's coordinates», <em>The Astronomical
+        Almanac</em>, pág. C5</strong> — as fórmulas de 1° de exatidão para 1950–2050.
+        ⚠️ <strong>Fonte primária que não consegui abrir:</strong> <code>aa.usno.navy.mil/faq/sun_approx</code>
+        recusou a ligação a 2026-09-16 e <code>docs/SunApprox.php</code> devolveu HTTP 500. Os
+        coeficientes vieram de uma reprodução em <code>celestialprogramming.com</code> que cita a
+        edição de 2017, e estão <strong>verificados por medição</strong> em
+        <code><a href="codigo/ensaio.py">codigo/ensaio.py</a></code>. Digo isto em vez de escrever
+        «verificado» ao lado de uma página que não abri.</li>
+      <li>🔴 <strong>Fonte que não é documentação — livro:</strong> Meeus,
+        <em>Astronomical Algorithms</em>, 2.ª ed., cap. 25 — <strong>é a fonte dos coeficientes
+        desta lição</strong>, e é ela que explica <em>porque</em> a equação do centro tem a forma
+        que tem, em vez de a dar como constante mágica. <strong>Por onde começar:</strong> o
+        capítulo 25 e o 22 (obliquidade). <strong>O que saltar:</strong> os planetas.
+        Lida na reprodução
+        de <code>squarewidget.com/solar-coordinates</code>, que cita as equações 25.3, 25.4 e 22.2 e
+        declara exatidão «<em>within a second for right ascension and well within one arc minute for
+        declination</em>». ⚠️ <strong>Não tenho o livro</strong>: não cito páginas.
+        <span class="verificado">🌐 Reprodução verificada a 2026-09-16</span></li>
+      <li><strong>NOAA Solar Calculator, «Solar Calculation Details»</strong> — declara-se baseado
+        no Meeus e dá exatidão «<em>within a minute for locations between +/- 72° latitude</em>»,
+        com os avisos sobre a atmosfera e sobre datas anteriores a 15 de outubro de 1582.
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Wikipédia, «Equation of time»</strong> — os quatro extremos com data (−14 min 15 s
+        a 11 de fevereiro; +16 min 25 s a 3 de novembro; +3 min 41 s a 14 de maio; −6 min 30 s a 26
+        de julho), as quatro passagens por zero, e a convenção de sinal do USNO (aparente menos
+        médio). <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>Wikipédia, «Equinox» e «March equinox»</strong> — instantes publicados dos
+        equinócios e solstícios de 2025 a 2027, em UT, usados como referência independente do livro.
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li>🔴 <strong>Fonte que não é documentação — artigo:</strong> J. J. Michalsky, «The
+        Astronomical Almanac's algorithm for approximate solar position (1950–2050)»,
+        <em>Solar Energy</em>, 1988. <strong>Porquê:</strong> é o artigo que pôs estas fórmulas em
+        circulação fora da astronomia, na engenharia solar, e que discute <em>o que se perde</em> ao
+        truncar — que é o assunto desta lição.
+        ⚠️ <strong>Não abri o artigo:</strong> vi a referência listada (volume 40, n.º 3, pp.
+        227–235) numa página de resultados de pesquisa, e não confirmei paginação nem DOI junto do
+        editor. Fica como pista de leitura, não como fonte de nenhuma afirmação acima.</li>
+    </ul>
+    <footer class="rodape">
+      <p><a href="02-o-tempo.html">← O tempo</a> · <a href="index.html">Índice do curso</a> · <a href="04-nascer-e-por.html">Nascer, pôr e crepúsculos →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

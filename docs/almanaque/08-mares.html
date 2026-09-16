@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8 · As marés — O almanaque</title>
+<meta name="description" content="As tábuas de marés estão na definição de almanaque, e são de um tipo completamente diferente: a astronomia dá as frequências, o porto dá as amplitudes e as fases. É identificação de sistema, não física.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/almanaque/08-mares.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> <a href="index.html">O almanaque</a> <span aria-hidden="true">›</span> lição 8</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta extensao">Lição 8 · extensão</p>
+    <h1>As marés: o almanaque que não se calcula — identifica-se</h1>
+    <p class="subtitulo">As tábuas de marés estão na definição de almanaque, e são de um tipo completamente diferente: a astronomia dá as <strong>frequências</strong>, o porto dá as <strong>amplitudes e as fases</strong>. É identificação de sistema, não física.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim desta lição <strong>explicas</strong> porque é que uma tábua de marés não se pode
+    calcular a partir da gravitação, <strong>implementas</strong> a soma harmónica que produz uma
+    previsão, e <strong>identificas</strong> as constantes harmónicas de um registo por mínimos
+    quadrados — dizendo quanto tempo de medição isso exige, e porquê.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>De memória.</p>
+    <ol>
+      <li>Quanto vale o dia sidéreo em segundos, e porque é mais curto do que o solar?
+        <details class="solucao"><summary>Resposta</summary>
+          <p><strong>86164,0905 s</strong>. É mais curto porque a Terra também avança cerca de 1°
+          na órbita por dia e tem de rodar esse grau a mais para o Sol voltar ao meridiano.
+          (Lição 2.)</p></details>
+      </li>
+      <li>Qual é o período do ciclo do nodo lunar, e onde é que ele já apareceu?
+        <details class="solucao"><summary>Resposta</summary>
+          <p><strong>18,6 anos.</strong> Na nutação (lição 3) e na declinação máxima da Lua
+          (lição 5).</p></details>
+      </li>
+      <li>Quanto dura um mês sinódico, em média e nos extremos?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Média 29,53059 d; entre cerca de 29,26 e 29,80 d. (Lição 5.)</p></details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p><strong>Porquê antes de como.</strong> O artigo que originou este curso lista as tábuas de
+    marés entre o conteúdo típico de um almanaque, ao lado do nascer do Sol e das fases da Lua. Mas
+    as marés são um tipo de almanaque <strong>fundamentalmente diferente</strong>, e perceber a
+    diferença é a lição inteira.</p>
+
+    <div class="caixa critico">
+  <span class="titulo">🔴 Porque é que uma tábua de marés é local e um almanaque astronómico não é</span>
+  <p>A posição do Sol é a mesma vista de todo o planeta. A maré, não: em Lisboa a preia-mar chega a uma hora, na Figueira da Foz a outra, e a amplitude é diferente. Porquê?</p><p>Porque a maré <strong>não é a força de maré</strong>. A força de maré é astronómica e universal; a maré que se mede num porto é a <strong>resposta daquela bacia oceânica</strong> a essa força — com a sua forma, a sua profundidade, os seus atritos e as suas ressonâncias. A astronomia dá as <em>frequências</em>. O porto dá as <em>amplitudes e as fases</em>.</p><p class="destaque">h(t) = Z₀ + Σ Aᵢ·cos(σᵢ·t − φᵢ) — os <strong>σᵢ</strong> vêm do céu e são iguais em todo o lado; os <strong>Aᵢ</strong> e os <strong>φᵢ</strong> vêm de medir aquele porto durante pelo menos um ano.</p><p>⭐ Em vocabulário de engenharia: a astronomia é o <strong>sinal de entrada</strong>, o oceano é um <strong>sistema linear</strong>, e as constantes harmónicas de um porto são a <strong>resposta em frequência</strong> desse sistema, medida ponto a ponto. Não se deduzem — identificam-se.</p>
+</div>
+
+    <h3>As frequências vêm do céu</h3>
+    <p>A força de maré num ponto da Terra varia com a posição do Sol e da Lua. Como essas posições
+    são somas de movimentos periódicos — rotação da Terra, órbita da Lua, órbita da Terra,
+    precessão do perigeu, rotação do nodo — a força de maré é também uma soma de periodicidades.
+    Decompô-la dá as <strong>constituintes harmónicas</strong>, cada uma com uma frequência exata e
+    conhecida:</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="As constituintes harmónicas principais, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>Símbolo</th><th>Nome</th><th>Período (h)</th><th>Velocidade (°/h)</th><th>De onde vem</th></tr></thead>
+    <tbody><tr><td><strong>M₂</strong></td><td>Semidiurna lunar principal</td><td>12,4206012</td><td>28,9841042</td><td>Meio dia lunar. <strong>Quase sempre a maior</strong></td></tr><tr><td><strong>S₂</strong></td><td>Semidiurna solar principal</td><td>12</td><td>30,0</td><td>Meio dia solar, exatamente. É a única com período redondo</td></tr><tr><td><strong>N₂</strong></td><td>Semidiurna lunar elítica maior</td><td>12,65834751</td><td>28,4397295</td><td>A excentricidade da órbita lunar</td></tr><tr><td><strong>K₂</strong></td><td>Semidiurna lunissolar</td><td>11,96723606</td><td>30,0821373</td><td>Declinação do Sol e da Lua, combinadas</td></tr><tr><td><strong>K₁</strong></td><td>Diurna lunissolar</td><td>23,93447213</td><td>15,0410686</td><td>🔴 O <strong>dia sidéreo</strong> — o mesmo número da lição 2</td></tr><tr><td><strong>O₁</strong></td><td>Diurna lunar</td><td>25,81933871</td><td>13,9430356</td><td>Declinação da Lua</td></tr><tr><td><strong>P₁</strong></td><td>Diurna solar</td><td>24,06588766</td><td>14,9589314</td><td>Declinação do Sol</td></tr><tr><td><strong>Q₁</strong></td><td>Diurna lunar elítica maior</td><td>26,868350</td><td>13,3986609</td><td>Excentricidade lunar, no ramo diurno</td></tr></tbody>
+  </table>
+</div>
+
+    <p>🔴 Repara nos números: <strong>K₁ tem o período do dia sidéreo</strong> e <strong>S₂ tem
+    exatamente meio dia solar</strong>. Não são constantes empíricas — são periodicidades
+    astronómicas que já encontraste noutras lições, reaparecendo porque o oceano responde a
+    todas.</p>
+    <p>A Wikipédia diz que «cerca de 62 constituintes são suficientemente grandes para serem
+    consideradas na previsão de marés marítimas», ainda que «por vezes muitas menos permitam prever
+    marés com exatidão útil».</p>
+
+    <h3>As amplitudes e as fases vêm do porto</h3>
+    <p>Nada na astronomia diz que a maré em Lisboa tem X metros de amplitude e chega Y horas depois
+    do trânsito da Lua. Isso mede-se: instala-se um marégrafo, regista-se durante pelo menos um ano,
+    e ajusta-se a soma de cossenos aos dados. O resultado — as <strong>constantes harmónicas</strong>
+    daquele porto — é o que a tábua de marés usa nos anos seguintes.</p>
+    <p>⭐ O atraso entre o trânsito da Lua e a preia-mar tem nome próprio desde o século XVII:
+    <em>estabelecimento do porto</em>. É a fase de M₂, com outro nome e quatrocentos anos mais
+    velha do que a análise harmónica.</p>
+
+    <h3>Marés vivas: batimento, não astronomia nova</h3>
+    <p>M₂ tem velocidade 28,9841°/h e S₂ tem 30,0°/h. Duas sinusoides de frequências próximas
+    <strong>batem</strong>: alternadamente somam-se e cancelam-se. O período do batimento é
+    360/(30,0 − 28,9841) horas = <strong>14,765 dias</strong>.</p>
+    <p>E 14,765 dias é <strong>metade do mês sinódico</strong>. Faz sentido: a Lua e o Sol alinham-se
+    duas vezes por lunação — na lua nova e na lua cheia — e é aí que as duas constituintes principais
+    se somam. As marés vivas não precisam de nenhuma explicação adicional: caem do batimento.</p>
+
+    <div class="caixa dica">
+  <span class="titulo">⭐ A máquina que somava os cossenos antes de haver computadores</span>
+  <p>Somar dez ou vinte cossenos para cada hora de cada dia de um ano, para cada porto, é trabalho impossível à mão. Lord Kelvin aplicou a análise de Fourier às marés e — este é o passo bonito — <strong>construiu uma máquina para fazer a soma</strong>: um sistema de roldanas e rodas dentadas, uma por constituinte, com um fio a somar as contribuições.</p><p>Segundo a Wikipédia, estas máquinas de previsão de marés foram usadas <strong>desde os anos 1870 até cerca de 1960</strong>. Noventa anos de computação analógica dedicada, a produzir almanaques.</p><p>🔴 A ligação com a lição 1: é o mesmo mecanismo de sempre — <strong>pré-calcular e publicar</strong> — mas aqui, pela primeira vez, o cálculo é caro que chegue para se construir <em>hardware específico</em> para ele. É o argumento de custo da lição 1 levado ao limite.</p>
+</div>
+
+    <h3>A fronteira</h3>
+    <p>🔴 Esta lição é <strong>extensão</strong>, não núcleo. Serve o objetivo «perceber o objeto
+    histórico» e a definição de almanaque do artigo original; <strong>não</strong> serve o critério
+    de sucesso, que é reproduzir um almanaque náutico. E não dá previsões de marés utilizáveis: para
+    isso são precisas constantes harmónicas reais de um porto real, que se pedem a um serviço
+    hidrográfico.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <h3>Passo 1 — separar o que é universal do que é local, antes de escrever código</h3>
+    <p>Esta separação decide a arquitetura toda. As <strong>frequências</strong> são constantes do
+    programa — vêm com ele. As <strong>amplitudes e fases</strong> são <em>dados de entrada</em>,
+    por porto. Um programa de marés que traga amplitudes embutidas está errado por construção, e é
+    um erro que se vê em bibliotecas a sério.</p>
+
+    <h3>Passo 2 — conferir as frequências contra a aritmética</h3>
+    <p>Cada velocidade tem de ser 360/período. Não é uma verificação profunda, mas apanha erros de
+    transcrição — e neste assunto, onde todos os números se parecem, é fácil trocar dois. Está no E1.</p>
+
+    <h3>Passo 3 — somar, e ver aparecer o que não se programou</h3>
+    <p>O teste de que o modelo está certo não é a curva do dia parecer uma maré: é as
+    <strong>marés vivas e mortas aparecerem sozinhas</strong>, com o período certo, sem terem sido
+    programadas. Está no E2.</p>
+
+    <h3>Passo 4 — o caminho inverso, que é o verdadeiro trabalho</h3>
+    <p>Somar cossenos conhecidos é fácil. O trabalho a sério é o inverso: dado um registo, descobrir
+    que cossenos lá estão. Isso é um problema de mínimos quadrados <em>linear</em> — e a razão de
+    ser linear é um truque que vale a pena guardar. Está no E3.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <p>Um porto tem constantes harmónicas com amplitude M₂ = 1,20 m e S₂ = 0,40 m.</p>
+      <ol>
+        <li><em>Dado:</em> em maré viva as duas somam-se; em maré morta subtraem-se.</li>
+        <li><strong>______</strong> Qual é a amplitude (metade da diferença entre preia-mar e
+          baixa-mar) em maré viva e em maré morta? E qual é a razão entre as duas?</li>
+        <li><em>Dado:</em> o mesmo porto tem K₁ = 0,08 m e O₁ = 0,06 m.</li>
+        <li><strong>______</strong> O quociente (K₁+O₁)/(M₂+S₂) classifica o regime de maré. Calcula-o
+          e diz o que ele significa para este porto.</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2.</strong> Viva: 1,20 + 0,40 = <strong>1,60 m</strong>. Morta:
+        1,20 − 0,40 = <strong>0,80 m</strong>. A razão é <strong>2,0</strong> — as marés vivas têm
+        aqui o dobro da amplitude das mortas.</p>
+        <p><strong>Passo 4.</strong> (0,08 + 0,06)/(1,20 + 0,40) = 0,14/1,60 =
+        <strong>0,0875</strong>.</p>
+        <p>O regime é <strong>fortemente semidiurno</strong>: duas preia-mares e duas baixa-mares por
+        dia, quase iguais entre si. As constituintes diurnas contribuem menos de 9 % e o que fazem é
+        uma pequena <em>desigualdade diurna</em> — uma preia-mar ligeiramente mais alta do que a
+        outra no mesmo dia.</p>
+        <p class="destaque">Se o quociente passasse de 3, o regime seria <strong>diurno</strong>: uma
+        só maré por dia. Entre 0,25 e 3 é <strong>misto</strong>. A classificação é
+        <strong>convenção</strong> — os limiares são acordados, não medidos — e este curso diz que
+        é convenção sempre que o é.</p>
+        <p>⚠️ Os limiares 0,25 e 3,0 circulam amplamente na literatura de oceanografia.
+        <strong>Não os confirmei numa fonte primária</strong> e por isso não os apresento como
+        norma: apresento-os como o que são, valores convencionais em uso. Se precisares deles a
+        sério, vai à fonte.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <p>O quinto surpreendeu-me a calcular, e está no E3.</p>
+<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns desta lição, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody><tr><td>«A maré alta é quando a Lua está por cima»</td><td>Esperar a preia-mar no trânsito lunar.</td><td>A fase φ de M₂ num porto vale tipicamente dezenas ou centenas de graus, ou seja horas de atraso em relação ao trânsito. Esse atraso — o «estabelecimento do porto» — é uma propriedade <strong>do porto</strong>, não da Lua, e vem da inércia e do atrito da bacia.</td></tr><tr><td>«As marés calculam-se a partir da gravitação»</td><td>Procurar uma fórmula física que dê a altura da maré num sítio.</td><td>A <strong>força</strong> calcula-se; a <strong>resposta do oceano</strong> não, com precisão útil. Por isso se medem as amplitudes e as fases localmente. A astronomia dá as frequências e mais nada.</td></tr><tr><td>«Marés vivas são quando a Lua está mais perto»</td><td>Confundir perigeu com sizígia.</td><td>São quando o Sol e a Lua estão <strong>alinhados</strong> — lua nova <em>e</em> lua cheia — e M₂ e S₂ somam-se. A distância da Lua também conta (é a constituinte N₂), mas é um efeito separado e mais pequeno. Quando os dois coincidem dá-se uma maré viva excecional.</td></tr><tr><td>«Há sempre duas marés por dia»</td><td>Assumir regime semidiurno em toda a parte.</td><td>Depende do porto. Onde as diurnas (K₁, O₁) dominam as semidiurnas (M₂, S₂), há <strong>uma</strong> maré por dia — regime diurno, como em partes do Golfo do México. O quociente (K₁+O₁)/(M₂+S₂) é o que classifica o regime.</td></tr><tr><td>⚠️ «Com um mês de medições caracteriza-se um porto»</td><td>Campanhas curtas a produzir constantes harmónicas.</td><td>Pelo critério de Rayleigh, duas constituintes só se separam se a diferença de frequências completar um ciclo no intervalo observado. K₁ e P₁ diferem 0,082°/h: precisam de <strong>meio ano</strong>. <em>Calculei isto e surpreendeu-me</em> — está no E3.</td></tr><tr><td>«O nível médio Z₀ é o nível do mar»</td><td>Tratar Z₀ como uma constante universal.</td><td>Z₀ é o nível médio <strong>acima do zero hidrográfico daquele porto</strong>, e o zero hidrográfico é uma convenção local — normalmente perto da baixa-mar mais baixa previsível, para que a carta nunca prometa mais água do que há. É uma escolha de segurança, não uma medição.</td></tr></tbody>
+  </table>
+</div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <p>O E3 é o que mostra porque é que este almanaque é o mais caro de todos.</p>
+
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — as frequências vêm todas de sítios que já conheces</h3>
+<p>Confere que cada velocidade tabelada é 360/período, e depois identifica de onde vem cada uma das três maiores. Duas delas são números que já apareceram neste curso.</p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import CONSTITUINTES
+
+PERIODOS = {"M2":12.4206012, "S2":12.0, "N2":12.65834751, "K2":11.96723606,
+            "K1":23.93447213, "O1":25.81933871, "P1":24.06588766, "Q1":26.868350}
+
+print("Cada velocidade CONFERE com 360/periodo (nada aqui e decorado):")
+for n in sorted(PERIODOS):
+    print("  %-3s  360/%-12.8f = %12.7f   tabelado %12.7f   erro %.1e"
+          % (n, PERIODOS[n], 360/PERIODOS[n], CONSTITUINTES[n],
+             abs(360/PERIODOS[n]-CONSTITUINTES[n])))
+
+print()
+print("E cada uma reconhece-se de outro sitio do curso:")
+print("  K1: periodo = %.4f s = o DIA SIDEREO da licao 2 (86164.0905 s)"
+      % (360/CONSTITUINTES["K1"]*3600))
+print("  S2: periodo = %.1f s = meio dia solar exacto" % (360/CONSTITUINTES["S2"]*3600))
+print("  M2: periodo = %.4f h = meio dia LUNAR" % (360/CONSTITUINTES["M2"]))
+print()
+bat = 360/abs(CONSTITUINTES["M2"]-CONSTITUINTES["S2"])/24
+print("Batimento M2 contra S2: %.3f dias -- as MARES VIVAS e MORTAS." % bat)
+print("Metade disso, %.2f dias, e o intervalo entre uma mare viva e a mare morta" % (bat/2))
+print("seguinte. E e tambem metade do mes sinodico (%.2f d): nao e coincidencia -" % 29.53)
+print("as mares vivas dao-se na lua nova E na lua cheia, duas vezes por lunacao.")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>Cada velocidade CONFERE com 360/periodo (nada aqui e decorado):
+  K1   360/23.93447213  =   15.0410670   tabelado   15.0410686   erro 1.6e-06
+  K2   360/11.96723606  =   30.0821341   tabelado   30.0821373   erro 3.2e-06
+  M2   360/12.42060120  =   28.9841042   tabelado   28.9841042   erro 4.8e-08
+  N2   360/12.65834751  =   28.4397312   tabelado   28.4397295   erro 1.7e-06
+  O1   360/25.81933871  =   13.9430372   tabelado   13.9430356   erro 1.6e-06
+  P1   360/24.06588766  =   14.9589330   tabelado   14.9589314   erro 1.6e-06
+  Q1   360/26.86835000  =   13.3986642   tabelado   13.3986609   erro 3.3e-06
+  S2   360/12.00000000  =   30.0000000   tabelado   30.0000000   erro 0.0e+00
+
+E cada uma reconhece-se de outro sitio do curso:
+  K1: periodo = 86164.0908 s = o DIA SIDEREO da licao 2 (86164.0905 s)
+  S2: periodo = 43200.0 s = meio dia solar exacto
+  M2: periodo = 12.4206 h = meio dia LUNAR
+
+Batimento M2 contra S2: 14.765 dias -- as MARES VIVAS e MORTAS.
+Metade disso, 7.38 dias, e o intervalo entre uma mare viva e a mare morta
+seguinte. E e tambem metade do mes sinodico (29.53 d): nao e coincidencia -
+as mares vivas dao-se na lua nova E na lua cheia, duas vezes por lunacao.</samp></pre>
+<details class="solucao"><summary>Solução</summary>
+<p><strong>K₁ tem o período do dia sidéreo</strong> — 86164,09 s, o mesmo número da lição 2. <strong>S₂ tem exatamente meio dia solar</strong>, 43200 s, por construção. <strong>M₂ tem meio dia lunar</strong>, 12,4206 h, que é mais longo do que meio dia solar porque a Lua avança na sua órbita enquanto a Terra roda — exatamente o mesmo raciocínio que faz o dia sidéreo ser mais curto do que o solar, aplicado ao contrário.</p><p><strong>O batimento M₂ − S₂ dá 14,765 dias</strong>, que é metade do mês sinódico. Não é coincidência: as marés vivas dão-se quando o Sol e a Lua estão alinhados, e isso acontece <em>duas</em> vezes por lunação — na lua nova e na lua cheia.</p><p class="destaque">A tabela de constituintes não é uma lista para decorar: cada linha é uma periodicidade astronómica que já viste noutro sítio, reaparecendo porque o oceano responde a todas elas.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — somar cossenos, e ver as marés vivas aparecerem</h3>
+<p>Com constantes harmónicas de exemplo, calcula a altura hora a hora de um dia e depois a amplitude diária ao longo de um mês. As marés vivas e mortas têm de aparecer sozinhas — ninguém as programa.</p>
+<details class="solucao"><summary>Solução</summary>
+<p><strong>Um dia:</strong></p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import altura_mare, CONSTITUINTES
+
+# Constantes harmonicas INVENTADAS, com a ordem de grandeza de um porto do
+# Atlantico portugues. 🔴 NAO sao de nenhum porto real: servem para mostrar o
+# mecanismo. Constantes a serio obtem-se de um servico hidrografico.
+TERMOS = [("M2", 1.05, 60.0), ("S2", 0.38, 95.0), ("N2", 0.22, 42.0),
+          ("K1", 0.07, 55.0), ("O1", 0.06, 320.0), ("K2", 0.10, 92.0)]
+Z0 = 2.00   # nivel medio acima do zero hidrografico, em metros
+
+print("hora | altura (m) | grafico")
+for h in range(0, 25):
+    a = altura_mare(h, Z0, TERMOS)
+    print("%4d | %10.2f | %s" % (h, a, "#" * int(a*14)))
+
+# Preia-mar e baixa-mar do dia, por varrimento fino
+alturas = [(altura_mare(h/60.0, Z0, TERMOS), h/60.0) for h in range(0, 24*60)]
+print()
+print("baixa-mar %.2f m as %.2f h   |   preia-mar %.2f m as %.2f h"
+      % (min(alturas)[0], min(alturas)[1], max(alturas)[0], max(alturas)[1]))
+print("amplitude do dia: %.2f m" % (max(alturas)[0]-min(alturas)[0]))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>hora | altura (m) | grafico
+   0 |       2.74 | ######################################
+   1 |       3.41 | ###############################################
+   2 |       3.74 | ####################################################
+   3 |       3.65 | ###################################################
+   4 |       3.15 | ############################################
+   5 |       2.37 | #################################
+   6 |       1.50 | ####################
+   7 |       0.75 | ##########
+   8 |       0.32 | ####
+   9 |       0.31 | ####
+  10 |       0.72 | ##########
+  11 |       1.45 | ####################
+  12 |       2.30 | ################################
+  13 |       3.06 | ##########################################
+  14 |       3.54 | #################################################
+  15 |       3.60 | ##################################################
+  16 |       3.25 | #############################################
+  17 |       2.56 | ###################################
+  18 |       1.71 | #######################
+  19 |       0.93 | #############
+  20 |       0.42 | #####
+  21 |       0.31 | ####
+  22 |       0.64 | #########
+  23 |       1.33 | ##################
+  24 |       2.21 | ##############################
+
+baixa-mar 0.26 m as 8.52 h   |   preia-mar 3.76 m as 2.28 h
+amplitude do dia: 3.50 m</samp></pre><p><strong>Um mês, só com M₂ e S₂:</strong></p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code>from almanaque import altura_mare
+
+TERMOS_VM = [("M2", 1.05, 60.0), ("S2", 0.38, 95.0)]   # so as duas maiores
+Z0 = 2.00
+
+# Ao longo de 30 dias, a amplitude diaria bate entre vivas e mortas.
+print("dia | amplitude do dia (m) | grafico")
+amps = []
+for d in range(30):
+    dia = [altura_mare(d*24 + h/30.0, Z0, TERMOS_VM) for h in range(30*24)]
+    amp = max(dia) - min(dia)
+    amps.append(amp)
+    print("%3d | %19.2f | %s" % (d, amp, "#" * int(amp*16)))
+
+print()
+print("amplitude maxima %.2f m (vivas)   minima %.2f m (mortas)" % (max(amps), min(amps)))
+print("razao vivas/mortas: %.2f" % (max(amps)/min(amps)))
+print("previsto pela teoria: (A_M2+A_S2)/(A_M2-A_S2) = %.2f" % ((1.05+0.38)/(1.05-0.38)))</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>dia | amplitude do dia (m) | grafico
+  0 |                2.83 | #############################################
+  1 |                2.86 | #############################################
+  2 |                2.82 | #############################################
+  3 |                2.69 | ##########################################
+  4 |                2.46 | #######################################
+  5 |                2.18 | ##################################
+  6 |                1.91 | ##############################
+  7 |                1.60 | #########################
+  8 |                1.38 | ######################
+  9 |                1.44 | #######################
+ 10 |                1.71 | ###########################
+ 11 |                2.00 | ################################
+ 12 |                2.28 | ####################################
+ 13 |                2.55 | ########################################
+ 14 |                2.75 | ###########################################
+ 15 |                2.85 | #############################################
+ 16 |                2.86 | #############################################
+ 17 |                2.80 | ############################################
+ 18 |                2.64 | ##########################################
+ 19 |                2.39 | ######################################
+ 20 |                2.14 | ##################################
+ 21 |                1.83 | #############################
+ 22 |                1.53 | ########################
+ 23 |                1.36 | #####################
+ 24 |                1.49 | #######################
+ 25 |                1.78 | ############################
+ 26 |                2.05 | ################################
+ 27 |                2.35 | #####################################
+ 28 |                2.61 | #########################################
+ 29 |                2.78 | ############################################
+
+amplitude maxima 2.86 m (vivas)   minima 1.36 m (mortas)
+razao vivas/mortas: 2.11
+previsto pela teoria: (A_M2+A_S2)/(A_M2-A_S2) = 2.13</samp></pre><p><strong>O que se vê:</strong> a amplitude bate entre um máximo e um mínimo com período de cerca de 14,8 dias. Isto é <strong>batimento</strong> puro — duas sinusoides de frequências próximas a somarem-se e a cancelarem-se alternadamente. É o mesmo fenómeno que ouves quando afinas duas cordas quase iguais.</p><p>E a razão entre a amplitude viva e a morta bate com (A<sub>M2</sub> + A<sub>S2</sub>) / (A<sub>M2</sub> − A<sub>S2</sub>), que é a previsão da teoria do batimento. Duas maneiras independentes de chegar ao mesmo número.</p><p>⚠️ <strong>As constantes harmónicas usadas aqui são inventadas</strong>, com a ordem de grandeza de um porto atlântico. Não são de nenhum porto real, e nenhuma conclusão sobre um porto concreto se pode tirar delas. Constantes a sério pedem-se a um serviço hidrográfico.</p>
+</details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código: identificar as constantes de um porto, e descobrir quanto tempo isso leva</h3>
+<p>Duas partes. <strong>(a)</strong> Dado um registo de maré, recupera as amplitudes e fases por mínimos quadrados — é isto que um serviço hidrográfico faz. Usa dados sintéticos para poderes <em>verificar</em> que o ajuste recupera o que lá está. <strong>(b)</strong> Descobre quanto tempo de medição é preciso para separar cada par de constituintes.</p>
+<details class="solucao"><summary>Solução</summary>
+<p><strong>(a) A identificação:</strong></p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code># Identificar as constantes harmonicas de um porto a partir de medicoes.
+# Isto e o que um servico hidrografico faz com um ano de mare-grafo -- aqui com
+# dados SINTETICOS, para se poder verificar que o ajuste recupera o que la esta.
+import math
+from almanaque import CONSTITUINTES, cos_g, sin_g
+
+VERDADE = [("M2", 1.05, 60.0), ("S2", 0.38, 95.0), ("N2", 0.22, 42.0), ("K1", 0.07, 55.0)]
+Z0_VERDADE = 2.00
+NOMES = [n for n, _, _ in VERDADE]
+
+# "Medicoes": de hora a hora durante 60 dias, com ruido pseudo-aleatorio fixo.
+import random
+random.seed(20260916)
+horas = list(range(60*24))
+med = []
+for t in horas:
+    v = Z0_VERDADE + sum(a*cos_g(CONSTITUINTES[n]*t - f) for n, a, f in VERDADE)
+    med.append(v + random.gauss(0, 0.03))      # 3 cm de ruido
+
+# Minimos quadrados lineares: h = Z0 + sum( c_i*cos(sigma t) + s_i*sin(sigma t) )
+cols = [lambda t: 1.0]
+for n in NOMES:
+    cols.append(lambda t, n=n: cos_g(CONSTITUINTES[n]*t))
+    cols.append(lambda t, n=n: sin_g(CONSTITUINTES[n]*t))
+k = len(cols)
+A = [[sum(cols[i](t)*cols[j](t) for t in horas) for j in range(k)] for i in range(k)]
+B = [sum(cols[i](t)*med[idx] for idx, t in enumerate(horas)) for i in range(k)]
+for i in range(k):                      # eliminacao de Gauss
+    p = A[i][i]
+    A[i] = [v/p for v in A[i]]; B[i] /= p
+    for r in range(k):
+        if r != i:
+            f = A[r][i]
+            A[r] = [A[r][j]-f*A[i][j] for j in range(k)]
+            B[r] -= f*B[i]
+
+print("constituinte | amplitude verdadeira / recuperada | fase verdadeira / recuperada")
+print("Z0           | %22.3f / %.3f |" % (Z0_VERDADE, B[0]))
+for idx, (n, a, f) in enumerate(VERDADE):
+    c, s = B[1+2*idx], B[2+2*idx]
+    amp = math.hypot(c, s)
+    fase = math.degrees(math.atan2(s, c)) % 360
+    print("%-12s | %10.3f / %-10.3f          | %8.1f / %.1f" % (n, a, amp, f, fase))
+print()
+print("Recupera-se o que la foi posto. E e assim -- com um ANO de dados e 30 a 60")
+print("constituintes -- que um porto ganha as suas constantes harmonicas.")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>constituinte | amplitude verdadeira / recuperada | fase verdadeira / recuperada
+Z0           |                  2.000 / 1.999 |
+M2           |      1.050 / 1.050               |     60.0 / 60.0
+S2           |      0.380 / 0.381               |     95.0 / 95.2
+N2           |      0.220 / 0.219               |     42.0 / 41.9
+K1           |      0.070 / 0.072               |     55.0 / 54.1
+
+Recupera-se o que la foi posto. E e assim -- com um ANO de dados e 30 a 60
+constituintes -- que um porto ganha as suas constantes harmonicas.</samp></pre><p>Repara na estrutura do problema: escrevendo A·cos(σt − φ) como c·cos(σt) + s·sin(σt), o ajuste torna-se <strong>linear</strong> nos parâmetros — e resolve-se por mínimos quadrados ordinários, sem iteração. A amplitude e a fase saem depois por √(c²+s²) e atan2(s, c). É o mesmo truque de sempre: reparametrizar até o problema ficar linear.</p><p><strong>(b) Quanto tempo é preciso medir:</strong></p><pre data-rotulo="Bloco de codigo, rolavel na horizontal"><code># Quanto tempo de medicao e preciso para separar duas constituintes?
+# Criterio de Rayleigh: duas frequencias separam-se se a diferenca entre elas
+# completar pelo menos um ciclo no intervalo observado.
+from almanaque import CONSTITUINTES
+
+pares = [("M2","S2"), ("M2","N2"), ("S2","K2"), ("K1","O1"), ("K1","P1")]
+print("par      | dif. de velocidade | tempo minimo de observacao")
+for a, b in pares:
+    d = abs(CONSTITUINTES[a]-CONSTITUINTES[b])
+    horas = 360.0/d
+    print("%-3s/%-3s  | %10.6f graus/h | %8.1f h = %6.1f dias"
+          % (a, b, d, horas, horas/24))
+print()
+print("Repara no par K1/P1: precisa de meio ano. E por isso que uma campanha de")
+print("um mes nao chega para caracterizar um porto -- e que o servico hidrografico")
+print("mede durante um ano ou mais, ou entao INFERE P1 a partir de K1 por uma")
+print("razao teorica, declarando que o fez.")</code></pre>
+<p class="verificado">Saída de correr o bloco acima (colada de uma execução real, não escrita):</p>
+<pre data-rotulo="Saída do programa, rolável na horizontal"><samp>par      | dif. de velocidade | tempo minimo de observacao
+M2 /S2   |   1.015896 graus/h |    354.4 h =   14.8 dias
+M2 /N2   |   0.544375 graus/h |    661.3 h =   27.6 dias
+S2 /K2   |   0.082137 graus/h |   4382.9 h =  182.6 dias
+K1 /O1   |   1.098033 graus/h |    327.9 h =   13.7 dias
+K1 /P1   |   0.082137 graus/h |   4382.9 h =  182.6 dias
+
+Repara no par K1/P1: precisa de meio ano. E por isso que uma campanha de
+um mes nao chega para caracterizar um porto -- e que o servico hidrografico
+mede durante um ano ou mais, ou entao INFERE P1 a partir de K1 por uma
+razao teorica, declarando que o fez.</samp></pre><p>🔴 <strong>Este resultado surpreendeu-me e vale a pena reter:</strong> K₁ e P₁ estão tão próximas em frequência que <strong>separá-las exige cerca de meio ano</strong> de observação contínua. Não é uma questão de ruído nem de instrumento: é o limite de resolução em frequência, o mesmo que limita a resolução de uma FFT.</p><p class="destaque">É por isso que uma tábua de marés não se faz com uma campanha de um mês, e é por isso que o <strong>almanaque de marés é o mais caro de produzir de todos os almanaques</strong>: cada porto exige um ano de dados próprios.</p><p>⭐ <strong>Fronteira com o tópico vizinho:</strong> o critério de Rayleigh aqui é o mesmo limite que aparece em <a href="../cassete-captura/00-espetro.html">Digitalizar cassetes</a>, onde a resolução de uma FFT é a largura do <em>bin</em>. Esse tópico escreve-a <strong>Δf = taxa ÷ N</strong>, que é a mesma coisa que <strong>1/T</strong> — a taxa a dividir pelo número de amostras é o inverso da duração observada. Lá o problema é distinguir dois tons próximos num espetro; aqui é distinguir duas constituintes. <strong>Mesmo limite, duas notações, dois domínios</strong> — e é a única coisa que os dois tópicos partilham.</p>
+</details>
+</div>
+
+    <h2 id="quiz">8. Quiz</h2>
+<p>Correção imediata.</p>
+<div class="quiz" data-quiz="almanaque-l8">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Porque é que uma tábua de marés é local e um almanaque astronómico não é?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q0" value="a" data-certa="false"><span class="rotulo">Porque a gravidade da Lua é diferente em sítios diferentes da Terra.</span></label>
+          <p class="explicacao" hidden>A força de maré varia com a posição na Terra, sim, e essa variação é calculável e universal. O que não é calculável é como cada bacia responde a essa força.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q0" value="b" data-certa="false"><span class="rotulo">Porque cada país usa um zero hidrográfico diferente.</span></label>
+          <p class="explicacao" hidden>Os zeros hidrográficos são mesmo convenções locais e afetam o Z₀ — mas mesmo com um zero comum, as horas e as amplitudes continuariam a diferir de porto para porto.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q0" value="c" data-certa="true"><span class="rotulo">Porque a astronomia dá as frequências, que são universais, mas as amplitudes e as fases são a resposta daquela bacia oceânica e medem-se ali.</span></label>
+          <p class="explicacao" hidden>Certo. A força de maré é universal; a maré observada é a resposta de um sistema com forma, profundidade, atrito e ressonâncias próprias.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O período da constituinte K₁ é 23,93447 h. Que número é este?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q1" value="a" data-certa="false"><span class="rotulo">O dia solar médio menos os 4 minutos do horário de verão.</span></label>
+          <p class="explicacao" hidden>O horário de verão é uma convenção civil e não entra em nenhuma constituinte. Os cerca de 4 minutos são a diferença entre dia solar e dia sidéreo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q1" value="b" data-certa="true"><span class="rotulo">O dia sidéreo — o mesmo 86164,09 s da lição 2.</span></label>
+          <p class="explicacao" hidden>Certo, e é uma das coisas mais bonitas desta lição: as constituintes das marés são periodicidades astronómicas que já apareceram noutro contexto.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q1" value="c" data-certa="false"><span class="rotulo">Metade do dia lunar, que é o período de M₂.</span></label>
+          <p class="explicacao" hidden>Metade do dia lunar é 12,4206 h, que é M₂. K₁ é diurna, com quase 24 h.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Quando é que se dão as marés vivas?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q2" value="a" data-certa="false"><span class="rotulo">Quando a Lua está no perigeu, mais perto da Terra.</span></label>
+          <p class="explicacao" hidden>A distância lunar tem o seu próprio efeito — é N₂ — e produz marés maiores, mas é separado do alinhamento. Quando os dois coincidem dá-se uma maré viva excecional.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q2" value="b" data-certa="true"><span class="rotulo">Quando o Sol e a Lua estão alinhados — na lua nova e na lua cheia — e M₂ e S₂ se somam.</span></label>
+          <p class="explicacao" hidden>Certo. O batimento entre M₂ e S₂ tem período de 14,765 dias, que é metade do mês sinódico, precisamente porque o alinhamento ocorre duas vezes por lunação.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q2" value="c" data-certa="false"><span class="rotulo">Na lua cheia apenas, quando a face iluminada está virada para nós.</span></label>
+          <p class="explicacao" hidden>Também na lua nova: o que conta é o alinhamento Sol–Terra–Lua, e ele existe nas duas fases. Daí o período de meio mês e não de um mês.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que separar as constituintes K₁ e P₁ exige cerca de meio ano de medições?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q3" value="a" data-certa="false"><span class="rotulo">Porque o ruído das ondas e do vento é grande e é preciso média.</span></label>
+          <p class="explicacao" hidden>A média reduz ruído aleatório, mas não separa duas frequências próximas: por muito que se meça, elas continuam a confundir-se se o intervalo for curto demais.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q3" value="b" data-certa="false"><span class="rotulo">Porque o marégrafo tem deriva e precisa de recalibração ao longo do ano.</span></label>
+          <p class="explicacao" hidden>A deriva é um problema real e trata-se de outra maneira. A duração mínima aqui é um limite matemático da análise, não instrumental.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q3" value="c" data-certa="true"><span class="rotulo">Porque as suas frequências diferem 0,082°/h, e pelo critério de Rayleigh essa diferença tem de completar um ciclo no intervalo observado.</span></label>
+          <p class="explicacao" hidden>Certo — é o mesmo limite de resolução em frequência que rege uma FFT: 1/T. Não se resolve com um instrumento melhor nem com menos ruído.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Na fórmula h(t) = Z₀ + Σ Aᵢ·cos(σᵢt − φᵢ), o que é que se calcula e o que é que se mede?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q4" value="a" data-certa="true"><span class="rotulo">Calculam-se os σᵢ, que são astronómicos; medem-se os Aᵢ e os φᵢ, que são daquele porto.</span></label>
+          <p class="explicacao" hidden>Certo. É a distinção que estrutura toda a lição — e que faz da maré um <em>almanaque identificado</em> em vez de um almanaque deduzido.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q4" value="b" data-certa="false"><span class="rotulo">Calcula-se tudo a partir das posições do Sol e da Lua.</span></label>
+          <p class="explicacao" hidden>As posições dão a força; a resposta do oceano é que não se calcula com precisão útil a partir de primeiros princípios.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q4" value="c" data-certa="false"><span class="rotulo">Mede-se tudo: as frequências também saem da análise dos dados.</span></label>
+          <p class="explicacao" hidden>Saem, e é uma boa verificação — mas não é preciso: as frequências são conhecidas de antemão pela astronomia, e é isso que torna o ajuste <em>linear</em> e resolúvel por mínimos quadrados.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O que foi a máquina de previsão de marés de Lord Kelvin?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q5" value="a" data-certa="false"><span class="rotulo">Um instrumento de medir a altura da maré num porto, precursor do marégrafo.</span></label>
+          <p class="explicacao" hidden>Isso é o marégrafo, que <em>mede</em>. A máquina de Kelvin <em>previa</em>: recebia as constantes harmónicas e produzia a curva.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q5" value="b" data-certa="false"><span class="rotulo">Um modelo físico em escala reduzida de uma bacia oceânica, com água.</span></label>
+          <p class="explicacao" hidden>Modelos hidráulicos em escala existiram para estudar portos, mas são outra coisa. A máquina de Kelvin era um somador de cossenos, puramente mecânico e sem água.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-l8-q5" value="c" data-certa="true"><span class="rotulo">Um computador analógico de roldanas e rodas dentadas que somava as constituintes harmónicas, usado desde os anos 1870 até cerca de 1960.</span></label>
+          <p class="explicacao" hidden>Certo. É o argumento de custo da lição 1 levado ao limite: o cálculo era caro que chegasse para se construir hardware dedicado a ele.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+
+    <p>Vai para a entrega.</p>
+<div class="aberta">
+  <label for="feynman-l8">Explica porque é que a previsão de marés é um problema de identificação de sistema e não um problema de física, a alguém que percebe de sinais.
+    <span class="pista">Sem usar «constituinte», «harmónica» nem «maré viva». Se quiseres, compara com um sistema que já tenhas caracterizado.</span>
+  </label>
+  <textarea id="feynman-l8" data-pergunta="Explica porque é que a previsão de marés é um problema de identificação de sistema e não um problema de física, a alguém que percebe de sinais."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas
+  respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e correr
+  <code>/corrigir almanaque</code>.</p>
+</div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>🔴 <strong>As frequências vêm do céu; as amplitudes e as fases vêm do porto.</strong> É
+        por isso que uma tábua de marés é local e um almanaque astronómico não é.</li>
+      <li>Em linguagem de engenharia: a astronomia é a entrada, o oceano é o sistema, e as
+        constantes harmónicas são a <strong>resposta em frequência medida</strong>.</li>
+      <li>K₁ tem o período do <strong>dia sidéreo</strong>; S₂ tem exatamente <strong>meio dia
+        solar</strong>. As constituintes são periodicidades que já viste noutras lições.</li>
+      <li>As <strong>marés vivas</strong> são o batimento M₂ − S₂: período 14,765 dias, metade do
+        mês sinódico. Caem do modelo, não se programam.</li>
+      <li>Separar K₁ de P₁ exige <strong>meio ano</strong> de medições (critério de Rayleigh) — o
+        mesmo limite que rege a resolução de uma FFT. É por isso que este é o almanaque mais caro
+        de produzir.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Wikipédia, «Theory of tides»</strong> — a tabela das constituintes com símbolos de
+        Darwin, períodos e velocidades usada nesta lição (M₂ 28,9841042°/h, S₂ 30, N₂ 28,4397295,
+        K₂ 30,0821373, K₁ 15,0410686, O₁ 13,9430356, P₁ 14,9589314, Q₁ 13,3986609); a afirmação de
+        que «cerca de 62 constituintes são suficientemente grandes para serem consideradas»; e a
+        história da máquina de previsão de marés, «<em>from the 1870s to about the 1960s</em>».
+        <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+      <li><strong>NOAA Tides &amp; Currents — constituintes harmónicas por estação</strong>.
+        ⚠️ <strong>Fonte primária que não consegui ler:</strong> a tabela é desenhada por JavaScript
+        e não veio no texto da página; a API também não respondeu daqui a 2026-09-16. Por isso as
+        velocidades citadas vieram da Wikipédia — e são <strong>conferidas por cálculo</strong>
+        (360/período) no E1, que é a verificação que ainda consigo fazer. Para constantes harmónicas
+        de um porto <em>real</em>, é a esta fonte que se vai.</li>
+      <li><strong>Constantes harmónicas usadas nos exemplos:</strong> 🔴
+        <strong>são inventadas</strong>, com a ordem de grandeza de um porto do Atlântico português,
+        e estão assinaladas como tal no próprio código. Não representam nenhum porto e nenhuma
+        conclusão sobre um porto se pode tirar delas.</li>
+      <li>🔴 <strong>Fonte que não é documentação — livro:</strong> Z. Kowalik e J. Luick,
+        <em>Modern Theory and Practice of Tide Analysis and Tidal Power</em>, disponível em PDF pela
+        Universidade do Alasca. <strong>Porquê:</strong> é o texto que trata a análise de marés como
+        problema de identificação de sistema, que é o enquadramento desta lição.
+        <strong>O que saltar:</strong> a parte de energia das marés, que é outro assunto.
+        ⚠️ <strong>Vi a referência listada e não a abri</strong> — não cito nada dela. Fica como
+        pista de leitura. <a href="bibliografia.html#kowalik">Ver a bibliografia</a>.</li>
+      <li>🔴 <strong>Fonte que não é documentação — vídeo/documentário:</strong> ⚠️
+        <strong>Procurei e não confirmei</strong> nenhuma peça audiovisual sobre a máquina de
+        previsão de marés de Kelvin que pudesse citar com ficha completa e tendo-a visto. Sei que
+        existem exemplares em museus de ciência e filmagens deles em circulação; não as vi. Digo-o
+        em vez de inventar uma referência.</li>
+      <li><strong>Tópico vizinho deste repositório:</strong>
+        <a href="../cassete-captura/00-espetro.html">Digitalizar cassetes, lição 0</a> — a resolução
+        em frequência de uma FFT, que esse tópico escreve <strong>Δf = taxa ÷ N</strong> e que é o
+        mesmo <strong>1/T</strong> do critério de Rayleigh usado no E3.
+        <strong>Fronteira:</strong> lá o sinal é áudio e a janela é de segundos; aqui o sinal é o
+        nível do mar e a janela é de meses. O limite é o mesmo; tudo o resto é diferente.</li>
+    </ul>
+    <footer class="rodape">
+      <p><a href="07-reduzir-uma-altura.html">← Reduzir uma altura</a> · <a href="index.html">Índice do curso</a> · <a href="09-o-teu-almanaque.html">O teu almanaque →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

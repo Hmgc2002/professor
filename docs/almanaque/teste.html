@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teste de domínio — O almanaque</title>
+<meta name="description" content="Teste intercalado do tópico do almanaque: quinze perguntas fora da ordem das lições e três perguntas abertas.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/almanaque/teste.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">&rsaquo;</span> <a href="index.html">O almanaque</a> <span aria-hidden="true">&rsaquo;</span> teste</p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta página</h2>
+    <ol>
+      <li><a href="#perguntas">As quinze</a></li>
+      <li><a href="#abertas">Três perguntas abertas</a></li>
+      <li><a href="#depois">Depois do teste</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta nucleo">teste de domínio</p>
+    <h1>Teste de domínio — O almanaque</h1>
+    <p class="subtitulo">Quinze perguntas <strong>intercaladas</strong>: fora da ordem das lições, de
+    propósito. Misturar assuntos torna a prática mais difícil e a retenção melhor — é uma das
+    <a href="../metodo.html">dificuldades desejáveis</a>, não uma maldade.</p>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Como fazer este teste</span>
+      <p><strong>Sem consultar</strong> as lições, sem a folha de consulta, sem correr código. Se
+      não souberes, escolhe a que te parece mais provável e segue — acertar por eliminação também é
+      informação sobre o que sabes.</p>
+      <p>No fim, <strong>lê a explicação de todas as opções</strong>, incluindo as que não
+      escolheste, e só depois responde às três perguntas abertas.</p>
+    </div>
+
+    <h2 id="perguntas">As quinze</h2>
+<div class="quiz" data-quiz="almanaque-teste">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Um erro de 4 segundos no cronómetro corresponde a que erro de longitude no equador?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q0" value="a" data-certa="false"><span class="rotulo">4 milhas náuticas.</span></label>
+          <p class="explicacao" hidden>Seria assim se cada segundo valesse uma milha; vale um quarto, porque 360° em 24 h dá 15° por hora.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q0" value="b" data-certa="false"><span class="rotulo">15 milhas náuticas.</span></label>
+          <p class="explicacao" hidden>15 milhas é o erro de 1 <em>minuto</em> de tempo, não de 4 segundos. Falta dividir por quinze.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q0" value="c" data-certa="true"><span class="rotulo">1 milha náutica.</span></label>
+          <p class="explicacao" hidden>O céu roda 15′ de arco por minuto de tempo, logo 0,25′ por segundo. 4 × 0,25 = 1′ = 1 milha náutica. (Lição 2.)</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A altura a que a <strong>Lua</strong> se considera nascida é positiva (+7,5′). Porquê?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q1" value="a" data-certa="false"><span class="rotulo">Porque a Lua é maior no céu do que o Sol e o seu bordo aparece antes.</span></label>
+          <p class="explicacao" hidden>Os dois têm cerca de 16′ de semidiâmetro, e o semidiâmetro empurra no mesmo sentido nos dois casos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q1" value="b" data-certa="false"><span class="rotulo">Porque a refração é menor para a Lua do que para o Sol.</span></label>
+          <p class="explicacao" hidden>A refração depende da altura aparente e do estado da atmosfera, não de que astro é. É a mesma para os dois.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q1" value="c" data-certa="true"><span class="rotulo">Porque a paralaxe horizontal (+57′) supera a refração (−34′) e o semidiâmetro (−16′).</span></label>
+          <p class="explicacao" hidden>É a única correção do curso que muda um sinal, e vem de a efeméride ser geocêntrica e tu estares na superfície da Terra. (Lição 5.)</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Qual destas grandezas é <strong>convenção</strong> e não medição?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q2" value="a" data-certa="false"><span class="rotulo">Os −50′ do nascer do Sol.</span></label>
+          <p class="explicacao" hidden>São uma medição arredondada: 34′ de refração média no horizonte mais 16′ de semidiâmetro médio.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q2" value="b" data-certa="true"><span class="rotulo">Os −12° do crepúsculo náutico.</span></label>
+          <p class="explicacao" hidden>Os limiares de −6°, −12° e −18° são acordos internacionais, sem nada de físico a acontecer neles. (Lição 4.)</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q2" value="c" data-certa="false"><span class="rotulo">A obliquidade de 23° 26′.</span></label>
+          <p class="explicacao" hidden>É medida, e está a mudar: diminui cerca de 47 segundos de arco por século.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O <em>zij</em> e o almanaque distinguem-se por…</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q3" value="a" data-certa="true"><span class="rotulo">…o <em>zij</em> publicar o método e o almanaque publicar o resultado já calculado.</span></label>
+          <p class="explicacao" hidden>É uma decisão de arquitetura: quem paga o custo do cálculo. Foi essa mudança, em 1088, que criou o almanaque moderno. (Lição 1.)</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q3" value="b" data-certa="false"><span class="rotulo">…o <em>zij</em> ser islâmico e o almanaque europeu.</span></label>
+          <p class="explicacao" hidden>O primeiro almanaque no sentido moderno é de al-Zarqālī, em Toledo, escrito em árabe.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q3" value="c" data-certa="false"><span class="rotulo">…o <em>zij</em> ser manuscrito e o almanaque impresso.</span></label>
+          <p class="explicacao" hidden>O almanaque de Azarquiel é de 1088; a imprensa chega 369 anos depois, em 1457.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o GHA se calcula com o tempo sidéreo <strong>aparente</strong> e não com o médio?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q4" value="a" data-certa="false"><span class="rotulo">Porque o médio só é válido para o meridiano de Greenwich.</span></label>
+          <p class="explicacao" hidden>Os dois são definidos em Greenwich. A diferença entre eles é a nutação, não a longitude.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q4" value="b" data-certa="true"><span class="rotulo">Porque o aparente inclui a nutação, e é esse que o livro publica; usar o médio custa até 0,263′.</span></label>
+          <p class="explicacao" hidden>Quase três vezes a tolerância de impressão do livro — e foi um bug real da primeira versão do código deste curso. (Lição 2.)</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q4" value="c" data-certa="false"><span class="rotulo">Porque o aparente já inclui o ΔT e o médio não.</span></label>
+          <p class="explicacao" hidden>O ΔT é a conversão entre UT1 e TT e entra noutro sítio do cálculo. A diferença GMST/GAST é a equação dos equinócios.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Na redução de altura, a refração aplica-se…</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q5" value="a" data-certa="false"><span class="rotulo">…diretamente ao valor lido no sextante.</span></label>
+          <p class="explicacao" hidden>Isso avalia a refração numa altura que ainda tem lá dentro o erro do instrumento e o da referência.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q5" value="b" data-certa="true"><span class="rotulo">…à altura já corrigida do erro de índice e da depressão do horizonte.</span></label>
+          <p class="explicacao" hidden>A refração é <em>função</em> da altura aparente. A 45° a troca de ordem é invisível; a 5° custa décimos de minuto de arco. (Lição 7.)</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q5" value="c" data-certa="false"><span class="rotulo">…no fim, depois do semidiâmetro e da paralaxe.</span></label>
+          <p class="explicacao" hidden>Essas duas descrevem a geometria verdadeira do astro e vêm <em>depois</em> do que a atmosfera fez ao raio, não antes.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Um astro de declinação 70° N visto da latitude 30° N…</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q6" value="a" data-certa="false"><span class="rotulo">…nasce e põe-se normalmente, porque 30° é uma latitude baixa.</span></label>
+          <p class="explicacao" hidden>A latitude ser baixa não impede nada: o que decide é a soma φ + δ contra 90°.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q6" value="b" data-certa="false"><span class="rotulo">…nunca sobe acima do horizonte, porque a declinação é muito maior do que a latitude.</span></label>
+          <p class="explicacao" hidden>Declinação maior do que a latitude faz o astro passar a norte do zénite; não o impede de subir.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q6" value="c" data-certa="true"><span class="rotulo">…é circumpolar: φ + δ = 100° ≥ 90°, logo nunca se põe.</span></label>
+          <p class="explicacao" hidden>A altura mínima do dia é φ + δ − 90° = 10°, a norte. (Lição 0.)</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Numa tábua de marés, o que é que vem da astronomia?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q7" value="a" data-certa="false"><span class="rotulo">As frequências e as amplitudes; só as fases são locais.</span></label>
+          <p class="explicacao" hidden>As amplitudes também são locais: dependem da forma, da profundidade e do atrito da bacia.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q7" value="b" data-certa="true"><span class="rotulo">Só as frequências das constituintes.</span></label>
+          <p class="explicacao" hidden>As amplitudes e as fases são a resposta daquela bacia oceânica e medem-se no porto durante pelo menos um ano. (Lição 8.)</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q7" value="c" data-certa="false"><span class="rotulo">Tudo: a maré calcula-se a partir das posições do Sol e da Lua.</span></label>
+          <p class="explicacao" hidden>A <em>força</em> de maré calcula-se; a resposta do oceano não, com precisão útil.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A série do Sol deste curso erra até 0,42′ no GHA. Porque é que as horas de nascer e pôr batem ao minuto com o livro?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q8" value="a" data-certa="false"><span class="rotulo">Porque o erro da série se cancela entre o nascer e o pôr.</span></label>
+          <p class="explicacao" hidden>Não cancela: os dois são calculados da mesma posição e o erro entra nos dois no mesmo sentido.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q8" value="b" data-certa="true"><span class="rotulo">Porque junto ao horizonte a altura varia depressa, e 0,42′ convertem-se em poucos segundos de tempo.</span></label>
+          <p class="explicacao" hidden>O mesmo erro do modelo pesa muito ou nada, conforme a grandeza que se está a publicar. (Lição 4.)</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q8" value="c" data-certa="false"><span class="rotulo">Porque as tabelas de nascer e pôr são menos rigorosas do que as de GHA.</span></label>
+          <p class="explicacao" hidden>São publicadas a resolução mais grossa — o minuto — o que é diferente de serem menos rigorosas.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A coluna «v» de uma página diária é…</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q9" value="a" data-certa="false"><span class="rotulo">…a velocidade do astro em ângulo horário, em graus por hora.</span></label>
+          <p class="explicacao" hidden>Nesse caso a coluna teria valores como 14 ou 15; imprime valores como 11,6, que são minutos de arco de <em>excesso</em>.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q9" value="b" data-certa="false"><span class="rotulo">…a variação da declinação por hora.</span></label>
+          <p class="explicacao" hidden>Essa é a coluna «d», impressa ao lado e com o mesmo tipo de função.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q9" value="c" data-certa="true"><span class="rotulo">…o excesso da velocidade do GHA daquela hora sobre a taxa nominal da tabela de incrementos, em minutos de arco por hora.</span></label>
+          <p class="explicacao" hidden>Para a Lua a taxa nominal é 14° 19,0′/h. É uma correção à interpolação, não uma grandeza física nova. (Lição 6.)</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O que é o intercepto de Marcq St Hilaire?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q10" value="a" data-certa="false"><span class="rotulo">O ângulo entre o azimute do astro e o norte verdadeiro.</span></label>
+          <p class="explicacao" hidden>Isso é o Zn, que dá a direção em que se marca e não a distância.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q10" value="b" data-certa="false"><span class="rotulo">A distância entre a posição assumida e a posição verdadeira.</span></label>
+          <p class="explicacao" hidden>É só a <em>componente</em> dessa distância na direção do azimute; a componente perpendicular fica indeterminada, e é por isso que uma observação dá uma reta.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q10" value="c" data-certa="true"><span class="rotulo">A diferença Ho − Hc em minutos de arco, que são milhas náuticas, marcada ao longo do azimute.</span></label>
+          <p class="explicacao" hidden>Positivo quer dizer na direção do astro. A regra é «computed greater → away». (Lição 7.)</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O mês sinódico dura 29,53059 dias. Isto é…</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q11" value="a" data-certa="false"><span class="rotulo">…um valor exato, definido na época J2000.</span></label>
+          <p class="explicacao" hidden>É a <em>média</em> na época J2000, o que é diferente de ser exato para cada lunação.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q11" value="b" data-certa="true"><span class="rotulo">…uma média: um mês concreto varia entre cerca de 29,26 e 29,80 dias.</span></label>
+          <p class="explicacao" hidden>Mais de meio dia entre o mais curto e o mais longo. Prever a lua nova somando a média erra horas — e num eclipse isso é tudo. (Lição 5.)</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q11" value="c" data-certa="false"><span class="rotulo">…o período de rotação da Lua sobre si própria.</span></label>
+          <p class="explicacao" hidden>Esse é o mês sideral, cerca de 27,32 dias, e é outro número.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o almanaque para 1767 foi impresso em 1766?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q12" value="a" data-certa="false"><span class="rotulo">Porque os cálculos demoravam quase um ano a fazer.</span></label>
+          <p class="explicacao" hidden>O prazo de produção é real, mas não explica publicar <em>antes</em>: se fosse só isso, publicava-se em janeiro do próprio ano.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q12" value="b" data-certa="true"><span class="rotulo">Porque tinha de estar completo e distribuído antes de ser preciso: um navio no mar não podia pedir a linha em falta.</span></label>
+          <p class="explicacao" hidden>É a diferença entre este cache e um de software: aqui não existe falha de cache recuperável. (Lição 1.)</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q12" value="c" data-certa="false"><span class="rotulo">Porque o ano astronómico começava em março nessa época.</span></label>
+          <p class="explicacao" hidden>A convenção do ano a começar em março existiu em calendários civis, mas não tem relação com a data de impressão de um almanaque.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Mediste a taxa de variação do GMST com passo de 1 segundo e o dia sidéreo saiu meio segundo errado. A causa mais provável é…</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q13" value="a" data-certa="false"><span class="rotulo">…o polinómio da IAU de 1982 não ser válido para esta época.</span></label>
+          <p class="explicacao" hidden>É válido, e concorda com o Ângulo de Rotação da Terra da IAU de 2000. E o erro desaparece só por se mudar o passo, o que nenhuma causa física explicaria.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q13" value="b" data-certa="false"><span class="rotulo">…faltar a correção da nutação.</span></label>
+          <p class="explicacao" hidden>A nutação altera o <em>valor</em> do tempo sidéreo e quase não altera a sua <em>taxa</em> — e é a taxa que aqui se está a medir.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q13" value="c" data-certa="true"><span class="rotulo">…cancelamento catastrófico: o termo em (JD − J2000) vale milhões de graus e a resolução do <code>float64</code> aí é grande demais para um sinal de 0,004°.</span></label>
+          <p class="explicacao" hidden>O programa não rebenta — devolve um número plausível errado na quarta casa. Com passo de 1 hora dá certo. (Lição 2.)</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Declaraste a tolerância <em>depois</em> de correr a comparação. Que problema tem isso?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q14" value="a" data-certa="false"><span class="rotulo">Nenhum, desde que o limiar escolhido seja razoável.</span></label>
+          <p class="explicacao" hidden>«Razoável» avaliado depois de ver o resultado é exatamente o problema: não sobra nenhum critério independente do resultado.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q14" value="b" data-certa="false"><span class="rotulo">Só é problema se publicares o resultado.</span></label>
+          <p class="explicacao" hidden>O problema é de conhecimento, não de publicação: nem tu ficas a saber se o teu modelo presta.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="almanaque-teste-q14" value="c" data-certa="true"><span class="rotulo">Escolheste o limiar que faz o teu resultado passar — não mediste, justificaste.</span></label>
+          <p class="explicacao" hidden>É a razão de o projeto começar por escrever <code>TOLERANCIA.md</code> e fazer commit antes de comparar. (Lição 9.)</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+
+    <h2 id="abertas">Três perguntas abertas</h2>
+    <p>São estas que mostram se o mecanismo ficou. Responde por palavras tuas, sem jargão.</p>
+<div class="aberta">
+  <label for="teste-a1">Explica porque é que um erro de 0,01° na posição do Sol produz três números de erro completamente diferentes conforme o que se publica.
+    <span class="pista">Dá os três números e diz de onde vem cada um.</span>
+  </label>
+  <textarea id="teste-a1" data-pergunta="Explica porque é que um erro de 0,01° na posição do Sol produz três números de erro completamente diferentes conforme o que se publica."></textarea>
+</div>
+<div class="aberta">
+  <label for="teste-a2">Um colega diz-te: «escrevi um gerador de almanaques, está a funcionar». Que três perguntas lhe fazes, e porquê?
+    <span class="pista">Pelo menos uma das perguntas tem de ser sobre a ordem em que ele fez as coisas, e não sobre o que fez.</span>
+  </label>
+  <textarea id="teste-a2" data-pergunta="Um colega diz-te: «escrevi um gerador de almanaques, está a funcionar». Que três perguntas lhe fazes, e porquê?"></textarea>
+</div>
+<div class="aberta">
+  <label for="teste-a3">O almanaque náutico continua a ser publicado em papel, todos os anos. Dá as duas razões que este curso defende, e diz qual delas te parece mais forte.
+    <span class="pista">Uma é sobre infraestrutura e a outra sobre custo de cálculo. Justifica a escolha.</span>
+  </label>
+  <textarea id="teste-a3" data-pergunta="O almanaque náutico continua a ser publicado em papel, todos os anos. Dá as duas razões que este curso defende, e diz qual delas te parece mais forte."></textarea>
+</div>
+
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas
+  respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e correr
+  <code>/corrigir almanaque</code>.</p>
+</div>
+
+    <h2 id="depois">Depois do teste</h2>
+    <ul>
+      <li>Cola a entrega em <code>topicos/almanaque/respostas/AAAA-MM-DD.md</code> e corre
+        <code>/corrigir almanaque</code>.</li>
+      <li>🔴 <strong>A chave deste teste não está publicada</strong>, e é de propósito: o
+        repositório é público e a chave ficaria ao lado do teste. Quem corrige resolve-o de novo
+        (<code>DECISOES.md</code> D-027).</li>
+      <li>Regista o resultado em <code>topicos/almanaque/PROGRESSO.md</code> — uma linha, com o que
+        falhou.</li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">Índice do curso</a> · <a href="folha.html">Folha de consulta</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>
