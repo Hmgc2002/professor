@@ -109,6 +109,7 @@ o que já está escrito.
   - [Artigos](docs/abstracts-e-resumos/bibliografia.html#artigos)
   - [Guias de prática](docs/abstracts-e-resumos/bibliografia.html#pratica)
   - [Livros e cursos](docs/abstracts-e-resumos/bibliografia.html#livros)
+  - [Em vídeo](docs/abstracts-e-resumos/bibliografia.html#video)
   - [O que ler depois de cada lição](docs/abstracts-e-resumos/bibliografia.html#por-licao)
   - [Como isto foi verificado](docs/abstracts-e-resumos/bibliografia.html#verificacao)
 
@@ -539,6 +540,7 @@ o que já está escrito.
   - [Fontes primárias](docs/indices-btree-sql/bibliografia.html#primarias)
   - [Os artigos originais](docs/indices-btree-sql/bibliografia.html#artigos)
   - [Livros](docs/indices-btree-sql/bibliografia.html#livros)
+  - [Em vídeo](docs/indices-btree-sql/bibliografia.html#video)
   - [O que ler depois de cada lição](docs/indices-btree-sql/bibliografia.html#por-licao)
   - [O que não está aqui, e porquê](docs/indices-btree-sql/bibliografia.html#fora)
   - [Como isto foi verificado](docs/indices-btree-sql/bibliografia.html#verificacao)

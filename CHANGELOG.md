@@ -3,6 +3,21 @@
 O formato é uma entrada por sessão de trabalho, com data. O que muda o que eu
 consigo aprender fica no topo da entrada; o que muda só a mecânica fica no fim.
 
+## 2026-09-16 (4) — Os outros dois cursos também ganharam secção «Em vídeo»
+
+- `docs/indices-btree-sql/bibliografia.html`: a cadeira **CMU 15-445/645, Intro to Database Systems** (Andy Pavlo),
+  com as aulas #08, #09 (índices e filtros) e #10 (concorrência em índices) — a parte que este curso deixa de fora
+  por opção. A secção «O que não está aqui» foi reescrita em vez de contradita: cursos em vídeo a ensinar a afinar
+  queries continuam fora, porque não os vi; o que entrou é uma cadeira universitária com proveniência verificável,
+  marcada como **não vista**, como percurso e não como recomendação de conteúdo.
+- `docs/abstracts-e-resumos/bibliografia.html`: **Larry McEnerney**, *The Craft of Writing Effectively*
+  (Universidade de Chicago, 2014) — a tese da lição 0 dita por quem dirigiu o programa de escrita da universidade
+  durante quatro décadas; e **Simon Peyton Jones**, *How to Write a Great Research Paper*, com os diapositivos e a
+  gravação de 34 minutos publicados pelo autor.
+- Todas marcadas como **não vistas**, com a proveniência confirmada (página da cadeira, página do autor, verbete
+  sobre o orador). No caso do McEnerney **não se escreve o endereço do vídeo**: o YouTube recusou a consulta, e um
+  endereço que não abri não se cita — diz-se onde procurar.
+
 ## 2026-09-16 (3) — A bibliografia deixou de ser só leitura
 
 **Processo**

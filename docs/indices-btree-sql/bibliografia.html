@@ -411,6 +411,7 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
       <li><a href="#primarias">Fontes primárias</a></li>
       <li><a href="#artigos">Os artigos originais</a></li>
       <li><a href="#livros">Livros</a></li>
+      <li><a href="#video">Em vídeo</a></li>
       <li><a href="#por-licao">O que ler depois de cada lição</a></li>
       <li><a href="#fora">O que não está aqui, e porquê</a></li>
       <li><a href="#verificacao">Como isto foi verificado</a></li>
@@ -552,6 +553,32 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
         <span class="verificado">🌐 Verificado a 2026-09-15</span></li>
     </ul>
 
+    <h2 id="video">Em vídeo</h2>
+    <div class="caixa aviso correcao">
+      <span class="titulo">⚠️ Secção acrescentada a 2026-09-16</span>
+      <p>Até esta data, este repositório lia a regra «pelo menos uma fonte que não seja documentação» como se
+      dissesse «livro ou artigo», e a secção seguinte dizia que nenhum curso em vídeo entrava aqui. A regra passou
+      a aceitar <strong>qualquer media</strong> (<code>DECISOES.md</code> D-038), desde que responda ao <em>porque é
+      assim</em> e venha com a mesma disciplina do resto: o que é, o porquê, o que ver, o que saltar — e se foi
+      mesmo vista.</p>
+    </div>
+    <ul class="fontes">
+      <li><strong>Andy Pavlo, <em>Intro to Database Systems</em> (CMU 15-445/645)</strong> — Carnegie Mellon
+      University, aulas gravadas e publicadas em vídeo, com os diapositivos e os trabalhos no sítio da cadeira.
+      <p><strong>Porquê:</strong> é a mesma matéria da lição 1 deste curso dada por quem investiga sistemas de
+      bases de dados, e com a parte que aqui fica de fora por opção: como é que a estrutura se comporta quando há
+      concorrência. É a fonte certa para quando quiseres descer da pergunta «que índice?» para a pergunta «como é
+      que ele está implementado?».</p>
+      <p><strong>O que ver:</strong> na edição de outono de 2024, as aulas <strong>#08 e #09 (Indexes &amp;
+      Filters)</strong> e a <strong>#10 (Index Concurrency Control)</strong>. <strong>O que saltar:</strong> tudo o
+      que é sobre o projeto da cadeira e sobre execução distribuída — não é sobre escolher índices.</p>
+      <p>⚠️ <strong>Não vi estas aulas</strong> (não consigo ver vídeo). Confirmei que a cadeira existe, que o
+      docente é Andy Pavlo, que as aulas são essas e que os vídeos estão publicados pela própria cadeira. Nenhuma
+      afirmação deste curso vem daqui.</p>
+      <a href="https://15445.courses.cs.cmu.edu/fall2024/schedule.html">15445.courses.cs.cmu.edu</a>
+      <span class="verificado">🌐 Página da cadeira verificada a 2026-09-16 — os vídeos não foram vistos</span></li>
+    </ul>
+
     <h2 id="por-licao">O que ler depois de cada lição</h2>
     <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Leitura recomendada por lição, tabela rolável na horizontal">
       <table>
@@ -570,8 +597,10 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
 
     <h2 id="fora">O que não está aqui, e porquê</h2>
     <ul>
-      <li><strong>Cursos em vídeo.</strong> Não recomendo nenhum porque não vi nenhum até ao fim — e recomendar
-      por reputação é exatamente o que este repositório não faz. Se encontrares um que preste, diz, e entra aqui
+      <li><strong>Cursos em vídeo a ensinar a afinar queries.</strong> Continuam de fora, e pela razão de
+      sempre: não os vi, e recomendar por reputação é o que este repositório não faz. O que passou a estar
+      <a href="#video">na secção de vídeo</a> é uma cadeira universitária cuja proveniência se verifica, e está lá
+      marcada como não vista — é um percurso, não uma recomendação de conteúdo. Se vires um bom, diz, e entra aqui
       com o teu nome na recomendação.</li>
       <li><strong>Livros sobre afinação de servidores</strong> (<em>shared_buffers</em>, WAL, <em>checkpoints</em>).
       Ficam de fora pela mesma razão que o curso os deixa de fora: a pergunta «que índice?» e a pergunta «que
