@@ -29,11 +29,14 @@ python3 validar.py || falhou=1
 # ---------------------------------------------------------------- 3. HTML
 passo "2/5  HTML bem formado (tidy do Homebrew — o /usr/bin/tidy é de 2006 e não conhece HTML5)"
 TIDY=""
-for c in /opt/homebrew/bin/tidy /usr/local/bin/tidy; do
-  [ -x "$c" ] && TIDY="$c" && break
+# Fora do macOS (Windows, Linux sem Homebrew) aponta-se para um tidy-html5 5.x com
+# TIDY_PARA_VALIDAR=/caminho/para/tidy — explícito de propósito, para não apanhar
+# sem querer um tidy antigo que esteja no PATH.
+for c in "${TIDY_PARA_VALIDAR:-}" /opt/homebrew/bin/tidy /usr/local/bin/tidy; do
+  [ -n "$c" ] && [ -x "$c" ] && TIDY="$c" && break
 done
 if [ -z "$TIDY" ]; then
-  echo "${A}tidy do Homebrew não encontrado — instala com: brew install tidy-html5${Z}"
+  echo "${A}tidy-html5 5.x não encontrado — macOS: brew install tidy-html5 · outros: TIDY_PARA_VALIDAR=/caminho/para/tidy${Z}"
   echo "${A}(este passo ficou por correr; não conta como passado)${Z}"
   falhou=1
 else

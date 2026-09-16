@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1 · Como o som fica preso na fita — A cassete como memória</title>
+<meta name="description" content="Domínios, coercividade, histerese e a lei de Faraday, explicados a partir das consequências que têm para quem quer guardar bytes numa cassete.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-dados/01-fita-magnetismo.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">A cassete como memória</a> <span aria-hidden="true">›</span> Lição 1
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta núcleo">Lição 1 · núcleo</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>Como o som fica preso na fita</h1>
+    <p class="subtitulo">A física que interessa — e só essa. Cada facto sobre magnetismo que está aqui explica uma decisão que o formato de dados teve de tomar; o que não explicava nenhuma ficou de fora.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim consegues explicar, sem consultar, <strong>porque é que a mesma fita não pode ser boa nos graves
+    e nos agudos ao mesmo tempo</strong>, e prever três consequências do mecanismo antes de as ver medidas:
+    porque é que a cabeça de leitura dá mais tensão nos agudos, porque é que a fita satura, e porque é que
+    tem um chiado de fundo que nenhuma eletrónica apaga. E consegues calcular, dada uma frequência, o
+    <strong>comprimento físico em micrómetros</strong> que ela ocupa numa cassete.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>De memória, antes de ler. Escreve as respostas.</p>
+    <ol>
+      <li>Um <code>.wav</code> a 44 100 Hz: qual é a frequência mais alta que lá cabe, e porquê?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>22 050 Hz — metade da taxa. Porque é preciso pelo menos uma amostra na parte de cima e outra na de
+          baixo de cada período para o período existir nos dados.</p>
+        </details>
+      </li>
+      <li>Na lição 0 mediste 10,77 amostras por meia onda a 2047 Hz. Com que precisão consegues dizer <em>onde</em>
+      está uma mudança de sinal, e em que unidades?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Até à amostra mais próxima: ±0,5 amostras, ou seja ±4,6 % do comprimento da meia onda. A unidade
+          que interessa não é o segundo — é a <strong>fração da coisa que estás a medir</strong>.</p>
+        </details>
+      </li>
+      <li>Uma onda quadrada e uma sinusoide com o mesmo pico. Qual tem maior média do valor absoluto?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>A quadrada, e por muito: está sempre no pico (média = pico), contra cerca de 0,64 do pico na
+          sinusoide. Guarda isto — na lição 2 vai explicar porque é que o sinal que se grava numa fita de dados
+          castiga a fita de maneira diferente da música.</p>
+        </details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p>Uma fita é uma tira de poliéster com cola e pó em cima. O pó são partículas magnéticas em forma de agulha,
+    com cerca de 0,5 × 0,1 micrómetros, orientadas ao comprido da fita. Cada partícula pode conter mais do que um
+    <strong>domínio</strong>: uma região cuja magnetização aponta toda para o mesmo lado.</p>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ O que <em>não</em> acontece</span>
+      <p>As partículas <strong>não rodam</strong>. Não há nada a mexer-se fisicamente. O que muda é a direção
+      para onde aponta a magnetização dos domínios — uma propriedade do material, não uma posição. Quem imagina
+      limalha a alinhar-se como numa experiência de escola fica com uma intuição que falha em todos os pormenores
+      que interessam.</p>
+    </div>
+
+    <h3>Gravar: um íman em forma de ferradura com uma fenda</h3>
+
+    <p>A cabeça de gravação é um anel de material magneticamente permeável com uma bobina à volta e uma
+    <strong>fenda</strong> minúscula. A corrente na bobina cria fluxo magnético no anel. Chegado à fenda, o fluxo
+    encontra ali muita resistência (<em>relutância</em>) e prefere o caminho mais fácil — que é atravessar o
+    revestimento da fita, que está encostado.</p>
+
+    <p>A fita passa e afasta-se. O campo cai rapidamente com a distância. Quando o campo já é mais fraco do que a
+    <strong>coercividade</strong> do material — a força de campo que é precisa para inverter a magnetização —
+    aquilo que lá estiver fica lá <em>para sempre</em>. Por isso a gravação acontece à <strong>saída</strong> da
+    fenda, não por baixo dela.</p>
+
+    <figure>
+      <svg viewBox="0 0 520 230" role="img" aria-labelledby="t-cabeca d-cabeca">
+        <title id="t-cabeca">A cabeça de gravação, a fenda, e o ponto em que o sinal fica fixado na fita</title>
+        <desc id="d-cabeca">Um anel de material magnético, com uma bobina enrolada do lado esquerdo, tem uma fenda
+        estreita em baixo, encostada à fita. A fita desliza da esquerda para a direita. O fluxo sai pela fenda e
+        atravessa o revestimento da fita. À direita da fenda o campo já enfraqueceu; é aí, no bordo de saída, que
+        a magnetização deixa de mudar e fica gravada.</desc>
+        <path class="svg-traco" d="M252 128 H170 Q150 128 150 108 V48 Q150 28 170 28 H350 Q370 28 370 48 V108 Q370 128 350 128 H268" style="stroke-width:14;fill:none"/>
+        <g class="svg-traco">
+          <path d="M132 50 H168"/><path d="M132 64 H168"/><path d="M132 78 H168"/><path d="M132 92 H168"/>
+        </g>
+        <text class="svg-texto" x="20" y="74">bobina</text>
+        <text class="svg-texto" x="228" y="112">fenda</text>
+        <rect class="svg-caixa" x="8" y="136" width="504" height="22" rx="3"/>
+        <text class="svg-texto" x="16" y="152">fita  →  →  →</text>
+        <path class="svg-traco" d="M252 132 Q260 146 268 132" style="fill:none"/>
+        <circle class="svg-realce" cx="285" cy="147" r="7"/>
+        <path class="svg-traco" d="M285 190 V160"/>
+        <text class="svg-texto" x="285" y="208" text-anchor="middle">bordo de saída:</text>
+        <text class="svg-texto" x="285" y="224" text-anchor="middle">aqui fica gravado</text>
+      </svg>
+      <figcaption>O que fixa o sinal não é o campo máximo — é o instante em que o campo <strong>desce abaixo da
+      coercividade</strong>. Daí a gravação acontecer no bordo de saída.</figcaption>
+    </figure>
+
+    <h3>A histerese: porque é que nada disto é linear</h3>
+
+    <p>Aumenta o campo aplicado a partir de zero e, no princípio, <strong>não acontece nada</strong>: o campo é
+    fraco de mais para vencer a coercividade. Continua a aumentar e a magnetização começa a acompanhar, mais ou
+    menos em proporção. Continua ainda e as partículas vão-se esgotando — já quase todas estão viradas — e a
+    curva achata: é a <strong>saturação</strong>.</p>
+
+    <p>Inverte agora o campo. Outra vez nada acontece até o campo invertido ultrapassar a coercividade. Este
+    «não acontece nada até…» nos dois sentidos é a <strong>histerese</strong>: o material lembra-se do estado
+    anterior. É o que faz a fita servir para guardar coisas — e é também o que a torna um transdutor péssimo.</p>
+
+    <figure>
+      <svg viewBox="0 0 520 250" role="img" aria-labelledby="t-hist d-hist">
+        <title id="t-hist">Curva de transferência de uma fita sem bias: zona morta ao centro, saturação nas pontas</title>
+        <desc id="d-hist">Eixo horizontal: campo aplicado H. Eixo vertical: magnetização que fica na fita. Perto de
+        campo zero a curva é completamente plana, sobre o eixo: é a zona morta, onde nada é gravado. Fora dela a
+        curva sobe quase em linha reta, que é a zona útil, e nas duas extremidades achata outra vez, que é a
+        saturação.</desc>
+        <path class="svg-traco" d="M40 125 H480" opacity="0.4"/>
+        <path class="svg-traco" d="M260 15 V235" opacity="0.4"/>
+        <text class="svg-texto" x="470" y="118">H</text>
+        <text class="svg-texto" x="268" y="24">M</text>
+        <rect class="svg-realce" x="217" y="113" width="86" height="24" rx="3" opacity="0.3"/>
+        <path class="svg-traco" d="M60.0 220.0 L61.4 220.0 L62.9 220.0 L64.3 220.0 L65.7 220.0 L67.1 220.0 L68.6 220.0 L70.0 220.0 L71.4 220.0 L72.9 220.0 L74.3 220.0 L75.7 220.0 L77.1 220.0 L78.6 220.0 L80.0 220.0 L81.4 220.0 L82.9 220.0 L84.3 220.0 L85.7 220.0 L87.1 220.0 L88.6 220.0 L90.0 220.0 L91.4 220.0 L92.9 220.0 L94.3 220.0 L95.7 220.0 L97.1 220.0 L98.6 220.0 L100.0 220.0 L101.4 220.0 L102.9 220.0 L104.3 220.0 L105.7 220.0 L107.1 220.0 L108.6 220.0 L110.0 220.0 L111.4 220.0 L112.9 220.0 L114.3 220.0 L115.7 220.0 L117.1 220.0 L118.6 218.8 L120.0 217.6 L121.4 216.3 L122.9 215.1 L124.3 213.9 L125.7 212.6 L127.1 211.4 L128.6 210.2 L130.0 208.9 L131.4 207.7 L132.9 206.5 L134.3 205.2 L135.7 204.0 L137.1 202.7 L138.6 201.5 L140.0 200.2 L141.4 199.0 L142.9 197.7 L144.3 196.4 L145.7 195.2 L147.1 193.9 L148.6 192.6 L150.0 191.4 L151.4 190.1 L152.9 188.8 L154.3 187.6 L155.7 186.3 L157.1 185.0 L158.6 183.7 L160.0 182.4 L161.4 181.1 L162.9 179.8 L164.3 178.5 L165.7 177.2 L167.1 175.9 L168.6 174.6 L170.0 173.3 L171.4 172.0 L172.9 170.6 L174.3 169.3 L175.7 168.0 L177.1 166.6 L178.6 165.3 L180.0 164.0 L181.4 162.6 L182.9 161.3 L184.3 159.9 L185.7 158.5 L187.1 157.1 L188.6 155.8 L190.0 154.4 L191.4 153.0 L192.9 151.6 L194.3 150.2 L195.7 148.7 L197.1 147.3 L198.6 145.9 L200.0 144.4 L201.4 143.0 L202.9 141.5 L204.3 140.0 L205.7 138.5 L207.1 137.0 L208.6 135.4 L210.0 133.8 L211.4 132.2 L212.9 130.6 L214.3 128.9 L215.7 127.1 L217.1 125.0 L218.6 125.0 L220.0 125.0 L221.4 125.0 L222.9 125.0 L224.3 125.0 L225.7 125.0 L227.1 125.0 L228.6 125.0 L230.0 125.0 L231.4 125.0 L232.9 125.0 L234.3 125.0 L235.7 125.0 L237.1 125.0 L238.6 125.0 L240.0 125.0 L241.4 125.0 L242.9 125.0 L244.3 125.0 L245.7 125.0 L247.1 125.0 L248.6 125.0 L250.0 125.0 L251.4 125.0 L252.9 125.0 L254.3 125.0 L255.7 125.0 L257.1 125.0 L258.6 125.0 L260.0 125.0 L261.4 125.0 L262.9 125.0 L264.3 125.0 L265.7 125.0 L267.1 125.0 L268.6 125.0 L270.0 125.0 L271.4 125.0 L272.9 125.0 L274.3 125.0 L275.7 125.0 L277.1 125.0 L278.6 125.0 L280.0 125.0 L281.4 125.0 L282.9 125.0 L284.3 125.0 L285.7 125.0 L287.1 125.0 L288.6 125.0 L290.0 125.0 L291.4 125.0 L292.9 125.0 L294.3 125.0 L295.7 125.0 L297.1 125.0 L298.6 125.0 L300.0 125.0 L301.4 125.0 L302.9 125.0 L304.3 122.9 L305.7 121.1 L307.1 119.4 L308.6 117.8 L310.0 116.2 L311.4 114.6 L312.9 113.0 L314.3 111.5 L315.7 110.0 L317.1 108.5 L318.6 107.0 L320.0 105.6 L321.4 104.1 L322.9 102.7 L324.3 101.3 L325.7 99.8 L327.1 98.4 L328.6 97.0 L330.0 95.6 L331.4 94.2 L332.9 92.9 L334.3 91.5 L335.7 90.1 L337.1 88.7 L338.6 87.4 L340.0 86.0 L341.4 84.7 L342.9 83.4 L344.3 82.0 L345.7 80.7 L347.1 79.4 L348.6 78.0 L350.0 76.7 L351.4 75.4 L352.9 74.1 L354.3 72.8 L355.7 71.5 L357.1 70.2 L358.6 68.9 L360.0 67.6 L361.4 66.3 L362.9 65.0 L364.3 63.7 L365.7 62.4 L367.1 61.2 L368.6 59.9 L370.0 58.6 L371.4 57.4 L372.9 56.1 L374.3 54.8 L375.7 53.6 L377.1 52.3 L378.6 51.0 L380.0 49.8 L381.4 48.5 L382.9 47.3 L384.3 46.0 L385.7 44.8 L387.1 43.5 L388.6 42.3 L390.0 41.1 L391.4 39.8 L392.9 38.6 L394.3 37.4 L395.7 36.1 L397.1 34.9 L398.6 33.7 L400.0 32.4 L401.4 31.2 L402.9 30.0 L404.3 30.0 L405.7 30.0 L407.1 30.0 L408.6 30.0 L410.0 30.0 L411.4 30.0 L412.9 30.0 L414.3 30.0 L415.7 30.0 L417.1 30.0 L418.6 30.0 L420.0 30.0 L421.4 30.0 L422.9 30.0 L424.3 30.0 L425.7 30.0 L427.1 30.0 L428.6 30.0 L430.0 30.0 L431.4 30.0 L432.9 30.0 L434.3 30.0 L435.7 30.0 L437.1 30.0 L438.6 30.0 L440.0 30.0 L441.4 30.0 L442.9 30.0 L444.3 30.0 L445.7 30.0 L447.1 30.0 L448.6 30.0 L450.0 30.0 L451.4 30.0 L452.9 30.0 L454.3 30.0 L455.7 30.0 L457.1 30.0 L458.6 30.0 L460.0 30.0" style="stroke-width:2.5;fill:none"/>
+        <text class="svg-texto" x="260" y="158" text-anchor="middle">zona morta</text>
+        <text class="svg-texto" x="330" y="90">zona útil</text>
+        <text class="svg-texto" x="120" y="175">zona útil</text>
+        <text class="svg-texto" x="420" y="22">saturação</text>
+        <text class="svg-texto" x="40" y="236">saturação</text>
+      </svg>
+      <figcaption>Duas zonas quase retas, uma zona morta ao meio e saturação nas pontas. ⚠️ Isto é a
+      <strong>curva de transferência</strong> — o que fica gravado, partindo de fita desmagnetizada — e não o
+      laço de histerese completo, que tem dois ramos e é o que dá memória à fita. A curva de transferência é a
+      que interessa para gravar, e é a mesma forma que o exercício E2 simula. A lição 2 é inteira sobre como se
+      contorna a zona morta — que é o problema maior dos dois.</figcaption>
+    </figure>
+
+    <h3>Ler: a lei de Faraday, e a consequência que ninguém adivinha</h3>
+
+    <p>A cabeça de leitura é quase a mesma coisa, ao contrário. A fita magnetizada passa pela fenda, o fluxo
+    magnético atravessa o anel, e o fluxo a variar induz tensão na bobina. <strong>Tensão induzida é
+    proporcional à <em>taxa de variação</em> do fluxo</strong>, não ao fluxo:</p>
+
+    <p style="text-align:center"><em>V</em> = −<em>N</em> · d<em>Φ</em>/d<em>t</em></p>
+
+    <p>Daqui sai a consequência que muda tudo. Duas gravações com <strong>a mesma amplitude</strong>, uma a
+    1 kHz e outra a 2 kHz: a de 2 kHz varia duas vezes mais depressa, logo induz <strong>o dobro</strong> da
+    tensão. A cabeça de leitura <em>diferencia</em> o sinal, e uma diferenciação sobe <strong>6 dB por
+    oitava</strong>. Em palavras de Jay McKnight, da Magnetic Reference Laboratory: «a cabeça de reprodução
+    indutiva habitual dá uma tensão de saída que sobe 6 dB/oitava para um fluxo de entrada constante».</p>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Consequência prática: a equalização não é um gosto, é uma obrigação</span>
+      <p>Se ligasses a cabeça de leitura direta a um amplificador, ouvias uma coisa sem graves nenhuns e com os
+      agudos aos berros. O pré-amplificador de uma cassete tem obrigatoriamente um <strong>integrador</strong>
+      — uma resposta a descer 6 dB/oitava — só para desfazer a diferenciação da física. Isso não é ainda a
+      equalização de 120 µs e 70 µs de que a lição 3 fala: é o degrau anterior a essa.</p>
+    </div>
+
+    <h3>O comprimento de onda: onde os agudos morrem</h3>
+
+    <p>Na fita, uma frequência não é um tempo — é um <strong>comprimento</strong>. A fita anda a 4,7625 cm/s
+    (1⅞ polegadas por segundo, valor que a norma fixa). Logo:</p>
+
+    <p style="text-align:center">comprimento de onda = velocidade ÷ frequência</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Comprimento de onda na fita, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Frequência</th><th>Comprimento na fita</th><th>Comparar com</th></tr></thead>
+        <tbody>
+          <tr><td>100 Hz</td><td>476 µm</td><td>meio milímetro — enorme</td></tr>
+          <tr><td>1 000 Hz</td><td>47,6 µm</td><td>uma partícula tem 0,5 µm: cabem lá cem</td></tr>
+          <tr><td>2 047 Hz <em>(o bit 0 do Spectrum)</em></td><td>23,3 µm</td><td>ainda confortável</td></tr>
+          <tr><td>10 000 Hz</td><td>4,76 µm</td><td>já é a escala da fenda da cabeça</td></tr>
+          <tr><td>15 000 Hz</td><td>3,18 µm</td><td>seis partículas por período</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Quando o comprimento de onda se aproxima do tamanho da <strong>fenda</strong> da cabeça de leitura, a
+    cabeça recolhe fluxo ao longo de toda a fenda e faz uma média. Quando o comprimento de onda for
+    <em>exatamente igual</em> à fenda, a média dá <strong>zero</strong> e a frequência não se reproduz de todo.
+    É a <em>perda de fenda</em>, e é um zero mesmo, não uma atenuação.</p>
+
+    <p>Há mais duas perdas a puxar no mesmo sentido, ambas piores quanto mais curta for a onda: a
+    <strong>perda por afastamento</strong> (se a fita não estiver encostadíssima à cabeça) e a <strong>perda por
+    espessura</strong> (o fundo do revestimento contribui menos). E há a <strong>auto-apagagem</strong>: mal a
+    fita sai da fenda de gravação, forma-se uma fenda fantasma entre a cabeça e a fita acabada de magnetizar, e
+    esse campo apaga preferencialmente os agudos.</p>
+
+    <div class="caixa critico">
+      <span class="titulo">🔴 A frase a levar desta lição</span>
+      <p>Na fita, <strong>tudo o que é mau é pior nos agudos</strong>, e tudo o que é mau vem de as ondas serem
+      curtas demais para a geometria do sistema. Uma cassete anda a 4,76 cm/s — quase oito vezes mais devagar do
+      que uma fita de estúdio a 15 polegadas por segundo — e por isso tem esses problemas todos oito vezes piores.</p>
+      <p>Guarda isto, porque é a pedra angular da lição 4: quem quiser pôr dados numa cassete tem de escolher um
+      esquema que viva nas <strong>frequências baixas</strong>, e o ZX Spectrum vive entre 807 e 2047 Hz.</p>
+    </div>
+
+    <h3>E o chiado?</h3>
+
+    <p>O chiado não vem da eletrónica. Vem de a fita ser feita de partículas <em>discretas</em>, espalhadas ao
+    acaso. A magnetização total é a soma de milhões de contributos individuais, e a soma de coisas ao acaso tem
+    flutuação. Como diz Kadis: «variações na distribuição aleatória de partículas e domínios resultam no ruído
+    de fundo inerente ao meio». Inerente — quer dizer que não há circuito nenhum que o tire.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p><strong>Pergunta:</strong> a cabeça de leitura diferencia o sinal e isso dá +6 dB/oitava. É fácil dizer.
+    Vamos <em>medi-lo</em>, em código, sem áudio e sem hardware.</p>
+
+    <h3>Passo 1 — o que é preciso montar, e porquê esta experiência e não outra</h3>
+    <p>Preciso de duas sinusoides com a <strong>mesma amplitude</strong> e frequências numa relação de 2 para 1
+    — uma oitava. Aplico a diferença entre amostras consecutivas (que é a versão discreta da derivada) e comparo
+    os picos. Se a teoria estiver certa, a de frequência dupla tem de dar o dobro do pico.</p>
+    <p>Amplitude igual é o que torna a experiência conclusiva: se as amplitudes diferissem, o resultado não
+    distinguia «a derivada favorece os agudos» de «esta onda era mais alta».</p>
+
+    <h3>Passo 2 — o código</h3>
+<pre><code>import math
+
+TAXA = 44100.0
+
+def sinusoide(freq, n=44100, amplitude=1.0):
+    return [amplitude * math.sin(2 * math.pi * freq * i / TAXA) for i in range(n)]
+
+def derivar(x):
+    &quot;&quot;&quot;A cabeca de leitura: tensao proporcional a taxa de variacao do fluxo.&quot;&quot;&quot;
+    return [b - a for a, b in zip(x, x[1:])]
+
+def pico(x):
+    return max(abs(v) for v in x)
+
+print(&quot;freq    pico entrada   pico apos a cabeca   razao   dB vs 500 Hz&quot;)
+ref = None
+for f in (500, 1000, 2000, 4000, 8000):
+    x = sinusoide(f)
+    p_ent, p_sai = pico(x), pico(derivar(x))
+    if ref is None:
+        ref = p_sai
+    print(f&quot;{f:5d}   {p_ent:12.4f}   {p_sai:18.6f}   {p_sai/p_ent:5.3f}&quot;
+          f&quot;   {20*math.log10(p_sai/ref):+8.2f}&quot;)</code></pre>
+
+    <h3>Passo 3 — a saída, e o que ela confirma</h3>
+<pre><code>freq    pico entrada   pico apos a cabeca   razao   dB vs 500 Hz
+  500         1.0000             0.071223   0.071      +0.00
+ 1000         1.0000             0.142355   0.142      +6.02
+ 2000         1.0000             0.283989   0.284     +12.01
+ 4000         1.0000             0.562222   0.562     +17.95
+ 8000         1.0000             1.079101   1.079     +23.61</code></pre>
+    <p>Uma oitava, +6,02 dB. Duas oitavas, +12,01. É a lei de Faraday a aparecer numa lista de números, sem
+    um íman à vista.</p>
+
+    <h3>Passo 4 — o desvio, que é onde está a lição a sério</h3>
+    <p>Agora olha para as duas últimas linhas. Se a regra fosse exactamente +6 dB por oitava, os 4000 Hz dariam
+    <strong>+18,00</strong> e os 8000 dariam <strong>+24,00</strong>. Deram <strong>+17,95</strong> e
+    <strong>+23,61</strong>. O desvio não é constante: é −0,05 dB a 4 kHz e <strong>−0,39 dB</strong> a 8 kHz —
+    quase oito vezes maior.</p>
+    <p>🔴 Aqui é onde se decide se se aprendeu alguma coisa. A resposta preguiçosa é «erro de arredondamento».
+    Não é: erros de arredondamento em vírgula flutuante andam na décima quinta casa decimal, não na segunda,
+    e sobretudo <strong>não crescem sistematicamente com a frequência</strong>. Um desvio que cresce tem causa.</p>
+    <p>A causa é que <code>b - a</code> <em>não é</em> a derivada. É o declive da corda entre dois pontos da
+    onda, e uma corda corta o canto. Quanto menos amostras houver por período, maior o canto cortado: a 500 Hz
+    há 88 amostras por período e a corda quase coincide com a curva; a 8000 Hz há 5,5 e já não coincide nada.</p>
+    <div class="caixa dica">
+      <span class="titulo">⭐ Porque é que isto não é uma nota de rodapé</span>
+      <p>Uma medida feita sobre um <strong>intervalo finito</strong> perde as ondas cujo período se aproxima
+      desse intervalo. O passo de amostragem é um intervalo no tempo; a fenda da cabeça de leitura é um
+      intervalo no espaço. É o <strong>mesmo mecanismo</strong>, e é por isso que o exercício E3 consegue
+      simular a perda de fenda mudando só uma linha deste código.</p>
+    </div>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa: a mesma conta, mas para a fita</h3>
+      <p>Uma cassete grava a 4,7625 cm/s. Uma fita de estúdio grava a 15 polegadas por segundo.</p>
+      <ol>
+        <li><strong>Dado:</strong> 15 in/s = 38,1 cm/s.</li>
+        <li><strong>______</strong> Quantas vezes mais depressa anda a fita de estúdio? Escreve a conta.</li>
+        <li><strong>Dado:</strong> um sinal de 15 kHz ocupa 3,18 µm numa cassete.</li>
+        <li><strong>______</strong> Quanto ocupa o mesmo sinal na fita de estúdio?</li>
+        <li><strong>______</strong> A fenda da cabeça de leitura é a mesma nas duas máquinas. Qual das duas
+        chega mais perto da perda de fenda a 15 kHz, e porquê?</li>
+        <li><strong>______</strong> Escreve numa frase a razão pela qual a cassete precisou de redução de ruído
+        (Dolby) e a fita de estúdio a 15 in/s precisou muito menos.</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>2.</strong> 38,1 ÷ 4,7625 = <strong>8 vezes</strong> exatamente. Não é coincidência: 15 in/s
+        é 1⅞ in/s × 8, e as velocidades normalizadas duplicam a partir da mesma base.</p>
+        <p><strong>4.</strong> 38,1 cm/s ÷ 15 000 Hz = 25,4 µm — <strong>oito vezes mais comprido</strong>.</p>
+        <p><strong>5.</strong> A <strong>cassete</strong>, e por oito vezes. Com 3,18 µm de comprimento de onda
+        está na mesma ordem de grandeza da fenda; com 25,4 µm está muito acima dela. A perda de fenda depende da
+        razão entre comprimento de onda e fenda, não do comprimento de onda sozinho.</p>
+        <p><strong>6.</strong> O ruído da fita é <em>por unidade de área</em>, e a cassete usa oito vezes menos
+        área por segundo — pista mais estreita <em>e</em> velocidade oito vezes menor. Menos sinal, o mesmo
+        ruído por área: pior relação sinal-ruído. Daí ter precisado de uma muleta eletrónica que a fita larga e
+        rápida não precisou.</p>
+        <div class="caixa dica">
+          <span class="titulo">⭐ O que esta conta mostra</span>
+          <p>Não há nada de especial na cassete enquanto tecnologia magnética. O que há de especial é ser
+          <strong>pequena e lenta</strong> — escolhas feitas para caber num bolso. Tudo o que o formato tem de
+          difícil é consequência dessas duas escolhas, e tudo o que a eletrónica faz é compensá-las.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>«As partículas rodam e alinham-se com o campo»</td>
+            <td>Imagens mentais de limalha de ferro a saltar</td>
+            <td>Nada se move. Muda a <strong>direção da magnetização</strong> dos domínios dentro de partículas
+            que continuam coladas onde estavam</td>
+          </tr>
+          <tr>
+            <td>«A gravação acontece por baixo da fenda»</td>
+            <td>Desenhar o sinal a ser «carimbado» pela fenda</td>
+            <td>Acontece no <strong>bordo de saída</strong>, quando o campo desce abaixo da coercividade. É por
+            isso que a fenda de gravação pode ser maior do que a de leitura</td>
+          </tr>
+          <tr>
+            <td>«A cabeça de leitura mede a magnetização da fita»</td>
+            <td>Esperar sinal com a fita parada</td>
+            <td>Mede a <strong>variação</strong> do fluxo. Com a fita parada a saída é zero, por mais magnetizada
+            que a fita esteja. É também por isso que a fita <em>tem</em> de andar a velocidade constante</td>
+          </tr>
+          <tr>
+            <td>«A equalização é para o som ficar bonito»</td>
+            <td>Falar de EQ como de um controlo de tonalidade</td>
+            <td>É para desfazer uma diferenciação que a física impõe. Sem ela não há som utilizável nenhum —
+            não é afinação, é correção obrigatória</td>
+          </tr>
+          <tr>
+            <td>«O chiado é dos circuitos; com eletrónica melhor desaparece»</td>
+            <td>Procurar o ruído no amplificador</td>
+            <td>Vem da granularidade do meio: partículas discretas espalhadas ao acaso. É por isso que a saída
+            foi tornar as partículas mais pequenas e mais densas, não melhorar os transístores</td>
+          </tr>
+          <tr>
+            <td>«Fitas melhores gravam mais agudos porque são mais sensíveis»</td>
+            <td>Confundir coercividade alta com sensibilidade alta</td>
+            <td>Ao contrário: coercividade <strong>alta</strong> torna a fita mais <em>difícil</em> de gravar —
+            por isso as fitas de metal precisam de cerca de 250 % da corrente de bias das ferrosas. O que ganham
+            é resistir à auto-apagagem, que é o que mata os agudos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — comprimentos de onda, à mão</h3>
+      <p>A 4,7625 cm/s, calcula o comprimento de onda de: 50 Hz, 807 Hz (o tom-piloto do Spectrum) e 20 kHz.
+      Depois responde: qual destes é que uma cassete reproduz sem esforço, e porquê?</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p>50 Hz → 4,7625/50 = 0,09525 cm = <strong>952,5 µm</strong> (quase um milímetro).<br>
+        807 Hz → <strong>59,0 µm</strong>.<br>
+        20 000 Hz → <strong>2,38 µm</strong>.</p>
+        <p>Os dois primeiros, com folga: estão muito acima de qualquer fenda de cabeça e de qualquer
+        irregularidade de contacto. Os 20 kHz estão no limite físico do sistema, e é por isso que nenhuma cassete
+        os reproduz bem. <strong>O tom-piloto do Spectrum, a 59 µm, está na zona mais confortável que a cassete
+        tem</strong> — e isso não é sorte, é desenho.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: a curva de histerese</h3>
+      <p>Escreve uma função <code>gravar(campo)</code> que simule a transferência não linear da fita: devolve 0
+      enquanto <code>abs(campo) &lt; 0.3</code> (a zona morta), cresce em proporção entre 0,3 e 1,0, e satura em
+      ±1,0 acima disso. Aplica-a a uma sinusoide de amplitude 0,5 e imprime lado a lado a entrada e a saída em
+      20 pontos.</p>
+      <p>Depois responde: <strong>o que é que aconteceu à onda?</strong> Não «ficou distorcida» — diz o que se
+      passou com as partes dela.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>import math
+
+MORTA, TOPO = 0.3, 1.0
+
+def gravar(campo):
+    &quot;&quot;&quot;A transferencia da fita, sem bias: zona morta ao centro, saturacao nas pontas.&quot;&quot;&quot;
+    sinal = 1.0 if campo &gt;= 0 else -1.0
+    v = abs(campo)
+    if v &lt; MORTA:
+        return 0.0                                   # nada a magnetizar
+    if v &gt; TOPO:
+        return sinal                                 # ja nao ha particulas livres
+    return sinal * (v - MORTA) / (TOPO - MORTA)      # a zona util, recta
+
+print(&quot; i   entrada    saida&quot;)
+for i in range(20):
+    e = 0.5 * math.sin(2 * math.pi * i / 20)
+    print(f&quot;{i:2d}   {e:+7.4f}  {gravar(e):+7.4f}&quot;)</code></pre>
+        <p>Saída:</p>
+<pre><code> i   entrada    saida
+ 0   +0.0000  +0.0000
+ 1   +0.1545  +0.0000
+ 2   +0.2939  +0.0000
+ 3   +0.4045  +0.1493
+ 4   +0.4755  +0.2508
+ 5   +0.5000  +0.2857
+ 6   +0.4755  +0.2508
+ 7   +0.4045  +0.1493
+ 8   +0.2939  +0.0000
+ 9   +0.1545  +0.0000
+10   +0.0000  +0.0000
+11   -0.1545  +0.0000
+12   -0.2939  +0.0000
+13   -0.4045  -0.1493
+14   -0.4755  -0.2508
+15   -0.5000  -0.2857
+16   -0.4755  -0.2508
+17   -0.4045  -0.1493
+18   -0.2939  +0.0000
+19   -0.1545  +0.0000</code></pre>
+        <p><strong>O que aconteceu:</strong> a onda foi <em>partida ao meio</em>. Tudo o que estava entre −0,3 e
+        +0,3 — que é a travessia do zero, ou seja a parte da onda onde ela muda de sinal — desapareceu e ficou
+        exatamente 0. O que sobrou foram dois cocurutos, um positivo e outro negativo, separados por patamares
+        de silêncio.</p>
+        <p>Não é «distorção» no sentido vago. É a <strong>destruição seletiva da parte da onda que passa pelo
+        zero</strong> — e repara que esta onda tinha amplitude 0,5, ou seja metade do máximo. Numa gravação a
+        sério os sons baixos ficam <strong>inteiramente</strong> dentro da zona morta e não são gravados de todo.
+        A lição 2 existe só para resolver isto.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — código que corre: reproduzir a experiência dos 6 dB e depois estragá-la</h3>
+      <p>Corre o código do exemplo trabalhado e confirma os +6,02 dB. Depois <strong>acrescenta uma quarta
+      coluna</strong> que simule a <em>perda de fenda</em>: em vez de <code>b - a</code>, calcula a média das
+      amostras numa janela de <code>g</code> amostras (a fenda) e só depois diferencia. Experimenta
+      <code>g = 5</code> e <code>g = 11</code>.</p>
+      <p><strong>Prevê antes de correr:</strong> a que frequência é que esperas que a saída caia a zero com
+      <code>g = 11</code>? Escreve o número antes de olhar.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>A previsão:</strong> a média anula-se quando a janela contém exatamente um período inteiro.
+        Com <code>g = 11</code> amostras a 44 100 Hz, isso é 44100/11 = <strong>4009 Hz</strong>.</p>
+<pre><code>import math
+
+TAXA = 44100.0
+
+def sinusoide(freq, n=44100):
+    return [math.sin(2 * math.pi * freq * i / TAXA) for i in range(n)]
+
+def fenda(x, g):
+    &quot;&quot;&quot;A cabeca recolhe fluxo ao longo de toda a fenda: media de g amostras.&quot;&quot;&quot;
+    if g &lt;= 1:
+        return x
+    soma, saida = sum(x[:g]), []
+    for i in range(g, len(x)):
+        saida.append(soma / g)
+        soma += x[i] - x[i - g]
+    return saida
+
+def derivar(x):
+    return [b - a for a, b in zip(x, x[1:])]
+
+def pico(x):
+    return max(abs(v) for v in x)
+
+print(&quot;freq     sem fenda      g=5         g=11&quot;)
+for f in (500, 1000, 2000, 3000, 4009, 6000, 8018, 10000):
+    x = sinusoide(f)
+    linha = [pico(derivar(fenda(x, g))) for g in (1, 5, 11)]
+    print(f&quot;{f:5d}   &quot; + &quot;  &quot;.join(f&quot;{v:10.6f}&quot; for v in linha))</code></pre>
+        <p>Saída:</p>
+<pre><code>freq     sem fenda      g=5         g=11
+  500     0.071223    0.070862    0.069429
+ 1000     0.142355    0.139482    0.128336
+ 2000     0.283989    0.261455    0.181817
+ 3000     0.424181    0.350605    0.129250
+ 4009     0.563453    0.395927    0.000013
+ 6000     0.829062    0.337548    0.181808
+ 8018     1.081260    0.112718    0.000026
+10000     1.307273    0.163215    0.181789</code></pre>
+        <div class="caixa ok">
+          <span class="titulo">✅ A previsão bateu</span>
+          <p>A 4009 Hz e com <code>g = 11</code>, a saída é <strong>0,000013</strong> — zero a menos de erro
+          numérico, contra 0,563 sem fenda. A frequência morreu por completo, tal como previsto, e a razão é
+          puramente geométrica: um período inteiro dentro da janela soma zero.</p>
+          <p><strong>E agora a parte que a previsão não continha.</strong> Acima do zero a saída
+          <strong>volta a subir</strong> — 0,1818 aos 6000 — e depois <strong>cai outra vez a zero</strong>:
+          0,000026 aos 8018 Hz. E 8018 é exactamente 2 × 4009. Aos 10 000 volta a estar em 0,1818.</p>
+          <p>A perda de fenda não é um filtro passa-baixo que desce e fica em baixo: tem <strong>um zero em cada
+          múltiplo de taxa ÷ g</strong>, com lóbulos pelo meio. Se tivesses previsto «acima de 4009 fica tudo a
+          zero», estavas errado — e é o tipo de erro que só correr apanha, porque a explicação («um período
+          inteiro na janela soma zero») aplica-se igualmente bem a dois períodos inteiros, e isso não é óbvio
+          até se ver.</p>
+          <p>Repara ainda na coluna <code>g = 5</code>: o seu primeiro zero está em 44100/5 = 8820 Hz, e por
+          isso aos 8018 já está a descer (0,113) mas ainda não chegou lá. <strong>Fenda mais pequena, zero mais
+          alto</strong> — que é exactamente a razão pela qual as cabeças de leitura têm fendas mais estreitas do
+          que as de gravação, ao preço de recolherem menos sinal.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+
+    <p>Cada opção tem explicação, também as erradas. Lê-as todas.</p>
+    <div class="quiz" data-quiz="l1">
+      <ol class="perguntas">
+        <li class="pergunta">
+          <p class="enunciado">Paras a fita a meio de uma passagem em que há música gravada. O que sai da cabeça de leitura?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l1-1" value="a" data-certa="false"><span class="rotulo">O valor instantâneo da magnetização naquele ponto</span></label>
+              <p class="explicacao" hidden>Seria assim se a cabeça medisse fluxo. Mede a <em>variação</em> do fluxo. Existem cabeças que medem o campo diretamente — as magnetorresistivas dos discos rígidos — mas a cabeça indutiva de uma cassete não é dessas.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-1" value="b" data-certa="true"><span class="rotulo">Nada: a saída é zero</span></label>
+              <p class="explicacao" hidden>V = −N·dΦ/dt. Fluxo parado, derivada zero, tensão zero. É também por isto que a velocidade tem de ser constante: variar a velocidade altera a tensão de saída mesmo sem alterar nada na fita.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-1" value="c" data-certa="false"><span class="rotulo">Um zumbido a 50 Hz</span></label>
+              <p class="explicacao" hidden>Isso é interferência da rede elétrica a entrar por outro caminho, e é um problema real — mas não é o que a cabeça lê da fita. A pergunta é sobre o mecanismo, não sobre patologias de instalação.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-1" value="d" data-certa="false"><span class="rotulo">O mesmo som, mas mais baixo</span></label>
+              <p class="explicacao" hidden>Não há «mais baixo»: não há sinal nenhum. Esta resposta imagina a leitura como algo contínuo que abranda, quando na verdade ela depende inteiramente de haver movimento.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Duas gravações com a mesma amplitude de fluxo, uma a 1 kHz e outra a 4 kHz. Qual é a diferença na tensão à saída da cabeça?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l1-2" value="a" data-certa="true"><span class="rotulo">A de 4 kHz dá quatro vezes mais, ou seja +12 dB</span></label>
+              <p class="explicacao" hidden>Duas oitavas a +6 dB cada. O código do exemplo trabalhado mede exactamente isto: +6,02 dB de 500 para 1000 e +12,02 de 500 para 2000.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-2" value="b" data-certa="false"><span class="rotulo">São iguais</span></label>
+              <p class="explicacao" hidden>Seriam iguais se a saída seguisse o fluxo. Segue a derivada, e a derivada de uma sinusoide de frequência <em>f</em> tem amplitude proporcional a <em>f</em>.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-2" value="c" data-certa="false"><span class="rotulo">A de 4 kHz dá o dobro</span></label>
+              <p class="explicacao" hidden>Dobro seria uma oitava. De 1 para 4 kHz vão <strong>duas</strong> oitavas, e cada uma duplica.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-2" value="d" data-certa="false"><span class="rotulo">A de 4 kHz dá menos, por causa da perda de fenda</span></label>
+              <p class="explicacao" hidden>A perda de fenda existe e puxa no sentido contrário — mas a 4 kHz numa cassete o comprimento de onda é 11,9 µm, ainda bem acima da fenda. A diferenciação domina. Combinar dois efeitos sem comparar as suas escalas é como se erra esta.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que a gravação fica fixada no bordo de <em>saída</em> da fenda e não por baixo dela?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l1-3" value="a" data-certa="false"><span class="rotulo">Porque a fita só toca na cabeça depois da fenda</span></label>
+              <p class="explicacao" hidden>A fita toca na cabeça ao longo de todo o percurso, incluindo por cima da fenda — se não tocasse, a perda por afastamento tornava a gravação impossível.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-3" value="b" data-certa="false"><span class="rotulo">Porque o campo é mais forte à saída do que por baixo</span></label>
+              <p class="explicacao" hidden>É ao contrário: o campo é máximo na fenda e cai rapidamente com a distância. A gravação acontece onde o campo é <em>fraco</em>, não onde é forte — que é precisamente o que torna isto contra-intuitivo.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-3" value="c" data-certa="false"><span class="rotulo">Por causa da direção em que a fita anda</span></label>
+              <p class="explicacao" hidden>A direção define qual dos bordos é o de saída, mas não é ela que explica o mecanismo. Inverte a fita e a gravação passa a fixar-se no outro bordo, pela mesma razão.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-3" value="d" data-certa="true"><span class="rotulo">Porque o que fixa o sinal é o campo <em>descer</em> abaixo da coercividade, e isso acontece ao afastar-se da fenda</span></label>
+              <p class="explicacao" hidden>É isso. Enquanto o campo for maior do que a coercividade, a magnetização continua a poder mudar. O último valor que o campo teve antes de ficar fraco de mais é o que fica gravado.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Uma fita de metal (Tipo IV) tem coercividade de cerca de 1100 Oe contra os cerca de 380 Oe de uma ferrosa. O que é que isso implica?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l1-4" value="a" data-certa="false"><span class="rotulo">Grava-se com menos corrente, porque é mais sensível</span></label>
+              <p class="explicacao" hidden>Troca exactamente o sentido da coercividade. Coercividade é a força de campo precisa para <em>mudar</em> a magnetização: mais alta significa mais difícil de gravar, não mais fácil.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-4" value="b" data-certa="false"><span class="rotulo">Reproduz-se com a mesma equalização de uma ferrosa</span></label>
+              <p class="explicacao" hidden>Não: as normas dão 120 µs às de Tipo I e 70 µs às de Tipo II, III e IV. É por isso que os leitores têm um comutador — e que as cassetes ganharam entalhes no invólucro para o comutar sozinhas.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-4" value="c" data-certa="true"><span class="rotulo">Precisa de mais corrente de bias — cerca de 250 % da de uma ferrosa — e em troca resiste melhor à auto-apagagem</span></label>
+              <p class="explicacao" hidden>Os dois lados do negócio. Mais difícil de magnetizar é também mais difícil de <em>des</em>magnetizar, e o que mata os agudos é precisamente a fita apagar-se a si própria.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-4" value="d" data-certa="false"><span class="rotulo">Tem menos chiado porque tem menos partículas</span></label>
+              <p class="explicacao" hidden>Tem menos chiado <em>relativo</em>, mas não por ter menos partículas — por aguentar um sinal mais forte. O ruído por área é parecido; o que muda é quanto sinal se lhe pode pôr por cima.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">O que é que o exercício E2 mostrou quando se aplica uma sinusoide de amplitude 0,5 a uma fita sem bias?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l1-5" value="a" data-certa="false"><span class="rotulo">A onda ficou com as pontas cortadas (saturação)</span></label>
+              <p class="explicacao" hidden>Saturação corta as <em>pontas</em>, e com amplitude 0,5 nem sequer se chega lá. O que foi cortado foi o <em>meio</em> — que é o problema oposto e muito mais grave.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-5" value="b" data-certa="true"><span class="rotulo">A onda perdeu a parte que atravessa o zero, e ficaram dois cocurutos separados por silêncio</span></label>
+              <p class="explicacao" hidden>A zona morta come tudo o que está entre −0,3 e +0,3, que é justamente a travessia do zero. Um sinal baixo desaparece por inteiro, e é isso que a lição 2 resolve.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-5" value="c" data-certa="false"><span class="rotulo">A onda ficou igual, só mais baixa</span></label>
+              <p class="explicacao" hidden>Se ficasse igual e mais baixa, a transferência era linear e não havia problema nenhum a resolver. A saída na tabela tem zeros no meio: não é uma versão à escala, é outra forma.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-5" value="d" data-certa="false"><span class="rotulo">A onda mudou de frequência</span></label>
+              <p class="explicacao" hidden>A frequência não muda: continua a haver uma subida e uma descida por período. O que mudou foi a <em>forma</em> — e mudar a forma sem mudar a frequência é acrescentar harmónicos, que é a definição de distorção.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que a cassete precisou de Dolby e uma fita de estúdio a 15 in/s precisou muito menos?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l1-6" value="a" data-certa="true"><span class="rotulo">Porque a cassete usa muito menos área de fita por segundo: é oito vezes mais lenta e tem pistas mais estreitas</span></label>
+              <p class="explicacao" hidden>O ruído da fita é por unidade de área. Menos área por segundo é menos sinal contra o mesmo ruído. A cassete escolheu ser pequena e lenta, e o Dolby é o preço dessa escolha.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-6" value="b" data-certa="false"><span class="rotulo">Porque a fita de cassete é de pior qualidade química</span></label>
+              <p class="explicacao" hidden>Houve cassetes com formulações excelentes, e mesmo essas precisavam de Dolby. A explicação não está no material — está na geometria.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-6" value="c" data-certa="false"><span class="rotulo">Porque as cabeças das cassetes são piores</span></label>
+              <p class="explicacao" hidden>As cabeças afetam sobretudo a resposta em frequência (pela fenda), não o piso de ruído do meio. Uma cabeça perfeita numa cassete continuava a ouvir o mesmo chiado.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l1-6" value="d" data-certa="false"><span class="rotulo">Porque o Dolby não funciona a 15 in/s</span></label>
+              <p class="explicacao" hidden>Funciona — e usou-se. O Dolby A foi feito precisamente para estúdio. A questão é que a 15 in/s a relação sinal-ruído já chegava para muitas aplicações sem ele.</p>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="feynman-1">Explica a alguém que percebe de eletrónica digital mas nada de magnetismo: porque é que uma cassete não consegue gravar bem os agudos. Chega ao fim sem usar a palavra «equalização».
+        <span class="pista">A resposta boa fala de comprimentos e de geometria, não de «qualidade». Se a tua explicação servisse igualmente bem para uma fita de estúdio, ainda não explicou nada específico da cassete.</span>
+      </label>
+      <textarea id="feynman-1" data-pergunta="Explica a alguém que percebe de eletrónica digital mas nada de magnetismo: porque é que uma cassete não consegue gravar bem os agudos. Chega ao fim sem usar a palavra «equalização»."></textarea>
+    </div>
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/cassete-dados/respostas/AAAA-MM-DD.md</code> e correr
+      <code>/corrigir cassete-dados</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>A fita guarda a <strong>direção da magnetização</strong> de domínios em partículas fixas. Nada roda.
+      O sinal fica fixado no <strong>bordo de saída</strong> da fenda, quando o campo desce abaixo da coercividade.</li>
+      <li>A transferência tem <strong>zona morta ao centro</strong> (nada abaixo da coercividade) e
+      <strong>saturação nas pontas</strong>. A zona morta é o problema maior: mata os sinais baixos por inteiro.</li>
+      <li>A cabeça de leitura <strong>diferencia</strong> (<em>V</em> = −<em>N</em> d<em>Φ</em>/d<em>t</em>):
+      +6 dB/oitava, medido. Daí a equalização ser obrigatória, e daí a fita ter de andar a velocidade constante.</li>
+      <li>Na fita, frequência é <strong>comprimento</strong>: velocidade ÷ frequência. Numa cassete, 15 kHz são
+      3,18 µm — à escala da fenda, das partículas e das imperfeições. Tudo o que é mau é pior nos agudos.</li>
+      <li>O chiado é <strong>inerente ao meio</strong> (partículas discretas ao acaso) e não se apaga com melhor
+      eletrónica. 🔴 Conclusão que a lição 4 vai usar: quem puser dados numa cassete tem de viver nas
+      <strong>frequências baixas</strong>.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Curso universitário (não é documentação)</strong> — Jay Kadis, <em>Magnetic Recording: Analog
+      Tape</em>, apontamentos do CCRMA (Center for Computer Research in Music and Acoustics) da Universidade de
+      Stanford, ©2014. <strong>Porquê:</strong> é a explicação mais completa e mais curta que encontrei do
+      mecanismo inteiro — histerese, bias, perdas de fenda, de afastamento e de espessura, auto-apagagem,
+      azimute — com as equações e sem as esconder. Daqui saem o tamanho das partículas (0,5 × 0,1 µm), a
+      afirmação de que a gravação se dá no bordo de saída, a fórmula da cabeça de leitura e a origem do ruído
+      de fundo. <strong>O que ler:</strong> «The recording process», «The playback process» e «Equalization».
+      <strong>O que saltar:</strong> a secção sobre gravadores multipista, que é sobre estúdio e não sobre isto.
+      <a href="https://ccrma.stanford.edu/~jay/subpages/Lectures/Lecture7-Magnetic_recording.pdf">ccrma.stanford.edu</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16 — descarreguei o PDF e li-o inteiro</span></li>
+
+      <li><strong>Fonte da indústria</strong> — Jay McKnight, <em>Tape Recording Equalization Fundamentals</em>,
+      Magnetic Reference Laboratory. A MRL fabrica as fitas de calibração com que os gravadores se alinham, e
+      McKnight trabalhou nas normas. É daqui que vem a citação dos 6 dB/oitava e a descrição do amplificador de
+      reprodução como integrador.
+      <a href="https://mrltapes.com/pages/equalization-fundamentals.html">mrltapes.com</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Livro</strong> — Eric D. Daniel, C. Denis Mee e Mark H. Clark (eds.), <em>Magnetic Recording:
+      The First 100 Years</em>, IEEE Press, Nova Iorque, 1999, 366 páginas, ISBN 0-7803-4709-9.
+      <strong>Porquê:</strong> é a história contada por quem fez a engenharia, e serve para perceber porque é que
+      cada compromisso foi tomado — coisa que nenhuma folha de especificações diz. <strong>O que saltar:</strong>
+      os capítulos sobre vídeo e sobre disco rígido, se só quiseres o fio da cassete.
+      <span class="verificado">🌐 Verificado a 2026-09-16 — confirmei título, editores, editora, ano, ISBN e
+      número de páginas no registo do Internet Archive e no catálogo da Penn State</span>
+      ⚠️ <strong>Não li este livro.</strong> Está aqui como percurso de leitura, não como fonte de nenhuma
+      afirmação desta lição. Nada do que está escrito acima vem dele.</li>
+
+      <li><strong>Fonte secundária</strong> — Wikipédia (inglês), <em>Magnetic storage</em>, para a linguagem
+      de domínios magnéticos e auto-desmagnetização. É enciclopédia, não é fonte primária, e ⚠️ conferi que
+      <strong>não</strong> cobre a diferenciação da cabeça de leitura — tive de ir buscar isso à MRL e a Kadis.
+      <a href="https://en.wikipedia.org/wiki/Magnetic_storage">en.wikipedia.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> · Anterior: <a href="00-som-numero-ficheiro.html">← 0 · Som, número, ficheiro</a> · Próxima: <a href="02-bias.html">2 · Bias: o truque que faz a fita funcionar →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

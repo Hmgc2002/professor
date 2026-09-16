@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A cassete como memória de computador — professor</title>
+<meta name="description" content="Como se guardam bytes numa cassete e como se voltam a tirar de lá: oito lições, do magnetismo ao descodificador que corre.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-dados/index.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    A cassete como memória
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta página</h2>
+    <ol>
+      <li><a href="#conseguir">O que vais conseguir fazer</a></li>
+      <li><a href="#nao-e">O que este curso não é</a></li>
+      <li><a href="#assumi">O que assumi</a></li>
+      <li><a href="#mapa">O mapa</a></li>
+      <li><a href="#plano">O plano no tempo</a></li>
+      <li><a href="#preparar">Preparar</a></li>
+      <li><a href="#fim">No fim do tópico</a></li>
+      <li><a href="#fases">Nota das fases</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta">8 lições</span> <span class="etiqueta">~4 semanas a 2 lições/semana</span></p>
+    <h1>A cassete como memória de computador</h1>
+    <p class="subtitulo">Como é que se põem bytes num meio analógico que não grava corrente contínua, tem
+    chiado de fundo, corta os agudos e nem sequer anda sempre à mesma velocidade — e como é que se voltam a
+    tirar de lá. No fim tens um programa que lê uma fita de ZX Spectrum e devolve os bytes certos.</p>
+
+    <h2 id="conseguir">O que vais conseguir fazer no fim</h2>
+    <p>Tudo o que se segue é verificável — ou consegues, ou não consegues:</p>
+    <ul>
+      <li><strong>Escrever um descodificador</strong> que lê um <code>.wav</code> de uma fita de ZX Spectrum e
+      produz um <code>.tap</code> com os bytes <strong>idênticos</strong> ao original, conferidos byte a byte.</li>
+      <li><strong>Medir</strong> onde esse descodificador parte — taxa de amostragem, ruído, largura de banda,
+      variação de velocidade — em vez de o dizer por palpite.</li>
+      <li><strong>Explicar porquê</strong>, sem consultar: porque é que a fita precisa de um tom inaudível de
+      100 kHz para gravar seja o que for; porque é que a cabeça de leitura dá mais tensão nos agudos; porque é
+      que nenhum esquema óbvio de gravar bits funciona; porque é que o tom-piloto existe.</li>
+      <li><strong>Descrever de memória</strong> o formato do Spectrum — os cinco tempos em T-states, a estrutura
+      do bloco, a paridade — e <strong>construir à mão</strong> um <code>.tap</code> válido.</li>
+      <li><strong>Justificar com uma conta</strong> porque é que nenhuma estrutura de dados indexada é possível
+      numa cassete — e porque é que «é lento» não é a resposta certa.</li>
+    </ul>
+
+    <h2 id="nao-e">O que este curso não é</h2>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="A fronteira do curso, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Não é</th><th>Onde isso vive</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Um curso sobre música em cassete</strong> — como escolher fita, como digitalizar a
+          tua coleção, como restaurar gravações</td>
+            <td>Não existe aqui. A fidelidade sonora só aparece quando explica uma decisão do formato de dados</td></tr>
+          <tr><td><strong>Uma história da Philips e da cassete</strong></td>
+            <td>Só a lição 7, e só na parte que explica porque é que o formato venceu e morreu</td></tr>
+          <tr><td><strong>Um curso de processamento de sinal</strong> — transformadas, filtros FIR, desenho de
+          filtros</td>
+            <td>Usam-se três filtros de um polo e explica-se cada um. Nada mais, e é de propósito</td></tr>
+          <tr><td><strong>Deteção e correção de erros</strong> — CRC, Hamming, Reed-Solomon</td>
+            <td>O formato do Spectrum tem só um XOR de paridade, que <em>deteta e não corrige</em>. A fronteira
+            está declarada na lição 5. Daria um tópico próprio</td></tr>
+          <tr><td><strong>Estruturas de dados e índices</strong></td>
+            <td><a href="../indices-btree-sql/index.html">Índices B-tree em SQL</a>, neste repositório. A lição 7
+            declara a fronteira: esse curso trata de estruturas que pressupõem acesso aleatório barato; este
+            trata do meio onde o acesso aleatório <strong>não existe</strong></td></tr>
+          <tr><td><strong>Outros formatos de fita</strong> — C64, Amstrad, TZX, turbo loaders</td>
+            <td>O Kansas City é ensinado <em>por contraste</em> na lição 4, com código. Os outros ficam de fora,
+            mas o mecanismo que aprendes ataca-os todos</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="assumi">O que assumi</h2>
+    <p>Cada pressuposto do <a href="https://github.com/Hmgc2002/professor/blob/main/topicos/cassete-dados/DIAGNOSTICO.md">diagnóstico</a>, com o que muda
+    se estiver errado. Um pressuposto sem consequência declarada é decoração.</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Pressupostos, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Assumi</th><th>Porquê</th><th>Se estiver errado</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Zero em magnetismo, sinal e DSP</strong></td>
+            <td>Respondeste «não» a todas as cinco perguntas do diagnóstico</td>
+            <td>Se afinal já sabes isto, as lições 1 a 3 são revisão e podes lê-las em diagonal — mas faz na
+            mesma os exercícios com código, que é onde estão as medições</td></tr>
+          <tr><td><strong>Python 3 lido e escrito</strong>, terminal, ficheiros binários, deslocamentos de bits e XOR</td>
+            <td>Perfil declarado: programador full-stack</td>
+            <td>O curso mantém-se: o algoritmo está sempre em prosa antes de estar em código. Só as soluções
+            mudavam de linguagem</td></tr>
+          <tr><td><strong>Não tens leitor de cassetes nem cassetes</strong></td>
+            <td>Disseste que nunca lhes mexeste</td>
+            <td>Nada muda — o áudio é <strong>gerado pelo curso</strong> a partir de um <code>.tap</code>,
+            de propósito para não depender de hardware. Com hardware ganhavas um exercício final a sério</td></tr>
+          <tr><td><strong>Só biblioteca padrão</strong>, sem <code>pip install</code></td>
+            <td>Um exercício que precisa de instalar coisas é um exercício que se adia</td>
+            <td>Nada. Com NumPy o código ficava mais curto e menos legível</td></tr>
+          <tr><td><strong>Windows</strong> como máquina principal</td>
+            <td>O repositório está em <code>C:\Users\…</code></td>
+            <td>Pouco: o código é portável. A lição 6 traz a armadilha da codificação <code>cp1252</code> da
+            consola, que foi apanhada a correr</td></tr>
+          <tr><td><strong>Queres saber porquê</strong>, não só fazer funcionar</td>
+            <td>É o que este repositório assume de todos os tópicos</td>
+            <td>Se só quisesses o descodificador, as lições 1 a 3 seriam um apêndice em vez do núcleo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="mapa">O mapa</h2>
+    <figure>
+      <svg viewBox="0 0 520 430" role="img" aria-labelledby="t-mapa d-mapa">
+        <title id="t-mapa">Ordem das oito lições e o que cada uma dá à seguinte</title>
+        <desc id="d-mapa">Oito caixas em coluna, ligadas por setas de cima para baixo. As cinco primeiras — som
+        e ficheiro, magnetismo, bias, limites da fita, e de bits a som — formam o núcleo. As três últimas — o
+        formato do ZX Spectrum, o descodificador, e porque falhava e morreu — formam a extensão. Há duas setas
+        laterais: da lição 0 para a lição 6, porque é lá que a leitura do ficheiro é usada; e da lição 3 para a
+        lição 6, porque é a medição da lição 3 que decide o desenho do descodificador.</desc>
+        <rect class="svg-realce" x="70" y="6"   width="250" height="34" rx="5"/>
+        <rect class="svg-realce" x="70" y="56"  width="250" height="34" rx="5"/>
+        <rect class="svg-realce" x="70" y="106" width="250" height="34" rx="5"/>
+        <rect class="svg-realce" x="70" y="156" width="250" height="34" rx="5"/>
+        <rect class="svg-realce" x="70" y="206" width="250" height="34" rx="5"/>
+        <rect class="svg-caixa"  x="70" y="266" width="250" height="34" rx="5"/>
+        <rect class="svg-caixa"  x="70" y="316" width="250" height="34" rx="5"/>
+        <rect class="svg-caixa"  x="70" y="366" width="250" height="34" rx="5"/>
+        <text class="svg-texto" x="82" y="28">0 · som, número, ficheiro</text>
+        <text class="svg-texto" x="82" y="78">1 · como o som fica preso na fita</text>
+        <text class="svg-texto" x="82" y="128">2 · bias</text>
+        <text class="svg-texto" x="82" y="178">3 · ruído, agudos, velocidade</text>
+        <text class="svg-texto" x="82" y="228">4 · de bits a som</text>
+        <text class="svg-texto" x="82" y="288">5 · o formato do ZX Spectrum</text>
+        <text class="svg-texto" x="82" y="338">6 · o descodificador</text>
+        <text class="svg-texto" x="82" y="388">7 · porque falhava e morreu</text>
+        <text class="svg-texto" x="4" y="28">núcleo</text>
+        <text class="svg-texto" x="4" y="288">extensão</text>
+        <path class="svg-traco" d="M195 40 V52" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M195 90 V102" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M195 140 V152" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M195 190 V202" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M195 240 V262" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M195 300 V312" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M195 350 V362" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M330 23 H400 V333 H330" marker-end="url(#seta-m)" opacity="0.55"/>
+        <path class="svg-traco" d="M330 173 H370 V340 H330" marker-end="url(#seta-m)" opacity="0.55"/>
+        <text class="svg-texto" x="406" y="180">ler o .wav</text>
+        <text class="svg-texto" x="406" y="200">e a medição</text>
+        <text class="svg-texto" x="406" y="220">da velocidade</text>
+        <defs>
+          <marker id="seta-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" class="svg-fundo" style="fill: currentColor"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>🔴 A <strong>lição 0 não é opcional</strong>, e a <strong>lição 1 também não</strong>: o
+      diagnóstico disse zero em amostragem e zero em magnetismo, e ambas são pré-requisito de tudo o que vem
+      depois. Não são notas de rodapé — são lições.</figcaption>
+    </figure>
+
+    <h2 id="plano">O plano no tempo</h2>
+    <p>Disseste «o que for necessário, não excedendo 1h por dia». O plano é de <strong>duas lições por
+    semana</strong>, com folga para o projeto:</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Plano semanal, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Semana</th><th>Lições</th><th>No fim da semana já consegues</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><a href="00-som-numero-ficheiro.html">0</a> · <a href="01-fita-magnetismo.html">1</a></td>
+            <td>Abrir um <code>.wav</code> e calcular o que lá cabe; explicar porque é que a cassete não dá agudos</td></tr>
+          <tr><td>2</td><td><a href="02-bias.html">2</a> · <a href="03-limites.html">3</a></td>
+            <td>Explicar o bias e medir a sua curva; dizer qual dos defeitos da fita é fatal para dados</td></tr>
+          <tr><td>3</td><td><a href="04-bits-em-som.html">4</a> · <a href="05-formato-zx.html">5</a></td>
+            <td><strong>Fim do núcleo.</strong> Atacar qualquer formato de fita sozinho; construir um <code>.tap</code> à mão</td></tr>
+          <tr><td>4</td><td><a href="06-descodificador.html">6</a> · <a href="07-porque-morreu.html">7</a></td>
+            <td><strong>O projeto.</strong> O descodificador a funcionar, com os limites medidos</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Sem prazo, o que decide se aprendes é a revisão</span>
+      <p>Disseste que não há prazo. Num ritmo sem data, nada obriga a voltar — e o que não se revê perde-se.
+      <strong>Importa o <a href="revisao.ics">revisao.ics</a> antes da primeira sessão</strong>, não depois. É a
+      peça deste curso que menos parece importar e mais importa.</p>
+    </div>
+
+    <h2 id="preparar">Preparar</h2>
+    <p>Só precisas de Python 3. Nada para instalar.</p>
+<pre><code>python --version        # ou py --version, no Windows
+mkdir cassete &amp;&amp; cd cassete</code></pre>
+    <p>Os dois ficheiros que vais construir ao longo do curso são <code>fita.py</code> (o gerador, lição 5) e
+    <code>ler_fita.py</code> (o descodificador, lição 6). O resto são exercícios soltos.</p>
+
+    <h2 id="fim">No fim do tópico</h2>
+    <ul>
+      <li><a href="bibliografia.html">Bibliografia</a> — por onde começar a ler, e o que saltar.</li>
+      <li><a href="folha.html">Folha de consulta</a> — imprimível, só o que se consulta.</li>
+      <li><a href="teste.html">Teste de domínio</a> — intercalado, sem soluções à vista.</li>
+      <li><a href="flashcards.csv">Flashcards</a> — <code>frente;verso;etiqueta</code>, para o Anki.</li>
+      <li><a href="revisao.ics">Calendário de revisão</a> — +1, +3, +7, +21 e +60 dias.</li>
+    </ul>
+
+    <h2 id="fases">Nota das fases</h2>
+    <p>O que cada fase do processo encontrou. É isto que prova que o processo correu — e o que não correu bem
+    fica escrito, não apagado.</p>
+
+    <h3>Fase 0 — Verificar</h3>
+    <p><strong>O que procurei</strong> em <code>docs/</code>, <code>topicos/</code>, <code>INDICE.md</code> e no
+    histórico do Git: <em>cassete · cassette · fita · magnét · magnetic · áudio · audio · analóg · sinal · ruído ·
+    frequência · modula · amostrag · Nyquist · quantiz · filtro · Fourier · onda · espectro · Dolby · Shannon ·
+    codific · descodific · bit · hertz · Hz · decibel · dB</em>; e, por sintoma e por verbo: <em>gravar ·
+    reproduz · digitaliz · preserva · degrada · obsolet · hardware · física · eletr · corrente · voltagem ·
+    circuito · standard · norma · compress · perda · arquiv · restaur · vinil · disco · música</em>.</p>
+    <p><strong>O que encontrei:</strong> nada. Os termos que deram resultados eram falsos positivos de outros
+    domínios — 25 ficheiros com «ruído» eram «const<strong>ruído</strong>», 18 com «dB» eram <code>innodb</code>
+    e <code>createdb</code>, os de «filtro» eram filtros de SQL. Zero para <em>cassete</em>, <em>magnét</em>,
+    <em>áudio</em>, <em>Nyquist</em>, <em>modula</em>, <em>amostrag</em>, <em>Fourier</em>, <em>Dolby</em>,
+    <em>hardware</em>, <em>circuito</em>, <em>digitaliz</em>.</p>
+    <p><strong>Vizinhos:</strong> <a href="../indices-btree-sql/index.html">índices B-tree</a>, e por
+    <em>contraste</em>, não por sobreposição — a fronteira está declarada na lição 7 e verificada com
+    <code>grep</code>. <a href="../abstracts-e-resumos/index.html">Abstracts e resumos</a> não toca nisto.</p>
+    <p><strong>Pré-requisitos em falta:</strong> dois, e ambos viraram lição — a 0 (amostragem) e a 1
+    (magnetismo).</p>
+
+    <h3>Fase 1 — Criar</h3>
+    <p>Oito lições, o gerador, o descodificador, e as medições. Todo o código corre só com a biblioteca padrão.</p>
+
+    <h3>Fase 2 — Aprofundar: o que a Fase 1 errou</h3>
+    <ol>
+      <li>🔴 <strong>Lição 2, a pior.</strong> Escrevi que «o ótimo do volume e o ótimo da distorção estão em
+      sítios diferentes» com dois números tirados de uma tabela grossa. Ao varrer o bias com passo fino, a
+      coluna do THD não era uma curva — saltava de 44 % para 0,93 % e de volta para 3,73 %. Investiguei se era
+      erro de medição (fuga espectral por correr sobre 19,99 períodos), corrigi, <strong>não mudou nada</strong>;
+      experimentei uma curva de transferência lisa, continuou irregular. Conclusão: a forma da distorção em
+      função do bias é um <strong>artefacto do meu modelo sem memória</strong>. Reescrevi a lição para afirmar
+      só o que se manteve nos dois modelos, e pus a investigação à vista.</li>
+      <li>🔴 <strong>Lição 2, o exercício E3 não sobreviveu.</strong> Prometia reconstruir a regra dos 150 % e
+      250 % de bias otimizando a distorção — que se mostrou impossível — e depois maximizando o sinal, que dá
+      0,60 / 0,85 / 0,90 / 0,90 / 1,50: não é proporcional a nada. Substituí pelo <strong>bias mínimo</strong>,
+      que é proporcional à zona morta com erro de poucos por cento, e escrevi na solução as duas definições que
+      falharam.</li>
+      <li><strong>Lição 3.</strong> A minha primeira simulação de companding usava um ganho variável do tipo
+      «se estiver baixo, multiplica por 8». Não é invertível: o expansor media o sinal já amplificado e não
+      desfazia nada. Resultado medido: <strong>−16,8 dB</strong>, pior do que não fazer nada. O erro entrou na
+      lição, como mecanismo.</li>
+      <li><strong>Lição 4, um erro grave de quiz.</strong> Na pergunta sobre auto-sincronização marquei a opção
+      <em>errada</em> como correta. Corrigido.</li>
+      <li><strong>Lição 6.</strong> Afirmei que o <code>minimo_piloto</code> «é o que separa sinal de silêncio».
+      Medi: baixá-lo de 256 para 4 <strong>não muda nada</strong>, nem com ruído quatro vezes maior. Quem rejeita
+      o ruído é a <em>janela de comprimento</em>. E o varrimento revelou algo que eu não tinha previsto: com
+      4096 o bloco de dados <strong>desaparece em silêncio</strong>, porque o seu piloto tem só 3223 meias ondas.
+      O exercício foi reescrito à volta desta descoberta.</li>
+      <li><strong>Lição 7.</strong> O exemplo trabalhado foi escrito a contar mostrar que a pesquisa binária
+      perde numa cassete. A conta diz o contrário — ganha até N ≈ 1 milhão. Mas uma cassete leva 300 KiB, logo
+      um milhão de registos daria 0,3 bytes cada: o ponto de viragem está fora do universo físico da cassete.
+      Deixei a conta errada à vista com a correção por baixo, porque o erro (comparar duas tecnologias no eixo
+      em que ambas têm números) é instrutivo.</li>
+      <li><strong>Fontes.</strong> A lista original tinha documentação a mais e livros a menos — a falha que
+      está no registo do <code>PROCESSO.md</code>. Percorri a lista de verificação e acrescentei, por lição,
+      pelo menos uma fonte que não é documentação: os apontamentos de Kadis (Stanford), a MRL de McKnight, a
+      acta do simpósio da <em>BYTE</em> de 1976, a desmontagem da ROM, o livro de Smith e o de Daniel/Mee/Clark.
+      <strong>Os livros que não li estão marcados como não lidos</strong>, com a indicação de que nenhuma
+      afirmação do curso vem deles.</li>
+    </ol>
+
+    <h3>Fase 3 — Validar: o que só apareceu a correr</h3>
+    <ol>
+      <li>🔴 <strong>O descodificador perdia o último byte de cada bloco</strong> — que é o da paridade. Em vez
+      de adivinhar, instrumentei: 303 meias ondas onde havia 304. A última não tem aresta de fecho porque a
+      seguir a ela vem silêncio. Um descodificador que exija duas arestas por bit perde <em>sempre</em> o
+      último byte.</li>
+      <li><strong>Todas as saídas de código que eu tinha escrito de cabeça estavam erradas.</strong> Sem
+      exceção. A da lição 0 dava 2209 amostras e não 2205, e 2046,708 Hz e não 2047,000. A da lição 1 dava
+      +17,95 e +23,61 dB e não +18,02 e +24,01. A da perda de fenda tinha zeros em 4009 <em>e</em> 8018 Hz, com
+      lóbulos pelo meio — estrutura que eu não tinha previsto. A da lição 3 tinha um ótimo em R = 0,3 onde eu
+      tinha escrito uma subida monótona. A da lição 5 dava 5,081 s e não 4,996 (eu tinha posto o tempo só do
+      piloto). Todas foram substituídas pela saída real.</li>
+      <li><strong>Codificação da consola.</strong> O descodificador rebentava com
+      <code>UnicodeEncodeError</code> numa consola de Windows em <code>cp1252</code> — depois de ter feito o
+      trabalho todo. Passou a imprimir só ASCII, e a armadilha ficou na lição 6.</li>
+      <li><strong>Uma discrepância entre fontes, registada em vez de resolvida em silêncio.</strong> A ROM usa
+      os contadores <code>$1F80</code> (8064) e <code>$0C98</code> (3224); a wiki diz 8063 e 3223 pulsos. Adotei
+      os números que descrevem o <em>sinal</em>, e a diferença está escrita na lição 5.</li>
+      <li><strong>Limites medidos, não estimados</strong> (lição 6, com sementes fixas e 8 repetições no
+      ruído): parte a <strong>1,5 amostras por meia onda</strong>, a <strong>SNR ≈ 16 dB</strong>, a um corte a
+      <strong>700 Hz</strong> e a <strong>±25 %</strong> de velocidade. O do corte é o mais surpreendente: o
+      sinal vai até 2047 Hz e o descodificador funciona com um passa-baixo a 800 Hz.</li>
+      <li><strong>Todas as contas à mão foram conferidas em código</strong>: os comprimentos de onda na fita, os
+      débitos dos dois formatos, as constantes de equalização, as paridades XOR dos exercícios, os tempos de
+      acesso, e o débito dos turbo loaders.</li>
+      <li><strong>O teste de domínio foi resolvido do zero</strong>, com as contas conferidas em código. Apanhou
+      uma coisa: a pergunta 2.2 usava bytes cuja paridade coincidia com a bandeira — a mesma coincidência do
+      exercício de lacunas da lição 5, o que deixava responder por memória do padrão. Os bytes foram trocados.
+      A chave de correção <strong>não</strong> está publicada: o repositório é público e ela ficaria ao lado do
+      teste.</li>
+      <li><strong>As figuras foram vistas a 400 px nos dois temas</strong> (capturas com o puppeteer do
+      repositório). Cinco de nove estavam mal, e nenhuma o axe teria apanhado: na lição 0 os valores não
+      estavam por baixo dos pontos; na lição 1 a cabeça não tinha fenda visível e — o erro de fundo — a curva
+      punha a «zona morta» onde a curva era <em>mais inclinada</em>, o contrário do texto, e chamava histerese a
+      uma coisa que é a curva de transferência; na lição 2 o sinal+bias acabava a meio da largura; na lição 4 o
+      enviado e o devolvido estavam misturados; na lição 5 a legenda do XOR saía cortada. Todas foram
+      redesenhadas com os traçados <strong>calculados</strong> em vez de escritos à mão.</li>
+      <li><strong>O validador tinha dois defeitos no Windows</strong>, que corrigi antes de confiar nele:
+      <code>str(Path)</code> dá barras invertidas, o que fazia (1) oito erros falsos em <code>modelo/</code> e
+      (2) — pior — regenerar o <code>INDICE.md</code> <strong>vazio</strong>, apagando 295 linhas sem aviso. E o
+      passo do tidy só procurava o Homebrew; ganhou <code>TIDY_PARA_VALIDAR</code>. Com os três corrigidos, o
+      <code>validar.sh</code> correu os cinco passos, sem nenhum por validar: HTML bem formado (tidy 5.8.0) e
+      zero violações WCAG A/AA nos dois temas, a 400 e 1280 px.</li>
+      <li>⚠️ <strong>O que fica por validar.</strong> Não tenho cassete nem leitor: <strong>todo o áudio deste
+      curso é sintético</strong>. Os limites medidos são do simulador e do descodificador, não da cassete —
+      está dito em cada sítio onde aparecem. E a explicação do circuito de entrada do Spectrum (lição 7) é uma
+      reconstrução minha, marcada como tal.</li>
+    </ol>
+
+    <footer class="rodape">
+      <p><a href="../index.html">↑ Todos os tópicos</a> ·
+      <a href="../metodo.html">Porque é que a lição tem esta forma</a> ·
+      <a href="00-som-numero-ficheiro.html">Começar pela lição 0 →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

@@ -151,7 +151,7 @@ def ver_ligacoes(rel, rp, raiz, ids_por_pagina, caminho):
             rel.erro(rp, no.linha, f"ligação quebrada «{href}» — {destino.relative_to(RAIZ) if RAIZ in destino.parents else destino} não existe")
             continue
         if frag and destino.suffix == ".html":
-            drp = str(destino.relative_to(RAIZ))
+            drp = destino.relative_to(RAIZ).as_posix()
             if drp not in ids_por_pagina:
                 ids_por_pagina[drp] = {n.attrs["id"] for n in analisar(destino).descendentes() if n.attrs.get("id")}
             if frag not in ids_por_pagina[drp]:
@@ -219,6 +219,37 @@ def ver_quiz(rel, rp, raiz):
                 rel.erro(rp, p.linha, f"opções da mesma pergunta com names diferentes {sorted(nomes)} — dá para escolher várias")
         if not any("data-verificar" in n.attrs for n in quiz.descendentes()):
             rel.erro(rp, quiz.linha, "quiz sem botão [data-verificar] — não há correção imediata")
+
+
+def ver_posicoes_certas(rel, paginas):
+    """Por tópico: em que posição está a opção certa de cada pergunta de quiz.
+
+    Porque existe: aconteceu duas vezes (abstracts-e-resumos, 31 em 54 na b;
+    cassete-dados, 42 em 48 na b). Quem escreve quizzes à mão põe a certa em
+    segundo lugar sem dar por isso, e depois acerta-se por posição sem saber a
+    matéria. É aviso e não erro porque um tópico pequeno pode concentrar por
+    acaso; o limiar (metade das perguntas numa só posição, com 10 ou mais) é
+    convenção, não evidência."""
+    por_topico = {}
+    for rp, raiz in paginas:
+        partes = rp.split("/")
+        if len(partes) != 3 or partes[0] != "docs":
+            continue
+        for p in raiz.descendentes():
+            if p.tag != "li" or "pergunta" not in p.classes():
+                continue
+            opcoes = [n for n in p.descendentes() if n.tag == "li" and "opcao" in n.classes()]
+            for i, o in enumerate(opcoes):
+                if any(n.tag == "input" and n.attrs.get("data-certa") == "true" for n in o.descendentes()):
+                    por_topico.setdefault(partes[1], []).append(i)
+    for topico, posicoes in sorted(por_topico.items()):
+        if len(posicoes) < 10:
+            continue
+        mais = max(set(posicoes), key=posicoes.count)
+        if posicoes.count(mais) * 2 > len(posicoes):
+            rel.aviso(f"docs/{topico}/", 0,
+                      f"{posicoes.count(mais)} de {len(posicoes)} respostas certas na opção "
+                      f"{'abcdefgh'[mais]} — acerta-se por posição sem saber a matéria")
 
 
 def ver_basico(rel, rp, raiz, texto):
@@ -327,7 +358,7 @@ def main():
     ids_por_pagina, paginas = {}, []
 
     for caminho in alvos:
-        rp = str(caminho.relative_to(RAIZ))
+        rp = caminho.relative_to(RAIZ).as_posix()
         texto = caminho.read_text(encoding="utf-8")
         raiz = analisar(caminho)
         paginas.append((rp, raiz))
@@ -339,8 +370,10 @@ def main():
         ver_amostras(rel, rp, raiz)
 
     for caminho in alvos:
-        rp = str(caminho.relative_to(RAIZ))
+        rp = caminho.relative_to(RAIZ).as_posix()
         ver_ligacoes(rel, rp, dict(paginas)[rp], ids_por_pagina, caminho)
+
+    ver_posicoes_certas(rel, paginas)
 
     indice_novo = gerar_indice([(rp, r) for rp, r in paginas if rp.startswith("docs/")])
     fich_indice = RAIZ / "INDICE.md"

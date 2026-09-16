@@ -3,6 +3,33 @@
 O formato é uma entrada por sessão de trabalho, com data. O que muda o que eu
 consigo aprender fica no topo da entrada; o que muda só a mecânica fica no fim.
 
+## 2026-09-16 — A cassete como memória de computador: um curso que acaba num descodificador que corre
+
+**Novo**
+
+- Tópico **A cassete como memória de computador** (`docs/cassete-dados/`), a partir do pedido com a página da Wikipédia
+  «Cassette tape». O diagnóstico escolheu a porta «armazenamento de dados», com partida em zero em magnetismo e em sinal,
+  e critério de sucesso «código que corre» (`topicos/cassete-dados/DIAGNOSTICO.md`).
+- Oito lições, duas delas lição 0 de facto (amostragem e magnetismo): bias, os limites da fita, porque é que só o tempo
+  sobrevive a uma fita, o formato do ZX Spectrum, o descodificador, e porque é que a cassete falhava e morreu — com a
+  fronteira declarada contra o curso de índices B-tree (numa fita o acesso aleatório não é lento: não existe).
+- Um gerador de fita e um descodificador em Python só com biblioteca padrão, com os limites medidos (taxa, ruído,
+  corte de agudos, velocidade). Kansas City implementado de ponta a ponta, por contraste.
+- Bibliografia, folha, teste intercalado, 53 flashcards, calendário de revisão.
+
+**O que as fases apanharam** — está por extenso na nota das fases do tópico. O essencial: **todas** as saídas de código
+que eu tinha escrito de cabeça estavam erradas; a lição do bias afirmava uma curva de distorção que era artefacto do
+modelo; o descodificador perdia sempre o byte de paridade; cinco de nove figuras estavam mal a 400 px, uma delas a
+contradizer o texto; e 42 de 48 respostas certas estavam na opção b.
+
+**Mecânica**
+
+- `validar.py`: caminhos com `as_posix()`. No Windows, `str(Path)` dava barras invertidas — oito erros falsos em
+  `modelo/` e, pior, o `INDICE.md` regenerado **vazio** sem aviso.
+- `validar.py`: novo `ver_posicoes_certas`, aviso quando mais de metade das respostas certas de um tópico está na mesma
+  posição. Dispara hoje em `indices-btree-sql` (34 de 37 na b) — por corrigir, fora do âmbito desta sessão.
+- `validar.sh`: `TIDY_PARA_VALIDAR` para apontar para um tidy-html5 5.x fora do Homebrew.
+
 ## 2026-09-15 — Abstracts e resumos técnicos: um curso sobre resumir para quem decide
 
 **Novo**

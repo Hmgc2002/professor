@@ -1,0 +1,125 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//professor//cassete-dados//PT
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Revisão — A cassete como memória
+BEGIN:VEVENT
+UID:fee7a3b48986d255@professor.local
+DTSTAMP:20260916T120000Z
+DTSTART;VALUE=DATE:20261008
+DTEND;VALUE=DATE:20261009
+SUMMARY:Revisão +1 — a mais importante de todas
+DESCRIPTION:Revisão espaçada\, +1 dias após o fim do núcleo.\n\n1. Se
+ m abrir as lições: explica em voz alta porque é que a fita precisa de
+  um tom de 100 kHz para gravar seja o que for.\n2. Flashcards cassete::l
+ 0 e cassete::l1 (~12 cartões).\n3. Corre o exemplo trabalhado da liçã
+ o 1 e confirma os +6\,02 dB por oitava.\n\nPágina: docs/cassete-dados/i
+ ndex.html\nFlashcards: docs/cassete-dados/flashcards.csv\nFolha: docs/ca
+ ssete-dados/folha.html\n\nDepois: regista uma linha em topicos/cassete-d
+ ados/PROGRESSO.md.\nSe falhares em algo já dado como sabido\, o interva
+ lo é curto demais - encurta-o.
+CATEGORIES:professor,revisão,cassete-dados
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +1 — a mais importante de todas - 30 a 40 minutos\
+ , sem consultar primeiro.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:c7d1ffa63add0b24@professor.local
+DTSTAMP:20260916T120000Z
+DTSTART;VALUE=DATE:20261010
+DTEND;VALUE=DATE:20261011
+SUMMARY:Revisão +3 — bias e os limites da fita
+DESCRIPTION:Revisão espaçada\, +3 dias após o fim do núcleo.\n\n1. De
+  memória: o que acontece com bias a menos e com bias a mais. Os dois la
+ dos.\n2. Flashcards cassete::l2 e cassete::l3.\n3. Sem consultar: quais 
+ são os três defeitos da fita e qual é fatal para dados?\n\nPágina: d
+ ocs/cassete-dados/index.html\nFlashcards: docs/cassete-dados/flashcards.
+ csv\nFolha: docs/cassete-dados/folha.html\n\nDepois: regista uma linha e
+ m topicos/cassete-dados/PROGRESSO.md.\nSe falhares em algo já dado como
+  sabido\, o intervalo é curto demais - encurta-o.
+CATEGORIES:professor,revisão,cassete-dados
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +3 — bias e os limites da fita - 25 minutos. A per
+ gunta do bias a mais é a que costuma falhar.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:df805922cd1d4185@professor.local
+DTSTAMP:20260916T120000Z
+DTSTART;VALUE=DATE:20261014
+DTEND;VALUE=DATE:20261015
+SUMMARY:Revisão +7 — os formatos
+DESCRIPTION:Revisão espaçada\, +7 dias após o fim do núcleo.\n\n1. De
+  memória: os cinco tempos do Spectrum em T-states\, e quais são meias 
+ ondas.\n2. Flashcards cassete::l4 e cassete::l5.\n3. Constrói um .tap 
+ à mão para os bytes 0x01 0x02 0x03 e confere a paridade em código.\n\
+ nPágina: docs/cassete-dados/index.html\nFlashcards: docs/cassete-dados/
+ flashcards.csv\nFolha: docs/cassete-dados/folha.html\n\nDepois: regista 
+ uma linha em topicos/cassete-dados/PROGRESSO.md.\nSe falhares em algo j
+ á dado como sabido\, o intervalo é curto demais - encurta-o.
+CATEGORIES:professor,revisão,cassete-dados
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +7 — os formatos - 30 minutos. Se os T-states não
+  vierem de memória\, o intervalo é curto demais.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:4fe1983845b3d384@professor.local
+DTSTAMP:20260916T120000Z
+DTSTART;VALUE=DATE:20261028
+DTEND;VALUE=DATE:20261029
+SUMMARY:Revisão +21 — o descodificador
+DESCRIPTION:Revisão espaçada\, +21 dias após o fim do núcleo.\n\n1. S
+ em olhar para o código: descreve os cinco passos e diz o que cada um pr
+ oduz.\n2. Flashcards cassete::l6.\n3. Corre o descodificador sobre uma f
+ ita nova que geres com defeitos diferentes dos do curso.\n4. Se algum pa
+ sso não vier de memória\, relê só esse e volta a tentar amanhã.\n\n
+ Página: docs/cassete-dados/index.html\nFlashcards: docs/cassete-dados/f
+ lashcards.csv\nFolha: docs/cassete-dados/folha.html\n\nDepois: regista u
+ ma linha em topicos/cassete-dados/PROGRESSO.md.\nSe falhares em algo já
+  dado como sabido\, o intervalo é curto demais - encurta-o.
+CATEGORIES:professor,revisão,cassete-dados
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +21 — o descodificador - 40 minutos. Descrever ant
+ es de olhar é o ponto todo.
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:7c320ab41f4f385c@professor.local
+DTSTAMP:20260916T120000Z
+DTSTART;VALUE=DATE:20261206
+DTEND;VALUE=DATE:20261207
+SUMMARY:Revisão +60 — tudo\, e o teste
+DESCRIPTION:Revisão espaçada\, +60 dias após o fim do núcleo.\n\n1. F
+ az o teste de domínio inteiro\, sem consultar: docs/cassete-dados/teste
+ .html\n2. Flashcards todos (cassete::*).\n3. Entrega em topicos/cassete-
+ dados/respostas/ e corre /corrigir cassete-dados.\n4. Se passares isto s
+ em hesitar\, o tópico está sabido. Se não\, o que falhar diz onde vol
+ tar.\n\nPágina: docs/cassete-dados/index.html\nFlashcards: docs/cassete
+ -dados/flashcards.csv\nFolha: docs/cassete-dados/folha.html\n\nDepois: r
+ egista uma linha em topicos/cassete-dados/PROGRESSO.md.\nSe falhares em 
+ algo já dado como sabido\, o intervalo é curto demais - encurta-o.
+CATEGORIES:professor,revisão,cassete-dados
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +60 — tudo\, e o teste - 60 minutos. É o teste a 
+ sério - marca-o como tal.
+END:VALARM
+END:VEVENT
+END:VCALENDAR

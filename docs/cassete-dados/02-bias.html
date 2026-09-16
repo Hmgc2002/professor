@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 · Bias: o tom inaudível sem o qual não há gravação nenhuma — A cassete como memória</title>
+<meta name="description" content="Porque é que se soma um tom de 100 kHz ao sinal antes de o gravar numa fita, com a distorção medida em código para cada nível de bias.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-dados/02-bias.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">A cassete como memória</a> <span aria-hidden="true">›</span> Lição 2
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta núcleo">Lição 2 · núcleo</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>Bias: o tom inaudível sem o qual não há gravação nenhuma</h1>
+    <p class="subtitulo">A fita não grava sinais fracos. Não os grava mal — não os grava. Esta lição é sobre o truque de 1921 que resolve isso, e sobre a razão de não haver um valor certo para ele.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim consegues explicar porque é que uma fita só funciona se lhe misturarmos um tom
+    <strong>inaudível de 100 kHz</strong> que não tem nada a ver com o que queremos gravar — e consegues
+    prever, sem consultar, o que acontece à distorção e ao volume quando há bias <em>a menos</em> e bias
+    <em>a mais</em>. Vais ter medido as duas coisas em código.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <ol>
+      <li>Da lição 1: o que é a «zona morta» da curva de histerese, e a que parte de uma onda sonora corresponde?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>É a região em que o campo aplicado é mais fraco do que a coercividade e portanto <strong>nada</strong>
+          é magnetizado. Corresponde à <strong>travessia do zero</strong> — e, num sinal baixo, à onda toda.</p>
+        </details>
+      </li>
+      <li>No exercício E2 da lição 1, uma sinusoide de amplitude 0,5 saiu com que forma?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Dois cocurutos separados por patamares de zero. A parte que atravessa o zero desapareceu.</p>
+        </details>
+      </li>
+      <li>Da lição 0: se misturares um sinal de 1 kHz com outro de 100 kHz e depois quiseres ficar só com o
+      de 1 kHz, que género de operação precisas?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Um filtro que deixe passar o baixo e corte o alto — um passa-baixo. A média móvel que usaste na
+          lição 1 para simular a fenda da cabeça é uma forma tosca (e eficaz) de passa-baixo.</p>
+        </details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p>A lição 1 deixou um problema por resolver, e é um problema fatal: <strong>a fita não grava sinais
+    baixos</strong>. Não grava-os mal — não os grava de todo. Abaixo da coercividade não acontece nada, e
+    «nada» é mesmo nada.</p>
+
+    <p>A solução tem quase cem anos e continua a ser a mais estranha da engenharia de áudio:
+    <strong>somar ao sinal um tom de alta frequência, com amplitude grande, que não se quer gravar</strong>.
+    Chama-se <em>bias</em> de corrente alternada, e nas cassetes anda entre os 40 e os 150 kHz — muito acima
+    de qualquer coisa que se ouça, e muito acima do que a fita consegue reproduzir.</p>
+
+    <h3>Porque é que funciona</h3>
+
+    <p>O raciocínio tem três passos e o segundo é onde quase toda a gente escorrega.</p>
+
+    <ol>
+      <li><strong>Sem bias.</strong> Um sinal pequeno oscila dentro da zona morta e nunca sai de lá. Resultado:
+      magnetização zero.</li>
+      <li><strong>Com bias.</strong> A soma «sinal + bias» tem amplitude grande — grande o suficiente para
+      atravessar a zona morta e chegar bem dentro da zona útil, <em>em ambos os sentidos</em>, dezenas de vezes
+      por cada ciclo do sinal. 🔴 <strong>O sinal deixou de ser o que magnetiza a fita. Passou a ser o que
+      <em>desequilibra</em> uma oscilação grande que já lá está.</strong></li>
+      <li><strong>O que fica gravado.</strong> Cada oscilação do bias deixa a fita magnetizada num sentido e
+      depois no outro. Se o sinal for zero, os dois lados cancelam e a magnetização média é zero. Se o sinal for
+      positivo, empurra a oscilação toda um pouco para cima: o lado positivo vai um bocadinho mais longe do que
+      o negativo, e sobra magnetização média positiva — <strong>proporcional ao sinal</strong>.</li>
+    </ol>
+
+    <figure>
+      <svg viewBox="0 0 520 240" role="img" aria-labelledby="t-bias d-bias">
+        <title id="t-bias">O sinal lento somado ao bias rápido, e a média que sobra</title>
+        <desc id="d-bias">Em cima, uma onda lenta de pequena amplitude, desenhada sozinha: fica toda dentro de uma
+        faixa central sombreada que representa a zona morta, por isso nada é gravado. Ao centro, a mesma onda lenta
+        somada a uma oscilação rápida e grande, de ponta a ponta: a soma sai da faixa central em todos os ciclos,
+        para cima e para baixo. Em baixo, a média de cada ciclo rápido reproduz a forma da onda lenta.</desc>
+        <text class="svg-texto" x="10" y="14">1 · só o sinal — não sai da zona morta</text>
+        <rect class="svg-realce" x="10" y="24" width="500" height="28" rx="3" opacity="0.25"/>
+        <path class="svg-traco" d="M10.0 38.0 L14.0 37.0 L18.0 36.0 L22.0 35.0 L26.0 34.1 L30.0 33.2 L34.0 32.3 L38.0 31.5 L42.0 30.8 L46.0 30.1 L50.0 29.6 L54.0 29.1 L58.0 28.7 L62.0 28.3 L66.0 28.1 L70.0 28.0 L74.0 28.0 L78.0 28.1 L82.0 28.3 L86.0 28.6 L90.0 29.0 L94.0 29.4 L98.0 30.0 L102.0 30.6 L106.0 31.3 L110.0 32.1 L114.0 33.0 L118.0 33.9 L122.0 34.8 L126.0 35.8 L130.0 36.7 L134.0 37.7 L138.0 38.8 L142.0 39.8 L146.0 40.7 L150.0 41.7 L154.0 42.6 L158.0 43.5 L162.0 44.3 L166.0 45.0 L170.0 45.7 L174.0 46.3 L178.0 46.8 L182.0 47.3 L186.0 47.6 L190.0 47.8 L194.0 48.0 L198.0 48.0 L202.0 47.9 L206.0 47.8 L210.0 47.5 L214.0 47.2 L218.0 46.7 L222.0 46.2 L226.0 45.5 L230.0 44.8 L234.0 44.1 L238.0 43.3 L242.0 42.4 L246.0 41.4 L250.0 40.5 L254.0 39.5 L258.0 38.5 L262.0 37.5 L266.0 36.5 L270.0 35.5 L274.0 34.6 L278.0 33.6 L282.0 32.7 L286.0 31.9 L290.0 31.2 L294.0 30.5 L298.0 29.8 L302.0 29.3 L306.0 28.8 L310.0 28.5 L314.0 28.2 L318.0 28.1 L322.0 28.0 L326.0 28.0 L330.0 28.2 L334.0 28.4 L338.0 28.7 L342.0 29.2 L346.0 29.7 L350.0 30.3 L354.0 31.0 L358.0 31.7 L362.0 32.5 L366.0 33.4 L370.0 34.3 L374.0 35.3 L378.0 36.2 L382.0 37.2 L386.0 38.3 L390.0 39.3 L394.0 40.2 L398.0 41.2 L402.0 42.1 L406.0 43.0 L410.0 43.9 L414.0 44.7 L418.0 45.4 L422.0 46.0 L426.0 46.6 L430.0 47.0 L434.0 47.4 L438.0 47.7 L442.0 47.9 L446.0 48.0 L450.0 48.0 L454.0 47.9 L458.0 47.7 L462.0 47.3 L466.0 46.9 L470.0 46.4 L474.0 45.9 L478.0 45.2 L482.0 44.5 L486.0 43.7 L490.0 42.8 L494.0 41.9 L498.0 41.0 L502.0 40.0 L506.0 39.0 L510.0 38.0" style="fill:none"/>
+        <text class="svg-texto" x="10" y="74">2 · sinal + bias — atravessa a zona útil dos dois lados</text>
+        <rect class="svg-realce" x="10" y="104" width="500" height="28" rx="3" opacity="0.25"/>
+        <path class="svg-traco" d="M10.0 84.0 L10.5 92.4 L11.0 100.7 L11.5 109.1 L12.0 117.5 L12.5 125.9 L13.0 134.2 L13.5 142.6 L14.0 151.0 L14.5 142.4 L15.0 133.7 L15.5 125.1 L16.0 116.5 L16.5 107.9 L17.0 99.2 L17.5 90.6 L18.0 82.0 L18.5 90.4 L19.0 98.8 L19.5 107.1 L20.0 115.5 L20.5 123.9 L21.0 132.3 L21.5 140.6 L22.0 149.0 L22.5 140.4 L23.0 131.8 L23.5 123.2 L24.0 114.6 L24.5 105.9 L25.0 97.3 L25.5 88.7 L26.0 80.1 L26.5 88.5 L27.0 96.9 L27.5 105.2 L28.0 113.6 L28.5 122.0 L29.0 130.4 L29.5 138.8 L30.0 147.2 L30.5 138.6 L31.0 130.0 L31.5 121.4 L32.0 112.7 L32.5 104.1 L33.0 95.5 L33.5 86.9 L34.0 78.3 L34.5 86.7 L35.0 95.1 L35.5 103.5 L36.0 111.9 L36.5 120.3 L37.0 128.7 L37.5 137.1 L38.0 145.5 L38.5 136.9 L39.0 128.3 L39.5 119.7 L40.0 111.2 L40.5 102.6 L41.0 94.0 L41.5 85.4 L42.0 76.8 L42.5 85.2 L43.0 93.6 L43.5 102.0 L44.0 110.5 L44.5 118.9 L45.0 127.3 L45.5 135.7 L46.0 144.1 L46.5 135.6 L47.0 127.0 L47.5 118.4 L48.0 109.8 L48.5 101.3 L49.0 92.7 L49.5 84.1 L50.0 75.6 L50.5 84.0 L51.0 92.4 L51.5 100.9 L52.0 109.3 L52.5 117.7 L53.0 126.2 L53.5 134.6 L54.0 143.1 L54.5 134.5 L55.0 126.0 L55.5 117.4 L56.0 108.8 L56.5 100.3 L57.0 91.7 L57.5 83.2 L58.0 74.7 L58.5 83.1 L59.0 91.6 L59.5 100.0 L60.0 108.5 L60.5 117.0 L61.0 125.4 L61.5 133.9 L62.0 142.3 L62.5 133.8 L63.0 125.3 L63.5 116.8 L64.0 108.2 L64.5 99.7 L65.0 91.2 L65.5 82.7 L66.0 74.1 L66.5 82.6 L67.0 91.1 L67.5 99.6 L68.0 108.1 L68.5 116.6 L69.0 125.0 L69.5 133.5 L70.0 142.0 L70.5 133.5 L71.0 125.0 L71.5 116.5 L72.0 108.0 L72.5 99.5 L73.0 91.0 L73.5 82.5 L74.0 74.0 L74.5 82.5 L75.0 91.0 L75.5 99.5 L76.0 108.0 L76.5 116.6 L77.0 125.1 L77.5 133.6 L78.0 142.1 L78.5 133.6 L79.0 125.1 L79.5 116.7 L80.0 108.2 L80.5 99.7 L81.0 91.2 L81.5 82.8 L82.0 74.3 L82.5 82.8 L83.0 91.3 L83.5 99.9 L84.0 108.4 L84.5 117.0 L85.0 125.5 L85.5 134.0 L86.0 142.6 L86.5 134.1 L87.0 125.7 L87.5 117.2 L88.0 108.7 L88.5 100.3 L89.0 91.8 L89.5 83.4 L90.0 75.0 L90.5 83.5 L91.0 92.1 L91.5 100.6 L92.0 109.2 L92.5 117.7 L93.0 126.3 L93.5 134.9 L94.0 143.4 L94.5 135.0 L95.0 126.6 L95.5 118.1 L96.0 109.7 L96.5 101.3 L97.0 92.8 L97.5 84.4 L98.0 76.0 L98.5 84.6 L99.0 93.1 L99.5 101.7 L100.0 110.3 L100.5 118.9 L101.0 127.5 L101.5 136.0 L102.0 144.6 L102.5 136.2 L103.0 127.8 L103.5 119.4 L104.0 111.0 L104.5 102.6 L105.0 94.2 L105.5 85.7 L106.0 77.3 L106.5 85.9 L107.0 94.5 L107.5 103.1 L108.0 111.7 L108.5 120.3 L109.0 128.9 L109.5 137.5 L110.0 146.1 L110.5 137.7 L111.0 129.3 L111.5 120.9 L112.0 112.5 L112.5 104.1 L113.0 95.7 L113.5 87.4 L114.0 79.0 L114.5 87.6 L115.0 96.2 L115.5 104.8 L116.0 113.4 L116.5 122.0 L117.0 130.6 L117.5 139.2 L118.0 147.9 L118.5 139.5 L119.0 131.1 L119.5 122.7 L120.0 114.3 L120.5 105.9 L121.0 97.6 L121.5 89.2 L122.0 80.8 L122.5 89.4 L123.0 98.0 L123.5 106.6 L124.0 115.3 L124.5 123.9 L125.0 132.5 L125.5 141.1 L126.0 149.8 L126.5 141.4 L127.0 133.0 L127.5 124.6 L128.0 116.2 L128.5 107.9 L129.0 99.5 L129.5 91.1 L130.0 82.7 L130.5 91.4 L131.0 100.0 L131.5 108.6 L132.0 117.2 L132.5 125.9 L133.0 134.5 L133.5 143.1 L134.0 151.7 L134.5 143.4 L135.0 135.0 L135.5 126.6 L136.0 118.3 L136.5 109.9 L137.0 101.5 L137.5 93.1 L138.0 84.8 L138.5 93.4 L139.0 102.0 L139.5 110.6 L140.0 119.3 L140.5 127.9 L141.0 136.5 L141.5 145.1 L142.0 153.8 L142.5 145.4 L143.0 137.0 L143.5 128.6 L144.0 120.2 L144.5 111.9 L145.0 103.5 L145.5 95.1 L146.0 86.7 L146.5 95.4 L147.0 104.0 L147.5 112.6 L148.0 121.2 L148.5 129.8 L149.0 138.4 L149.5 147.1 L150.0 155.7 L150.5 147.3 L151.0 138.9 L151.5 130.5 L152.0 122.1 L152.5 113.8 L153.0 105.4 L153.5 97.0 L154.0 88.6 L154.5 97.2 L155.0 105.8 L155.5 114.4 L156.0 123.0 L156.5 131.6 L157.0 140.3 L157.5 148.9 L158.0 157.5 L158.5 149.1 L159.0 140.7 L159.5 132.3 L160.0 123.9 L160.5 115.5 L161.0 107.1 L161.5 98.7 L162.0 90.3 L162.5 98.9 L163.0 107.5 L163.5 116.1 L164.0 124.7 L164.5 133.3 L165.0 141.8 L165.5 150.4 L166.0 159.0 L166.5 150.6 L167.0 142.2 L167.5 133.8 L168.0 125.4 L168.5 117.0 L169.0 108.5 L169.5 100.1 L170.0 91.7 L170.5 100.3 L171.0 108.9 L171.5 117.4 L172.0 126.0 L172.5 134.6 L173.0 143.2 L173.5 151.7 L174.0 160.3 L174.5 151.9 L175.0 143.4 L175.5 135.0 L176.0 126.6 L176.5 118.1 L177.0 109.7 L177.5 101.3 L178.0 92.8 L178.5 101.4 L179.0 109.9 L179.5 118.5 L180.0 127.0 L180.5 135.6 L181.0 144.2 L181.5 152.7 L182.0 161.3 L182.5 152.8 L183.0 144.3 L183.5 135.9 L184.0 127.4 L184.5 119.0 L185.0 110.5 L185.5 102.0 L186.0 93.6 L186.5 102.1 L187.0 110.7 L187.5 119.2 L188.0 127.7 L188.5 136.2 L189.0 144.8 L189.5 153.3 L190.0 161.8 L190.5 153.3 L191.0 144.9 L191.5 136.4 L192.0 127.9 L192.5 119.4 L193.0 110.9 L193.5 102.4 L194.0 94.0 L194.5 102.5 L195.0 111.0 L195.5 119.5 L196.0 128.0 L196.5 136.5 L197.0 145.0 L197.5 153.5 L198.0 162.0 L198.5 153.5 L199.0 145.0 L199.5 136.5 L200.0 128.0 L200.5 119.5 L201.0 111.0 L201.5 102.4 L202.0 93.9 L202.5 102.4 L203.0 110.9 L203.5 119.4 L204.0 127.9 L204.5 136.3 L205.0 144.8 L205.5 153.3 L206.0 161.8 L206.5 153.2 L207.0 144.7 L207.5 136.2 L208.0 127.7 L208.5 119.1 L209.0 110.6 L209.5 102.0 L210.0 93.5 L210.5 102.0 L211.0 110.4 L211.5 118.9 L212.0 127.3 L212.5 135.8 L213.0 144.3 L213.5 152.7 L214.0 161.2 L214.5 152.6 L215.0 144.0 L215.5 135.5 L216.0 126.9 L216.5 118.4 L217.0 109.8 L217.5 101.3 L218.0 92.7 L218.5 101.1 L219.0 109.6 L219.5 118.0 L220.0 126.4 L220.5 134.9 L221.0 143.3 L221.5 151.7 L222.0 160.2 L222.5 151.6 L223.0 143.0 L223.5 134.4 L224.0 125.9 L224.5 117.3 L225.0 108.7 L225.5 100.1 L226.0 91.5 L226.5 100.0 L227.0 108.4 L227.5 116.8 L228.0 125.2 L228.5 133.6 L229.0 142.0 L229.5 150.4 L230.0 158.8 L230.5 150.3 L231.0 141.7 L231.5 133.1 L232.0 124.5 L232.5 115.9 L233.0 107.3 L233.5 98.7 L234.0 90.1 L234.5 98.5 L235.0 106.9 L235.5 115.3 L236.0 123.7 L236.5 132.1 L237.0 140.5 L237.5 148.9 L238.0 157.3 L238.5 148.6 L239.0 140.0 L239.5 131.4 L240.0 122.8 L240.5 114.2 L241.0 105.6 L241.5 97.0 L242.0 88.4 L242.5 96.8 L243.0 105.1 L243.5 113.5 L244.0 121.9 L244.5 130.3 L245.0 138.7 L245.5 147.1 L246.0 155.4 L246.5 146.8 L247.0 138.2 L247.5 129.6 L248.0 121.0 L248.5 112.4 L249.0 103.7 L249.5 95.1 L250.0 86.5 L250.5 94.9 L251.0 103.2 L251.5 111.6 L252.0 120.0 L252.5 128.4 L253.0 136.8 L253.5 145.1 L254.0 153.5 L254.5 144.9 L255.0 136.3 L255.5 127.6 L256.0 119.0 L256.5 110.4 L257.0 101.8 L257.5 93.1 L258.0 84.5 L258.5 92.9 L259.0 101.3 L259.5 109.6 L260.0 118.0 L260.5 126.4 L261.0 134.7 L261.5 143.1 L262.0 151.5 L262.5 142.9 L263.0 134.2 L263.5 125.6 L264.0 117.0 L264.5 108.4 L265.0 99.7 L265.5 91.1 L266.0 82.5 L266.5 90.9 L267.0 99.2 L267.5 107.6 L268.0 116.0 L268.5 124.4 L269.0 132.8 L269.5 141.1 L270.0 149.5 L270.5 140.9 L271.0 132.3 L271.5 123.6 L272.0 115.0 L272.5 106.4 L273.0 97.8 L273.5 89.2 L274.0 80.6 L274.5 88.9 L275.0 97.3 L275.5 105.7 L276.0 114.1 L276.5 122.5 L277.0 130.9 L277.5 139.2 L278.0 147.6 L278.5 139.0 L279.0 130.4 L279.5 121.8 L280.0 113.2 L280.5 104.6 L281.0 96.0 L281.5 87.4 L282.0 78.7 L282.5 87.1 L283.0 95.5 L283.5 103.9 L284.0 112.3 L284.5 120.7 L285.0 129.1 L285.5 137.5 L286.0 145.9 L286.5 137.3 L287.0 128.7 L287.5 120.1 L288.0 111.5 L288.5 102.9 L289.0 94.3 L289.5 85.7 L290.0 77.2 L290.5 85.6 L291.0 94.0 L291.5 102.4 L292.0 110.8 L292.5 119.2 L293.0 127.6 L293.5 136.0 L294.0 144.5 L294.5 135.9 L295.0 127.3 L295.5 118.7 L296.0 110.1 L296.5 101.6 L297.0 93.0 L297.5 84.4 L298.0 75.8 L298.5 84.3 L299.0 92.7 L299.5 101.1 L300.0 109.6 L300.5 118.0 L301.0 126.4 L301.5 134.9 L302.0 143.3 L302.5 134.7 L303.0 126.2 L303.5 117.6 L304.0 109.1 L304.5 100.5 L305.0 92.0 L305.5 83.4 L306.0 74.8 L306.5 83.3 L307.0 91.7 L307.5 100.2 L308.0 108.7 L308.5 117.1 L309.0 125.6 L309.5 134.0 L310.0 142.5 L310.5 134.0 L311.0 125.4 L311.5 116.9 L312.0 108.3 L312.5 99.8 L313.0 91.3 L313.5 82.8 L314.0 74.2 L314.5 82.7 L315.0 91.2 L315.5 99.7 L316.0 108.1 L316.5 116.6 L317.0 125.1 L317.5 133.6 L318.0 142.1 L318.5 133.6 L319.0 125.0 L319.5 116.5 L320.0 108.0 L320.5 99.5 L321.0 91.0 L321.5 82.5 L322.0 74.0 L322.5 82.5 L323.0 91.0 L323.5 99.5 L324.0 108.0 L324.5 116.5 L325.0 125.0 L325.5 133.5 L326.0 142.0 L326.5 133.6 L327.0 125.1 L327.5 116.6 L328.0 108.1 L328.5 99.6 L329.0 91.1 L329.5 82.7 L330.0 74.2 L330.5 82.7 L331.0 91.2 L331.5 99.8 L332.0 108.3 L332.5 116.8 L333.0 125.3 L333.5 133.9 L334.0 142.4 L334.5 134.0 L335.0 125.5 L335.5 117.0 L336.0 108.6 L336.5 100.1 L337.0 91.7 L337.5 83.2 L338.0 74.7 L338.5 83.3 L339.0 91.8 L339.5 100.4 L340.0 109.0 L340.5 117.5 L341.0 126.1 L341.5 134.6 L342.0 143.2 L342.5 134.7 L343.0 126.3 L343.5 117.9 L344.0 109.4 L344.5 101.0 L345.0 92.6 L345.5 84.1 L346.0 75.7 L346.5 84.3 L347.0 92.8 L347.5 101.4 L348.0 110.0 L348.5 118.6 L349.0 127.1 L349.5 135.7 L350.0 144.3 L350.5 135.9 L351.0 127.5 L351.5 119.0 L352.0 110.6 L352.5 102.2 L353.0 93.8 L353.5 85.4 L354.0 77.0 L354.5 85.6 L355.0 94.2 L355.5 102.7 L356.0 111.3 L356.5 119.9 L357.0 128.5 L357.5 137.1 L358.0 145.7 L358.5 137.3 L359.0 128.9 L359.5 120.5 L360.0 112.1 L360.5 103.7 L361.0 95.3 L361.5 86.9 L362.0 78.5 L362.5 87.1 L363.0 95.7 L363.5 104.4 L364.0 113.0 L364.5 121.6 L365.0 130.2 L365.5 138.8 L366.0 147.4 L366.5 139.0 L367.0 130.6 L367.5 122.2 L368.0 113.9 L368.5 105.5 L369.0 97.1 L369.5 88.7 L370.0 80.3 L370.5 88.9 L371.0 97.6 L371.5 106.2 L372.0 114.8 L372.5 123.4 L373.0 132.0 L373.5 140.6 L374.0 149.3 L374.5 140.9 L375.0 132.5 L375.5 124.1 L376.0 115.8 L376.5 107.4 L377.0 99.0 L377.5 90.6 L378.0 82.2 L378.5 90.9 L379.0 99.5 L379.5 108.1 L380.0 116.7 L380.5 125.4 L381.0 134.0 L381.5 142.6 L382.0 151.2 L382.5 142.9 L383.0 134.5 L383.5 126.1 L384.0 117.7 L384.5 109.4 L385.0 101.0 L385.5 92.6 L386.0 84.3 L386.5 92.9 L387.0 101.5 L387.5 110.1 L388.0 118.8 L388.5 127.4 L389.0 136.0 L389.5 144.6 L390.0 153.3 L390.5 144.9 L391.0 136.5 L391.5 128.1 L392.0 119.8 L392.5 111.4 L393.0 103.0 L393.5 94.6 L394.0 86.2 L394.5 94.9 L395.0 103.5 L395.5 112.1 L396.0 120.7 L396.5 129.4 L397.0 138.0 L397.5 146.6 L398.0 155.2 L398.5 146.8 L399.0 138.4 L399.5 130.1 L400.0 121.7 L400.5 113.3 L401.0 104.9 L401.5 96.5 L402.0 88.1 L402.5 96.8 L403.0 105.4 L403.5 114.0 L404.0 122.6 L404.5 131.2 L405.0 139.8 L405.5 148.4 L406.0 157.0 L406.5 148.6 L407.0 140.3 L407.5 131.9 L408.0 123.5 L408.5 115.1 L409.0 106.7 L409.5 98.3 L410.0 89.9 L410.5 98.5 L411.0 107.1 L411.5 115.7 L412.0 124.3 L412.5 132.9 L413.0 141.5 L413.5 150.1 L414.0 158.7 L414.5 150.3 L415.0 141.8 L415.5 133.4 L416.0 125.0 L416.5 116.6 L417.0 108.2 L417.5 99.8 L418.0 91.4 L418.5 100.0 L419.0 108.5 L419.5 117.1 L420.0 125.7 L420.5 134.3 L421.0 142.9 L421.5 151.4 L422.0 160.0 L422.5 151.6 L423.0 143.2 L423.5 134.7 L424.0 126.3 L424.5 117.9 L425.0 109.4 L425.5 101.0 L426.0 92.6 L426.5 101.1 L427.0 109.7 L427.5 118.3 L428.0 126.8 L428.5 135.4 L429.0 143.9 L429.5 152.5 L430.0 161.0 L430.5 152.6 L431.0 144.2 L431.5 135.7 L432.0 127.3 L432.5 118.8 L433.0 110.3 L433.5 101.9 L434.0 93.4 L434.5 102.0 L435.0 110.5 L435.5 119.0 L436.0 127.6 L436.5 136.1 L437.0 144.7 L437.5 153.2 L438.0 161.7 L438.5 153.2 L439.0 144.8 L439.5 136.3 L440.0 127.8 L440.5 119.3 L441.0 110.9 L441.5 102.4 L442.0 93.9 L442.5 102.4 L443.0 110.9 L443.5 119.4 L444.0 128.0 L444.5 136.5 L445.0 145.0 L445.5 153.5 L446.0 162.0 L446.5 153.5 L447.0 145.0 L447.5 136.5 L448.0 128.0 L448.5 119.5 L449.0 111.0 L449.5 102.5 L450.0 94.0 L450.5 102.5 L451.0 111.0 L451.5 119.4 L452.0 127.9 L452.5 136.4 L453.0 144.9 L453.5 153.4 L454.0 161.9 L454.5 153.3 L455.0 144.8 L455.5 136.3 L456.0 127.8 L456.5 119.2 L457.0 110.7 L457.5 102.2 L458.0 93.7 L458.5 102.1 L459.0 110.6 L459.5 119.0 L460.0 127.5 L460.5 136.0 L461.0 144.4 L461.5 152.9 L462.0 161.3 L462.5 152.8 L463.0 144.3 L463.5 135.7 L464.0 127.2 L464.5 118.6 L465.0 110.0 L465.5 101.5 L466.0 92.9 L466.5 101.4 L467.0 109.8 L467.5 118.3 L468.0 126.7 L468.5 135.1 L469.0 143.6 L469.5 152.0 L470.0 160.4 L470.5 151.9 L471.0 143.3 L471.5 134.7 L472.0 126.2 L472.5 117.6 L473.0 109.0 L473.5 100.4 L474.0 91.9 L474.5 100.3 L475.0 108.7 L475.5 117.1 L476.0 125.5 L476.5 134.0 L477.0 142.4 L477.5 150.8 L478.0 159.2 L478.5 150.6 L479.0 142.0 L479.5 133.4 L480.0 124.8 L480.5 116.3 L481.0 107.7 L481.5 99.1 L482.0 90.5 L482.5 98.9 L483.0 107.3 L483.5 115.7 L484.0 124.1 L484.5 132.5 L485.0 140.9 L485.5 149.3 L486.0 157.7 L486.5 149.1 L487.0 140.5 L487.5 131.9 L488.0 123.3 L488.5 114.6 L489.0 106.0 L489.5 97.4 L490.0 88.8 L490.5 97.2 L491.0 105.6 L491.5 114.0 L492.0 122.4 L492.5 130.8 L493.0 139.1 L493.5 147.5 L494.0 155.9 L494.5 147.3 L495.0 138.7 L495.5 130.1 L496.0 121.4 L496.5 112.8 L497.0 104.2 L497.5 95.6 L498.0 87.0 L498.5 95.4 L499.0 103.7 L499.5 112.1 L500.0 120.5 L500.5 128.9 L501.0 137.2 L501.5 145.6 L502.0 154.0 L502.5 145.4 L503.0 136.8 L503.5 128.1 L504.0 119.5 L504.5 110.9 L505.0 102.3 L505.5 93.6 L506.0 85.0 L506.5 93.4 L507.0 101.8 L507.5 110.1 L508.0 118.5 L508.5 126.9 L509.0 135.3 L509.5 143.6 L510.0 152.0" style="fill:none;stroke-width:1"/>
+        <text class="svg-texto" x="10" y="176">3 · a média de cada ciclo rápido = o sinal, gravável</text>
+        <path class="svg-traco" d="M10.0 210.0 L14.0 207.8 L18.0 205.6 L22.0 203.5 L26.0 201.4 L30.0 199.4 L34.0 197.5 L38.0 195.8 L42.0 194.2 L46.0 192.7 L50.0 191.4 L54.0 190.3 L58.0 189.4 L62.0 188.8 L66.0 188.3 L70.0 188.0 L74.0 188.0 L78.0 188.2 L82.0 188.6 L86.0 189.3 L90.0 190.1 L94.0 191.1 L98.0 192.4 L102.0 193.8 L106.0 195.3 L110.0 197.1 L114.0 198.9 L118.0 200.9 L122.0 202.9 L126.0 205.1 L130.0 207.2 L134.0 209.4 L138.0 211.7 L142.0 213.9 L146.0 216.0 L150.0 218.1 L154.0 220.1 L158.0 222.0 L162.0 223.8 L166.0 225.5 L170.0 227.0 L174.0 228.3 L178.0 229.4 L182.0 230.4 L186.0 231.1 L190.0 231.6 L194.0 231.9 L198.0 232.0 L202.0 231.9 L206.0 231.5 L210.0 230.9 L214.0 230.1 L218.0 229.1 L222.0 228.0 L226.0 226.6 L230.0 225.1 L234.0 223.4 L238.0 221.6 L242.0 219.6 L246.0 217.6 L250.0 215.5 L254.0 213.3 L258.0 211.1 L262.0 208.9 L266.0 206.7 L270.0 204.5 L274.0 202.4 L278.0 200.4 L282.0 198.4 L286.0 196.6 L290.0 194.9 L294.0 193.4 L298.0 192.0 L302.0 190.9 L306.0 189.9 L310.0 189.1 L314.0 188.5 L318.0 188.1 L322.0 188.0 L326.0 188.1 L330.0 188.4 L334.0 188.9 L338.0 189.6 L342.0 190.6 L346.0 191.7 L350.0 193.0 L354.0 194.5 L358.0 196.2 L362.0 198.0 L366.0 199.9 L370.0 201.9 L374.0 204.0 L378.0 206.1 L382.0 208.3 L386.0 210.6 L390.0 212.8 L394.0 214.9 L398.0 217.1 L402.0 219.1 L406.0 221.1 L410.0 222.9 L414.0 224.7 L418.0 226.2 L422.0 227.6 L426.0 228.9 L430.0 229.9 L434.0 230.7 L438.0 231.4 L442.0 231.8 L446.0 232.0 L450.0 232.0 L454.0 231.7 L458.0 231.2 L462.0 230.6 L466.0 229.7 L470.0 228.6 L474.0 227.3 L478.0 225.8 L482.0 224.2 L486.0 222.5 L490.0 220.6 L494.0 218.6 L498.0 216.5 L502.0 214.4 L506.0 212.2 L510.0 210.0" style="fill:none;stroke-width:2.5"/>
+      </svg>
+      <figcaption>O bias não é gravado — é reproduzido tão mal que desaparece, e o pré-amplificador filtra o
+      resto. O que fica é a <strong>média</strong>, e essa é proporcional ao sinal.</figcaption>
+    </figure>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ Se conheces <em>dither</em>, já conheces isto</span>
+      <p>É a mesma ideia que se usa para gravar áudio a 16 bits sem que os sons muito baixos caiam todos no
+      mesmo degrau: junta-se ruído para que o sinal <em>atravesse</em> os degraus, e a média recupera a
+      informação que um arredondamento sozinho teria deitado fora. O bias é dither com uma onda em vez de ruído,
+      cinquenta anos antes de alguém lhe chamar dither.</p>
+    </div>
+
+    <h3>Porquê alternada e não contínua</h3>
+
+    <p>A primeira ideia da indústria foi somar <em>corrente contínua</em>, o que também afasta o sinal da zona
+    morta. Reduziu a distorção — e trouxe um problema pior: a fita ficava com magnetização líquida, e uma fita
+    magnetizada de forma desigual faz barulho na leitura. Nas palavras da referência: o bias contínuo «deixava a
+    fita com uma magnetização líquida, que gerava ruído significativo na reprodução». A corrente alternada
+    resolve isto por simetria: em média, magnetiza tanto para um lado como para o outro.</p>
+
+    <h3>De quem foi a ideia</h3>
+
+    <p>De quatro grupos independentes, o que é sinal de que o problema era premente e a solução não era óbvia:</p>
+    <ul>
+      <li><strong>Carlson e Carpenter</strong> — patente pedida em 1921, concedida em 1927.</li>
+      <li><strong>Teiji Igarashi, Makoto Ishikawa e Kenzo Nagai</strong> — artigo publicado no Japão em 1938.</li>
+      <li><strong>Marvin Camras</strong> — redescobriu-o de forma independente em 1941, patente em 1944.</li>
+    </ul>
+
+    <h3>O bias não tem um valor certo — tem quatro valores certos diferentes</h3>
+
+    <p>E é aqui que deixa de ser física e passa a ser engenharia. Subir o bias <strong>melhora</strong> umas
+    coisas e <strong>piora</strong> outras, e os ótimos não coincidem:</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Efeito do nível de bias, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>O que se mede</th><th>Bias a menos</th><th>Bias a mais</th></tr></thead>
+        <tbody>
+          <tr><td>Distorção</td><td>muita — ainda se apanha a zona morta</td><td>pouca</td></tr>
+          <tr><td>Sensibilidade (volume que sai)</td><td>baixa</td><td>também baixa: passa de um máximo e desce</td></tr>
+          <tr><td>Resposta nos agudos</td><td>melhor</td><td><strong>pior</strong> — o bias apaga as ondas curtas</td></tr>
+          <tr><td>Ruído</td><td>maior</td><td>menor</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Não há um valor que otimize os quatro. Há um <strong>compromisso</strong>, e é por isso que os gravadores
+    profissionais têm o bias ajustável por pista e que as cassetes precisaram de normalizar tipos de fita.</p>
+
+    <p>E precisaram mesmo: uma fita de crómio (Tipo II) quer cerca de <strong>150 %</strong> do bias de uma
+    ferrosa (Tipo I), e uma de metal (Tipo IV) cerca de <strong>250 %</strong>. Gravar uma Tipo II com bias de
+    Tipo I dá uma gravação com bias a menos — distorcida e com pouco volume. Um ano depois de a norma IEC fixar
+    os tipos, a própria norma passou a exigir <strong>entalhes no invólucro</strong> para o leitor os detetar
+    sozinho, porque contar com o utilizador para pôr o comutador na posição certa não funcionava.</p>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p>Vamos medir o bias. A pergunta verificável é: <strong>quanta distorção harmónica sobra, e quanto sinal
+    sai, em função do nível de bias?</strong> Não «soa melhor» — números.</p>
+
+    <h3>Passo 1 — o que é preciso montar, e porquê assim</h3>
+    <p>A taxa de amostragem tem de ser alta: o bias está a 100 kHz e, pela lição 0, preciso de pelo menos
+    200 kHz só para ele existir. Uso <strong>1 MHz</strong>, que dá dez amostras por ciclo de bias e chega para
+    a média sair limpa.</p>
+    <p>A média móvel sobre <strong>exactamente um período do bias</strong> faz o papel duplo do que acontece na
+    realidade: a fita não reproduz uma onda tão curta (perda de fenda, lição 1) e o pré-amplificador tem um
+    filtro — a <em>armadilha de bias</em> — para apanhar o que sobrar.</p>
+
+    <h3>Passo 2 — medir distorção sem bibliotecas</h3>
+    <p>Distorção harmónica é energia em múltiplos da frequência do sinal. Para a medir não preciso de uma FFT:
+    basta <strong>correlacionar</strong> o sinal com um seno e um cosseno de cada harmónico. Se lá houver
+    componente nessa frequência, a correlação dá um número; se não houver, dá zero.</p>
+<pre><code>import math
+
+TAXA = 1_000_000.0          # 1 MHz: e preciso para o bias de 100 kHz caber
+SINAL, BIAS = 1000.0, 100_000.0
+MORTA, TOPO = 0.3, 1.0
+
+def gravar(campo):
+    &quot;&quot;&quot;A mesma fita da licao 1: zona morta ao centro, saturacao nas pontas.&quot;&quot;&quot;
+    s = 1.0 if campo &gt;= 0 else -1.0
+    v = abs(campo)
+    if v &lt; MORTA: return 0.0
+    if v &gt; TOPO:  return s
+    return s * (v - MORTA) / (TOPO - MORTA)
+
+def media_movel(x, n):
+    soma, saida = sum(x[:n]), []
+    for i in range(n, len(x)):
+        saida.append(soma / n); soma += x[i] - x[i-n]
+    return saida
+
+def harmonicos(x, f0, quantos=7):
+    &quot;&quot;&quot;Amplitude de cada harmonico de f0, por correlacao com seno e cosseno.&quot;&quot;&quot;
+    x = x[:(len(x)//int(TAXA/SINAL))*int(TAXA/SINAL)]   # so periodos inteiros
+    n = len(x); out = []
+    for k in range(1, quantos+1):
+        c = sum(v*math.cos(2*math.pi*k*f0*i/TAXA) for i, v in enumerate(x))
+        s = sum(v*math.sin(2*math.pi*k*f0*i/TAXA) for i, v in enumerate(x))
+        out.append(2*math.hypot(c, s)/n)
+    return out
+
+def thd(h):
+    return 100 * math.sqrt(sum(v*v for v in h[1:])) / h[0] if h[0] else float(&#x27;inf&#x27;)
+
+N = int(TAXA / SINAL) * 20 + int(TAXA / BIAS)     # 20 periodos + o que a media come
+janela = int(TAXA / BIAS)                        # 1 periodo do bias
+
+print(f&quot;{&#x27;amplitude&#x27;:&gt;9} {&#x27;bias&#x27;:&gt;6} {&#x27;fundamental&#x27;:&gt;12} {&#x27;2h&#x27;:&gt;9} {&#x27;3h&#x27;:&gt;9} {&#x27;THD %&#x27;:&gt;8}&quot;)
+for amp in (0.5, 0.2, 0.05):
+    for nivel_bias in (0.0, 0.3, 0.5, 0.7, 0.9, 1.2):
+        x = [amp*math.sin(2*math.pi*SINAL*i/TAXA) for i in range(N)]
+        b = [nivel_bias*math.sin(2*math.pi*BIAS*i/TAXA) for i in range(N)]
+        y = [gravar(xi+bi) for xi, bi in zip(x, b)]
+        y = media_movel(y, janela) if nivel_bias else y
+        h = harmonicos(y, SINAL)
+        print(f&quot;{amp:9.2f} {nivel_bias:6.1f} {h[0]:12.5f} {h[1]:9.5f} {h[2]:9.5f} {thd(h):8.2f}&quot;)
+    print()</code></pre>
+
+    <h3>Passo 3 — a saída</h3>
+<pre><code>amplitude   bias  fundamental        2h        3h    THD %
+     0.50    0.0      0.20340   0.00000   0.09313    46.35
+     0.50    0.3      0.27838   0.00000   0.03563    13.07
+     0.50    0.5      0.38663   0.00002   0.00188     2.07
+     0.50    0.7      0.45546   0.00002   0.02460     5.42
+     0.50    0.9      0.45591   0.00001   0.01836     4.84
+     0.50    1.2      0.36254   0.00001   0.00502     3.47
+
+     0.20    0.0      0.00000   0.00000   0.00000      inf
+     0.20    0.3      0.06701   0.00000   0.00903    13.57
+     0.20    0.5      0.16630   0.00000   0.00160     1.51
+     0.20    0.7      0.20973   0.00001   0.00773     3.73
+     0.20    0.9      0.21882   0.00001   0.00582     2.75
+     0.20    1.2      0.12469   0.00000   0.00607     5.01
+
+     0.05    0.0      0.00000   0.00000   0.00000      inf
+     0.05    0.3      0.00902   0.00000   0.00155    19.29
+     0.05    0.5      0.04063   0.00000   0.00072     2.16
+     0.05    0.7      0.05713   0.00000   0.00000     0.00
+     0.05    0.9      0.05713   0.00000   0.00000     0.00
+     0.05    1.2      0.02857   0.00000   0.00000     0.00</code></pre>
+
+    <h3>Passo 4 — ler isto linha a linha</h3>
+
+    <div class="caixa critico">
+      <span class="titulo">🔴 A linha que justifica a lição inteira</span>
+      <p><code>0.20&nbsp;&nbsp;&nbsp;&nbsp;0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00000</code></p>
+      <p>Amplitude 0,2, sem bias: a fundamental é <strong>exactamente zero</strong>. E o THD é
+      <code>inf</code>, não porque haja distorção infinita mas porque não há sinal nenhum para dividir. Um som
+      com 40 % da amplitude máxima <strong>desaparece</strong>. Não fica abafado: não existe. É por isto que o
+      bias não é um refinamento — sem ele não há gravação magnética analógica de todo.</p>
+    </div>
+
+    <p><strong>Com sinal grande e sem bias (0,50 / 0,0): THD de 46 %.</strong> Quase metade da energia à saída
+    está em frequências que não estavam à entrada. Repara que o segundo harmónico é zero e o terceiro é grande:
+    a zona morta é simétrica, e uma não-linearidade simétrica só produz harmónicos ímpares. Se algum dia vires
+    segundo harmónico numa gravação, a assimetria está noutro sítio — por exemplo numa fita com magnetização
+    contínua residual, que é exactamente o que o bias de corrente contínua provocava.</p>
+
+    <p><strong>O bias resolve.</strong> Com bias 0,5, o THD cai de 46 % para <strong>2,07 %</strong> e a
+    fundamental quase duplica. Nos sinais baixos o efeito é ainda mais violento: de <em>não existir</em> para
+    0,1663 com 1,51 % de THD.</p>
+
+    <p><strong>Bias a mais também é mau.</strong> Segue a coluna da fundamental para amplitude 0,50:
+    0,3866 → 0,4555 → 0,4559 → 0,3625. Sobe, chega a um máximo por volta de 0,7–0,9 e <strong>volta a
+    descer</strong>. Não é «quanto mais melhor»: há um pico e depois estraga-se.</p>
+
+    <div class="caixa critico">
+      <span class="titulo">🔴 O que esta simulação mede, o que <em>não</em> mede, e como descobri a diferença</span>
+      <p>Eu tinha escrito aqui que o ótimo do volume e o ótimo da distorção caem em sítios diferentes: nesta
+      tabela o volume é máximo em 0,7–0,9 e o THD é mínimo em 0,5. Depois fui <strong>varrer o bias em passos
+      de 0,1</strong> para ver a curva inteira — e a coluna do THD não era uma curva: saltava de 44 % para
+      0,93 %, subia para 3,73 %, descia para 1,53 %.</p>
+      <p>Fui procurar um erro de medição. Encontrei um candidato: a correlação corria sobre 19,99 períodos em
+      vez de 20, o que provoca fuga espectral. Corrigi-o. <strong>Não mudou nada.</strong> Experimentei uma
+      curva de transferência lisa em vez desta, que tem bicos: continuou irregular.</p>
+      <p><strong>Conclusão honesta:</strong> o meu modelo é uma curva <em>sem memória</em>, com dois bicos —
+      em ±0,3 e em ±1,0. Uma fita real tem histerese, ou seja memória, e uma curva suave. A forma exacta da
+      distorção em função do bias é um <strong>artefacto do modelo</strong>, e não a devo apresentar como se
+      fosse da fita.</p>
+      <p><strong>O que fica de pé</strong>, porque se manteve nos dois modelos e em todas as medições:</p>
+      <ul>
+        <li>Abaixo de um limiar não sai <strong>nada</strong>.</li>
+        <li>O bias faz a distorção cair uma ordem de grandeza (46 % → 1–3 %).</li>
+        <li>A sensibilidade sobe, atinge um máximo e desce.</li>
+      </ul>
+      <p>Que os <em>quatro</em> ótimos (sensibilidade, ruído, agudos, distorção) caiam em sítios diferentes é
+      afirmação de Kadis, que mediu fita a sério — não minha. Está na secção 11, com a referência.</p>
+      <p>⚠️ Mais duas ressalvas. Os valores 0,3 e 1,0 da zona morta e da saturação são <strong>inventados por
+      mim</strong> para a simulação ser legível: os números absolutos não valem para fita nenhuma. E as três
+      linhas com <code>THD 0.00</code> não querem dizer distorção nula — querem dizer abaixo do que esta
+      simulação, com 20 períodos e sete harmónicos, consegue medir.</p>
+    </div>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa: prever antes de correr</h3>
+      <p>Vais mudar uma coisa de cada vez na simulação. Para cada uma, <strong>escreve a previsão primeiro</strong>
+      e só depois corre.</p>
+      <ol>
+        <li><strong>Dado:</strong> com <code>MORTA = 0.3</code> e bias 0,5, a amplitude 0,20 dá fundamental
+        0,166 e THD 1,51 %.</li>
+        <li><strong>______</strong> Se puseres <code>MORTA = 0.6</code> (uma fita de coercividade mais alta,
+        tipo metal), o que acontece à fundamental com bias 0,5? E ao THD? Porquê?</li>
+        <li><strong>Dado:</strong> uma fita Tipo IV pede cerca de 250 % do bias de uma Tipo I.</li>
+        <li><strong>______</strong> Que valor de bias terias de usar com <code>MORTA = 0.6</code> para voltar a
+        ter THD baixo? Diz o número <em>antes</em> de o procurar.</li>
+        <li><strong>______</strong> E se em vez de subires o bias baixasses <code>BIAS</code> de 100 kHz para
+        3 kHz, mantendo tudo o resto? O que é que se estraga — e porquê é que não é a fita que se estraga, mas
+        a <em>medição</em>?</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>2.</strong> A fundamental <strong>cai</strong> e o THD <strong>sobe</strong>. Com a zona morta
+        maior, um bias de 0,5 já não chega para a atravessar com folga — passou de bias adequado a bias a menos
+        <em>sem se ter mexido no bias</em>. Corrido: fundamental <strong>0,02623</strong> e THD
+        <strong>48,90 %</strong>, contra 0,16630 e 1,51 %. O sinal caiu a um sexto.</p>
+        <p><strong>4.</strong> Se a zona morta duplicou de 0,3 para 0,6, é razoável pedir bias a dobrar: cerca de
+        <strong>1,0</strong>. Corrido: com bias 1,0 a fundamental é <strong>0,22315</strong> e o THD
+        <strong>3,47 %</strong> — melhor do que o que se tinha antes de a fita mudar. A previsão «dobra a zona
+        morta, dobra o bias» acertou no sentido e na ordem de grandeza; o exercício E3 mede <em>quão bem</em>
+        acerta, e a resposta tem uma surpresa.</p>
+        <p><strong>5.</strong> A média móvel tem a largura de um período do bias. Com o bias a 3 kHz, essa janela
+        passa a ser mais larga do que um período do sinal de 1 kHz — e uma média sobre mais do que um período do
+        sinal <strong>apaga o sinal</strong>. Não é a fita que deixa de funcionar: é a separação entre «o que se
+        quer» e «o que serve de veículo» que deixa de existir. É por isso que o bias tem de estar muito acima da
+        banda de áudio, e não só um bocadinho acima.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>«O bias fica gravado na fita e depois é filtrado»</td>
+            <td>Procurar o bias na gravação</td>
+            <td>Quase nada dele fica: a 100 kHz o comprimento de onda numa cassete é 0,48 µm, muito abaixo da
+            fenda da cabeça, e por isso nem se reproduz. O filtro existe para o que sobra, não para o principal</td>
+          </tr>
+          <tr>
+            <td>«O bias empurra o sinal para longe do zero, como a corrente contínua faria»</td>
+            <td>Desenhar o sinal deslocado para cima</td>
+            <td>O bias é <strong>simétrico</strong> e a sua média é zero. Não desloca nada: faz o ponto de
+            funcionamento <em>varrer</em> a curva toda muitas vezes por ciclo do sinal. Quem o imagina como
+            deslocamento está a pensar em bias de corrente contínua — que se usou e se abandonou por fazer ruído</td>
+          </tr>
+          <tr>
+            <td>«Mais bias é sempre melhor»</td>
+            <td>«Pus o bias no máximo para não distorcer»</td>
+            <td>A tabela do exemplo trabalhado mostra a fundamental a <strong>descer</strong> acima de 0,9. E na
+            fita real há um custo que a simulação nem mostra: o bias a mais apaga os agudos, porque é um campo
+            alternado forte a passar por cima de ondas curtas</td>
+          </tr>
+          <tr>
+            <td>«Bias é o mesmo que equalização»</td>
+            <td>Usar as palavras como sinónimos, ou pensar que o comutador é um só</td>
+            <td>Bias acontece na <strong>gravação</strong> e é uma corrente. Equalização é um <strong>filtro</strong>
+            e existe na gravação e na leitura. Que o mesmo comutador mexa nos dois é conveniência de fabrico</td>
+          </tr>
+          <tr>
+            <td>«Uma fita de metal grava melhor porque é mais sensível»</td>
+            <td>Esperar mais volume com a mesma corrente</td>
+            <td>É <em>menos</em> sensível: precisa de cerca de 250 % do bias. O que ganha é aguentar mais sinal
+            antes de saturar e resistir melhor à auto-apagagem</td>
+          </tr>
+          <tr>
+            <td>«Se o segundo harmónico for zero, não há distorção»</td>
+            <td>Medir só o 2.º harmónico</td>
+            <td>Uma não-linearidade <strong>simétrica</strong> só produz harmónicos ímpares. Na tabela, o
+            2.º é 0,00000 e o 3.º é 0,09313 com 46 % de THD. Medir só o 2.º daria «perfeito»</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — ler a tabela</h3>
+      <p>Sem correr nada, só a partir da saída do exemplo trabalhado:</p>
+      <ol>
+        <li>Qual é o nível de bias que darias a uma máquina que só vai gravar voz baixinha, e porquê?</li>
+        <li>E a uma que vai gravar um sinal forte e constante, onde só interessa o volume à saída?</li>
+        <li>Porque é que a coluna do 2.º harmónico está quase toda a zeros?</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>1.</strong> <strong>0,5.</strong> Na linha de amplitude 0,05 é onde o THD é baixo (2,16 %) com
+        sinal já utilizável (0,0407). Subir para 0,7 dá mais sinal, mas o que mata uma gravação baixinha não é
+        falta de volume — é ela cair na zona morta, e 0,5 já a tirou de lá.</p>
+        <p><strong>2.</strong> <strong>0,7 a 0,9</strong>, onde a fundamental é máxima (0,456). Paga-se em
+        distorção (5,42 % contra 2,07 %) e é uma troca consciente, não um descuido.</p>
+        <p><strong>3.</strong> Porque a zona morta que simulei é <strong>simétrica</strong>: trata igual o
+        positivo e o negativo. Uma não-linearidade simétrica só gera harmónicos ímpares. Os 0,00002 que aparecem
+        aqui e ali são resto numérico da média móvel, não distorção.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: a curva do bias</h3>
+      <p>Modifica a simulação para varrer o bias de 0,0 a 1,6 em passos de 0,1, com amplitude fixa 0,2, e
+      imprimir três colunas: bias, fundamental, THD. Encontra <strong>numericamente</strong> o bias que maximiza
+      a fundamental e o que minimiza o THD, e diz de quanto é a diferença entre eles.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code># reaproveita gravar(), media_movel(), harmonicos() e thd() do exemplo trabalhado
+N, janela = int(TAXA / SINAL) * 20, int(TAXA / BIAS)
+AMP = 0.2
+
+melhor_sinal = (0.0, -1.0)
+print(f&quot;{&#x27;bias&#x27;:&gt;5} {&#x27;fundamental&#x27;:&gt;12} {&#x27;THD %&#x27;:&gt;8}&quot;)
+for passo in range(0, 17):
+    nb = passo / 10
+    x = [AMP*math.sin(2*math.pi*SINAL*i/TAXA) for i in range(N)]
+    b = [nb*math.sin(2*math.pi*BIAS*i/TAXA) for i in range(N)]
+    y = [gravar(xi+bi) for xi, bi in zip(x, b)]
+    y = media_movel(y, janela) if nb else y
+    h = harmonicos(y, SINAL)
+    d = thd(h)
+    print(f&quot;{nb:5.1f} {h[0]:12.5f} {d:8.2f}&quot;)
+    if h[0] &gt; melhor_sinal[1]: melhor_sinal = (nb, h[0])
+
+print(f&quot;\nmais sinal : bias {melhor_sinal[0]:.1f} -&gt; {melhor_sinal[1]:.5f}&quot;)</code></pre>
+        <p>Saída:</p>
+<pre><code> bias  fundamental    THD %
+  0.0      0.00000      inf
+  0.1      0.00000      inf
+  0.2      0.02107    44.10
+  0.3      0.06701    13.57
+  0.4      0.11953     0.93
+  0.5      0.16630     1.51
+  0.6      0.19033     3.43
+  0.7      0.20973     3.73
+  0.8      0.22468     1.53
+  0.9      0.21882     2.75
+  1.0      0.18902     3.29
+  1.1      0.15476     3.86
+  1.2      0.12469     5.01
+  1.3      0.11427     0.00
+  1.4      0.11166     2.37
+  1.5      0.09751     7.79
+  1.6      0.07847     8.93
+
+mais sinal : bias 0.8 -&gt; 0.22468</code></pre>
+        <div class="caixa ok">
+          <span class="titulo">✅ O que a curva completa mostra, e o que ela desmente</span>
+          <p><strong>Abaixo de 0,2 não há nada.</strong> Zero, duas vezes seguidas. Enquanto a soma
+          «sinal + bias» não atravessar a zona morta, a gravação não começa — não começa devagarinho, não
+          começa de todo. Há um <strong>limiar</strong>, não uma rampa. É o facto mais robusto da lição.</p>
+          <p><strong>Há um pico e depois desce.</strong> Máximo em 0,8 (0,22468); aos 1,6 já só resta 0,07847,
+          um terço. Bias a mais é mau, e é mau <em>de forma suave</em> — não há nenhum sítio onde parta.</p>
+          <p>🔴 <strong>E agora o que esta tabela desmente.</strong> Olha para a coluna do THD: 44,10 →
+          13,57 → <strong>0,93</strong> → 1,51 → 3,43 → 3,73 → <strong>1,53</strong> → 2,75 → … →
+          <strong>0,00</strong> aos 1,3. Isto não é uma curva. É ruído com forma.</p>
+          <p>Se tivesses concluído da tabela grossa do exemplo trabalhado que «o ótimo de distorção está em
+          0,5», esta tabela mostra que estavas a ler um acidente. <strong>A distorção em função do bias não é
+          uma quantidade que este modelo saiba prever</strong> — e essa é a conclusão certa a tirar, em vez
+          de um número.</p>
+          <p>O que falha é o modelo, não a medição: isso já está verificado e explicado na caixa vermelha do
+          exemplo trabalhado.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — código que corre: de onde vem a regra dos 150 %</h3>
+      <p>As normas dizem que uma fita Tipo II precisa de cerca de <strong>150 %</strong> do bias de uma Tipo I,
+      e uma Tipo IV de cerca de <strong>250 %</strong>. Esses números saíram de medições em fita real. Mas se o
+      mecanismo que a lição descreve estiver certo, o modelo tem de conseguir explicar <em>porque é que existe
+      uma relação</em>, mesmo que não acerte no número.</p>
+      <p>Mede o <strong>bias mínimo</strong>: o mais baixo a que ainda sai alguma coisa. Faz isso para zonas
+      mortas de 0,15 a 0,90 e compara com a razão entre as zonas mortas.</p>
+      <p>🔴 <strong>Escreve a previsão antes de correr</strong>, e depois escreve honestamente se bateu.</p>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>A previsão:</strong> para haver saída, a soma «sinal + bias» tem de chegar a ±<code>MORTA</code>.
+        Com sinal pequeno, isso quer dizer bias ≈ <code>MORTA</code>. Logo o bias mínimo deve ser
+        <strong>proporcional à zona morta</strong>.</p>
+<pre><code># reaproveita gravar(), media_movel(), harmonicos() e thd()
+
+def limiar(morta, amp=0.05, minimo=0.001):
+    # O bias mais baixo a que ainda sai alguma coisa.
+    global MORTA
+    MORTA = morta
+    N, janela = int(TAXA/SINAL)*20 + int(TAXA/BIAS), int(TAXA/BIAS)
+    for passo in range(1, 200):
+        nb = passo / 100
+        x = [amp*math.sin(2*math.pi*SINAL*i/TAXA) for i in range(N)]
+        b = [nb*math.sin(2*math.pi*BIAS*i/TAXA) for i in range(N)]
+        y = media_movel([gravar(xi+bi) for xi, bi in zip(x, b)], janela)
+        if harmonicos(y, SINAL)[0] &gt; minimo:
+            return nb
+    return None
+
+base = limiar(0.30)
+print(f"{'zona morta':&gt;11} {'bias minimo':&gt;12} {'razao':&gt;8} {'zona/0.30':&gt;10}")
+for m in (0.15, 0.30, 0.45, 0.60, 0.75, 0.90):
+    b = limiar(m)
+    print(f"{m:11.2f} {b:12.2f} {b/base:8.2f} {m/0.30:10.2f}")</code></pre>
+        <p>Saída:</p>
+<pre><code> zona morta  bias minimo    razao  zona/0.30
+       0.15         0.12     0.43       0.50
+       0.30         0.28     1.00       1.00
+       0.45         0.43     1.54       1.50
+       0.60         0.59     2.11       2.00
+       0.75         0.75     2.68       2.50
+       0.90         0.90     3.21       3.00</code></pre>
+        <div class="caixa ok">
+          <span class="titulo">✅ Bateu — e é preciso dizer exactamente <em>o quê</em></span>
+          <p>Compara as duas últimas colunas: 0,43 contra 0,50 · 1,54 contra 1,50 · 2,11 contra 2,00 ·
+          2,68 contra 2,50 · 3,21 contra 3,00. <strong>O bias mínimo é proporcional à zona morta</strong>, com
+          erro de poucos por cento. E a coluna do meio mostra porquê de forma ainda mais directa: 0,28 para uma
+          zona morta de 0,30, 0,59 para 0,60, 0,90 para 0,90. <strong>Bias mínimo ≈ zona morta.</strong></p>
+          <p>É este o mecanismo por trás dos 150 % e dos 250 %: uma fita com o dobro da coercividade precisa
+          aproximadamente do dobro do campo só para a gravação começar.</p>
+        </div>
+        <div class="caixa critico">
+          <span class="titulo">🔴 E agora o que <em>não</em> bateu — que é a parte que interessa</span>
+          <p>A minha primeira versão deste exercício procurava o bias que <strong>minimiza a distorção</strong>,
+          e depois o que <strong>maximiza o sinal</strong>. Corri os dois. Nenhum funciona:</p>
+          <ul>
+            <li>Minimizar o THD é impossível neste modelo, porque o THD em função do bias não é uma curva
+            (ver E2).</li>
+            <li>Maximizar o sinal dá, para zonas mortas de 0,15 / 0,30 / 0,45 / 0,60 / 0,75, os bias
+            0,60 / 0,85 / 0,90 / 0,90 / 1,50. <strong>Não é proporcional a nada</strong> — há um patamar no meio
+            e um salto no fim.</li>
+          </ul>
+          <p>Ou seja: das três definições possíveis de «o bias certo», só uma — o <strong>limiar</strong> —
+          é que o modelo reproduz de forma limpa. As outras duas não.</p>
+          <p><strong>Isto é o resultado honesto e vale mais do que uma coincidência.</strong> O modelo explica
+          porque é que existe uma relação entre coercividade e bias, e acerta no sentido e na ordem de grandeza.
+          Não prevê o número da norma, porque a norma saiu de medições numa fita real com uma curva que não é a
+          recta que eu desenhei, e porque «bias de referência» na norma não é definido como limiar.</p>
+          <p>Um modelo que explica o mecanismo e falha o terceiro algarismo é um bom modelo. Um modelo que
+          acertasse nos 250 % por acaso seria <em>pior</em>, porque te levava a confiar nele para a pergunta
+          seguinte.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+
+    <p>Cada opção tem explicação, também as erradas.</p>
+    <div class="quiz" data-quiz="l2">
+      <ol class="perguntas">
+        <li class="pergunta">
+          <p class="enunciado">Qual é o problema que o bias resolve?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l2-1" value="a" data-certa="false"><span class="rotulo">A fita satura quando o sinal é forte</span></label>
+              <p class="explicacao" hidden>A saturação existe, mas o bias não ajuda nisso — se alguma coisa, gasta margem. O bias ataca o problema do lado oposto da curva.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-1" value="b" data-certa="true"><span class="rotulo">Abaixo da coercividade a fita não é magnetizada, e por isso os sinais baixos não se gravam de todo</span></label>
+              <p class="explicacao" hidden>É esse. O exemplo trabalhado mede-o: amplitude 0,2 sem bias dá fundamental exactamente 0,00000. Não «baixo»: zero.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-1" value="c" data-certa="false"><span class="rotulo">A cabeça de leitura amplifica os agudos em 6 dB por oitava</span></label>
+              <p class="explicacao" hidden>Isso é verdade e é da lição 1, mas resolve-se com equalização, não com bias. São dois problemas diferentes em dois pontos diferentes da cadeia.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-1" value="d" data-certa="false"><span class="rotulo">A fita tem chiado de fundo</span></label>
+              <p class="explicacao" hidden>O chiado vem da granularidade do meio e o bias não lhe toca. Quem ataca o chiado é a redução de ruído — o Dolby — e isso é a lição 3.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que o bias tem de ser alternado e não contínuo?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l2-2" value="a" data-certa="true"><span class="rotulo">Porque o bias contínuo deixa a fita com magnetização líquida, e isso gera ruído na leitura</span></label>
+              <p class="explicacao" hidden>É a razão histórica e a técnica. O bias alternado magnetiza tanto num sentido como no outro, e a média fica zero quando o sinal é zero.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-2" value="b" data-certa="false"><span class="rotulo">Porque a corrente contínua não atravessa a zona morta</span></label>
+              <p class="explicacao" hidden>Atravessa: era precisamente por isso que se usava, e reduzia mesmo a distorção. O problema dela é outro.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-2" value="c" data-certa="false"><span class="rotulo">Porque a corrente contínua não passa nas bobinas da cabeça</span></label>
+              <p class="explicacao" hidden>Passa perfeitamente — uma bobina conduz corrente contínua melhor do que alternada. O que a corrente contínua não faz é produzir campo <em>variável</em>, mas para o efeito de bias isso não era o obstáculo.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-2" value="d" data-certa="false"><span class="rotulo">Porque as normas IEC o exigem</span></label>
+              <p class="explicacao" hidden>As normas fixaram níveis e equalizações, não a existência do bias alternado — que é anterior às normas e foi patenteado em 1927, décadas antes da cassete.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Na tabela do exemplo trabalhado, o 2.º harmónico é praticamente zero em todas as linhas e o 3.º é grande. O que é que isso diz?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l2-3" value="a" data-certa="false"><span class="rotulo">Que a medição está errada</span></label>
+              <p class="explicacao" hidden>Está certa, e é confirmável: sobe o 3.º harmónico exactamente quando o THD sobe. Uma medição errada não seria tão consistente.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-3" value="b" data-certa="false"><span class="rotulo">Que o filtro passa-baixo removeu o 2.º harmónico</span></label>
+              <p class="explicacao" hidden>O 2.º harmónico de 1 kHz são 2 kHz, e a janela da média móvel tem largura de 10 µs — corta acima de 100 kHz. Não chega perto dos 2 kHz.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-3" value="c" data-certa="false"><span class="rotulo">Que o bias está mal ajustado</span></label>
+              <p class="explicacao" hidden>O padrão par/ímpar mantém-se em <em>todas</em> as linhas, com bias bom e mau. Vem da forma da curva, não do ajuste.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-3" value="d" data-certa="true"><span class="rotulo">Que a não-linearidade é simétrica — trata igual o positivo e o negativo — e simetrias só geram harmónicos ímpares</span></label>
+              <p class="explicacao" hidden>É isso, e é uma ferramenta de diagnóstico: se alguma vez vires 2.º harmónico forte, a assimetria está algures. Magnetização contínua residual na fita, por exemplo.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Puseste o bias no máximo que a máquina dá, «para não distorcer». O que é que acontece de facto?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l2-4" value="a" data-certa="false"><span class="rotulo">Perde-se um pouco de volume e ganha-se em distorção</span></label>
+              <p class="explicacao" hidden>«Um pouco» não descreve o que a medição mostra: em E2, a fundamental passa de 0,2247 (bias 0,8, o máximo) para 0,0785 (bias 1,6). Perde-se <strong>dois terços</strong> do sinal.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-4" value="b" data-certa="false"><span class="rotulo">Nada de mal — é o que os gravadores profissionais fazem</span></label>
+              <p class="explicacao" hidden>Fazem o oposto: têm o bias <strong>ajustável por pista</strong> justamente porque não há valor máximo que sirva.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-4" value="c" data-certa="true"><span class="rotulo">O volume desaba — cai a um terço — e na fita real perdem-se ainda os agudos</span></label>
+              <p class="explicacao" hidden>Medido em E2: de 0,2247 no máximo para 0,0785 aos 1,6. E há um custo que a simulação não mostra de todo: um campo alternado forte a passar por cima de ondas curtas apaga-as. Bias a mais mata os agudos, que é exactamente o que uma cassete menos pode dar-se ao luxo de perder.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-4" value="d" data-certa="false"><span class="rotulo">A fita fica magnetizada e é preciso desmagnetizar as cabeças</span></label>
+              <p class="explicacao" hidden>Cabeças magnetizadas são um problema real e agravam a auto-apagagem, mas não é isso que excesso de bias provoca.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Uma fita Tipo II pede cerca de 150 % do bias de uma Tipo I. Se a gravares numa máquina regulada para Tipo I, o que ouves?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l2-5" value="a" data-certa="false"><span class="rotulo">Uma gravação com bias a mais: agudos abafados</span></label>
+              <p class="explicacao" hidden>Seria o caso contrário — gravar uma Tipo I numa máquina regulada para Tipo II. Aí sim, bias a mais.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-5" value="b" data-certa="true"><span class="rotulo">Uma gravação com bias a menos: pouco volume e distorção alta</span></label>
+              <p class="explicacao" hidden>A fita tem coercividade mais alta e a corrente de Tipo I não chega para a atravessar bem. O E3 mede o mecanismo: o bias mínimo é proporcional à zona morta, logo uma fita mais dura com o bias de uma fita mais mole fica abaixo do limiar ou perto dele.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-5" value="c" data-certa="false"><span class="rotulo">Exactamente o mesmo: o tipo só afeta a leitura</span></label>
+              <p class="explicacao" hidden>Afeta os dois. Na leitura muda a equalização (120 µs contra 70 µs) e na gravação muda o bias. Por isso é que os entalhes do invólucro comutam ambos.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-5" value="d" data-certa="false"><span class="rotulo">Nada de audível: a diferença entre tipos é de marketing</span></label>
+              <p class="explicacao" hidden>As coercividades são medidas e muito diferentes: ~380 Oe numa ferrosa contra ~490 Oe numa de dióxido de crómio. A IEC não normalizaria quatro tipos por causa de marketing.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que o bias está a 100 kHz e não a 3 kHz, já que em qualquer dos casos é inaudível numa fita de dados?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l2-6" value="a" data-certa="true"><span class="rotulo">Porque o que separa o sinal do bias é um filtro, e o filtro só os separa se as frequências estiverem muito afastadas</span></label>
+              <p class="explicacao" hidden>É isso. A média que recupera o sinal tem a largura de um ciclo de bias; se essa largura se aproximar de um período do sinal, a média apaga o próprio sinal. É o que o passo 5 da secção 5 demonstra.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-6" value="b" data-certa="false"><span class="rotulo">Para não interferir com a rádio</span></label>
+              <p class="explicacao" hidden>Curiosamente, interferência é um problema real dos osciladores de bias — mas é consequência, não razão. A razão é interna ao mecanismo.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-6" value="c" data-certa="false"><span class="rotulo">Porque a fita não consegue gravar 3 kHz</span></label>
+              <p class="explicacao" hidden>Grava 3 kHz muito bem — é plena banda de áudio. O que a fita quase não grava é os 100 kHz, e isso é uma vantagem do bias, não um requisito.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l2-6" value="d" data-certa="false"><span class="rotulo">Porque a 3 kHz não haveria oscilações suficientes por ciclo do sinal</span></label>
+              <p class="explicacao" hidden>Esta chega perto mas troca a causa pelo sintoma. O número de oscilações por ciclo é consequência da razão entre as frequências; o que falha mesmo é a separação por filtragem.</p>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="feynman-1">Explica a quem programa mas não sabe eletrónica: porque é que para gravar um som fraco numa fita é preciso somar-lhe um sinal forte que ninguém quer ouvir. Usa uma analogia com alguma coisa de software.
+        <span class="pista">A analogia boa existe e está na lição, mas tenta chegar lá sozinho antes de a procurar. Se a tua explicação não disser o que acontece quando o bias é a mais, ainda está a meio.</span>
+      </label>
+      <textarea id="feynman-1" data-pergunta="Explica a quem programa mas não sabe eletrónica: porque é que para gravar um som fraco numa fita é preciso somar-lhe um sinal forte que ninguém quer ouvir. Usa uma analogia com alguma coisa de software."></textarea>
+    </div>
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/cassete-dados/respostas/AAAA-MM-DD.md</code> e correr
+      <code>/corrigir cassete-dados</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Abaixo da coercividade a fita <strong>não grava nada</strong>. Medido: amplitude 0,2 sem bias dá
+      fundamental 0,00000. Sem bias não há gravação analógica.</li>
+      <li>O bias é um tom <strong>alternado</strong> de 40–150 kHz somado ao sinal. Não desloca o sinal: faz o
+      ponto de funcionamento varrer a zona útil dezenas de vezes por ciclo, e o sinal passa a ser o
+      <strong>desequilíbrio</strong> dessa oscilação. O que fica gravado é a média.</li>
+      <li>Tem de ser alternado: o bias contínuo deixava magnetização líquida e fazia ruído.</li>
+      <li>🔴 <strong>Não há um nível certo de bias.</strong> A sensibilidade sobe, chega a um máximo e volta
+      a descer: medido, de 0,2247 no pico para 0,0785 com bias ao dobro. Regular o bias é escolher o que se
+      perde — e os quatro critérios (sensibilidade, ruído, agudos, distorção) têm ótimos diferentes.</li>
+      <li>Coercividade mais alta pede mais bias: <strong>o bias mínimo é proporcional à zona morta</strong>,
+      medido em E3. É o mecanismo por trás dos 150 % da Tipo II e dos 250 % da Tipo IV, e dos entalhes no
+      invólucro que fazem o leitor comutar sozinho.</li>
+      <li>⚠️ A simulação desta lição é um modelo <strong>sem memória</strong> e explica o mecanismo, não a
+      fita. Serve para prever sentidos e ordens de grandeza; não serve para prever os números da norma.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Curso universitário (não é documentação)</strong> — Jay Kadis, <em>Magnetic Recording: Analog
+      Tape</em>, CCRMA, Universidade de Stanford, ©2014. <strong>Porquê:</strong> a secção «Bias Current»
+      explica o mecanismo pela <em>banda morta</em> («os domínios magnéticos têm uma força de campo mínima
+      abaixo da qual não podem ser magnetizados, por isso sinais de baixa amplitude não podem ser transferidos»)
+      e a figura 6 mostra que sensibilidade, ruído, resposta e distorção têm ótimos diferentes — que é a ideia
+      central desta lição. <strong>O que ler:</strong> «The Record Head», sobretudo as duas páginas sobre bias.
+      <a href="https://ccrma.stanford.edu/~jay/subpages/Lectures/Lecture7-Magnetic_recording.pdf">ccrma.stanford.edu</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Fonte secundária</strong> — Wikipédia (inglês), <em>Tape bias</em>. Daqui saem a gama de
+      frequências (40 a 150 kHz), as datas e os nomes das quatro descobertas independentes, e a citação sobre o
+      bias contínuo deixar «magnetização líquida, que gerava ruído significativo na reprodução». É enciclopédia
+      e diz-se que é. ⚠️ Conferi e <strong>não</strong> discute sub-bias nem sobre-bias — os efeitos do nível
+      tive de os ir buscar a Kadis e medi-los eu.
+      <a href="https://en.wikipedia.org/wiki/Tape_bias">en.wikipedia.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Norma</strong> — os tipos IEC de cassete (I a IV), as coercividades de referência (360 Oe para
+      Tipo I, 490 Oe para o dióxido de crómio, ~1100 Oe para metal) e os níveis relativos de bias (150 % e 250 %).
+      <span class="verificado">🌐 Verificado a 2026-09-16</span> ⚠️ Confirmei estes valores numa enciclopédia
+      que os atribui à IEC 60094; <strong>não</strong> abri o texto da norma, que é pago. Os números estão aqui
+      com essa ressalva.</li>
+
+      <li><strong>Livro</strong> — Daniel, Mee e Clark (eds.), <em>Magnetic Recording: The First 100 Years</em>,
+      IEEE Press, 1999, ISBN 0-7803-4709-9. <strong>Porquê:</strong> a história das redescobertas do bias —
+      quatro grupos em três países ao longo de vinte anos — está contada lá com o contexto industrial.
+      <span class="verificado">🌐 Verificado a 2026-09-16 — referência confirmada em catálogo</span>
+      ⚠️ <strong>Não li o livro.</strong> As datas acima vêm da Wikipédia, não dele.</li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> · Anterior: <a href="01-fita-magnetismo.html">← 1 · Como o som fica preso na fita</a> · Próxima: <a href="03-limites.html">3 · Os limites: ruído, banda e velocidade →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

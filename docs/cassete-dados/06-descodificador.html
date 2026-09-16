@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6 · O descodificador: de som a bytes — A cassete como memória</title>
+<meta name="description" content="Um descodificador de fita de ZX Spectrum em Python, passo a passo, com os limites de ruído, banda, velocidade e taxa de amostragem medidos.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-dados/06-descodificador.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">A cassete como memória</a> <span aria-hidden="true">›</span> Lição 6
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta extensão">Lição 6 · extensão</span> <span class="etiqueta">~2 horas</span></p>
+    <h1>O descodificador: de som a bytes</h1>
+    <p class="subtitulo">O projeto. Cinco passos, noventa linhas de biblioteca padrão, e um ficheiro de saída que tem de ser idêntico ao de entrada — byte a byte, ou não conta.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim tens <strong>um programa que corre</strong>: lê um <code>.wav</code> de uma fita de ZX Spectrum e
+    escreve um <code>.tap</code> cujos bytes são <strong>idênticos</strong> ao original. E sabes onde ele parte,
+    porque mediste: a que taxa de amostragem, a que ruído, a que corte de agudos e a que variação de velocidade.
+    Este é o critério de sucesso que escolheste no diagnóstico.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <ol>
+      <li>Da lição 5: os cinco tempos do formato, em T-states.
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Piloto <strong>2168</strong>; sincronismo <strong>667</strong> e <strong>735</strong>; bit 0
+          <strong>855</strong>; bit 1 <strong>1710</strong>. Todos em meias ondas — um bit são duas.</p>
+        </details>
+      </li>
+      <li>Da lição 3: porque é que não se pode usar «mais de 16 amostras é um 1»?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Porque a velocidade da reprodução é desconhecida. Medido: a 1,5× de velocidade, o limiar fixo erra
+          400 bits em 800 e o medido no piloto erra zero.</p>
+        </details>
+      </li>
+      <li>Da lição 4: o que fez o descodificador do Kansas City passar de aguentar ruído 0,05 para 0,20?
+        <details class="solucao"><summary>Resposta</summary>
+          <p><strong>Histerese</strong>: dois limiares com uma zona morta pelo meio, em vez de reagir ao
+          cruzamento exacto do zero.</p>
+        </details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p>O descodificador tem <strong>cinco passos</strong>, e a razão de serem cinco e não um é que cada um se
+    verifica sozinho. Se a coisa não funcionar — e não vai funcionar à primeira — precisas de saber
+    <em>onde</em>.</p>
+
+    <figure>
+      <svg viewBox="0 0 520 210" role="img" aria-labelledby="t-cinco d-cinco">
+        <title id="t-cinco">Os cinco passos do descodificador e o que cada um produz</title>
+        <desc id="d-cinco">Cinco caixas ligadas por setas de cima para baixo. A primeira, ler, produz uma lista
+        de amostras inteiras. A segunda, centrar, tira o desvio de zero e produz amostras centradas. A terceira,
+        arestas, produz os índices onde o sinal muda de lado. A quarta, medir, produz o comprimento de cada meia
+        onda em amostras. A quinta, ler bits, produz os blocos de bytes.</desc>
+        <rect class="svg-caixa"  x="8"   y="8"  width="150" height="34" rx="5"/>
+        <rect class="svg-caixa"  x="8"   y="50" width="150" height="34" rx="5"/>
+        <rect class="svg-realce" x="8"   y="92" width="150" height="34" rx="5"/>
+        <rect class="svg-caixa"  x="8"   y="134" width="150" height="34" rx="5"/>
+        <rect class="svg-realce" x="8"   y="176" width="150" height="26" rx="5"/>
+        <text class="svg-texto" x="20" y="30">1 · ler</text>
+        <text class="svg-texto" x="20" y="72">2 · centrar</text>
+        <text class="svg-texto" x="20" y="114">3 · arestas</text>
+        <text class="svg-texto" x="20" y="156">4 · medir</text>
+        <text class="svg-texto" x="20" y="194">5 · ler bits</text>
+        <text class="svg-texto" x="178" y="30">lista de inteiros, um canal</text>
+        <text class="svg-texto" x="178" y="72">sem desvio de zero nem deriva</text>
+        <text class="svg-texto" x="178" y="114">índices onde o sinal troca de lado</text>
+        <text class="svg-texto" x="178" y="156">comprimento de cada meia onda</text>
+        <text class="svg-texto" x="178" y="194">blocos de bytes, com paridade</text>
+        <path class="svg-traco" d="M83 42 V46"/><path d="M83 84 V88" class="svg-traco"/>
+        <path class="svg-traco" d="M83 126 V130"/><path d="M83 168 V172" class="svg-traco"/>
+      </svg>
+      <figcaption>Os dois passos realçados são os que fazem o trabalho: a <strong>histerese</strong> (3) e a
+      <strong>escala medida no piloto</strong> (5). Os outros três são canalização.</figcaption>
+    </figure>
+
+    <h3>Passo 2 — centrar: porquê um passa-alto e não subtrair a média</h3>
+
+    <p>Uma gravação real tem desvio de zero (o sinal não oscila em torno de 0) e deriva lenta (esse desvio muda
+    ao longo do tempo). Subtrair a média global corrige o primeiro e não corrige o segundo.</p>
+
+    <p>Um <strong>passa-alto</strong> de um polo corrige os dois, porque tira <em>tudo</em> o que varia devagar.
+    O corte vai em 40 Hz — muito abaixo dos 807 Hz do tom-piloto, que é a frequência mais baixa que nos
+    interessa preservar.</p>
+
+    <h3>Passo 3 — arestas: histerese com envelope</h3>
+
+    <p>Já viste na lição 4 porque é preciso histerese: sem ela, o ruído em volta do zero conta dez transições
+    onde há uma. Falta uma peça: <strong>qual é o limiar?</strong></p>
+
+    <p>Um valor fixo não serve, porque a amplitude varia — entre gravações, entre máquinas, e ao longo da
+    própria fita. A solução é um <strong>seguidor de envelope</strong>: uma variável que sobe instantaneamente
+    quando o sinal sobe e desce devagar quando ele desce. O limiar é uma fração dela.</p>
+
+<pre><code>env = max(abs(v), env * decaimento)   # sobe de imediato, desce devagar
+limiar = fraccao * env</code></pre>
+
+    <p>É o mesmo princípio do companding da lição 3 — o sistema mede o nível e adapta-se — aplicado a outro
+    problema. E é o mesmo princípio do passo 5.</p>
+
+    <h3>Passo 5 — a régua vem dentro do desenho</h3>
+
+    <p>Este é o passo que faz o descodificador funcionar, e é a conclusão da lição 3 posta em código.</p>
+
+    <ol>
+      <li><strong>Encontrar o piloto</strong>: uma corrida de meias ondas todas parecidas <em>e</em> com
+      comprimento na vizinhança do valor nominal do piloto (entre 0,6 e 1,6 vezes). São duas condições
+      distintas, e o E2 mede qual delas é que faz o trabalho — a resposta não é a que eu esperava.</li>
+      <li><strong>Medir a escala</strong>: a <em>mediana</em> dos comprimentos dessa corrida vale 2168 T. Daí
+      sai quantas amostras vale um T-state <strong>nesta fita, a esta velocidade</strong>.</li>
+      <li><strong>Tudo o resto em relação a essa escala</strong>: o sincronismo, o limiar entre 0 e 1, o limite
+      acima do qual já não é bit.</li>
+    </ol>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ Porquê mediana e não média</span>
+      <p>A média é arrastada por valores extremos. Se um <em>dropout</em> a meio do piloto produzir uma meia
+      onda com o triplo do comprimento, a média move-se; a mediana não dá por nada. Com milhares de valores e
+      alguns estragados, a mediana é a escolha óbvia — e custa uma ordenação.</p>
+    </div>
+
+    <h3>A armadilha que só apareceu a correr</h3>
+
+    <div class="caixa critico">
+      <span class="titulo">🔴 A última meia onda não tem aresta de fecho</span>
+      <p>A minha primeira versão lia os bits aos pares: duas arestas, um bit. Funcionava — e perdia
+      <strong>o último byte de cada bloco</strong>, que é justamente o da paridade.</p>
+      <p>Instrumentei em vez de adivinhar, e a causa apareceu: o bloco tem 304 meias ondas de bits e o
+      descodificador via <strong>303</strong>. A última meia onda não tem aresta a fechá-la, porque a seguir a
+      ela vem silêncio — e silêncio não cruza limiar nenhum. Um descodificador que exija duas arestas por bit
+      descarta o par incompleto e perde sempre o último byte.</p>
+      <p>A correção é classificar o último bit com a meia onda que existe. Está no código, comentada.</p>
+    </div>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p>O programa completo, nos cinco passos. São 90 linhas de biblioteca padrão.</p>
+
+    <h3>Passos 1 e 2 — ler e centrar</h3>
+<pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Le um .wav de uma fita de ZX Spectrum e devolve os blocos (.tap).&quot;&quot;&quot;
+import math
+import struct
+import sys
+import wave
+
+PILOTO, SINC1, SINC2, BIT0, BIT1 = 2168, 667, 735, 855, 1710
+
+
+def ler_wav(caminho):
+    with wave.open(caminho, &quot;rb&quot;) as w:
+        taxa, largura, canais = w.getframerate(), w.getsampwidth(), w.getnchannels()
+        bruto = w.readframes(w.getnframes())
+    if largura != 2:
+        raise SystemExit(&quot;so leio 16 bits por amostra&quot;)
+    todas = struct.unpack(&quot;&lt;%dh&quot; % (len(bruto) // 2), bruto)
+    return taxa, list(todas[::canais])          # fica so o canal esquerdo
+
+
+def centrar(x, taxa, corte_hz=40.0):
+    &quot;&quot;&quot;Passa-alto de 1 polo: tira o desvio de zero e a deriva lenta.&quot;&quot;&quot;
+    a = math.exp(-2 * math.pi * corte_hz / taxa)
+    y, ant_x, ant_y = [], 0.0, 0.0
+    for v in x:
+        ant_y = a * (ant_y + v - ant_x)
+        ant_x = v
+        y.append(ant_y)
+    return y</code></pre>
+
+    <h3>Passos 3 e 4 — arestas e comprimentos</h3>
+<pre><code>def arestas(x, taxa, ataque_hz=20.0, fraccao=0.25):
+    &quot;&quot;&quot;Indices onde o sinal cruza o limiar. Histerese: um limiar para subir,
+    outro para descer. Sem isto, o ruido em volta do zero conta dez arestas
+    onde ha uma.&quot;&quot;&quot;
+    decaimento = math.exp(-2 * math.pi * ataque_hz / taxa)
+    env, lado, saida = 0.0, 1, []
+    for i, v in enumerate(x):
+        env = max(abs(v), env * decaimento)     # seguidor de envelope
+        limiar = fraccao * env
+        if lado &gt; 0 and v &lt; -limiar:
+            lado, _ = -1, saida.append(i)
+        elif lado &lt; 0 and v &gt; limiar:
+            lado, _ = 1, saida.append(i)
+    return saida
+
+
+def comprimentos(idx):
+    return [b - a for a, b in zip(idx, idx[1:])]</code></pre>
+
+    <h3>Passo 5 — os bits</h3>
+<pre><code>def mediana(v):
+    v = sorted(v)
+    return v[len(v) // 2]
+
+
+def descodificar(comp, taxa, minimo_piloto=256):
+    &quot;&quot;&quot;Percorre os comprimentos e devolve os blocos encontrados.&quot;&quot;&quot;
+    escala_nominal = taxa / 3_500_000          # amostras por T-state
+    blocos, i = [], 0
+    while i &lt; len(comp):
+        # --- procurar uma corrida de meias ondas todas parecidas e compridas
+        inicio = i
+        alvo = comp[i]
+        if not (0.6 * PILOTO * escala_nominal &lt; alvo &lt; 1.6 * PILOTO * escala_nominal):
+            i += 1
+            continue
+        j = i
+        while j &lt; len(comp) and 0.75 * alvo &lt; comp[j] &lt; 1.33 * alvo:
+            j += 1
+        if j - inicio &lt; minimo_piloto:
+            i = j if j &gt; i else i + 1
+            continue
+
+        # --- o piloto e o padrao: 2168 T medidos AQUI, nesta fita, a esta
+        #     velocidade. Tudo o resto passa a ser medido contra ele.
+        escala = mediana(comp[inicio:j]) / PILOTO
+
+        # --- sincronismo: duas meias ondas curtas seguidas
+        k = j
+        while k + 1 &lt; len(comp) and not (comp[k] &lt; 0.75 * PILOTO * escala
+                                         and comp[k + 1] &lt; 0.75 * PILOTO * escala):
+            k += 1
+        k += 2                                  # saltar SINC1 e SINC2
+
+        # --- bits: dois pulsos por bit, classificados contra o meio-termo
+        meio = (BIT0 + BIT1) / 2 * escala
+        limite_alto = 1.4 * BIT1 * escala       # acima disto ja nao e bit: acabou
+        meias_ondas = []
+        while k &lt; len(comp) and comp[k] &lt;= limite_alto:
+            meias_ondas.append(comp[k])
+            k += 1
+
+        # A ULTIMA meia onda do bloco nao tem aresta de fecho: a seguir a ela
+        # vem silencio, e silencio nao cruza limiar nenhum. Quem exigir duas
+        # arestas por bit le 303 meias ondas onde ha 304 e perde sempre o
+        # ultimo byte -- que e justamente o da paridade. Classifica-se o
+        # ultimo bit com a meia onda que existe.
+        bits = [1 if sum(par) / len(par) &gt; meio else 0
+                for par in (meias_ondas[n:n + 2]
+                            for n in range(0, len(meias_ondas), 2))]
+
+        octetos = bytearray()
+        for n in range(0, len(bits) - 7, 8):
+            v = 0
+            for b in bits[n:n + 8]:
+                v = (v &lt;&lt; 1) | b                # bit mais significativo primeiro
+            octetos.append(v)
+        if octetos:
+            blocos.append(bytes(octetos))
+        i = k
+    return blocos
+
+
+def paridade_ok(b):
+    x = 0
+    for v in b:
+        x ^= v
+    return x == 0</code></pre>
+
+    <h3>O programa principal</h3>
+<pre><code>def main():
+    caminho = sys.argv[1] if len(sys.argv) &gt; 1 else &quot;fita.wav&quot;
+    taxa, x = ler_wav(caminho)
+    idx = arestas(centrar(x, taxa), taxa)
+    blocos = descodificar(comprimentos(idx), taxa)
+
+    print(f&quot;{caminho}: {len(x)/taxa:.2f} s a {taxa} Hz, {len(idx)} arestas&quot;)
+    for n, b in enumerate(blocos):
+        marca = (&quot;cabecalho&quot; if b[0] == 0x00 else
+                 &quot;dados&quot; if b[0] == 0xFF else f&quot;?{b[0]:02x}&quot;)
+        print(f&quot;  bloco {n}: {len(b):4d} bytes  |  {marca:9s}  |  &quot;
+              f&quot;paridade {&#x27;ok&#x27; if paridade_ok(b) else &#x27;ERRADA&#x27;}&quot;)
+
+    saida = caminho.replace(&quot;.wav&quot;, &quot;-lido.tap&quot;)
+    with open(saida, &quot;wb&quot;) as f:
+        for b in blocos:
+            f.write(struct.pack(&quot;&lt;H&quot;, len(b)) + b)
+    print(f&quot;escrito {saida}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Porque é que diz «cabecalho» sem cedilha</span>
+      <p>A primeira versão escrevia <code>cabeçalho</code> e <code>✓</code>. Numa consola de Windows, que por
+      omissão está em <strong>cp1252</strong>, o programa rebentava com
+      <code>UnicodeEncodeError: 'charmap' codec can't encode character '\u2717'</code> — depois de já ter feito
+      todo o trabalho.</p>
+      <p>Não é uma questão de gosto: é que um programa de linha de comandos que só imprime bem em metade das
+      consolas é um programa que só funciona em metade das máquinas. <strong>ASCII na saída, sempre</strong>,
+      ou então cuidar da codificação de propósito.</p>
+    </div>
+
+    <h3>A saída</h3>
+<pre><code>&gt; python fita.py fita.wav
+fita.wav: 9.00 s, 44100 Hz
+fita.tap: 82 bytes, 2 blocos de [19, 59]
+
+&gt; python ler_fita.py fita.wav
+fita.wav: 9.00 s a 44100 Hz, 31518 arestas
+  bloco 0:   19 bytes  |  cabecalho  |  paridade ok
+  bloco 1:   59 bytes  |  dados      |  paridade ok
+escrito fita-lido.tap
+
+original 82 bytes
+lido     82 bytes
+IGUAL</code></pre>
+
+    <div class="caixa ok">
+      <span class="titulo">✅ «IGUAL» é o critério, e não há nenhum mais fraco que sirva</span>
+      <p>Repara no que <em>não</em> é o critério: não é «a paridade bate», não é «os blocos têm o tamanho
+      certo», não é «parece bem». É os 82 bytes serem <strong>os mesmos 82 bytes</strong>.</p>
+      <p>E repara nas <strong>31 518 arestas</strong> num sinal que só tem 12 538 meias ondas de verdade. As
+      outras 19 000 são ruído nos silêncios entre blocos, onde o envelope decaiu e o limiar baixou até ao nível
+      do chiado.</p>
+      <p>O descodificador deita-as fora com <strong>duas</strong> guardas independentes, e o exercício E2 mede
+      qual delas faz o trabalho:</p>
+      <ul>
+        <li>a <strong>janela de comprimento</strong> — uma corrida só é candidata a tom-piloto se as suas meias
+        ondas estiverem entre 0,6 e 1,6 vezes o valor nominal do piloto. O ruído em silêncio produz meias ondas
+        de 1 a 5 amostras, muito abaixo das ~27 do piloto;</li>
+        <li>o <strong><code>minimo_piloto</code></strong> — exigir uma corrida longa de meias ondas parecidas.</li>
+      </ul>
+      <p>⚠️ Eu tinha escrito aqui que era o <code>minimo_piloto</code> «o que separa sinal de silêncio».
+      <strong>Medi e não é.</strong> Baixá-lo de 256 para 4 não muda absolutamente nada, nem com ruído quatro
+      vezes maior. Quem faz o trabalho é a janela de comprimento; o <code>minimo_piloto</code> só conta abaixo
+      de 4. O E2 tem a medição.</p>
+    </div>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa: onde é que ele parte, e porquê</h3>
+      <p>Antes de medires (exercício E3), <strong>prevê</strong>. Escreve as tuas respostas.</p>
+      <ol>
+        <li><strong>Dado:</strong> a 44 100 Hz, uma meia onda de um bit 0 tem 10,77 amostras.</li>
+        <li><strong>______</strong> A que taxa de amostragem é que esperas que ele parta? Justifica com um
+        número de amostras por meia onda, não com «qualidade».</li>
+        <li><strong>Dado:</strong> o sinal vale ±1 e o ruído é gaussiano com desvio-padrão σ.</li>
+        <li><strong>______</strong> A que σ é que esperas que parta? A histerese está em 0,25 do envelope.</li>
+        <li><strong>______</strong> E a que corte de agudos? O sinal vai até 2047 Hz.</li>
+      </ol>
+      <details class="solucao"><summary>Ver o raciocínio (não os resultados — esses mede-los em E3)</summary>
+        <p><strong>2.</strong> O raciocínio: o que distingue um 0 de um 1 é o comprimento ser um ou dois. Com
+        <em>n</em> amostras por meia onda de um 0, o erro de medição é ±0,5 amostras, ou seja ±0,5/<em>n</em>.
+        Para a distinção sobreviver, esse erro tem de ficar bem abaixo de 50 %. Isso dá <em>n</em> ≈ 2 como
+        ordem de grandeza, e portanto uma taxa pela casa dos <strong>8000 Hz</strong>. Repara que este
+        raciocínio dá um <em>intervalo</em>, não um número — e que a taxa a que ele parte é a única coisa que a
+        medição pode dizer.</p>
+        <p><strong>4.</strong> A histerese dispara a 0,25 do envelope. Para o ruído atravessar a zona morta
+        sozinho precisa de excursões de mais de 0,5 (de −0,25 a +0,25). Com σ = 0,15, uma excursão de 0,5 são
+        3,3 desvios-padrão, o que acontece raramente — mas «raramente» em 400 000 amostras são muitas vezes.
+        Ordem de grandeza esperada: σ entre <strong>0,1 e 0,2</strong>.</p>
+        <p><strong>5.</strong> 🔴 <strong>Aqui a previsão honesta é «não sei».</strong> A lição 4 mostrou que um
+        passa-baixo quase não move os cruzamentos, portanto o corte pode descer muito abaixo dos 2047 Hz. Mas
+        quanto? Nada do que viste até aqui permite responder. É exactamente o tipo de pergunta em que <em>ter de
+        medir</em> não é preguiça — é a única via.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Classificar com limiares fixos em amostras</td>
+            <td>Funciona nos teus ficheiros e falha em fitas reais</td>
+            <td>A escala mede-se no piloto. É o passo 5, e é o que faz o descodificador existir</td>
+          </tr>
+          <tr>
+            <td>Contar cruzamentos por zero sem histerese</td>
+            <td>Número de arestas absurdo; bits a mais</td>
+            <td>Dois limiares com zona morta. Medido na lição 4: quadruplica o ruído tolerado</td>
+          </tr>
+          <tr>
+            <td>Exigir duas arestas por bit</td>
+            <td>Falta <strong>sempre</strong> o último byte, e é sempre o da paridade</td>
+            <td>A última meia onda não tem aresta de fecho. Classifica-se com a que existe</td>
+          </tr>
+          <tr>
+            <td>Usar a média do piloto em vez da mediana</td>
+            <td>Escala ligeiramente errada quando há <em>dropouts</em></td>
+            <td>Uma meia onda estragada arrasta a média. A mediana ignora-a</td>
+          </tr>
+          <tr>
+            <td>Não filtrar o desvio de zero</td>
+            <td>Metade das arestas desaparece; comprimentos ao dobro</td>
+            <td>Um sinal centrado em 0,3 nunca desce abaixo de −0,25 e as arestas descendentes somem</td>
+          </tr>
+          <tr>
+            <td>Apertar o <code>minimo_piloto</code> «para ter a certeza»</td>
+            <td>Um bloco desaparece <strong>em silêncio</strong>; o resto tem paridade certa</td>
+            <td>O piloto de um bloco de <em>dados</em> tem só 3223 meias ondas. Medido: com 4096, o bloco de
+            dados some-se e o programa não se queixa. Uma guarda apertada de mais não avisa — apaga</td>
+          </tr>
+          <tr>
+            <td>Escrever caracteres não-ASCII na saída</td>
+            <td><code>UnicodeEncodeError</code> numa consola de Windows, depois do trabalho todo feito</td>
+            <td>cp1252 é o que uma consola de Windows usa por omissão. ASCII na saída, ou tratar da codificação
+            de propósito</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — fazer correr</h3>
+      <p>Junta o gerador da lição 5 e o descodificador desta, gera uma fita e lê-a. Confirma que o
+      <code>.tap</code> de saída é <strong>byte a byte</strong> igual ao de entrada — com
+      <code>filecmp</code> ou com uma comparação de <code>bytes</code>, não a olho.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>a = open(&quot;fita.tap&quot;, &quot;rb&quot;).read()
+b = open(&quot;fita-lido.tap&quot;, &quot;rb&quot;).read()
+print(&quot;original&quot;, len(a), &quot;bytes&quot;)
+print(&quot;lido    &quot;, len(b), &quot;bytes&quot;)
+print(&quot;IGUAL&quot; if a == b else &quot;DIFERENTE&quot;)
+if a != b:
+    for i, (x, y) in enumerate(zip(a, b)):
+        if x != y:
+            print(f&quot;primeiro byte diferente: offset {i}: {x:#04x} != {y:#04x}&quot;)
+            break</code></pre>
+        <p>A segunda metade — dizer <em>onde</em> diferem — é o que transforma «não funciona» em algo que se
+        pode investigar. Vale sempre a pena escrevê-la antes de precisares dela.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: partir de propósito</h3>
+      <p>Quatro sabotagens, uma de cada vez. Para cada uma, <strong>prevê o sintoma antes de correr</strong> e
+      depois confere.</p>
+      <ol>
+        <li>Trocar <code>arestas()</code> por uma deteção simples de cruzamento por zero, sem histerese.</li>
+        <li>Substituir <code>escala</code> pela escala nominal (<code>taxa / 3_500_000</code>), e depois ler
+        uma fita gerada a 1,3× de velocidade.</li>
+        <li>Voltar a exigir duas meias ondas por bit.</li>
+        <li>Varrer <code>minimo_piloto</code> de 1 a 4096 e encontrar o intervalo em que funciona.
+        <strong>Prevê os dois extremos</strong>: o que parte em baixo, e o que parte em cima.</li>
+      </ol>
+      <details class="solucao"><summary>Solução — os sintomas medidos</summary>
+        <p>A fita de referência dá <code>blocos=[19, 59]</code>, as duas paridades <code>ok</code> e o ficheiro
+        <code>IGUAL</code>. Eis o que cada sabotagem produziu:</p>
+        <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Sintomas de cada sabotagem, tabela rolável na horizontal">
+          <table>
+            <thead><tr><th>Sabotagem</th><th>Blocos lidos</th><th>Paridade</th></tr></thead>
+            <tbody>
+              <tr><td>(nenhuma)</td><td><code>[19, 59]</code></td><td>ok, ok — ficheiro IGUAL</td></tr>
+              <tr><td>1 · Sem histerese</td><td><code>[1649]</code></td><td>errada</td></tr>
+              <tr><td>2 · Escala nominal, fita a 1,3×</td><td><code>[19, 59]</code></td><td>errada, errada</td></tr>
+              <tr><td>3 · Duas meias ondas por bit</td><td><code>[18, 58]</code></td><td>errada, errada</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>1 · Sem histerese.</strong> As arestas passam de 27 965 para <strong>41 127</strong>, e o
+        descodificador devolve <em>um</em> bloco só, de 1649 bytes. Não falha em silêncio: engole o sinal todo
+        como se fosse um bloco gigante, porque as arestas espúrias apagam a fronteira entre o fim de um bloco e
+        o princípio do seguinte.</p>
+        <p><strong>3 · Duas meias ondas por bit.</strong> <code>[18, 58]</code> — exactamente um byte a menos
+        em cada bloco, sempre. Um erro de fronteira, e do tipo que só se apanha a <em>comparar tamanhos</em>.</p>
+
+        <div class="caixa aviso">
+          <span class="titulo">⚠️ A sabotagem 2 é a mais perigosa, e por uma razão precisa</span>
+          <p>Devolve <code>[19, 59]</code>: os tamanhos certos, a bandeira certa, e o nome <code>TESTE</code>
+          legível no cabeçalho. Tudo o que um olho distraído verificaria está bem. Só os <em>bytes</em> estão
+          errados.</p>
+          <p><strong>Sem a verificação de paridade, terias escrito um <code>.tap</code> corrompido e acreditado
+          nele.</strong> É a razão para o critério de sucesso deste curso ser «os bytes são iguais» e não
+          «o programa corre».</p>
+        </div>
+
+        <h4>4 · O varrimento do <code>minimo_piloto</code>, que não deu o que eu esperava</h4>
+<pre><code>  minimo_piloto=    1 -&gt; [172, 572, 627, 372]
+  minimo_piloto=    2 -&gt; [19, 59, 55]
+  minimo_piloto=    4 -&gt; [19, 59]
+  minimo_piloto=   16 -&gt; [19, 59]
+  minimo_piloto=   64 -&gt; [19, 59]
+  minimo_piloto=  256 -&gt; [19, 59]
+  minimo_piloto= 1024 -&gt; [19, 59]
+  minimo_piloto= 4096 -&gt; [19]</code></pre>
+        <div class="caixa critico">
+          <span class="titulo">🔴 Funciona de 4 a 1024. Eu tinha previsto que 4 partisse.</span>
+          <p><strong>O extremo de baixo.</strong> Com 1, o descodificador apanha corridas de ruído e devolve
+          lixo: <code>[172, 572, 627, 372]</code>. Com 2, ainda aparece um bloco fantasma de 55 bytes. A partir
+          de <strong>4</strong> está limpo — e continua limpo até 1024.</p>
+          <p><strong>O extremo de cima</strong> é o que ensina mais. Com 4096, os blocos passam a
+          <code>[19]</code>: o bloco de <em>dados</em> desapareceu. Porquê? Porque o seu tom-piloto tem
+          <strong>3223</strong> meias ondas (lição 5), e 3223 &lt; 4096. A guarda passou a rejeitar o próprio
+          sinal que devia proteger.</p>
+          <p>🔴 <strong>Uma guarda apertada de mais não avisa: apaga.</strong> E apaga de forma limpa — o bloco
+          que sobra tem paridade certa, o programa não se queixa de nada, e o ficheiro fica com metade. É o
+          mesmo tipo de falha silenciosa da sabotagem 2, por outro caminho.</p>
+          <p><strong>Então o 256 está bem escolhido?</strong> Está, e agora sei porquê: fica no meio de um
+          intervalo que vai de 4 a ~3223, com quase três ordens de grandeza de folga de cada lado. Mas o
+          raciocínio com que eu o tinha escolhido — «é isto que separa sinal de ruído» — estava errado.</p>
+          <p>⭐ <strong>E o que separa mesmo?</strong> Corri a experiência que faltava: desliguei a
+          <em>janela de comprimento</em> (a condição que exige que a corrida esteja entre 0,6 e 1,6 vezes o
+          comprimento nominal do piloto). Com <code>minimo_piloto = 4</code> e sem janela, o resultado é
+          <strong>zero blocos</strong>; com 256 e sem janela, volta a <code>[19, 59]</code>. As duas guardas
+          cobrem casos diferentes e nenhuma delas é redundante — mas a que rejeita o ruído dos silêncios é a
+          <strong>janela de comprimento</strong>, não o <code>minimo_piloto</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — código que corre: encontrar os limites</h3>
+      <p>Escreve um arnês que gera fitas com defeitos controlados e mede onde o descodificador parte. Quatro
+      ataques, um de cada vez, e depois os quatro juntos.</p>
+      <p>🔴 <strong>No ruído, usa várias sementes.</strong> Uma medição com uma semente só não é uma medição: é
+      uma anedota. Um descodificador que funciona com uma semente e falha com outra não «funciona».</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>&quot;&quot;&quot;Ate onde e que o descodificador aguenta? Uma medicao por ataque.&quot;&quot;&quot;
+import io, math, struct, wave
+import fita as F, ler_fita as L
+
+def uma_fita(taxa=44100, wow=0.004, ruido=0.04, corte=6000, semente=1):
+    corpo = bytes(range(32)) + b&quot;OLA MUNDO&quot; + bytes([0xAA, 0x55]*8)
+    blocos = [F.cabecalho(3, &quot;TESTE&quot;, len(corpo), 32768, 32768),
+              F.bloco(0xFF, corpo)]
+    x = F.silencio(taxa, 0.3)
+    for b in blocos:
+        x += F.onda(F.pulsos(b), taxa, wow=wow) + F.silencio(taxa, 0.5)
+    x = F.estragar(x, taxa, corte_hz=corte, ruido=ruido, semente=semente)
+    pico = max(1e-9, max(abs(v) for v in x))
+    q = b&quot;&quot;.join(struct.pack(&quot;&lt;h&quot;, int(max(-1, min(1, v/pico/1.05))*32000))
+                 for v in x)
+    buf = io.BytesIO()
+    with wave.open(buf, &quot;wb&quot;) as w:
+        w.setnchannels(1); w.setsampwidth(2)
+        w.setframerate(taxa); w.writeframes(q)
+    buf.seek(0)
+    with wave.open(buf, &quot;rb&quot;) as w:
+        bruto = w.readframes(w.getnframes())
+    am = list(struct.unpack(&quot;&lt;%dh&quot; % (len(bruto)//2), bruto))
+    lidos = L.descodificar(L.comprimentos(L.arestas(L.centrar(am, taxa), taxa)), taxa)
+    return F.tap(lidos) == F.tap(blocos)       # byte a byte, nada menos
+
+print(&quot;1. TAXA DE AMOSTRAGEM   (meia onda de um bit 0 = 855 T)&quot;)
+for t in (5000, 6000, 6500, 8000, 11025, 22050, 44100):
+    print(f&quot;   {t:6d} Hz  =  {855/3.5e6*t:4.2f} amostras  -&gt;  &quot;
+          f&quot;{&#x27;ok&#x27; if uma_fita(taxa=t) else &#x27;FALHA&#x27;}&quot;)
+
+print(&quot;\n2. RUIDO   (8 sementes diferentes; o sinal vale +-1)&quot;)
+for r in (0.05, 0.08, 0.10, 0.12, 0.15, 0.20):
+    n = sum(1 for s in range(1, 9) if uma_fita(ruido=r, semente=s))
+    print(f&quot;   sigma {r:4.2f}  SNR ~{20*math.log10(1/r):2.0f} dB  -&gt;  &quot;
+          f&quot;{n}/8 ficheiros identicos&quot;)
+
+print(&quot;\n3. CORTE DE AGUDOS   (passa-baixo de 1 polo; o sinal vai ate 2047 Hz)&quot;)
+for c in (4000, 2000, 1000, 800, 700, 500):
+    print(f&quot;   {c:5d} Hz  -&gt;  {&#x27;ok&#x27; if uma_fita(corte=c) else &#x27;FALHA&#x27;}&quot;)
+
+print(&quot;\n4. VARIACAO DE VELOCIDADE (wow, valor de pico)&quot;)
+for w in (0.00, 0.10, 0.20, 0.25, 0.30):
+    print(f&quot;   {w:4.0%}  -&gt;  {&#x27;ok&#x27; if uma_fita(wow=w) else &#x27;FALHA&#x27;}&quot;)
+
+print(&quot;\n5. TUDO AO MESMO TEMPO&quot;)
+for rot, kw in ((&quot;cassete boa   &quot;, dict(ruido=0.05, wow=0.02, corte=8000)),
+                (&quot;cassete gasta &quot;, dict(ruido=0.08, wow=0.05, corte=4000)),
+                (&quot;cassete ma    &quot;, dict(ruido=0.10, wow=0.10, corte=2000)),
+                (&quot;ja nao da     &quot;, dict(ruido=0.12, wow=0.15, corte=1500))):
+    print(f&quot;   {rot} -&gt; {&#x27;ok&#x27; if uma_fita(**kw) else &#x27;FALHA&#x27;}&quot;)</code></pre>
+        <p>Saída:</p>
+<pre><code>1. TAXA DE AMOSTRAGEM   (meia onda de um bit 0 = 855 T)
+     5000 Hz  =  1.22 amostras  -&gt;  FALHA
+     6000 Hz  =  1.47 amostras  -&gt;  FALHA
+     6500 Hz  =  1.59 amostras  -&gt;  ok
+     8000 Hz  =  1.95 amostras  -&gt;  ok
+    11025 Hz  =  2.69 amostras  -&gt;  ok
+    22050 Hz  =  5.39 amostras  -&gt;  ok
+    44100 Hz  =  10.77 amostras  -&gt;  ok
+
+2. RUIDO   (8 sementes diferentes; o sinal vale +-1)
+   sigma 0.05  SNR ~26 dB  -&gt;  8/8 ficheiros identicos
+   sigma 0.08  SNR ~22 dB  -&gt;  8/8 ficheiros identicos
+   sigma 0.10  SNR ~20 dB  -&gt;  8/8 ficheiros identicos
+   sigma 0.12  SNR ~18 dB  -&gt;  7/8 ficheiros identicos
+   sigma 0.15  SNR ~16 dB  -&gt;  3/8 ficheiros identicos
+   sigma 0.20  SNR ~14 dB  -&gt;  0/8 ficheiros identicos
+
+3. CORTE DE AGUDOS   (passa-baixo de 1 polo; o sinal vai ate 2047 Hz)
+    4000 Hz  -&gt;  ok
+    2000 Hz  -&gt;  ok
+    1000 Hz  -&gt;  ok
+     800 Hz  -&gt;  ok
+     700 Hz  -&gt;  FALHA
+     500 Hz  -&gt;  FALHA
+
+4. VARIACAO DE VELOCIDADE (wow, valor de pico)
+     0%  -&gt;  ok
+    10%  -&gt;  ok
+    20%  -&gt;  ok
+    25%  -&gt;  FALHA
+    30%  -&gt;  FALHA
+
+5. TUDO AO MESMO TEMPO
+   cassete boa    -&gt; ok
+   cassete gasta  -&gt; ok
+   cassete ma     -&gt; ok
+   ja nao da      -&gt; FALHA</code></pre>
+
+        <div class="caixa ok">
+          <span class="titulo">✅ Quatro números, e o terceiro é o que importa</span>
+          <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Limites medidos, tabela rolável na horizontal">
+            <table>
+              <thead><tr><th>Ataque</th><th>Aguenta até</th><th>Parte em</th></tr></thead>
+              <tbody>
+                <tr><td>Taxa de amostragem</td><td>6500 Hz (1,59 amostras por meia onda)</td><td>6000 Hz (1,47)</td></tr>
+                <tr><td>Ruído</td><td>σ = 0,10 — SNR ≈ 20 dB</td><td>σ = 0,15 — 3/8</td></tr>
+                <tr><td>Corte de agudos</td><td><strong>800 Hz</strong></td><td>700 Hz</td></tr>
+                <tr><td>Variação de velocidade</td><td>±20 %</td><td>±25 %</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>A taxa de amostragem</strong> confirma a previsão: parte por volta de <strong>1,5 amostras
+          por meia onda</strong>. Repara que isto é o teorema da amostragem dito no domínio do tempo — e que a
+          fronteira não está no limite de Shannon (4094 Hz para um sinal de 2047 Hz) mas em cerca de
+          <strong>1,6 vezes</strong> esse limite, porque cronometrar exige mais do que reconstruir.</p>
+          <p><strong>O ruído</strong> parte a SNR ≈ 16–18 dB. Qualquer cassete decente dá 45 dB ou mais, e uma
+          péssima dá 30. O ruído <em>nunca</em> é o problema numa fita de dados — e era a primeira coisa que
+          eu teria adivinhado.</p>
+          <p>🔴 <strong>E o corte de agudos é o número que vale a lição inteira.</strong> O sinal tem
+          componentes até 2047 Hz. O descodificador funciona com um passa-baixo a <strong>800 Hz</strong> — ou
+          seja, com a componente principal do sinal atenuada. Isto não é margem: é o mecanismo da lição 4 a
+          mostrar-se por inteiro. A informação está nos <em>instantes</em> dos cruzamentos, e atenuar a
+          amplitude não move instantes.</p>
+          <p><strong>Os quatro juntos</strong> aguentam até uma combinação bastante má (σ = 0,10, wow de 10 %,
+          corte a 2000 Hz) e só partem na última. Os defeitos não se acumulam tão depressa como se poderia
+          temer — mas a última linha mostra que se acumulam.</p>
+          <p>⚠️ <strong>Uma ressalva honesta:</strong> estes são os limites <em>do meu simulador com o meu
+          descodificador</em>. Uma cassete real não é um passa-baixo de um polo mais ruído gaussiano: tem
+          <em>dropouts</em>, tem distorção, tem <em>print-through</em>. Estes números medem o descodificador, não
+          a cassete. Para medir a cassete era preciso uma cassete.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+
+    <p>Cada opção tem explicação, também as erradas.</p>
+    <div class="quiz" data-quiz="l6">
+      <ol class="perguntas">
+        <li class="pergunta">
+          <p class="enunciado">Porque é que o descodificador mede a escala na mediana do tom-piloto, e não na média?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l6-1" value="a" data-certa="false"><span class="rotulo">Porque a mediana é mais rápida de calcular</span></label>
+              <p class="explicacao" hidden>É mais lenta: exige ordenar. A média é uma passagem só. A escolha custa tempo e paga-se em robustez.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-1" value="b" data-certa="true"><span class="rotulo">Porque um <em>dropout</em> a meio do piloto produz meias ondas absurdas que arrastam a média mas não movem a mediana</span></label>
+              <p class="explicacao" hidden>Com milhares de valores e alguns estragados, a mediana é a escolha óbvia. O custo é a ordenação.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-1" value="c" data-certa="false"><span class="rotulo">Porque a média daria um valor não inteiro</span></label>
+              <p class="explicacao" hidden>A mediana de comprimentos em amostras também pode não ser inteira, e não haveria mal nenhum nisso: a escala é em vírgula flutuante de qualquer forma.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-1" value="d" data-certa="false"><span class="rotulo">Porque a mediana é imune ao erro constante de velocidade</span></label>
+              <p class="explicacao" hidden>Nenhuma das duas é: um erro constante muda <em>todos</em> os comprimentos e move as duas por igual. E isso é precisamente o que se quer — é assim que a escala acompanha a velocidade.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">O descodificador encontrou 31 518 arestas num sinal com 12 538 meias ondas reais. O que são as outras?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l6-2" value="a" data-certa="true"><span class="rotulo">Ruído nos silêncios entre blocos, onde o envelope decaiu e o limiar baixou até ao nível do chiado</span></label>
+              <p class="explicacao" hidden>O seguidor de envelope desce devagar mas desce. Em silêncio, o limiar acaba por chegar ao nível do ruído e toda a flutuação conta como aresta.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-2" value="b" data-certa="false"><span class="rotulo">Erros da deteção de histerese</span></label>
+              <p class="explicacao" hidden>A histerese está a funcionar: sem ela seriam muitas mais. Estas arestas são reais — o sinal cruza mesmo os limiares nesses pontos.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-2" value="c" data-certa="false"><span class="rotulo">Os pulsos de sincronismo, que são contados duas vezes</span></label>
+              <p class="explicacao" hidden>São dois pulsos por bloco, ou seja quatro no total. Não explicam 19 000 arestas nem de longe.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-2" value="d" data-certa="false"><span class="rotulo">Harmónicos da onda quadrada</span></label>
+              <p class="explicacao" hidden>Harmónicos mudam a <em>forma</em> da onda, não o número de vezes que ela cruza um limiar. Uma onda quadrada e a sua fundamental cruzam o zero nos mesmos sítios.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Qual das quatro sabotagens de E2 é a mais perigosa?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l6-3" value="a" data-certa="false"><span class="rotulo">Tirar a histerese, porque devolve um bloco gigante de 1649 bytes</span></label>
+              <p class="explicacao" hidden>É a mais <em>visível</em>, e por isso a menos perigosa: um bloco de 1649 bytes onde se esperavam dois de 19 e 59 nota-se de imediato, e a paridade também se queixa.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-3" value="b" data-certa="false"><span class="rotulo">Exigir duas meias ondas por bit, porque falta um byte</span></label>
+              <p class="explicacao" hidden>É insidiosa — falha sempre no mesmo sítio — mas a paridade apanha-a, e a comparação de tamanhos («19 esperados, 18 lidos») aponta logo para onde.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-3" value="c" data-certa="false"><span class="rotulo"><code>minimo_piloto = 4</code>, porque aparecem blocos falsos</span></label>
+              <p class="explicacao" hidden>Medido: com 4 <strong>não aparece lixo nenhum</strong> — o resultado é idêntico ao de 256. A guarda que rejeita o ruído dos silêncios é a janela de comprimento, não esta. O valor perigoso é o de <em>cima</em>: com 4096 o bloco de dados desaparece em silêncio.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-3" value="d" data-certa="true"><span class="rotulo">Usar a escala nominal numa fita a 1,3×, porque devolve blocos com o tamanho e o nome certos e os bytes errados</span></label>
+              <p class="explicacao" hidden>Parece funcionar. Sem a verificação de paridade, escrevias um .tap corrompido e acreditavas nele. É por isto que o critério de sucesso é «os bytes são iguais».</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">O descodificador funciona com um passa-baixo a 800 Hz, num sinal com componentes até 2047 Hz. Porquê?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l6-4" value="a" data-certa="false"><span class="rotulo">Porque 800 Hz ainda deixa passar o tom-piloto, que está a 807 Hz</span></label>
+              <p class="explicacao" hidden>Deixa passar o piloto a muito custo (807 está acima de 800), mas isso não explica os <em>bits</em>, que estão a 1023 e 2047 Hz e são bem mais atenuados. E os bits são lidos na mesma.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-4" value="b" data-certa="false"><span class="rotulo">Porque o passa-alto do passo 2 compensa o passa-baixo</span></label>
+              <p class="explicacao" hidden>Não compensa nada: o passa-alto está em 40 Hz e serve para tirar o desvio de zero. Os dois filtros atuam em extremos opostos do espectro e não se anulam.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-4" value="c" data-certa="true"><span class="rotulo">Porque a informação está nos instantes dos cruzamentos, e atenuar a amplitude não move instantes</span></label>
+              <p class="explicacao" hidden>É o mecanismo da lição 4 a mostrar-se por inteiro. Um filtro atrasa e atenua; atrasa todas as transições por igual, e por isso não muda os <em>intervalos</em> entre elas.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-4" value="d" data-certa="false"><span class="rotulo">Porque o descodificador tem um filtro adaptativo</span></label>
+              <p class="explicacao" hidden>Não tem filtro adaptativo nenhum. O que tem de adaptativo é o <em>limiar</em> (envelope) e a <em>escala</em> (piloto) — e nenhum deles reconstrói agudos perdidos.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">A medição do ruído usa 8 sementes diferentes. Porquê?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l6-5" value="a" data-certa="false"><span class="rotulo">Para o resultado ser mais bonito</span></label>
+              <p class="explicacao" hidden>Não é estética: com uma semente só, σ = 0,12 daria «ok» ou «falha» conforme a semente, e as duas respostas seriam igualmente defensáveis a partir dos dados.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-5" value="b" data-certa="true"><span class="rotulo">Porque ruído é aleatório, e uma medição com uma semente só não distingue «funciona» de «teve sorte»</span></label>
+              <p class="explicacao" hidden>É o que a linha σ = 0,15 → 3/8 mostra: nem funciona nem falha, falha <em>às vezes</em>. Com uma semente terias escrito uma das duas conclusões erradas.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-5" value="c" data-certa="false"><span class="rotulo">Para testar 8 fitas diferentes</span></label>
+              <p class="explicacao" hidden>A fita é sempre a mesma — os mesmos bytes, os mesmos pulsos. O que muda é só o ruído somado.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-5" value="d" data-certa="false"><span class="rotulo">Porque o gerador exige uma semente</span></label>
+              <p class="explicacao" hidden>Exige, mas com valor por omissão. Podia correr-se tudo com <code>semente=1</code> e o programa funcionava; o que não funcionava era a conclusão.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Segundo os limites medidos, qual destes é o menos provável de estragar a leitura de uma fita real?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l6-6" value="a" data-certa="true"><span class="rotulo">O ruído da fita</span></label>
+              <p class="explicacao" hidden>O descodificador aguenta SNR de cerca de 20 dB. Qualquer cassete decente dá 45 dB ou mais; uma péssima dá 30. Há margem enorme — e era a primeira coisa que se teria adivinhado como problema.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-6" value="b" data-certa="false"><span class="rotulo">A variação de velocidade</span></label>
+              <p class="explicacao" hidden>Também há muita margem (±20 % contra os 0,1–0,3 % de uma máquina normal), mas o erro <em>constante</em> de velocidade, que a lição 3 mediu, é outra história e é exactamente o que o passo 5 existe para resolver.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-6" value="c" data-certa="false"><span class="rotulo">Uma taxa de amostragem baixa de mais na digitalização</span></label>
+              <p class="explicacao" hidden>É uma escolha de quem digitaliza, e por isso evitável — mas alguém que capture a 8000 Hz «porque é só dados» fica com 1,95 amostras por meia onda, muito perto do limite de 1,5.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l6-6" value="d" data-certa="false"><span class="rotulo">Um corte de agudos severo</span></label>
+              <p class="explicacao" hidden>Há margem enorme (funciona até 800 Hz), mas por uma razão que não se adivinha — e quem não a conheça pode desperdiçar tempo a tentar restaurar agudos que não fazem falta nenhuma.</p>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="feynman-1">Explica a alguém que programa mas não sabe nada disto como é que o teu programa lê bytes de um som. Os cinco passos, e porque é que o passo 5 não pode usar números fixos.
+        <span class="pista">Se a tua explicação servisse igualmente bem para ler um ficheiro binário, faltou a parte difícil. O que torna isto diferente é não se saber de antemão quanto tempo dura um bit.</span>
+      </label>
+      <textarea id="feynman-1" data-pergunta="Explica a alguém que programa mas não sabe nada disto como é que o teu programa lê bytes de um som. Os cinco passos, e porque é que o passo 5 não pode usar números fixos."></textarea>
+    </div>
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/cassete-dados/respostas/AAAA-MM-DD.md</code> e correr
+      <code>/corrigir cassete-dados</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Cinco passos: <strong>ler · centrar · arestas · medir · ler bits</strong>. Cinco e não um porque cada
+      um se verifica sozinho, e vais precisar de saber <em>onde</em> falhou.</li>
+      <li>Dois passos fazem o trabalho: a <strong>histerese</strong> com seguidor de envelope (limiar que se
+      adapta à amplitude) e a <strong>escala medida na mediana do tom-piloto</strong> (que se adapta à
+      velocidade). Ambos medem em vez de assumir.</li>
+      <li>🔴 A <strong>última meia onda não tem aresta de fecho</strong>: 303 onde há 304. Quem exigir duas
+      arestas por bit perde sempre o byte de paridade.</li>
+      <li>Limites medidos: parte a <strong>1,5 amostras por meia onda</strong>, a <strong>SNR ≈ 16 dB</strong>,
+      a um corte a <strong>700 Hz</strong> e a <strong>±25 %</strong> de variação de velocidade.</li>
+      <li>🔴 O critério é os bytes serem <strong>idênticos</strong>. «Encontrou os blocos» não chega: a
+      sabotagem 2 de E2 devolve <code>[19, 59]</code> com o nome certo e os bytes errados.</li>
+      <li>⚠️ E uma guarda apertada de mais é tão má como uma frouxa, mas pior de encontrar: medido, com
+      <code>minimo_piloto = 4096</code> o bloco de dados desaparece <strong>sem nenhum aviso</strong>.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Documentação</strong> — módulo <code>wave</code> da biblioteca padrão do Python, para
+      <code>getframerate</code>, <code>getsampwidth</code>, <code>getnchannels</code> e
+      <code>readframes</code>; e módulo <code>struct</code>, para o desempacotamento little-endian.
+      <a href="https://docs.python.org/3/library/wave.html">docs.python.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Livro (não é documentação)</strong> — Steven W. Smith, <em>The Scientist and Engineer's Guide
+      to Digital Signal Processing</em>, California Technical Publishing, texto integral gratuito.
+      <strong>Porquê:</strong> os filtros de um polo que os passos 2 e 3 usam — passa-alto, passa-baixo e
+      seguidor de envelope — estão aqui explicados com a recorrência e com o desenho, sem transformadas.
+      <strong>O que ler:</strong> capítulo 19, <em>Recursive Filters</em>, secção «Single Pole Recursive
+      Filters». <strong>O que saltar:</strong> os capítulos sobre filtros de Chebyshev — este descodificador
+      não precisa de nada disso, e é uma boa notícia.
+      <a href="https://www.dspguide.com/pdfbook.htm">dspguide.com</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16 — confirmei a existência e o acesso livre ao livro e
+      a lista de capítulos</span> ⚠️ Confirmei que o capítulo 19 é <em>Recursive Filters</em>; <strong>não</strong>
+      li o capítulo inteiro nem confirmei o número de página da secção citada.</li>
+
+      <li><strong>Especificação do formato</strong> — os tempos e a estrutura estão na lição 5, com as duas
+      fontes independentes que os confirmam (a ROM desmontada e o <em>Sinclair Wiki</em>).
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li>⚠️ <strong>Os limites medidos em E3 não têm fonte externa.</strong> Não encontrei literatura que
+      publique tolerâncias medidas para descodificadores de fita de ZX Spectrum, e procurei. Os números da
+      tabela são <strong>medições feitas por este curso, sobre este simulador e este descodificador</strong>, e
+      não devem ser citados como propriedades da cassete nem do formato. São reprodutíveis: o código está todo
+      aqui e as sementes estão fixas.</li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> · Anterior: <a href="05-formato-zx.html">← 5 · O formato do ZX Spectrum</a> · Próxima: <a href="07-porque-morreu.html">7 · Porque é que falhava e porque é que morreu →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

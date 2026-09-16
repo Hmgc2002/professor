@@ -139,6 +139,158 @@ o que já está escrito.
   - [C · Diagnosticar](docs/abstracts-e-resumos/teste.html#parte-c)
   - [Entregar](docs/abstracts-e-resumos/teste.html#entregar)
 
+## `docs/cassete-dados/00-som-numero-ficheiro.html` — 0 · Som, número, ficheiro — o que lá está mesmo dentro de um .wav — A cassete como memória
+
+  - [1. Objetivo](docs/cassete-dados/00-som-numero-ficheiro.html#objetivo)
+  - [2. Recuperar](docs/cassete-dados/00-som-numero-ficheiro.html#recuperar)
+  - [3. O mecanismo](docs/cassete-dados/00-som-numero-ficheiro.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-dados/00-som-numero-ficheiro.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-dados/00-som-numero-ficheiro.html#lacunas)
+  - [6. Erros comuns](docs/cassete-dados/00-som-numero-ficheiro.html#erros)
+  - [7. Praticar](docs/cassete-dados/00-som-numero-ficheiro.html#praticar)
+  - [8. Quiz](docs/cassete-dados/00-som-numero-ficheiro.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-dados/00-som-numero-ficheiro.html#feynman)
+  - [10. Resumo](docs/cassete-dados/00-som-numero-ficheiro.html#resumo)
+  - [11. Fontes](docs/cassete-dados/00-som-numero-ficheiro.html#fontes)
+
+## `docs/cassete-dados/01-fita-magnetismo.html` — 1 · Como o som fica preso na fita — A cassete como memória
+
+  - [1. Objetivo](docs/cassete-dados/01-fita-magnetismo.html#objetivo)
+  - [2. Recuperar](docs/cassete-dados/01-fita-magnetismo.html#recuperar)
+  - [3. O mecanismo](docs/cassete-dados/01-fita-magnetismo.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-dados/01-fita-magnetismo.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-dados/01-fita-magnetismo.html#lacunas)
+  - [6. Erros comuns](docs/cassete-dados/01-fita-magnetismo.html#erros)
+  - [7. Praticar](docs/cassete-dados/01-fita-magnetismo.html#praticar)
+  - [8. Quiz](docs/cassete-dados/01-fita-magnetismo.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-dados/01-fita-magnetismo.html#feynman)
+  - [10. Resumo](docs/cassete-dados/01-fita-magnetismo.html#resumo)
+  - [11. Fontes](docs/cassete-dados/01-fita-magnetismo.html#fontes)
+
+## `docs/cassete-dados/02-bias.html` — 2 · Bias: o tom inaudível sem o qual não há gravação nenhuma — A cassete como memória
+
+  - [1. Objetivo](docs/cassete-dados/02-bias.html#objetivo)
+  - [2. Recuperar](docs/cassete-dados/02-bias.html#recuperar)
+  - [3. O mecanismo](docs/cassete-dados/02-bias.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-dados/02-bias.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-dados/02-bias.html#lacunas)
+  - [6. Erros comuns](docs/cassete-dados/02-bias.html#erros)
+  - [7. Praticar](docs/cassete-dados/02-bias.html#praticar)
+  - [8. Quiz](docs/cassete-dados/02-bias.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-dados/02-bias.html#feynman)
+  - [10. Resumo](docs/cassete-dados/02-bias.html#resumo)
+  - [11. Fontes](docs/cassete-dados/02-bias.html#fontes)
+
+## `docs/cassete-dados/03-limites.html` — 3 · Os limites: ruído, agudos e o relógio que não é relógio — A cassete como memória
+
+  - [1. Objetivo](docs/cassete-dados/03-limites.html#objetivo)
+  - [2. Recuperar](docs/cassete-dados/03-limites.html#recuperar)
+  - [3. O mecanismo](docs/cassete-dados/03-limites.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-dados/03-limites.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-dados/03-limites.html#lacunas)
+  - [6. Erros comuns](docs/cassete-dados/03-limites.html#erros)
+  - [7. Praticar](docs/cassete-dados/03-limites.html#praticar)
+  - [8. Quiz](docs/cassete-dados/03-limites.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-dados/03-limites.html#feynman)
+  - [10. Resumo](docs/cassete-dados/03-limites.html#resumo)
+  - [11. Fontes](docs/cassete-dados/03-limites.html#fontes)
+
+## `docs/cassete-dados/04-bits-em-som.html` — 4 · De bits a som: porque é que nenhuma ideia óbvia funciona — A cassete como memória
+
+  - [1. Objetivo](docs/cassete-dados/04-bits-em-som.html#objetivo)
+  - [2. Recuperar](docs/cassete-dados/04-bits-em-som.html#recuperar)
+  - [3. O mecanismo](docs/cassete-dados/04-bits-em-som.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-dados/04-bits-em-som.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-dados/04-bits-em-som.html#lacunas)
+  - [6. Erros comuns](docs/cassete-dados/04-bits-em-som.html#erros)
+  - [7. Praticar](docs/cassete-dados/04-bits-em-som.html#praticar)
+  - [8. Quiz](docs/cassete-dados/04-bits-em-som.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-dados/04-bits-em-som.html#feynman)
+  - [10. Resumo](docs/cassete-dados/04-bits-em-som.html#resumo)
+  - [11. Fontes](docs/cassete-dados/04-bits-em-som.html#fontes)
+
+## `docs/cassete-dados/05-formato-zx.html` — 5 · O formato do ZX Spectrum, byte a byte — A cassete como memória
+
+  - [1. Objetivo](docs/cassete-dados/05-formato-zx.html#objetivo)
+  - [2. Recuperar](docs/cassete-dados/05-formato-zx.html#recuperar)
+  - [3. O mecanismo](docs/cassete-dados/05-formato-zx.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-dados/05-formato-zx.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-dados/05-formato-zx.html#lacunas)
+  - [6. Erros comuns](docs/cassete-dados/05-formato-zx.html#erros)
+  - [7. Praticar](docs/cassete-dados/05-formato-zx.html#praticar)
+  - [8. Quiz](docs/cassete-dados/05-formato-zx.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-dados/05-formato-zx.html#feynman)
+  - [10. Resumo](docs/cassete-dados/05-formato-zx.html#resumo)
+  - [11. Fontes](docs/cassete-dados/05-formato-zx.html#fontes)
+
+## `docs/cassete-dados/06-descodificador.html` — 6 · O descodificador: de som a bytes — A cassete como memória
+
+  - [1. Objetivo](docs/cassete-dados/06-descodificador.html#objetivo)
+  - [2. Recuperar](docs/cassete-dados/06-descodificador.html#recuperar)
+  - [3. O mecanismo](docs/cassete-dados/06-descodificador.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-dados/06-descodificador.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-dados/06-descodificador.html#lacunas)
+  - [6. Erros comuns](docs/cassete-dados/06-descodificador.html#erros)
+  - [7. Praticar](docs/cassete-dados/06-descodificador.html#praticar)
+  - [8. Quiz](docs/cassete-dados/06-descodificador.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-dados/06-descodificador.html#feynman)
+  - [10. Resumo](docs/cassete-dados/06-descodificador.html#resumo)
+  - [11. Fontes](docs/cassete-dados/06-descodificador.html#fontes)
+
+## `docs/cassete-dados/07-porque-morreu.html` — 7 · Porque é que falhava, e porque é que morreu — A cassete como memória
+
+  - [1. Objetivo](docs/cassete-dados/07-porque-morreu.html#objetivo)
+  - [2. Recuperar](docs/cassete-dados/07-porque-morreu.html#recuperar)
+  - [3. O mecanismo](docs/cassete-dados/07-porque-morreu.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/cassete-dados/07-porque-morreu.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/cassete-dados/07-porque-morreu.html#lacunas)
+  - [6. Erros comuns](docs/cassete-dados/07-porque-morreu.html#erros)
+  - [7. Praticar](docs/cassete-dados/07-porque-morreu.html#praticar)
+  - [8. Quiz](docs/cassete-dados/07-porque-morreu.html#quiz)
+  - [9. Explica por palavras tuas](docs/cassete-dados/07-porque-morreu.html#feynman)
+  - [10. Resumo](docs/cassete-dados/07-porque-morreu.html#resumo)
+  - [11. Fontes](docs/cassete-dados/07-porque-morreu.html#fontes)
+
+## `docs/cassete-dados/bibliografia.html` — Bibliografia — A cassete como memória
+
+  - [O percurso](docs/cassete-dados/bibliografia.html#percurso)
+  - [1. Se leres só uma coisa](docs/cassete-dados/bibliografia.html#primeiro)
+  - [2. A física, a sério](docs/cassete-dados/bibliografia.html#fisica)
+  - [3. O lado do sinal](docs/cassete-dados/bibliografia.html#sinal)
+  - [4. Os formatos](docs/cassete-dados/bibliografia.html#formatos)
+  - [5. A história](docs/cassete-dados/bibliografia.html#historia)
+  - [O que não li](docs/cassete-dados/bibliografia.html#nao-li)
+
+## `docs/cassete-dados/folha.html` — Folha de consulta — A cassete como memória
+
+  - [O formato do Spectrum](docs/cassete-dados/folha.html#formato)
+  - [O ficheiro .tap](docs/cassete-dados/folha.html#tap)
+  - [Contas que se repetem](docs/cassete-dados/folha.html#contas)
+  - [A fita, em cinco factos](docs/cassete-dados/folha.html#fita)
+  - [O descodificador em cinco passos](docs/cassete-dados/folha.html#desc)
+  - [Limites medidos](docs/cassete-dados/folha.html#limites)
+  - [Sintoma → causa](docs/cassete-dados/folha.html#sintomas)
+
+## `docs/cassete-dados/index.html` — A cassete como memória de computador — professor
+
+  - [O que vais conseguir fazer no fim](docs/cassete-dados/index.html#conseguir)
+  - [O que este curso não é](docs/cassete-dados/index.html#nao-e)
+  - [O que assumi](docs/cassete-dados/index.html#assumi)
+  - [O mapa](docs/cassete-dados/index.html#mapa)
+  - [O plano no tempo](docs/cassete-dados/index.html#plano)
+  - [Preparar](docs/cassete-dados/index.html#preparar)
+  - [No fim do tópico](docs/cassete-dados/index.html#fim)
+  - [Nota das fases](docs/cassete-dados/index.html#fases)
+
+## `docs/cassete-dados/teste.html` — Teste de domínio — A cassete como memória
+
+  - [Como funciona](docs/cassete-dados/teste.html#como)
+  - [Parte 1 — mecanismo](docs/cassete-dados/teste.html#parte1)
+  - [Parte 2 — contas](docs/cassete-dados/teste.html#parte2)
+  - [Parte 3 — diagnóstico](docs/cassete-dados/teste.html#parte3)
+  - [Parte 4 — caso completo](docs/cassete-dados/teste.html#parte4)
+  - [Entregar](docs/cassete-dados/teste.html#entregar)
+
 ## `docs/index.html` — professor — cursos que ficam a corrigir
 
   - [Tópicos](docs/index.html#topicos)

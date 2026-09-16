@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 · Os limites: ruído, agudos e o relógio que não é relógio — A cassete como memória</title>
+<meta name="description" content="Relação sinal-ruído, companding, constantes de equalização e instabilidade de velocidade, com a medição que decide como se escreve um descodificador de fita.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-dados/03-limites.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">A cassete como memória</a> <span aria-hidden="true">›</span> Lição 3
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta núcleo">Lição 3 · núcleo</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>Os limites: ruído, agudos e o relógio que não é relógio</h1>
+    <p class="subtitulo">Três defeitos, medidos um a um. A surpresa é qual deles é fatal para dados — e não é aquele que se ouve.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim consegues nomear as <strong>três</strong> coisas que uma fita faz mal — mete ruído, corta agudos e
+    não anda a velocidade constante — e dizer qual delas é fatal para dados e qual é quase irrelevante. E
+    consegues justificar, com uma medição tua, porque é que um descodificador de fita <strong>nunca</strong> deve
+    usar limiares absolutos em amostras.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <ol>
+      <li>Da lição 1: de onde vem o chiado de uma fita, e porque é que não se apaga com melhor eletrónica?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Da granularidade do meio: partículas discretas espalhadas ao acaso, cuja soma flutua. É inerente
+          ao material, não ao circuito.</p>
+        </details>
+      </li>
+      <li>Da lição 1: porque é que a cabeça de leitura precisa de um integrador a seguir?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Porque a cabeça diferencia (<em>V</em> = −<em>N</em> d<em>Φ</em>/d<em>t</em>), o que dá
+          +6 dB/oitava. O integrador desfaz isso com −6 dB/oitava.</p>
+        </details>
+      </li>
+      <li>Da lição 2: o que é que acontece quando se grava com bias a mais?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>A sensibilidade desce (medido: de 0,2247 no máximo para 0,0785 com o dobro do bias) e, na fita
+          real, perdem-se os agudos.</p>
+        </details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p>Três defeitos, por ordem de <strong>gravidade para quem quer guardar bytes</strong> — que não é a mesma
+    ordem de quem quer ouvir música:</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Os três defeitos da fita, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Defeito</th><th>Gravidade para música</th><th>Gravidade para dados</th><th>Porquê a diferença</th></tr></thead>
+        <tbody>
+          <tr><td>Ruído de fundo</td><td>alta — ouve-se sempre</td><td><strong>média</strong></td>
+            <td>Um bit só precisa de se distinguir do ruído, não de soar limpo</td></tr>
+          <tr><td>Corte de agudos</td><td>alta — perde-se brilho</td><td><strong>baixa</strong></td>
+            <td>Um esquema de dados escolhe onde vive. O Spectrum vive entre 807 e 2047 Hz</td></tr>
+          <tr><td>Velocidade instável</td><td>baixa — quase não se nota</td><td><strong>fatal, se ignorada</strong></td>
+            <td>Toda a informação está no <em>tempo</em>. Mudar a velocidade muda os dados</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>1. Ruído: a relação sinal-ruído</h3>
+
+    <p>A relação sinal-ruído mede-se em decibéis e é uma <strong>razão</strong>, não um valor absoluto:
+    20·log₁₀(sinal ÷ ruído). Sinal dez vezes maior do que o ruído são 20 dB; cem vezes, 40 dB.</p>
+
+    <p>Por isso a redução de ruído da cassete existe, e por isso se chama <em>companding</em>: comprimir na
+    gravação, expandir na leitura. A ideia é simples e o mecanismo é o que interessa:</p>
+
+    <ol>
+      <li>Antes de gravar, <strong>amplifica-se o que está baixo</strong> e deixa-se o que está alto quase como
+      está. O sinal fraco passa a estar bem acima do chiado.</li>
+      <li>Na leitura aplica-se a operação <strong>inversa</strong>: baixa-se o que estava baixo, de volta ao
+      seu nível original. O sinal volta ao sítio — <strong>e o chiado da fita vai com ele para baixo</strong>,
+      porque o chiado entrou depois da compressão.</li>
+    </ol>
+
+    <div class="caixa critico">
+      <span class="titulo">🔴 A operação tem de ser invertível — e por pouco não é</span>
+      <p>Escrevi a primeira versão desta simulação com um ganho variável do tipo «se estiver baixo, multiplica
+      por 8». Na leitura, o expansor media o nível do sinal <em>recebido</em> — que já estava amplificado — e
+      concluía que não precisava de mexer em nada. Resultado medido: SNR de <strong>−16,8 dB</strong>, muito
+      pior do que não fazer nada.</p>
+      <p>Não foi um erro de programação: foi um erro de conceito. A lei de compressão tem de ser uma função
+      <strong>invertível</strong>, para que o expansor consiga desfazê-la olhando só para o que recebeu. O
+      Dolby usa uma lei desse tipo; a minha primeira ideia não era uma.</p>
+    </div>
+
+    <p>O Dolby B, que é o que quase todas as cassetes usam, atua sobretudo nas frequências altas e nos sinais
+    baixos, e a redução que anuncia é de <strong>3 dB a 600 Hz, 6 dB a 1,2 kHz, 8 dB a 2,4 kHz e 10 dB a
+    5 kHz</strong>. Daí o efeito conhecido de ouvir uma fita com Dolby sem a descodificar: como as altas
+    frequências ficaram realçadas na gravação e ninguém as baixou, o som «parece mais brilhante».</p>
+
+    <h3>2. Agudos: a equalização, e o que é uma «constante de tempo»</h3>
+
+    <p>Já sabes da lição 1 que a cabeça diferencia e que é preciso um integrador. O que as normas acrescentam é
+    <strong>onde</strong> essa correção começa, e exprimem-no de uma forma que confunde toda a gente: em
+    <em>microssegundos</em>.</p>
+
+    <p>Uma constante de tempo τ é a de um circuito RC, e corresponde a uma frequência:</p>
+
+    <p style="text-align:center"><em>f</em> = 1 ÷ (2·π·τ)</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Constantes de tempo de equalização, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Constante</th><th>Frequência</th><th>Que fitas</th></tr></thead>
+        <tbody>
+          <tr><td>120 µs</td><td>1326 Hz</td><td>Tipo I (ferrosa)</td></tr>
+          <tr><td>70 µs</td><td>2274 Hz</td><td>Tipos II, III e IV</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Porquê duas? Quando as fitas de dióxido de crómio chegaram ao mercado, houve uma discussão sobre se
+    deviam usar os 120 µs já existentes ou uns novos 70 µs. A troca era explícita: os 70 µs
+    <strong>reduziam o ruído em cerca de 4,5 dB ao preço de 4,5 dB de saída nos agudos</strong>. Como o ruído
+    era o problema que mais travava a aceitação da cassete, escolheu-se os 70 µs.</p>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ Isto é uma decisão, não uma lei da natureza</span>
+      <p>Repara no que aconteceu: duas alternativas tecnicamente defensáveis, uma escolhida por razões de
+      mercado num momento concreto, e o resultado ficou congelado numa norma durante quarenta anos. Metade do
+      que parece «como as coisas são» em qualquer formato é isto.</p>
+    </div>
+
+    <h3>3. Velocidade: o defeito que mata os dados</h3>
+
+    <p>A fita é puxada por um <strong>veio</strong> (o <em>capstan</em>) contra o qual um <strong>rolete de
+    pressão</strong> a encosta. É esse par que fixa a velocidade — não os carretos, cujo raio muda à medida que
+    a fita passa de um para o outro. A velocidade nunca é perfeitamente constante:</p>
+
+    <ul>
+      <li><strong>Wow</strong> — variação lenta, alguns hertz. Ouve-se como afinação a oscilar.</li>
+      <li><strong>Flutter</strong> — variação rápida. Ouve-se como aspereza.</li>
+      <li><strong>Erro constante de velocidade</strong> — a máquina anda toda ela 3 % mais depressa do que a
+      que gravou. <strong>Não se ouve praticamente nada</strong> e é o que estraga tudo do lado dos dados.</li>
+    </ul>
+
+    <p>E há o <strong>azimute</strong>: se a fenda da cabeça não estiver exactamente perpendicular ao percurso
+    da fita, as duas metades da pista são lidas com um desfasamento. Como a informação está no <em>quando</em>,
+    um azimute mal alinhado é uma cabeça que mente sobre as horas.</p>
+
+    <div class="caixa critico">
+      <span class="titulo">🔴 A conclusão que o resto do curso depende</span>
+      <p>Numa fita de dados, <strong>toda a informação está em intervalos de tempo</strong>. Um descodificador
+      que use limiares em amostras — «mais de 16 amostras é um 1» — está a assumir que a fita anda à velocidade
+      a que foi gravada. Não anda, e nem sequer é preciso que ande muito diferente.</p>
+      <p>O exercício E3 mede isto: a 1,5× de velocidade, o limiar fixo erra <strong>400 bits em 800</strong> e
+      o limiar medido no próprio sinal erra <strong>zero</strong>. É por isso que o formato do Spectrum começa
+      com cinco segundos de tom-piloto — e é essa a resposta a «para que serve aquele apito antes do jogo».</p>
+    </div>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p><strong>Pergunta:</strong> quanto é que o companding melhora mesmo, e o que é que custa? Não «melhora
+    muito» — dois números, um para a passagem alta e outro para a baixa.</p>
+
+    <h3>Passo 1 — a experiência, e porquê esta</h3>
+    <p>Preciso de um sinal que tenha <strong>as duas situações</strong>: uma passagem alta (amplitude 0,8) e
+    uma passagem baixa (0,05). Com uma só, qualquer esquema parece bom — é preciso o contraste para ver a
+    troca. A fita mete ruído fixo (desvio-padrão 0,02) e satura em ±1,0.</p>
+
+    <h3>Passo 2 — a lei de compressão</h3>
+    <p>Uso <em>y</em> = |<em>x</em>|<sup>0,5</sup>, com o sinal preservado. É a raiz quadrada, e é
+    <strong>invertível</strong>: o expansor eleva ao quadrado e recupera exactamente o que entrou. A raiz
+    quadrada faz naturalmente o que se quer — amplifica muito o que é pequeno e quase nada o que é grande.</p>
+<pre><code>import math, random
+
+TAXA, RUIDO_FITA, TETO = 44100.0, 0.02, 1.0
+R = 0.5                     # lei de compressao: y = |x|^R
+
+def comprimir(x): return [math.copysign(abs(v)**R, v) for v in x]
+def expandir(y):  return [math.copysign(abs(v)**(1/R), v) for v in y]
+
+def fita(x, semente=1):
+    &quot;&quot;&quot;A fita: satura em +-1 e soma o seu chiado.&quot;&quot;&quot;
+    r = random.Random(semente)
+    return [max(-TETO, min(TETO, v)) + r.gauss(0, RUIDO_FITA) for v in x]
+
+def rms(x): return math.sqrt(sum(v*v for v in x)/len(x)) if x else 0.0
+
+def snr(rec, orig, fatia):
+    s = rms(orig[fatia]); e = rms([a-b for a, b in zip(rec[fatia], orig[fatia])])
+    return 20*math.log10(s/e) if e else float(&quot;inf&quot;)
+
+n = int(TAXA)
+x = ([0.8*math.sin(2*math.pi*1000*i/TAXA) for i in range(n)] +      # 1 s alto
+     [0.05*math.sin(2*math.pi*1000*i/TAXA) for i in range(n)])      # 1 s baixo
+ALTO, BAIXO = slice(0, n), slice(n, 2*n)
+
+directo = fita(x)
+compand = expandir(fita(comprimir(x)))
+
+print(&quot;                              passagem ALTA   passagem BAIXA&quot;)
+print(f&quot;  direto para a fita          {snr(directo,x,ALTO):10.1f} dB {snr(directo,x,BAIXO):13.1f} dB&quot;)
+print(f&quot;  com companding              {snr(compand,x,ALTO):10.1f} dB {snr(compand,x,BAIXO):13.1f} dB&quot;)
+print()
+print(f&quot;  pico gravado, direto        {max(abs(v) for v in x):.3f}&quot;)
+print(f&quot;  pico gravado, comprimido    {max(abs(v) for v in comprimir(x)):.3f}&quot;)
+print(f&quot;  0.05 comprimido fica        {0.05**R:.4f}  (x{0.05**R/0.05:.1f})&quot;)
+print(f&quot;  0.80 comprimido fica        {0.80**R:.4f}  (x{0.80**R/0.80:.1f})&quot;)</code></pre>
+
+    <h3>Passo 3 — a saída</h3>
+<pre><code>                              passagem ALTA   passagem BAIXA
+  direto para a fita                29.0 dB           4.9 dB
+  com companding                    25.9 dB          13.9 dB
+
+  pico gravado, direto        0.800
+  pico gravado, comprimido    0.894
+  0.05 comprimido fica        0.2236  (x4.5)
+  0.80 comprimido fica        0.8944  (x1.1)</code></pre>
+
+    <h3>Passo 4 — o que a tabela diz, incluindo o que custa</h3>
+
+    <p><strong>A passagem baixa ganha 9 dB</strong> (de 4,9 para 13,9). Um sinal a 4,9 dB acima do ruído é um
+    sinal quase inutilizável; a 13,9 dB já se percebe. Isto é a mesma ordem de grandeza do que o Dolby B anuncia
+    (até 10 dB a 5 kHz) — o que é boa notícia para o modelo, e coincidência suficiente para desconfiar dela.</p>
+
+    <p><strong>A passagem alta perde 3 dB</strong> (de 29,0 para 25,9). Isto <em>não</em> é um defeito da
+    simulação: é como o companding funciona. Ao comprimir, as diferenças grandes ficam mais juntas; ao expandir,
+    o ruído que entretanto entrou é ampliado junto com elas. 🔴 <strong>O companding não cria informação. Move
+    a relação sinal-ruído de onde não faz falta para onde faz.</strong></p>
+
+    <p>E é por isso que funciona <em>na prática</em>: numa passagem alta, o ouvido não ouve o chiado porque o
+    som o mascara. Perder 3 dB onde já havia 29 não custa nada; ganhar 9 dB onde só havia 4,9 muda tudo.</p>
+
+    <p><strong>O terceiro número</strong>, que é o que torna o companding possível: o pico gravado passa de
+    0,800 para 0,894. Quase não sobe — porque a raiz quadrada de um número grande é pouco maior do que ele
+    próprio (0,80 → 0,89, um ganho de 1,1×), enquanto a de um pequeno é muito maior (0,05 → 0,22, um ganho de
+    4,5×). Um <strong>ganho fixo</strong> de 4,5× teria levado a passagem alta a 3,6 e a fita satura em 1,0.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa: constantes de tempo e a fita que anda depressa</h3>
+      <ol>
+        <li><strong>Dado:</strong> a fórmula é <em>f</em> = 1 ÷ (2·π·τ), e 120 µs dão 1326 Hz.</li>
+        <li><strong>______</strong> Confirma a conta dos 70 µs. Que frequência dá?</li>
+        <li><strong>Dado:</strong> nas fitas de vídeo e nalguns formatos profissionais usam-se 35 µs.</li>
+        <li><strong>______</strong> Que frequência dá? E o que é que isso diz sobre onde a correção começa a
+        atuar, comparado com uma cassete?</li>
+        <li><strong>______</strong> Uma máquina lê uma fita 3 % mais depressa do que a máquina que a gravou.
+        Uma meia onda de um bit 0, que devia medir 10,77 amostras, mede quanto? Isso é audível numa música?
+        E é fatal para os dados?</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>2.</strong> 1 ÷ (2 × π × 70×10⁻⁶) = <strong>2274 Hz</strong>.</p>
+        <p><strong>4.</strong> 1 ÷ (2 × π × 35×10⁻⁶) = <strong>4547 Hz</strong>. Constante mais pequena,
+        frequência mais alta: a correção começa a atuar mais acima, porque essas máquinas andam muito mais
+        depressa e por isso só sofrem de perdas de agudos em frequências muito superiores. <strong>A constante
+        de tempo é uma medida indireta da velocidade da fita.</strong></p>
+        <p><strong>5.</strong> 10,77 ÷ 1,03 = <strong>10,46 amostras</strong>.</p>
+        <p><strong>Na música:</strong> 3 % em frequência é cerca de meio semitom. Quem não tem ouvido absoluto
+        não dá por nada, sobretudo ouvindo a música sozinha.</p>
+        <p><strong>Nos dados:</strong> 10,46 continua muito abaixo do limiar de 16,16, portanto este erro
+        sozinho <em>não</em> é fatal — e é importante dizê-lo, porque a resposta fácil («o tempo é tudo, logo
+        qualquer erro mata») está errada. O que é fatal é o erro ficar <strong>grande</strong>, e o exercício E3
+        mede onde é que isso acontece. A conclusão certa não é «3 % mata»; é «não há maneira de saber de
+        antemão quanto é que vai ser, logo o descodificador tem de medir em vez de assumir».</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>«O Dolby filtra o chiado»</td>
+            <td>Pensar nele como um redutor de ruído que corta o que não interessa</td>
+            <td>Não toca no chiado. Muda <strong>o nível a que o sinal é gravado</strong>, e desfaz essa
+            mudança na leitura. O chiado desce porque entrou entre as duas operações</td>
+          </tr>
+          <tr>
+            <td>«O companding melhora a relação sinal-ruído em toda a gama»</td>
+            <td>Anunciar «10 dB de redução de ruído» sem mais nada</td>
+            <td>Medido: +9 dB na passagem baixa e <strong>−3 dB</strong> na alta. É uma redistribuição, não um
+            ganho. Funciona porque o ouvido não precisa do que lhe foi tirado</td>
+          </tr>
+          <tr>
+            <td>«120 µs e 70 µs são uma propriedade da fita»</td>
+            <td>Procurar a explicação na química</td>
+            <td>É uma <strong>decisão</strong>, tomada quando o dióxido de crómio chegou: 4,5 dB menos ruído por
+            4,5 dB menos agudos. Escolheu-se o ruído porque era o problema do momento</td>
+          </tr>
+          <tr>
+            <td>«A velocidade é fixada pelos carretos»</td>
+            <td>Explicar o transporte pelos rolos das cassetes</td>
+            <td>É fixada pelo <strong>capstan</strong> e pelo rolete de pressão. O raio da fita nos carretos
+            muda continuamente, por isso não podia ser eles</td>
+          </tr>
+          <tr>
+            <td>«Wow e flutter são o grande problema para os dados»</td>
+            <td>Culpar o wow quando um carregamento falha</td>
+            <td>Medido: com limiar fixo, o wow só começa a produzir erros acima de <strong>40 %</strong> de
+            variação — valor absurdo. O que mata é o erro <strong>constante</strong> de velocidade, que não se
+            ouve</td>
+          </tr>
+          <tr>
+            <td>«Uma fita mais silenciosa lê dados melhor»</td>
+            <td>Comprar fita de metal para gravar programas</td>
+            <td>Faz pouca diferença: o descodificador só precisa de distinguir o sinal do ruído, e o formato do
+            Spectrum já tem margem para 20 dB de SNR (medido na lição 6). O que interessa é a
+            <strong>estabilidade mecânica</strong> do leitor, que não vem na fita</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — contas de decibéis</h3>
+      <ol>
+        <li>Um sinal com amplitude 0,5 e ruído com desvio-padrão 0,005. Qual é a SNR em dB?</li>
+        <li>Quantos dB se ganham ao duplicar a amplitude do sinal?</li>
+        <li>O Dolby B anuncia 10 dB a 5 kHz. Por que fator é que isso multiplica a razão sinal-ruído?</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>1.</strong> 20 × log₁₀(0,5 ÷ 0,005) = 20 × log₁₀(100) = <strong>40 dB</strong>.</p>
+        <p><strong>2.</strong> 20 × log₁₀(2) = <strong>6,02 dB</strong>. É o mesmo 6,02 da lição 1 — e não é
+        coincidência: lá era o dobro da <em>frequência</em> a dar o dobro da <em>tensão</em>, aqui é o dobro da
+        amplitude. A regra é sempre «dobro ⇒ +6 dB» em amplitude.</p>
+        <p><strong>3.</strong> 10<sup>10/20</sup> = 10<sup>0,5</sup> = <strong>3,16 vezes</strong>. Repara que
+        10 dB não são «dez vezes melhor» — em amplitude são pouco mais de três. Um dos enganos mais comuns com
+        decibéis.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: quão agressiva deve ser a compressão?</h3>
+      <p>No exemplo trabalhado usei <code>R = 0.5</code>. Varre <code>R</code> de 1,0 (nenhuma compressão) até
+      0,2 (muito agressiva) e imprime, para cada valor, a SNR na passagem alta e na baixa, e o pico gravado.</p>
+      <p><strong>Prevê antes de correr:</strong> achas que há um <code>R</code> ótimo para a passagem baixa,
+      ou que quanto mais agressivo melhor? Escreve a tua resposta — e o teu raciocínio — antes de olhar.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code># reaproveita comprimir/expandir/fita/rms/snr do exemplo trabalhado,
+# mas com R como argumento em vez de constante global
+
+def compand(x, r, semente=1):
+    y = [math.copysign(abs(v)**r, v) for v in x]
+    z = fita(y, semente)
+    return [math.copysign(abs(v)**(1/r), v) for v in z]
+
+print(f&quot;{&#x27;R&#x27;:&gt;5} {&#x27;SNR alta&#x27;:&gt;10} {&#x27;SNR baixa&#x27;:&gt;11} {&#x27;pico gravado&#x27;:&gt;14}&quot;)
+for passo in range(10, 1, -1):
+    r = passo/10
+    rec = compand(x, r)
+    pico = max(abs(math.copysign(abs(v)**r, v)) for v in x)
+    print(f&quot;{r:5.1f} {snr(rec,x,ALTO):8.1f} dB {snr(rec,x,BAIXO):9.1f} dB {pico:14.3f}&quot;)</code></pre>
+        <p>Saída:</p>
+<pre><code>    R   SNR alta   SNR baixa   pico gravado
+  1.0     29.0 dB       4.9 dB          0.800
+  0.9     28.9 dB       7.2 dB          0.818
+  0.8     28.5 dB       9.2 dB          0.837
+  0.7     27.9 dB      11.0 dB          0.855
+  0.6     27.1 dB      12.6 dB          0.875
+  0.5     25.9 dB      13.9 dB          0.894
+  0.4     24.5 dB      14.8 dB          0.915
+  0.3     22.4 dB      15.1 dB          0.935
+  0.2     19.2 dB      14.3 dB          0.956</code></pre>
+        <div class="caixa ok">
+          <span class="titulo">✅ Há um ótimo, e está onde não se esperava</span>
+          <p><strong>A previsão «quanto mais agressivo, melhor» está errada</strong>, e a tabela mostra-o:
+          a passagem baixa melhora até <code>R</code> = 0,3 (15,1 dB) e depois <strong>piora</strong> —
+          14,3 dB em 0,2. Há um ponto de viragem.</p>
+          <p><strong>Porquê?</strong> O expansor eleva a 1/<em>R</em>. Com <code>R</code> = 0,2, isso é elevar
+          à quinta potência, e uma potência alta amplifica <em>tudo</em> o que recebe — incluindo o ruído que
+          a fita acabou de somar. Abaixo de certo ponto, o expansor estraga mais do que o compressor tinha
+          ganho. É o mesmo mecanismo do companding, a funcionar contra si próprio.</p>
+          <p><strong>E a passagem alta desaba.</strong> De 29,0 para 19,2 dB — quase <strong>10 dB
+          perdidos</strong>, não os 3 dB do exemplo trabalhado. A troca deixou de ser barata.</p>
+          <p>⭐ Repara no valor no ótimo: <strong>+10,2 dB</strong> de ganho na passagem baixa (de 4,9 para
+          15,1). O Dolby B anuncia até 10 dB. A coincidência é bonita, e é preciso não lhe dar mais peso do
+          que merece: este é um modelo sem seletividade em frequência e com uma lei diferente da do Dolby.
+          Bate na ordem de grandeza, e é só isso que se pode dizer.</p>
+          <p>🔴 <strong>E há dois travões que esta tabela não mostra de todo</strong>, e que empurram o
+          valor prático para ainda menos agressivo:</p>
+          <ul>
+            <li><strong>O erro de calibração.</strong> O expansor tem de aplicar exactamente a inversa. Se o
+            leitor não estiver ao mesmo nível do gravador, o erro é amplificado por 1/<em>R</em> — com
+            R = 0,2, um erro de 1 dB vira 5 dB. É por isso que existe um «nível Dolby» de referência e que se
+            fabricam fitas de calibração.</li>
+            <li><strong>O <em>breathing</em>.</strong> Com compressão forte, o ruído de fundo sobe e desce
+            audivelmente ao ritmo do sinal. O ouvido é muito sensível a ruído que <em>se mexe</em>, e nenhuma
+            medida de SNR o mostra.</li>
+          </ul>
+          <p>O Dolby C foi mais agressivo (cerca de 15 dB) e é notoriamente mais sensível a desalinhamento —
+          exactamente o que estas duas notas prevêem. <strong>Uma tabela que mede uma coisa só nunca decide um
+          compromisso.</strong></p>
+        </div>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — código que corre: a experiência que decide o descodificador</h3>
+      <p>Esta é a mais importante do curso até aqui, porque a conclusão dela é o desenho da lição 6.</p>
+      <p>Gera os comprimentos das meias ondas de uma sequência de bits do Spectrum (855 T para um 0, 1710 T
+      para um 1, duas meias ondas por bit) e classifica-os de duas maneiras:</p>
+      <ul>
+        <li><strong>Limiar fixo</strong> — o ponto médio entre os valores nominais em amostras.</li>
+        <li><strong>Limiar relativo</strong> — medido a partir do tom-piloto <em>daquela fita</em>.</li>
+      </ul>
+      <p>Faz isso para (a) wow crescente e (b) erro constante de velocidade. Conta os bits mal lidos.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>import math
+
+RELOGIO, TAXA = 3_500_000, 44100
+PILOTO, BIT0, BIT1 = 2168, 855, 1710
+
+def meias_ondas(bits, wow, wow_hz=3.0):
+    &quot;&quot;&quot;Comprimento, em amostras, de cada meia onda, com a velocidade a oscilar.&quot;&quot;&quot;
+    saida, t = [], 0.0
+    for b in bits:
+        for _ in range(2):
+            T = BIT1 if b else BIT0
+            v = 1.0 + wow*math.sin(2*math.pi*wow_hz*t/TAXA)
+            n = T * TAXA / RELOGIO / v
+            saida.append(n); t += n
+    return saida
+
+bits = [(i*7 + i//3) % 2 for i in range(400)]     # mistura de 0 e 1
+nominal0, nominal1 = BIT0*TAXA/RELOGIO, BIT1*TAXA/RELOGIO
+meio_absoluto = (nominal0 + nominal1)/2
+
+print(f&quot;nominal: bit0 = {nominal0:.2f} amostras | bit1 = {nominal1:.2f} &quot;
+      f&quot;| limiar fixo = {meio_absoluto:.2f}\n&quot;)
+print(f&quot;{&#x27;wow&#x27;:&gt;6} {&#x27;0: min..max&#x27;:&gt;16} {&#x27;1: min..max&#x27;:&gt;16} {&#x27;erros c/ limiar fixo&#x27;:&gt;21}&quot;)
+for wow in (0.0, 0.02, 0.10, 0.20, 0.30, 0.40, 0.50):
+    m = meias_ondas(bits, wow)
+    marcas = [b for b in bits for _ in range(2)]
+    z = [v for v, b in zip(m, marcas) if not b]
+    u = [v for v, b in zip(m, marcas) if b]
+    erros = sum(1 for v in z if v &gt; meio_absoluto) + sum(1 for v in u if v &lt;= meio_absoluto)
+    print(f&quot;{wow:6.0%} {min(z):7.2f}..{max(z):&lt;7.2f} {min(u):7.2f}..{max(u):&lt;7.2f} &quot;
+          f&quot;{erros:15d} / {len(m)}&quot;)
+
+print(&quot;\nErro constante de velocidade - limiar fixo contra limiar medido no piloto\n&quot;)
+print(f&quot;{&#x27;velocidade&#x27;:&gt;11} {&#x27;bit0&#x27;:&gt;7} {&#x27;bit1&#x27;:&gt;7} {&#x27;erros fixo&#x27;:&gt;11} {&#x27;erros relativo&#x27;:&gt;15}&quot;)
+for k in (0.80, 0.90, 1.00, 1.10, 1.25, 1.50):
+    z, u = nominal0/k, nominal1/k
+    piloto_medido = PILOTO*TAXA/RELOGIO/k       # o que o piloto mede NESTA fita
+    escala = piloto_medido/PILOTO                # amostras por T-state, medidas
+    meio_relativo = (BIT0+BIT1)/2*escala
+    e_fixo = (400 if z &gt; meio_absoluto else 0) + (400 if u &lt;= meio_absoluto else 0)
+    e_rel  = (400 if z &gt; meio_relativo else 0) + (400 if u &lt;= meio_relativo else 0)
+    print(f&quot;{k:11.2f} {z:7.2f} {u:7.2f} {e_fixo:8d}/800 {e_rel:12d}/800&quot;)</code></pre>
+        <p>Saída:</p>
+<pre><code>nominal: bit0 = 10.77 amostras | bit1 = 21.55 | limiar fixo = 16.16
+
+   wow      0: min..max      1: min..max  erros c/ limiar fixo
+    0%   10.77..10.77     21.55..21.55                 0 / 800
+    2%   10.56..10.99     21.12..21.99                 0 / 800
+   10%    9.79..11.97     19.59..23.94                 0 / 800
+   20%    8.98..13.47     17.96..26.93                 0 / 800
+   30%    8.29..15.31     16.57..30.55                 0 / 800
+   40%    7.70..17.27     15.39..34.26               105 / 800
+   50%    7.18..18.45     14.36..36.22               151 / 800
+
+Erro constante de velocidade - limiar fixo contra limiar medido no piloto
+
+ velocidade    bit0    bit1  erros fixo  erros relativo
+       0.80   13.47   26.93        0/800            0/800
+       0.90   11.97   23.94        0/800            0/800
+       1.00   10.77   21.55        0/800            0/800
+       1.10    9.79   19.59        0/800            0/800
+       1.25    8.62   17.24        0/800            0/800
+       1.50    7.18   14.36      400/800            0/800</code></pre>
+        <div class="caixa ok">
+          <span class="titulo">✅ Duas conclusões, e a segunda é a que desenha a lição 6</span>
+          <p><strong>Primeira: o wow quase não interessa.</strong> Só a <strong>40 %</strong> de variação de
+          velocidade é que aparecem erros — e 40 % é uma máquina avariada, não uma máquina má. A codificação
+          por comprimento de pulso é <em>muito</em> robusta ao wow, porque um 1 é o <strong>dobro</strong> de um
+          0 e o dobro é uma margem enorme. Se tinhas o wow como o vilão, a medição diz que não é.</p>
+          <p><strong>Segunda: o erro constante mata o limiar fixo.</strong> A 1,5×, o bit 1 mede 14,36 amostras
+          — <em>abaixo</em> do limiar de 16,16 — e todos os 1 são lidos como 0: <strong>400 erros em 800</strong>.
+          Não é degradação, é falha total. E o limiar medido no piloto? <strong>Zero erros</strong>, porque o
+          piloto encolheu na mesma proporção e o limiar encolheu com ele.</p>
+          <p>🔴 Repara na assimetria: 0,80 e 1,25 passam nos dois. O limiar fixo não falha por ser mau — falha
+          por ter um <strong>alcance limitado</strong> que ninguém conhece de antemão. O limiar relativo não tem
+          alcance: adapta-se a qualquer velocidade, porque mede a fita em vez de assumir a fita.</p>
+          <p><strong>É por isto que os cinco segundos de tom-piloto existem.</strong> Não são para «acordar» o
+          computador: são a régua que vai ao lado do desenho.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+
+    <p>Cada opção tem explicação, também as erradas.</p>
+    <div class="quiz" data-quiz="l3">
+      <ol class="perguntas">
+        <li class="pergunta">
+          <p class="enunciado">Como é que o companding reduz o ruído da fita?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l3-1" value="a" data-certa="false"><span class="rotulo">Filtra as frequências onde o chiado é mais audível</span></label>
+              <p class="explicacao" hidden>Nenhum filtro é aplicado ao ruído. Um filtro que cortasse o chiado cortava também a música que está nas mesmas frequências.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-1" value="b" data-certa="true"><span class="rotulo">Grava o sinal fraco a um nível mais alto e desfaz essa amplificação na leitura, arrastando o chiado para baixo com ela</span></label>
+              <p class="explicacao" hidden>É a mecânica toda. O chiado entra <em>entre</em> as duas operações, por isso só apanha a segunda — a que baixa.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-1" value="c" data-certa="false"><span class="rotulo">Usa fita de melhor qualidade nas passagens baixas</span></label>
+              <p class="explicacao" hidden>A fita é a mesma do princípio ao fim; não há forma de a mudar a meio. O companding é inteiramente eletrónico e funciona com qualquer fita.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-1" value="d" data-certa="false"><span class="rotulo">Aumenta a relação sinal-ruído em toda a gama dinâmica</span></label>
+              <p class="explicacao" hidden>Medido no exemplo trabalhado: +9 dB na passagem baixa e <strong>−3 dB</strong> na alta. É uma redistribuição. Se criasse informação do nada, era um moto-perpétuo.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que a primeira versão da simulação de companding deu SNR de −16,8 dB, pior do que não fazer nada?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l3-2" value="a" data-certa="true"><span class="rotulo">A lei de compressão não era invertível: o expansor media o sinal já amplificado e concluía que não havia nada a desfazer</span></label>
+              <p class="explicacao" hidden>É esse o erro conceptual. Uma regra do tipo «se estiver baixo, multiplica por 8» destrói a informação de <em>quanto</em> estava baixo, e sem ela o expansor não tem como voltar atrás.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-2" value="b" data-certa="false"><span class="rotulo">O ruído da fita estava mal simulado</span></label>
+              <p class="explicacao" hidden>O ruído era o mesmo nas três estratégias, e a estratégia «direto» dava 5,0 dB — um valor sensato. Se o ruído estivesse errado, todas estariam erradas.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-2" value="c" data-certa="false"><span class="rotulo">Faltava filtrar as altas frequências antes de expandir</span></label>
+              <p class="explicacao" hidden>O Dolby B é de facto seletivo em frequência, mas isso é um refinamento. O problema aqui era anterior e mais grave: a operação não tinha inversa.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-2" value="d" data-certa="false"><span class="rotulo">A fita saturou</span></label>
+              <p class="explicacao" hidden>Saturou na estratégia do ganho fixo de 8× (pico gravado 1,00). Na do ganho variável o pico gravado era 0,80 e não saturou — e mesmo assim o resultado foi péssimo.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Uma cassete Tipo II usa equalização de 70 µs em vez dos 120 µs da Tipo I. Porquê?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l3-3" value="a" data-certa="false"><span class="rotulo">Porque o dióxido de crómio reproduz agudos de forma diferente e a física obriga</span></label>
+              <p class="explicacao" hidden>A física não obriga a nada disto: os 120 µs eram tecnicamente utilizáveis nessas fitas. Houve mesmo uma discussão na indústria, e a decisão podia ter caído do outro lado.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-3" value="b" data-certa="false"><span class="rotulo">Porque 70 µs corresponde a uma frequência mais baixa e isso ajuda nos graves</span></label>
+              <p class="explicacao" hidden>Ao contrário: 70 µs correspondem a 2274 Hz e 120 µs a 1326 Hz. Constante <em>mais pequena</em>, frequência <em>mais alta</em>, porque f = 1/(2πτ).</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-3" value="c" data-certa="false"><span class="rotulo">Porque as fitas Tipo II precisam de mais bias e a equalização compensa isso</span></label>
+              <p class="explicacao" hidden>Precisam mesmo de mais bias (cerca de 150 %), mas isso é gravação e resolve-se na gravação. A equalização de reprodução é um problema separado.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-3" value="d" data-certa="true"><span class="rotulo">Foi uma decisão: os 70 µs davam cerca de 4,5 dB menos ruído ao preço de 4,5 dB menos saída nos agudos, e o ruído era o problema do momento</span></label>
+              <p class="explicacao" hidden>Uma troca explícita, resolvida por prioridade de mercado. A cassete estava a lutar pela aceitação como meio de alta fidelidade e o chiado era o que lhe pesava.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Que defeito de uma cassete é <strong>mais</strong> perigoso para ler dados, segundo as medições de E3?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l3-4" value="a" data-certa="false"><span class="rotulo">Wow e flutter</span></label>
+              <p class="explicacao" hidden>Medido: com limiar fixo, só aparecem erros acima de 40 % de variação de velocidade — valor absurdo para qualquer máquina que ainda ande. A codificação por comprimento tem margem de sobra.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-4" value="b" data-certa="false"><span class="rotulo">Chiado de fundo</span></label>
+              <p class="explicacao" hidden>O formato do Spectrum aguenta SNR até cerca de 20 dB (medido na lição 6), que qualquer cassete dá. O ruído é problema para a música, não para estes dados.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-4" value="c" data-certa="true"><span class="rotulo">Erro constante de velocidade</span></label>
+              <p class="explicacao" hidden>A 1,5× o limiar fixo erra 400 bits em 800: falha total. E é o defeito que <em>menos</em> se ouve — 3 % de erro constante é meio semitom, que ninguém nota numa música.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-4" value="d" data-certa="false"><span class="rotulo">Corte de agudos</span></label>
+              <p class="explicacao" hidden>O sinal do Spectrum vive entre 807 e 2047 Hz, muito abaixo de onde a cassete tem dificuldades. Na lição 6 vais medir que sobrevive a um corte a 800 Hz.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Para que serve o tom-piloto de cinco segundos no princípio de cada bloco?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l3-5" value="a" data-certa="false"><span class="rotulo">Para dar tempo ao motor da cassete de estabilizar</span></label>
+              <p class="explicacao" hidden>Soa plausível, e o efeito até existe como benefício secundário. Mas se fosse só isso bastava silêncio, que é mais barato de gravar e não precisava de ter uma frequência definida.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-5" value="b" data-certa="true"><span class="rotulo">Para o descodificador medir quanto é que 2168 T-states valem em amostras <em>naquela</em> fita, e escalar tudo o resto a partir daí</span></label>
+              <p class="explicacao" hidden>É a régua ao lado do desenho. O piloto tem duração conhecida em T-states, portanto medi-lo dá a conversão entre o relógio do Spectrum e a velocidade real desta reprodução.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-5" value="c" data-certa="false"><span class="rotulo">Para o utilizador saber, pelo som, que a fita está na posição certa</span></label>
+              <p class="explicacao" hidden>Ajuda mesmo — quem usou reconhece o apito. Mas é efeito, não causa: o piloto teria de existir de qualquer forma para o descodificador funcionar.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-5" value="d" data-certa="false"><span class="rotulo">Para separar blocos consecutivos</span></label>
+              <p class="explicacao" hidden>Quem separa blocos é o silêncio entre eles. O piloto vem <em>depois</em> do silêncio e <em>antes</em> dos dados de um bloco, não entre blocos.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Em E2 mediste que a passagem baixa melhora até R = 0,3 e depois piora. Porque é que piora?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l3-6" value="a" data-certa="true"><span class="rotulo">Porque o expansor eleva a 1/R, e com R baixo isso amplifica o ruído que a fita somou</span></label>
+              <p class="explicacao" hidden>Com R = 0,2 o expansor eleva à quinta potência. Uma potência alta amplifica tudo o que recebe, incluindo o chiado que entrou depois da compressão. Abaixo de certo ponto, o expansor estraga mais do que o compressor tinha ganho.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-6" value="b" data-certa="false"><span class="rotulo">Porque a fita satura</span></label>
+              <p class="explicacao" hidden>Não satura: a tabela mostra o pico gravado a chegar só a 0,956 com R = 0,2, ainda abaixo de 1,0. Seria uma explicação plausível se o pico tivesse batido no teto — mas não bateu.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-6" value="c" data-certa="false"><span class="rotulo">Porque a passagem alta perde demasiado</span></label>
+              <p class="explicacao" hidden>Perde mesmo — de 29,0 para 19,2 dB — e é uma boa razão prática para não ir tão longe. Mas a pergunta é sobre a passagem <em>baixa</em>, que também piora, e isso precisa de outra explicação.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l3-6" value="d" data-certa="false"><span class="rotulo">Porque 10 dB é o máximo teórico do companding</span></label>
+              <p class="explicacao" hidden>Não há máximo teórico nenhum. A tabela chega a 15,1 dB na passagem baixa, acima dos 10 dB que o Dolby B anuncia. Os limites são todos práticos.</p>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="feynman-1">Explica porque é que uma fita que anda 3 % mais depressa não estraga uma música mas pode estragar um programa — e o que se faz para resolver isso.
+        <span class="pista">Cuidado com o exagero: 3 % sozinhos não chegam para estragar o programa, e a lição mede isso. A boa resposta explica porque é que mesmo assim não se pode contar com a velocidade.</span>
+      </label>
+      <textarea id="feynman-1" data-pergunta="Explica porque é que uma fita que anda 3 % mais depressa não estraga uma música mas pode estragar um programa — e o que se faz para resolver isso."></textarea>
+    </div>
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/cassete-dados/respostas/AAAA-MM-DD.md</code> e correr
+      <code>/corrigir cassete-dados</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Três defeitos: <strong>ruído</strong>, <strong>corte de agudos</strong> e <strong>velocidade
+      instável</strong>. Para dados, a ordem de gravidade inverte-se em relação à música.</li>
+      <li><strong>Companding</strong> (o Dolby) grava alto o que é fraco e desfaz isso na leitura, arrastando o
+      chiado para baixo. Medido: +9 dB na passagem baixa, <strong>−3 dB na alta</strong>. Redistribui, não cria.
+      A lei tem de ser <strong>invertível</strong> ou piora tudo.</li>
+      <li>As constantes de equalização são frequências disfarçadas: <em>f</em> = 1/(2πτ), logo 120 µs = 1326 Hz
+      e 70 µs = 2274 Hz. A escolha dos 70 µs foi uma <strong>decisão de mercado</strong>: −4,5 dB de ruído por
+      −4,5 dB de agudos.</li>
+      <li>A velocidade é fixada pelo <strong>capstan</strong> e pelo rolete, não pelos carretos. Medido: o wow
+      só produz erros acima de 40 %; o que mata é o <strong>erro constante</strong>, que é o que menos se ouve.</li>
+      <li>🔴 <strong>Um descodificador de fita nunca usa limiares absolutos.</strong> Medido: a 1,5× de
+      velocidade, limiar fixo = 400 erros em 800; limiar medido no tom-piloto = <strong>zero</strong>.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Fonte da indústria</strong> — Jay McKnight, <em>Tape Recording Equalization Fundamentals</em>,
+      Magnetic Reference Laboratory. O tratamento a sério de por que existe equalização de gravação e de
+      reprodução, e do que é uma constante de tempo. <strong>Porquê:</strong> a MRL fabrica as fitas de
+      calibração da indústria e McKnight trabalhou nas normas — é primária no sentido que interessa.
+      <a href="https://mrltapes.com/pages/equalization-fundamentals.html">mrltapes.com</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Curso universitário (não é documentação)</strong> — Jay Kadis, <em>Magnetic Recording: Analog
+      Tape</em>, CCRMA, Stanford, ©2014. Daqui vêm o papel do capstan e do rolete, o azimute, a origem
+      mecânica do wow e do flutter, e a descrição do companding («comprimindo o sinal antes de o enviar para a
+      fita e expandindo-o na reprodução»). <strong>O que ler:</strong> «Tape transport» e «Head alignment».
+      <a href="https://ccrma.stanford.edu/~jay/subpages/Lectures/Lecture7-Magnetic_recording.pdf">ccrma.stanford.edu</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Fonte secundária</strong> — Wikipédia (inglês), <em>Dolby noise-reduction system</em>. Daqui
+      saem os números do Dolby B (3 dB a 600 Hz, 6 dB a 1,2 kHz, 8 dB a 2,4 kHz, 10 dB a 5 kHz), o «nível
+      Dolby» de referência, o efeito de brilho quando se ouve sem descodificar, e os cerca de 15 dB do Dolby C.
+      É enciclopédia e diz-se que é.
+      <a href="https://en.wikipedia.org/wiki/Dolby_noise-reduction_system">en.wikipedia.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Constantes de equalização</strong> — 120 µs para Tipo I, 70 µs para Tipos II, III e IV, com a
+      troca de 4,5 dB de ruído por 4,5 dB de agudos que motivou a escolha.
+      <span class="verificado">🌐 Verificado a 2026-09-16</span> ⚠️ <strong>Aviso de qualidade de fonte.</strong>
+      Confirmei os dois valores em várias fontes independentes, incluindo uma enciclopédia que os atribui à
+      IEC 60094. O número específico dos <strong>4,5 dB</strong> e a história da discussão encontrei-os em
+      fóruns de técnicos de áudio, que <strong>não são fonte fiável</strong>. Não abri a norma, que é paga, nem
+      encontrei o número em fonte primária. Os 120/70 µs são sólidos; os 4,5 dB estão aqui com esta ressalva.</li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> · Anterior: <a href="02-bias.html">← 2 · Bias</a> · Próxima: <a href="04-bits-em-som.html">4 · De bits a som →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

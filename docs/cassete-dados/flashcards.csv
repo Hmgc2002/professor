@@ -1,0 +1,54 @@
+frente;verso;etiqueta
+Num .wav, qual é a frequência mais alta representável?;Metade da taxa de amostragem.;cassete::l0
+Bits por amostra e taxa de amostragem: o que limita cada um?;Bits limitam a resolução de amplitude (piso de ruído). Taxa limita a frequência máxima. São independentes.;cassete::l0
+Num .wav, 16 bits são com ou sem sinal? E 8 bits?;16 bits com sinal (-32768 a 32767). 8 bits SEM sinal (0 a 255, silêncio em 128). A convenção muda.;cassete::l0
+O que devolve readframes(n) do módulo wave?;Bytes crus, no máximo n frames. Falta desempacotar.;cassete::l0
+Para este curso, qual é a pergunta certa sobre a taxa de amostragem?;Não «que frequências cabem» mas «com que precisão consigo cronometrar uma mudança de sinal» — ±0,5 amostras.;cassete::l0
+O que é que a cabeça de leitura mede?;A taxa de variação do fluxo (V = -N dPhi/dt), não o fluxo. Fita parada, saída zero.;cassete::l1
+Quantos dB por oitava sobe a saída da cabeça de leitura, e porquê?;+6 dB/oitava, porque diferenciar uma sinusoide multiplica a amplitude pela frequência.;cassete::l1
+Onde é que o sinal fica fixado na fita?;No bordo de SAÍDA da fenda, quando o campo desce abaixo da coercividade — não por baixo da fenda.;cassete::l1
+O que é a coercividade?;A força de campo precisa para inverter a magnetização do material.;cassete::l1
+Na fita, como se converte frequência em comprimento?;comprimento de onda = velocidade / frequência. Numa cassete a 4,7625 cm/s, 15 kHz são 3,18 micrómetros.;cassete::l1
+De onde vem o chiado de uma fita?;Da granularidade do meio: partículas discretas ao acaso, cuja soma flutua. Inerente, não é dos circuitos.;cassete::l1
+O que é a perda de fenda?;Quando o comprimento de onda iguala a fenda da cabeça, a média do fluxo dá zero e a frequência não se reproduz. Tem zeros em cada múltiplo.;cassete::l1
+Qual é o problema que o bias resolve?;Abaixo da coercividade a fita não grava nada. Medido: amplitude 0,2 sem bias dá fundamental exactamente 0,00000.;cassete::l2
+Porque é que o bias tem de ser alternado e não contínuo?;O bias contínuo deixa magnetização líquida na fita, que gera ruído na reprodução.;cassete::l2
+Em que gama de frequências está o bias de uma cassete?;40 a 150 kHz.;cassete::l2
+O bias desloca o sinal?;Não. É simétrico e a sua média é zero. Faz o ponto de funcionamento varrer a curva muitas vezes por ciclo do sinal.;cassete::l2
+O que acontece com bias a mais?;A sensibilidade desce (medido: de 0,2247 no pico para 0,0785 com o dobro) e na fita real perdem-se os agudos.;cassete::l2
+Porque é que fitas de tipos diferentes precisam de bias diferente?;O bias mínimo é proporcional à coercividade. Tipo II pede ~150 por cento e Tipo IV ~250 por cento do de uma Tipo I.;cassete::l2
+Numa não-linearidade simétrica, que harmónicos aparecem?;Só os ímpares. Se vires 2.º harmónico forte, há assimetria algures.;cassete::l2
+Como é que o companding reduz o ruído da fita?;Grava o sinal fraco mais alto e desfaz isso na leitura. O chiado entrou entre as duas operações, por isso só apanha a segunda.;cassete::l3
+Quanto é que o companding melhora, e quanto custa?;Medido: +9 dB na passagem baixa e -3 dB na alta. Redistribui, não cria. E a lei tem de ser invertível.;cassete::l3
+Constantes de equalização de cassete: quais são e a que frequências correspondem?;120 microssegundos (1326 Hz) para Tipo I. 70 microssegundos (2274 Hz) para Tipos II, III e IV. f = 1/(2 pi tau).;cassete::l3
+O que fixa a velocidade da fita numa cassete?;O capstan e o rolete de pressão. Não os carretos, cujo raio muda.;cassete::l3
+Qual é o defeito da fita que é fatal para dados?;O erro CONSTANTE de velocidade — o que menos se ouve. Wow só produz erros acima de 40 por cento.;cassete::l3
+Porque é que um descodificador de fita não pode usar limiares absolutos?;Medido: a 1,5x de velocidade, limiar fixo erra 400 bits em 800. Limiar medido no tom-piloto erra zero.;cassete::l3
+Porque é que não se gravam bits como níveis de tensão numa fita?;A cabeça diferencia e um patamar não produz saída. Medido: ao quarto bit igual, o nível lido é 0,00.;cassete::l4
+Porque é que não se gravam bits por amplitude?;A amplitude é mexida por seis coisas: nível de gravação, contacto, coercividade, bias, redução de ruído e volume.;cassete::l4
+O que quer dizer um esquema ser auto-sincronizado?;Ter pelo menos uma transição garantida em CADA bit, para qualquer sequência de dados.;cassete::l4
+Porque é que gravar por tempo funciona numa fita?;A transição é o que a cabeça lê melhor, a amplitude passa a ser irrelevante, e filtrar não move os cruzamentos.;cassete::l4
+Kansas City: como se codificam um 0 e um 1?;0 = 4 ciclos de 1200 Hz. 1 = 8 ciclos de 2400 Hz. Os dois duram 3,333 ms. 300 baud, 27,3 byte/s.;cassete::l4
+Kansas City: como é o enquadramento de um byte?;1 bit de arranque (0) + 8 de dados (menos significativo primeiro) + 2 de paragem (1) = 11 bits.;cassete::l4
+Porque é que o Spectrum é 6x mais rápido do que o Kansas City?;Célula de duração variável: um bit 0 demora metade de um bit 1. No Kansas City todos os bits duram o mesmo.;cassete::l4
+Que largura de banda assumiu o simpósio de 1975 como fiável numa cassete?;3000 Hz, por causa do desalinhamento de cabeças entre gravadores. O Spectrum vive entre 807 e 2624 Hz.;cassete::l4
+Os cinco tempos do formato do Spectrum, em T-states.;Piloto 2168. Sincronismo 667 e 735. Bit 0 855. Bit 1 1710. Todos em MEIAS ondas.;cassete::l5
+Quanto tempo ocupa um bit 1 no Spectrum?;3420 T-states — duas meias ondas de 1710. Um bit 0 ocupa 1710 T.;cassete::l5
+Quantas meias ondas tem o tom-piloto?;8063 num cabeçalho (cerca de 5 s) e 3223 num bloco de dados (cerca de 2 s).;cassete::l5
+Como se calcula o byte de paridade de um bloco do Spectrum?;XOR de todos os bytes anteriores, bandeira incluída. O XOR do bloco inteiro dá 0x00.;cassete::l5
+Em que ordem vão os bits de um byte na fita do Spectrum?;Mais significativo primeiro. Ao contrário do Kansas City.;cassete::l5
+Qual é a estrutura de um ficheiro .tap?;Por bloco: 2 bytes little-endian com o comprimento (sem se contarem), depois o bloco. Repetir. Mais nada.;cassete::l5
+Porque é que um .tap não representa turbo loaders?;Guarda só os bytes e assume os tempos da ROM. Para os tempos existe o .tzx.;cassete::l5
+Quais são os cinco passos do descodificador?;Ler, centrar, arestas, medir, ler bits.;cassete::l6
+Como se deteta uma aresta com ruído?;Histerese: dois limiares com zona morta, com o limiar a seguir o envelope do sinal.;cassete::l6
+Como se mede a escala de tempo de uma fita?;Mediana dos comprimentos do tom-piloto, dividida por 2168. Mediana e não média, por causa dos dropouts.;cassete::l6
+Porque é que a última meia onda de um bloco não tem aresta de fecho?;A seguir a ela vem silêncio, e silêncio não cruza limiar. São 303 onde há 304 — perde-se o byte de paridade.;cassete::l6
+Até que ruído aguenta o descodificador?;Medido com 8 sementes: sigma 0,10 (SNR ~20 dB) passa 8/8. Sigma 0,15 passa 3/8.;cassete::l6
+Até que corte de agudos aguenta o descodificador?;Medido: 800 Hz, num sinal com componentes até 2047 Hz. Filtrar não move os cruzamentos.;cassete::l6
+Qual é o critério de sucesso do descodificador?;Os bytes serem idênticos. «Encontrou os blocos» não chega — há sabotagens que dão tamanhos certos e bytes errados.;cassete::l6
+Se o formato é imune à amplitude, porque é que era preciso acertar no volume?;O Spectrum detetava transições com comparador de limiar quase fixo, sem seguidor de envelope. O formato é imune, a implementação não era.;cassete::l7
+Porque é que não se pode construir uma B-tree numa cassete?;Não há endereços. «Lê a página p» não é uma operação cara — não está definida. O contador conta voltas do carreto.;cassete::l7
+Quanto leva um lado de uma C60 como dados do Spectrum?;Cerca de 300 KiB, a 171 byte/s durante 1800 segundos.;cassete::l7
+O que é que a disquete trouxe que matou a cassete como meio de dados?;Endereços. Passou a haver sistema de ficheiros e carregamento parcial. É diferença de natureza, não de grau.;cassete::l7
+O que ganha e o que perde um turbo loader?;Ganha débito (400/800 T dão 365 byte/s contra 171). Perde margem: a onda sobe para 4375 Hz e o comprimento na fita cai para 10,9 micrómetros.;cassete::l7
+Porque é que a cassete venceu os formatos concorrentes em 1963-66?;A Philips passou a licenciá-la gratuitamente a partir de 1966, sob pressão da Sony. Formato aberto contra formatos fechados.;cassete::l7

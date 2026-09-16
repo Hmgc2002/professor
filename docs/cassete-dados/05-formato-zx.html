@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5 · O formato do ZX Spectrum, byte a byte — A cassete como memória</title>
+<meta name="description" content="Tom-piloto, sincronismo, bandeira, paridade XOR e o formato .tap do ZX Spectrum, com os tempos em T-states conferidos contra a ROM.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-dados/05-formato-zx.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">A cassete como memória</a> <span aria-hidden="true">›</span> Lição 5
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta extensão">Lição 5 · extensão</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>O formato do ZX Spectrum, byte a byte</h1>
+    <p class="subtitulo">A especificação completa, com os cinco tempos, a estrutura do bloco e o ficheiro .tap — construído à mão e conferido. É o mapa que a lição 6 implementa.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim consegues <strong>descrever de memória</strong> a estrutura completa de um bloco de fita do
+    ZX Spectrum — tom-piloto, sincronismo, bandeira, dados, paridade — com os tempos em T-states, e
+    <strong>construir à mão</strong> um ficheiro <code>.tap</code> válido, verificando a paridade. É o mapa que
+    o descodificador da lição 6 vai implementar.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <ol>
+      <li>Da lição 4: o que quer dizer um esquema ser auto-sincronizado?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Ter pelo menos uma transição garantida em <strong>cada</strong> bit, para qualquer sequência de
+          dados — para o leitor nunca perder a conta.</p>
+        </details>
+      </li>
+      <li>Da lição 3: para que serve o tom-piloto?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Para o descodificador medir quanto vale 2168 T-states em amostras <em>naquela</em> reprodução, e
+          escalar tudo o resto a partir daí. É a régua ao lado do desenho.</p>
+        </details>
+      </li>
+      <li>Da lição 4: quantos bytes por segundo dá o formato do Spectrum, em média?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Cerca de <strong>171 byte/s</strong> (1364,5 bit/s). Um bit médio ocupa 2565 T e o relógio corre a
+          3 500 000 T/s.</p>
+        </details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p>O relógio do ZX Spectrum de 48K corre a <strong>3 500 000 ciclos por segundo</strong>, e é nessa unidade
+    — o <em>T-state</em> — que a ROM conta tudo. Um T-state são 1/3 500 000 s ≈ 0,286 µs. Todos os tempos do
+    formato são múltiplos disto, porque o que a ROM faz é literalmente contar instruções.</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Os cinco tempos do formato, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Elemento</th><th>T-states</th><th>Duração</th><th>Frequência da onda</th></tr></thead>
+        <tbody>
+          <tr><td>Meia onda do tom-piloto</td><td><strong>2168</strong></td><td>619,4 µs</td><td>807,2 Hz</td></tr>
+          <tr><td>1.º pulso de sincronismo</td><td><strong>667</strong></td><td>190,6 µs</td><td>(2623,7 Hz)</td></tr>
+          <tr><td>2.º pulso de sincronismo</td><td><strong>735</strong></td><td>210,0 µs</td><td>(2381,0 Hz)</td></tr>
+          <tr><td>Meia onda de um bit <strong>0</strong></td><td><strong>855</strong></td><td>244,3 µs</td><td>2046,8 Hz</td></tr>
+          <tr><td>Meia onda de um bit <strong>1</strong></td><td><strong>1710</strong></td><td>488,6 µs</td><td>1023,4 Hz</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ «Meia onda», e porque é que a palavra importa</span>
+      <p>Estes números são o tempo que o sinal fica <strong>de um lado</strong> antes de trocar. Um bit são
+      <strong>duas</strong> meias ondas, portanto um bit 0 ocupa 1710 T e um bit 1 ocupa 3420 T. Confundir isto
+      dá um descodificador com o dobro ou metade do débito, e é o erro mais comum de quem lê a especificação à
+      pressa.</p>
+    </div>
+
+    <h3>A anatomia de um bloco</h3>
+
+    <figure>
+      <svg viewBox="0 0 520 170" role="img" aria-labelledby="t-bloco d-bloco">
+        <title id="t-bloco">A sequência de um bloco de fita do ZX Spectrum, da esquerda para a direita</title>
+        <desc id="d-bloco">Da esquerda para a direita: silêncio; um longo tom-piloto de meias ondas todas
+        iguais de 2168 T-states, com cerca de cinco segundos num cabeçalho e dois segundos num bloco de dados;
+        dois pulsos curtos de sincronismo de 667 e 735 T-states; e depois os bytes, cada bit feito de duas
+        meias ondas de 855 ou de 1710 T-states. Os bytes são, por esta ordem: uma bandeira, os dados, e um byte
+        de paridade. Segue-se silêncio.</desc>
+        <rect class="svg-caixa" x="4"   y="46" width="52"  height="44" rx="4"/>
+        <rect class="svg-realce" x="60" y="46" width="170" height="44" rx="4"/>
+        <rect class="svg-caixa" x="234" y="46" width="52"  height="44" rx="4"/>
+        <rect class="svg-realce" x="290" y="46" width="44"  height="44" rx="4"/>
+        <rect class="svg-caixa" x="338" y="46" width="110" height="44" rx="4"/>
+        <rect class="svg-realce" x="452" y="46" width="44"  height="44" rx="4"/>
+        <text class="svg-texto" x="30"  y="72" text-anchor="middle">silêncio</text>
+        <text class="svg-texto" x="145" y="66" text-anchor="middle">tom-piloto</text>
+        <text class="svg-texto" x="145" y="82" text-anchor="middle">2168 T × 8063</text>
+        <text class="svg-texto" x="260" y="66" text-anchor="middle">sincr.</text>
+        <text class="svg-texto" x="260" y="82" text-anchor="middle">667+735</text>
+        <text class="svg-texto" x="312" y="72" text-anchor="middle">band.</text>
+        <text class="svg-texto" x="393" y="66" text-anchor="middle">dados</text>
+        <text class="svg-texto" x="393" y="82" text-anchor="middle">855 ou 1710 T</text>
+        <text class="svg-texto" x="474" y="66" text-anchor="middle">par.</text>
+        <text class="svg-texto" x="474" y="82" text-anchor="middle">XOR</text>
+        <text class="svg-texto" x="4"   y="32">~5 s num cabeçalho, ~2 s num bloco de dados</text>
+        <text class="svg-texto" x="490" y="124" text-anchor="end">XOR de band. + dados + par. = 0x00</text>
+        <path class="svg-traco" d="M312 106 V94 M474 106 V94 M312 106 H474" style="fill:none"/>
+        <text class="svg-texto" x="4" y="150">mais depressa →  bit 0 (855 T)  ·  mais devagar →  bit 1 (1710 T)</text>
+      </svg>
+      <figcaption>Os bytes vão com o <strong>bit mais significativo primeiro</strong>. O byte de paridade é
+      escolhido para que o XOR de todos os bytes do bloco, bandeira incluída, dê exactamente zero.</figcaption>
+    </figure>
+
+    <h3>1. Tom-piloto</h3>
+    <p>Meias ondas todas iguais de 2168 T. O número delas depende do tipo de bloco:</p>
+    <ul>
+      <li><strong>8063</strong> num cabeçalho → 8063 × 2168 ÷ 3 500 000 = <strong>4,99 s</strong>;</li>
+      <li><strong>3223</strong> num bloco de dados → <strong>2,00 s</strong>.</li>
+    </ul>
+    <p>Os comentários da ROM dizem-no assim: «esta constante dá um cabeçalho de cerca de 5 segundos» e «cerca
+    de 2 segundos para um bloco de programa/dados». Cinco segundos num cabeçalho porque é o primeiro contacto e
+    é preciso dar tempo ao leitor de se orientar; dois no bloco de dados porque a esta altura já se sabe que a
+    fita está a correr.</p>
+
+    <h3>2. Sincronismo</h3>
+    <p>Dois pulsos curtos, de <strong>667</strong> e <strong>735</strong> T. São mais curtos do que qualquer
+    outra coisa no formato — mais curtos até do que um bit 0 — e é essa a sua função: marcar sem ambiguidade
+    «acabou o piloto, o que vem a seguir são dados». Não há forma de os confundir com um bit.</p>
+
+    <h3>3. Os bytes</h3>
+    <ul>
+      <li><strong>Bandeira</strong>: <code>0x00</code> num cabeçalho, <code>0xFF</code> num bloco de dados.</li>
+      <li><strong>Dados</strong>: o conteúdo.</li>
+      <li><strong>Paridade</strong>: um byte calculado para que o XOR de <em>todos</em> os bytes do bloco,
+      incluindo a bandeira e o próprio byte de paridade, dê <code>0x00</code>.</li>
+    </ul>
+    <p>Dentro de cada byte, o <strong>bit mais significativo vai primeiro</strong>. Repara que é o contrário do
+    Kansas City, que manda o menos significativo primeiro — outra decisão arbitrária que fica congelada.</p>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Paridade não é correção</span>
+      <p>Um XOR de todos os bytes deteta qualquer número ímpar de bits errados numa dada posição, e nada mais.
+      Dois erros que se cancelem passam despercebidos. E mesmo quando deteta, <strong>não diz onde</strong> nem
+      corrige. O Spectrum respondia <code>R Tape loading error</code> e não havia mais nada a fazer senão
+      rebobinar. Códigos que corrigem existem e são outro tópico — este curso não os cobre.</p>
+    </div>
+
+    <h3>O cabeçalho por dentro: 17 bytes com significado</h3>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Os campos do cabeçalho, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Posição</th><th>Bytes</th><th>Campo</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>1</td><td>Tipo: 0 = programa BASIC, 1 = matriz numérica, 2 = matriz de carateres, 3 = código</td></tr>
+          <tr><td>1–10</td><td>10</td><td>Nome, preenchido com espaços à direita</td></tr>
+          <tr><td>11–12</td><td>2</td><td>Comprimento do bloco de dados que se segue</td></tr>
+          <tr><td>13–14</td><td>2</td><td>Parâmetro 1 (para tipo 3, o endereço de carregamento)</td></tr>
+          <tr><td>15–16</td><td>2</td><td>Parâmetro 2</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Com a bandeira à frente e a paridade atrás, um bloco de cabeçalho tem sempre <strong>19 bytes</strong>.
+    Os inteiros de 2 bytes são little-endian, como tudo no Z80.</p>
+
+    <h3>O ficheiro <code>.tap</code>: o formato mais simples que já viste</h3>
+
+    <p>Um <code>.tap</code> é a fita <strong>sem o áudio</strong> — só os bytes, na ordem em que estão. A sua
+    estrutura inteira cabe numa frase: <em>para cada bloco, dois bytes little-endian com o comprimento, seguidos
+    do bloco</em>. Mais nada. Sem cabeçalho de ficheiro, sem número mágico, sem versão.</p>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ O que este formato não te dá</span>
+      <p>Não tem os tempos. Um <code>.tap</code> assume que todos os pulsos são os da ROM — logo não consegue
+      representar os <em>turbo loaders</em>, que usavam tempos próprios para carregar mais depressa. Para esses
+      inventou-se o <code>.tzx</code>, que guarda os pulsos. É o mesmo tipo de história que a dos 70 µs da lição
+      3: um formato simples, um mundo que cresce, um formato novo por cima.</p>
+    </div>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p>Vamos construir à mão um <code>.tap</code> com um programa de máquina de três instruções, e verificar a
+    paridade.</p>
+
+    <h3>Passo 1 — que programa, e porquê este</h3>
+    <p>Quatro bytes de código Z80:</p>
+<pre><code>AF        XOR A            ; A = 0  (0 e a cor preta)
+D3 FE     OUT (0xFE), A    ; escreve A na porta 0xFE, que controla a borda
+C9        RET              ; volta ao BASIC</code></pre>
+    <p>Escolhi-o por ser o programa mais curto que <em>faz</em> alguma coisa visível: pinta a borda do ecrã de
+    preto. Quatro bytes deixam o bloco pequeno o suficiente para caber inteiro num despejo hexadecimal que se lê
+    a olho — e ler o despejo a olho é metade do exercício.</p>
+
+    <h3>Passo 2 — o código</h3>
+<pre><code>import struct
+
+def paridade(b):
+    x = 0
+    for v in b:
+        x ^= v
+    return x
+
+def bloco(bandeira, corpo):
+    &quot;&quot;&quot;bandeira + corpo + byte de paridade. O XOR de tudo tem de dar 0x00.&quot;&quot;&quot;
+    b = bytes([bandeira]) + corpo
+    return b + bytes([paridade(b)])
+
+def cabecalho(tipo, nome, comprimento, par1, par2):
+    corpo = struct.pack(&quot;&lt;B10sHHH&quot;, tipo, nome.encode(&quot;ascii&quot;).ljust(10)[:10],
+                        comprimento, par1, par2)
+    return bloco(0x00, corpo)
+
+def tap(blocos):
+    # dois bytes little-endian com o comprimento, depois o bloco. E mais nada.
+    return b&quot;&quot;.join(struct.pack(&quot;&lt;H&quot;, len(b)) + b for b in blocos)
+
+corpo = bytes([0xAF, 0xD3, 0xFE, 0xC9])
+h = cabecalho(3, &quot;ECRA&quot;, len(corpo), 32768, 32768)
+d = bloco(0xFF, corpo)
+ficheiro = tap([h, d])
+
+print(&quot;cabecalho:&quot;, h.hex(&quot; &quot;))
+print(&quot;  bandeira %02x | tipo %d | nome %r | comp %d | p1 %d | p2 %d | paridade %02x&quot;
+      % (h[0], h[1], h[2:12].decode(&quot;ascii&quot;), int.from_bytes(h[12:14], &quot;little&quot;),
+         int.from_bytes(h[14:16], &quot;little&quot;), int.from_bytes(h[16:18], &quot;little&quot;), h[18]))
+print(&quot;dados    :&quot;, d.hex(&quot; &quot;))
+print(&quot;tap      :&quot;, ficheiro.hex(&quot; &quot;))
+print()
+print(&quot;XOR do cabecalho inteiro (tem de dar 0):&quot;, paridade(h))
+print(&quot;XOR do bloco de dados inteiro (tem de dar 0):&quot;, paridade(d))
+print(&quot;tamanhos:&quot;, len(h), &quot;e&quot;, len(d), &quot;bytes; ficheiro&quot;, len(ficheiro), &quot;bytes&quot;)</code></pre>
+
+    <h3>Passo 3 — a saída</h3>
+<pre><code>cabecalho: 00 03 45 43 52 41 20 20 20 20 20 20 04 00 00 80 00 80 12
+  bandeira 00 | tipo 3 | nome &#x27;ECRA      &#x27; | comp 4 | p1 32768 | p2 32768 | paridade 12
+dados    : ff af d3 fe c9 b4
+tap      : 13 00 00 03 45 43 52 41 20 20 20 20 20 20 04 00 00 80 00 80 12 06 00 ff af d3 fe c9 b4
+
+XOR do cabecalho inteiro (tem de dar 0): 0
+XOR do bloco de dados inteiro (tem de dar 0): 0
+tamanhos: 19 e 6 bytes; ficheiro 29 bytes</code></pre>
+
+    <h3>Passo 4 — ler o despejo byte a byte</h3>
+
+    <p>Segue o <code>tap</code> da esquerda para a direita e reconhece cada pedaço:</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="O ficheiro tap byte a byte, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Bytes</th><th>O que é</th><th>Como se lê</th></tr></thead>
+        <tbody>
+          <tr><td><code>13 00</code></td><td>comprimento do 1.º bloco</td><td>0x0013 little-endian = <strong>19</strong></td></tr>
+          <tr><td><code>00</code></td><td>bandeira</td><td>cabeçalho</td></tr>
+          <tr><td><code>03</code></td><td>tipo</td><td>código de máquina</td></tr>
+          <tr><td><code>45 43 52 41 20 20 20 20 20 20</code></td><td>nome</td><td><code>ECRA</code> + seis espaços (0x20)</td></tr>
+          <tr><td><code>04 00</code></td><td>comprimento dos dados</td><td>4 bytes</td></tr>
+          <tr><td><code>00 80</code> <code>00 80</code></td><td>parâmetros</td><td>0x8000 = <strong>32768</strong>, duas vezes</td></tr>
+          <tr><td><code>12</code></td><td>paridade</td><td>o XOR de tudo acima</td></tr>
+          <tr><td><code>06 00</code></td><td>comprimento do 2.º bloco</td><td><strong>6</strong></td></tr>
+          <tr><td><code>ff</code></td><td>bandeira</td><td>dados</td></tr>
+          <tr><td><code>af d3 fe c9</code></td><td>o programa</td><td>as três instruções do passo 1</td></tr>
+          <tr><td><code>b4</code></td><td>paridade</td><td>0xFF ^ 0xAF ^ 0xD3 ^ 0xFE ^ 0xC9 = 0xB4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Confere a última linha à mão</strong>, que é onde se percebe se percebeste:</p>
+<pre><code>  0xFF = 1111 1111
+^ 0xAF = 1010 1111
+       = 0101 0000   (0x50)
+^ 0xD3 = 1101 0011
+       = 1000 0011   (0x83)
+^ 0xFE = 1111 1110
+       = 0111 1101   (0x7D)
+^ 0xC9 = 1100 1001
+       = 1011 0100   (0xB4)   &lt;- o byte de paridade</code></pre>
+
+    <div class="caixa ok">
+      <span class="titulo">✅ E porque é que o XOR do bloco todo dá zero</span>
+      <p>Porque o byte de paridade <em>é</em> o XOR de tudo o resto, e <em>x</em> ^ <em>x</em> = 0 para qualquer
+      <em>x</em>. Não é uma propriedade mágica da soma: é a definição de XOR aplicada duas vezes.</p>
+      <p>Isto dá ao descodificador uma verificação de uma linha: <strong>faz o XOR de todos os bytes recebidos;
+      se não der 0, o bloco está mau.</strong> Sem precisar de saber quantos bytes eram nem onde acabam.</p>
+    </div>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa: o outro bloco</h3>
+      <p>Queres guardar um bloco de dados com os três bytes <code>0x01 0x02 0x03</code>.</p>
+      <ol>
+        <li><strong>Dado:</strong> a bandeira de um bloco de dados é <code>0xFF</code>.</li>
+        <li><strong>______</strong> Qual é o byte de paridade? Faz a conta à mão.</li>
+        <li><strong>______</strong> Quantos bytes tem o bloco completo? E que dois bytes o precedem no
+        <code>.tap</code>?</li>
+        <li><strong>Dado:</strong> um bloco de dados leva 3223 meias ondas de tom-piloto.</li>
+        <li><strong>______</strong> Quanto tempo demora a gravar este bloco inteiro, do princípio do piloto ao
+        último bit? Conta o piloto, o sincronismo e os bits.</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>2.</strong> 0xFF ^ 0x01 ^ 0x02 ^ 0x03 = 0xFF ^ 0x00 = <strong>0xFF</strong>. (Porque
+        0x01 ^ 0x02 = 0x03, e 0x03 ^ 0x03 = 0x00.) O byte de paridade é igual à bandeira — coincidência desta
+        sequência, não uma regra.</p>
+        <p><strong>3.</strong> 1 bandeira + 3 dados + 1 paridade = <strong>5 bytes</strong>. Precedido por
+        <code>05 00</code>.</p>
+        <p><strong>5.</strong> Peça a peça:</p>
+        <ul>
+          <li>piloto: 3223 × 2168 = 6 987 464 T</li>
+          <li>sincronismo: 667 + 735 = 1402 T</li>
+          <li>bits: os 5 bytes são 0xFF, 0x01, 0x02, 0x03, 0xFF = 40 bits, dos quais 8+1+1+2+8 =
+          <strong>20 uns</strong> e 20 zeros.<br>
+          20 × 3420 + 20 × 1710 = 68 400 + 34 200 = 102 600 T</li>
+        </ul>
+        <p>Total: 6 987 464 + 1402 + 102 600 = 7 091 466 T ÷ 3 500 000 = <strong>2,03 segundos</strong>.</p>
+        <p>⭐ Repara na proporção: <strong>o tom-piloto é 98,5 % do tempo</strong> e os dados são 1,4 %. Para
+        blocos pequenos, o formato é quase todo cerimónia. É por isso que se gravava tudo num bloco grande em vez
+        de muitos pequenos — e é por isso que os <em>turbo loaders</em>, que encurtavam o piloto, valiam a pena.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>«855 T é a duração de um bit 0»</td>
+            <td>Calcular o débito como 3 500 000 ÷ 855</td>
+            <td>855 T é <strong>meia onda</strong>. Um bit 0 são duas, logo 1710 T. Quem se engana aqui obtém o
+            dobro do débito real</td>
+          </tr>
+          <tr>
+            <td>«O byte de paridade é a soma dos outros»</td>
+            <td>Usar <code>sum()</code> e um <code>&amp; 0xFF</code></td>
+            <td>É o <strong>XOR</strong>. A fonte diz explicitamente: «não é realmente uma soma, mas um XOR
+            binário». Numa soma o transporte propaga-se; num XOR cada bit é independente</td>
+          </tr>
+          <tr>
+            <td>«Os bits vão com o menos significativo primeiro, como no Kansas City»</td>
+            <td>Bytes lidos com os bits ao contrário: 0x01 vira 0x80</td>
+            <td><strong>Mais significativo primeiro</strong> no Spectrum. É arbitrário e cada formato escolheu
+            o seu; não há forma de adivinhar, só de conferir na fonte</td>
+          </tr>
+          <tr>
+            <td>«O comprimento no <code>.tap</code> inclui os dois bytes do comprimento»</td>
+            <td>Ler o ficheiro deslocado dois bytes e ver lixo</td>
+            <td>«Todos os blocos começam com dois bytes que especificam quantos bytes se seguem
+            (<strong>sem contar</strong> os dois bytes de comprimento)»</td>
+          </tr>
+          <tr>
+            <td>«O comprimento no cabeçalho é o do bloco de dados no <code>.tap</code>»</td>
+            <td>Alocar 2 bytes a menos e ficar sem os últimos</td>
+            <td>O campo do cabeçalho conta só os <strong>dados</strong>. O bloco no <code>.tap</code> tem mais
+            dois: a bandeira e a paridade</td>
+          </tr>
+          <tr>
+            <td>«Um <code>.tap</code> guarda a fita»</td>
+            <td>Esperar carregar um turbo loader a partir de um <code>.tap</code></td>
+            <td>Guarda só os <em>bytes</em>, e assume os tempos da ROM. Quem precisa dos tempos usa
+            <code>.tzx</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — ler um despejo</h3>
+      <p>Um <code>.tap</code> começa assim:</p>
+<pre><code>13 00 00 00 4a 4f 47 4f 20 20 20 20 20 20 0a 00 0a 00 00 80 ??</code></pre>
+      <ol>
+        <li>Que tipo de ficheiro é, e como se chama?</li>
+        <li>Quantos bytes tem o bloco de dados que se segue?</li>
+        <li>Calcula o byte de paridade que está no lugar do <code>??</code>.</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>1.</strong> <code>13 00</code> = 19 bytes de bloco. Bandeira <code>00</code> = cabeçalho.
+        Tipo <code>00</code> = <strong>programa BASIC</strong>. Nome: <code>4a 4f 47 4f</code> = <code>JOGO</code>,
+        mais seis espaços.</p>
+        <p><strong>2.</strong> <code>0a 00</code> little-endian = <strong>10 bytes</strong>.</p>
+        <p><strong>3.</strong> XOR de <code>00 00 4a 4f 47 4f 20 20 20 20 20 20 0a 00 0a 00 00 80</code>:</p>
+        <p>Os seis espaços <code>20</code> cancelam-se aos pares e sobra 0x00 (número par deles). Restam
+        <code>4a ^ 4f ^ 47 ^ 4f ^ 0a ^ 0a ^ 80</code>. Os dois <code>4f</code> cancelam-se, os dois
+        <code>0a</code> também. Fica <code>4a ^ 47 ^ 80</code> = <code>0d ^ 80</code> = <strong>0x8d</strong>.</p>
+        <p>⭐ O atalho que usei — pares iguais cancelam-se — é a propriedade que torna o XOR barato de calcular
+        à mão, e é a mesma que faz o bloco inteiro dar zero.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: o leitor de <code>.tap</code></h3>
+      <p>Escreve <code>ler_tap(dados)</code>, que parte um <code>.tap</code> em blocos, e
+      <code>descrever(bloco)</code>, que imprime o que cada bloco é e se a paridade bate. Testa-o com o
+      ficheiro do exemplo trabalhado.</p>
+      <p><strong>Trata o caso mau</strong>: um ficheiro truncado a meio de um bloco não deve dar
+      <code>IndexError</code> — deve dizer que está truncado.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>import struct
+
+TIPOS = {0: &quot;programa BASIC&quot;, 1: &quot;matriz numerica&quot;,
+         2: &quot;matriz de carateres&quot;, 3: &quot;codigo&quot;}
+
+def ler_tap(dados):
+    blocos, i = [], 0
+    while i + 2 &lt;= len(dados):
+        (n,) = struct.unpack_from(&quot;&lt;H&quot;, dados, i)
+        i += 2
+        if i + n &gt; len(dados):
+            blocos.append((&quot;truncado&quot;, dados[i:]))
+            break
+        blocos.append((&quot;ok&quot;, dados[i:i+n]))
+        i += n
+    return blocos
+
+def descrever(estado, b):
+    if estado == &quot;truncado&quot;:
+        return f&quot;TRUNCADO: faltam bytes ({len(b)} disponiveis)&quot;
+    x = 0
+    for v in b:
+        x ^= v
+    sit = &quot;paridade ok&quot; if x == 0 else f&quot;PARIDADE MA (xor={x:#04x})&quot;
+    if b[0] == 0x00 and len(b) == 19:
+        tipo = TIPOS.get(b[1], f&quot;tipo {b[1]}&quot;)
+        nome = b[2:12].decode(&quot;ascii&quot;, &quot;replace&quot;).rstrip()
+        comp = int.from_bytes(b[12:14], &quot;little&quot;)
+        p1 = int.from_bytes(b[14:16], &quot;little&quot;)
+        return f&quot;cabecalho | {tipo} | {nome!r} | {comp} bytes | p1={p1} | {sit}&quot;
+    if b[0] == 0xFF:
+        return f&quot;dados     | {len(b)-2} bytes uteis | {sit}&quot;
+    return f&quot;desconhecido (bandeira {b[0]:#04x}) | {sit}&quot;
+
+ficheiro = bytes.fromhex(
+    &quot;13000003454352412020202020200400008000801206 00ffafd3fec9b4&quot;.replace(&quot; &quot;, &quot;&quot;))
+for estado, b in ler_tap(ficheiro):
+    print(descrever(estado, b))
+
+print(&quot;\n--- truncado de proposito ---&quot;)
+for estado, b in ler_tap(ficheiro[:-3]):
+    print(descrever(estado, b))
+
+print(&quot;\n--- um bit trocado de proposito ---&quot;)
+mau = bytearray(ficheiro); mau[24] ^= 0x01
+for estado, b in ler_tap(bytes(mau)):
+    print(descrever(estado, b))</code></pre>
+        <p>Saída:</p>
+<pre><code>cabecalho | codigo | &#x27;ECRA&#x27; | 4 bytes | p1=32768 | paridade ok
+dados     | 4 bytes uteis | paridade ok
+
+--- truncado de proposito ---
+cabecalho | codigo | &#x27;ECRA&#x27; | 4 bytes | p1=32768 | paridade ok
+TRUNCADO: faltam bytes (3 disponiveis)
+
+--- um bit trocado de proposito ---
+cabecalho | codigo | &#x27;ECRA&#x27; | 4 bytes | p1=32768 | paridade ok
+dados     | 4 bytes uteis | PARIDADE MA (xor=0x01)</code></pre>
+        <div class="caixa ok">
+          <span class="titulo">✅ O <code>xor=0x01</code> diz mais do que parece</span>
+          <p>O XOR não dá só «mau» — dá <strong>0x01</strong>, que é exactamente o bit que troquei. O valor do
+          XOR é a <em>máscara</em> dos bits errados, somados em todas as posições.</p>
+          <p>Isso permite uma coisa gira: se souberes que só um byte está errado e souberes <em>qual</em>,
+          consegues repará-lo — basta fazer-lhe XOR com o resultado. Não sabendo qual, não dá.
+          <strong>É a fronteira exacta entre detetar e corrigir</strong>, e é por isso que um código corretor
+          precisa de mais informação do que um byte de paridade.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — código que corre: gerar a fita</h3>
+      <p>Escreve o gerador: dado um <code>.tap</code>, produz o <code>.wav</code> que uma cassete teria. Isto é
+      metade do projeto — a outra metade é a lição 6, que lê o que este escreve.</p>
+      <p>Tem de fazer: o tom-piloto com o número certo de meias ondas conforme a bandeira, os dois pulsos de
+      sincronismo, os bits com o bit mais significativo primeiro, e silêncio entre blocos.</p>
+      <p>🔴 <strong>Um aviso sobre a conversão de T-states para amostras:</strong> 2168 T a 44 100 Hz são
+      27,32 amostras — <em>não é inteiro</em>. Se arredondares cada meia onda, o erro acumula ao longo dos 8063
+      pulsos do piloto. Acumula a posição em vírgula flutuante, como fizeste na lição 0.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>import struct, wave
+
+RELOGIO = 3_500_000          # T-states por segundo no Spectrum de 48K
+PILOTO = 2168                # T por meia onda do tom-piloto
+SINC1, SINC2 = 667, 735      # os dois pulsos de sincronismo
+BIT0, BIT1 = 855, 1710       # T por meia onda; um bit sao DUAS meias ondas
+PULSOS_PILOTO = {0x00: 8063, 0xFF: 3223}   # cabecalho ~5 s, dados ~2 s
+
+def blocos_do_tap(dados):
+    i, saida = 0, []
+    while i + 2 &lt;= len(dados):
+        (n,) = struct.unpack_from(&quot;&lt;H&quot;, dados, i)
+        i += 2
+        saida.append(dados[i:i+n]); i += n
+    return saida
+
+def pulsos(b):
+    &quot;&quot;&quot;A sequencia de meias ondas, em T-states, que grava um bloco.&quot;&quot;&quot;
+    yield from [PILOTO] * PULSOS_PILOTO[b[0]]
+    yield SINC1
+    yield SINC2
+    for byte in b:
+        for i in range(7, -1, -1):          # bit mais significativo primeiro
+            t = BIT1 if (byte &gt;&gt; i) &amp; 1 else BIT0
+            yield t
+            yield t                          # duas meias ondas por bit
+
+def onda(seq, taxa):
+    &quot;&quot;&quot;Meias ondas -&gt; amostras de -1/+1. A posicao acumula-se em virgula
+    flutuante: arredondar cada meia onda acumularia erro ao longo do piloto.&quot;&quot;&quot;
+    amostras, nivel, pos = [], 1, 0.0
+    for t in seq:
+        pos += t * taxa / RELOGIO
+        while len(amostras) &lt; pos:
+            amostras.append(nivel)
+        nivel = -nivel
+    return amostras
+
+def escrever_wav(caminho, amostras, taxa):
+    q = b&quot;&quot;.join(struct.pack(&quot;&lt;h&quot;, int(v*20000)) for v in amostras)
+    with wave.open(caminho, &quot;wb&quot;) as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(taxa)
+        w.writeframes(q)
+
+TAXA = 44100
+dados = bytes.fromhex(&quot;13000003454352412020202020200400008000801206&quot;
+                      &quot;00ffafd3fec9b4&quot;)
+x = [0.0]*int(TAXA*0.3)
+for b in blocos_do_tap(dados):
+    seq = list(pulsos(b))
+    x += onda(seq, TAXA) + [0.0]*int(TAXA*0.5)
+    print(f&quot;bloco de {len(b)} bytes (bandeira {b[0]:#04x}): {len(seq)} meias ondas&quot;
+          f&quot; = {sum(seq)/RELOGIO:.3f} s&quot;)
+escrever_wav(&quot;fita.wav&quot;, x, TAXA)
+print(f&quot;fita.wav: {len(x)/TAXA:.2f} s&quot;)</code></pre>
+        <p>Saída:</p>
+<pre><code>bloco de 19 bytes (bandeira 0x00): 8369 meias ondas = 5.081 s
+bloco de 6 bytes (bandeira 0xff): 3321 meias ondas = 2.037 s
+fita.wav: 8.42 s</code></pre>
+        <div class="caixa ok">
+          <span class="titulo">✅ Confere as contas antes de seguires</span>
+          <p><strong>8369 meias ondas</strong> no cabeçalho = 8063 do piloto + 2 de sincronismo + (19 bytes × 8
+          bits × 2 meias ondas) = 8063 + 2 + 304 = 8369. ✅ O mesmo para o bloco de dados:
+          3223 + 2 + (6 × 8 × 2) = 3223 + 2 + 96 = <strong>3321</strong>. ✅</p>
+          <p><strong>Agora a parte que interessa: onde é que o tempo se vai.</strong></p>
+          <ul>
+            <li>Cabeçalho: 5,081 s no total, dos quais o piloto são 8063 × 2168 ÷ 3 500 000 =
+            <strong>4,994 s</strong>. Sobram <strong>87 ms</strong> para o sincronismo e os 19 bytes.</li>
+            <li>Bloco de dados: 2,037 s no total, dos quais o piloto são 3223 × 2168 ÷ 3 500 000 =
+            <strong>1,996 s</strong>. Sobram <strong>41 ms</strong> para 6 bytes.</li>
+          </ul>
+          <p>⭐ <strong>O piloto é 98 % do tempo destes dois blocos.</strong> O formato gasta quase tudo a
+          dizer «atenção» e quase nada a dizer alguma coisa.</p>
+          <p>Para um jogo de 48K a proporção inverte-se por completo — 5 segundos de piloto contra quase
+          cinco minutos de dados (lição 4) — e é por isso que se gravava tudo num bloco grande em vez de
+          muitos pequenos. E é também por isso que os <em>turbo loaders</em>, que encurtavam o piloto,
+          valiam a pena exactamente nos casos em que <em>não</em> valiam: nos ficheiros pequenos.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+
+    <p>Cada opção tem explicação, também as erradas.</p>
+    <div class="quiz" data-quiz="l5">
+      <ol class="perguntas">
+        <li class="pergunta">
+          <p class="enunciado">Um bit 1 no formato do Spectrum ocupa quanto tempo?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l5-1" value="a" data-certa="false"><span class="rotulo">1710 T-states</span></label>
+              <p class="explicacao" hidden>1710 T é <strong>meia onda</strong>. É o erro mais comum desta lição, e dá um descodificador com o dobro do débito real.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-1" value="b" data-certa="true"><span class="rotulo">3420 T-states, porque um bit são duas meias ondas de 1710 T cada</span></label>
+              <p class="explicacao" hidden>3420 T ÷ 3 500 000 = 977 µs. Daí os 1023 bit/s de uma sequência só de uns.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-1" value="c" data-certa="false"><span class="rotulo">855 T-states</span></label>
+              <p class="explicacao" hidden>855 T é a meia onda de um bit <strong>0</strong>. Um bit 1 tem o dobro do comprimento — é literalmente essa a codificação.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-1" value="d" data-certa="false"><span class="rotulo">Depende do tom-piloto</span></label>
+              <p class="explicacao" hidden>O piloto dá a <em>escala</em> na leitura, mas o tempo gravado é sempre 3420 T. O que varia é quantas amostras isso ocupa numa reprodução concreta.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Como se calcula o byte de paridade de um bloco?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l5-2" value="a" data-certa="true"><span class="rotulo">O XOR de todos os bytes anteriores, bandeira incluída</span></label>
+              <p class="explicacao" hidden>E a consequência prática é a verificação de uma linha: o XOR do bloco <em>inteiro</em>, paridade incluída, tem de dar 0x00, porque x ^ x = 0.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-2" value="b" data-certa="false"><span class="rotulo">A soma de todos os bytes, truncada a 8 bits</span></label>
+              <p class="explicacao" hidden>A fonte é explícita: «não é realmente uma soma, mas um XOR binário de todos os bytes». Numa soma o transporte propaga-se entre bits; num XOR cada posição é independente.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-2" value="c" data-certa="false"><span class="rotulo">O XOR dos bytes de dados, sem a bandeira</span></label>
+              <p class="explicacao" hidden>A bandeira entra. Deixá-la de fora dá uma paridade errada por 0x00 num cabeçalho (onde não se nota) e por 0xFF num bloco de dados (onde se nota logo) — uma armadilha desagradável.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-2" value="d" data-certa="false"><span class="rotulo">Um CRC de 8 bits</span></label>
+              <p class="explicacao" hidden>Um CRC é mais forte e deteta muito mais padrões de erro. O Spectrum não usa CRC nenhum: o Z80 de 1982 teria de o calcular em software enquanto a fita corre, e não havia ciclos para isso.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Num ficheiro <code>.tap</code>, os dois bytes de comprimento no princípio de cada bloco contam o quê?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l5-3" value="a" data-certa="false"><span class="rotulo">O bloco inteiro, incluindo os dois bytes de comprimento</span></label>
+              <p class="explicacao" hidden>Se fosse assim, o valor seria 21 e não 19. Lê-lo desta maneira desloca a leitura dois bytes por bloco e a partir do segundo bloco é só lixo.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-3" value="b" data-certa="false"><span class="rotulo">Só os bytes de dados, sem a bandeira nem a paridade</span></label>
+              <p class="explicacao" hidden>Isso é o que o campo <em>dentro do cabeçalho</em> conta (posições 11–12). São dois comprimentos diferentes no mesmo ficheiro, e confundi-los é um clássico.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-3" value="c" data-certa="false"><span class="rotulo">O número de blocos no ficheiro</span></label>
+              <p class="explicacao" hidden>Não há nenhum sítio onde o número de blocos esteja escrito. O <code>.tap</code> não tem cabeçalho de ficheiro nenhum: lê-se até acabar.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-3" value="d" data-certa="true"><span class="rotulo">Os bytes que se seguem, sem contar os próprios dois bytes</span></label>
+              <p class="explicacao" hidden>É a definição do formato. No exemplo trabalhado, <code>13 00</code> = 19, e o bloco de cabeçalho tem mesmo 19 bytes: bandeira + 17 de cabeçalho + paridade.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que o tom-piloto de um cabeçalho é de 5 segundos e o de um bloco de dados é de 2?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l5-4" value="a" data-certa="false"><span class="rotulo">Porque o cabeçalho tem mais bytes</span></label>
+              <p class="explicacao" hidden>Tem 19 bytes contra os que o bloco de dados tiver — muitas vezes milhares. A relação é ao contrário do que esta resposta sugere.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-4" value="b" data-certa="false"><span class="rotulo">Porque o cabeçalho precisa de mais precisão na medida da escala</span></label>
+              <p class="explicacao" hidden>Mais piloto dá de facto uma mediana mais estável, mas 3223 meias ondas já são muitíssimas para isso. Não é aqui que está a razão.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-4" value="c" data-certa="true"><span class="rotulo">Porque o cabeçalho é o primeiro contacto e o leitor precisa de mais tempo para se orientar; depois já se sabe que a fita está a correr</span></label>
+              <p class="explicacao" hidden>Os comentários da ROM dizem «cerca de 5 segundos para um cabeçalho» e «cerca de 2 segundos para um bloco de programa/dados». A diferença é de função, não de tamanho.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-4" value="d" data-certa="false"><span class="rotulo">Para dar tempo ao utilizador de carregar em PLAY</span></label>
+              <p class="explicacao" hidden>O utilizador carrega em PLAY <em>antes</em>; é o computador que espera pela fita, não o contrário.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">No E2, trocaste um bit e o programa respondeu <code>PARIDADE MA (xor=0x01)</code>. O que é que o valor <code>0x01</code> te diz?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l5-5" value="a" data-certa="false"><span class="rotulo">Que há um byte errado</span></label>
+              <p class="explicacao" hidden>Diz mais do que isso, e também menos: podia haver três bytes errados no mesmo bit e o XOR dava 0x01 na mesma. Não diz <em>quantos</em>.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-5" value="b" data-certa="true"><span class="rotulo">Que os bits errados, somados por posição, formam a máscara 0x01 — mas não onde estão</span></label>
+              <p class="explicacao" hidden>É a fronteira exacta entre detetar e corrigir. Sabendo <em>qual</em> byte está mau, bastava fazer-lhe XOR com 0x01 para o reparar. Sem saber qual, não há nada a fazer.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-5" value="c" data-certa="false"><span class="rotulo">Que o primeiro byte do bloco está errado</span></label>
+              <p class="explicacao" hidden>O XOR não guarda posição nenhuma — é uma acumulação sobre todos os bytes. Neste caso troquei de facto um bit no primeiro byte de dados, mas o valor 0x01 não podia dizê-lo.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-5" value="d" data-certa="false"><span class="rotulo">Que faltou um byte</span></label>
+              <p class="explicacao" hidden>Um byte em falta daria quase de certeza um XOR igual a esse byte, que seria um valor qualquer. E o caso de bytes em falta é apanhado antes, pelo comprimento.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que um <code>.tap</code> não consegue representar um <em>turbo loader</em>?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l5-6" value="a" data-certa="true"><span class="rotulo">Porque guarda só os bytes e assume os tempos da ROM, e um turbo loader usa tempos próprios</span></label>
+              <p class="explicacao" hidden>É o essencial do formato: ele não guarda a fita, guarda o <em>conteúdo</em>. Para os tempos inventou-se o <code>.tzx</code>.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-6" value="b" data-certa="false"><span class="rotulo">Porque não tem espaço para blocos grandes</span></label>
+              <p class="explicacao" hidden>O comprimento são dois bytes, portanto até 65 535 bytes por bloco — mais do que a RAM inteira de um 48K. Tamanho não é o problema.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-6" value="c" data-certa="false"><span class="rotulo">Porque a paridade XOR não chega para dados a essa velocidade</span></label>
+              <p class="explicacao" hidden>A paridade é independente da velocidade: são os mesmos bytes seja qual for o tempo dos pulsos. Um turbo loader até podia usar a mesma verificação.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l5-6" value="d" data-certa="false"><span class="rotulo">Porque os turbo loaders usam frequências fora da banda da cassete</span></label>
+              <p class="explicacao" hidden>Usavam pulsos mais curtos, sim, mas dentro do que a cassete dá — se não, não funcionariam em cassetes. O obstáculo é do formato de ficheiro, não do meio.</p>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="feynman-1">Descreve a estrutura de um bloco de fita do ZX Spectrum a alguém que nunca viu um, do princípio ao fim, dizendo para que serve cada pedaço. Não te limites a listar: diz o que aconteceria se cada um faltasse.
+        <span class="pista">São cinco pedaços e cada um resolve um problema diferente que já viste nas lições 3 e 4. Se algum deles te parecer que «é só convenção», é sinal de que ainda não encontraste o problema dele.</span>
+      </label>
+      <textarea id="feynman-1" data-pergunta="Descreve a estrutura de um bloco de fita do ZX Spectrum a alguém que nunca viu um, do princípio ao fim, dizendo para que serve cada pedaço. Não te limites a listar: diz o que aconteceria se cada um faltasse."></textarea>
+    </div>
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/cassete-dados/respostas/AAAA-MM-DD.md</code> e correr
+      <code>/corrigir cassete-dados</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Relógio a <strong>3 500 000 T/s</strong>. Cinco tempos: piloto <strong>2168</strong>, sincronismo
+      <strong>667</strong> e <strong>735</strong>, bit 0 <strong>855</strong>, bit 1 <strong>1710</strong> —
+      todos em <em>meias ondas</em>. Um bit são duas.</li>
+      <li>Um bloco é: piloto (8063 meias ondas num cabeçalho, 3223 num bloco de dados) · 2 pulsos de
+      sincronismo · bandeira (<code>0x00</code>/<code>0xFF</code>) · dados · paridade.</li>
+      <li>Bits com o <strong>mais significativo primeiro</strong> (ao contrário do Kansas City). Inteiros
+      little-endian.</li>
+      <li>A paridade é o <strong>XOR</strong>, não a soma, e é escolhida para que o XOR do bloco inteiro dê
+      <code>0x00</code>. Deteta; não corrige.</li>
+      <li>Um <code>.tap</code> é: dois bytes little-endian de comprimento (sem se contarem a si próprios),
+      depois o bloco. Repetir. 🔴 Não guarda os tempos — por isso não representa turbo loaders, e por isso
+      existe o <code>.tzx</code>.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Fonte primária — a própria ROM</strong> — a rotina <code>SA-BYTES</code> do ZX Spectrum, na
+      desmontagem comentada publicada por Richard Dymond em <em>skoolkid.github.io/rom</em>. É o código que
+      gravou todas as fitas que existem. Os comentários dizem, literalmente: pulsos de «2168 T states», «MIC
+      off durante 667 T states», «MIC on durante 735 T States», «um pulso "MIC off" de 855 T states seguido de
+      um pulso "MIC on" de 855 T states» para um bit a zero, e «pulsos exactamente duas vezes mais longos» para
+      um bit a um. As constantes do piloto são <code>$1F80</code> (8064) e <code>$0C98</code> (3224).
+      <a href="https://skoolkid.github.io/rom/asm/04C2.html">skoolkid.github.io/rom</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Segunda fonte independente</strong> — <em>Sinclair Wiki</em>, páginas «Spectrum tape
+      interface» e «TAP format». Confirma os mesmos cinco tempos, dá as contagens do piloto como
+      <strong>8063</strong> e <strong>3223</strong> pulsos, e é daqui que vêm o bit mais significativo primeiro
+      («o byte mais baixo em memória é o primeiro na fita, com o bit mais significativo primeiro dentro de cada
+      byte»), a definição da paridade («o XOR bit a bit de todos os bytes incluindo o byte de bandeira») e a
+      estrutura do <code>.tap</code>.
+      <a href="https://sinclair.wiki.zxnet.co.uk/wiki/Spectrum_tape_interface">sinclair.wiki.zxnet.co.uk</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li>⚠️ <strong>Uma discrepância que encontrei e não escondo.</strong> A ROM usa os contadores
+      <code>$1F80</code> = 8064 e <code>$0C98</code> = 3224, e a wiki diz <strong>8063</strong> e
+      <strong>3223</strong> pulsos. A diferença de um é a habitual entre «valor do contador» e «pulsos
+      emitidos» num ciclo de decremento. Adotei 8063 e 3223 porque são os números que descrevem o
+      <em>sinal</em>, que é o que o descodificador vê. A diferença de um pulso em 8063 não é mensurável e
+      não afeta nada do que o curso faz — mas fica registada, em vez de eu escolher um número em silêncio.</li>
+
+      <li><strong>Livro</strong> — Ian Logan e Frank O'Hara, <em>The Complete Spectrum ROM Disassembly</em>,
+      Melbourne House, 1983, 236 páginas, ISBN 0-86161-116-0. <strong>Porquê:</strong> é o livro que
+      desmontou e explicou a ROM inteira um ano depois de a máquina sair, e é a origem dos comentários que hoje
+      circulam em todas as versões online. <strong>O que ler:</strong> só o capítulo das rotinas de fita —
+      <code>SA-BYTES</code>, <code>SA-LEADER</code>, <code>LD-BYTES</code> e <code>LD-EDGE</code>.
+      <span class="verificado">🌐 Verificado a 2026-09-16 — confirmei autores, editora, ano, páginas e ISBN
+      em catálogos e no arquivo do World of Spectrum</span>
+      ⚠️ <strong>Não li o livro em si</strong>: trabalhei sobre as versões online da desmontagem. Está aqui
+      como percurso de leitura e como reconhecimento de origem.</li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> · Anterior: <a href="04-bits-em-som.html">← 4 · De bits a som</a> · Próxima: <a href="06-descodificador.html">6 · O descodificador →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

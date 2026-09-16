@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0 · Som, número, ficheiro — o que lá está mesmo dentro de um .wav — A cassete como memória</title>
+<meta name="description" content="Amostragem, quantização e o formato RIFF, vistos por quem vai medir tempos e não ouvir música.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-dados/00-som-numero-ficheiro.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">A cassete como memória</a> <span aria-hidden="true">›</span> Lição 0
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta núcleo">Lição 0 · núcleo</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>Som, número, ficheiro — o que lá está mesmo dentro de um .wav</h1>
+    <p class="subtitulo">Esta lição não fala de cassetes. Fala do ficheiro que vais ter de abrir no fim, e da diferença entre «consigo reconstruir esta onda» e «consigo cronometrar esta onda» — que é a diferença que decide tudo o resto.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim consegues, <strong>dado um <code>.wav</code></strong>, abri-lo só com a biblioteca padrão do
+    Python, tirar de lá a lista de amostras, e <strong>calcular antes de olhar</strong> duas coisas: qual é a
+    frequência mais alta que aquele ficheiro pode representar, e quantas amostras cabem dentro do acontecimento
+    mais curto que precisas de medir. E consegues explicar porque é que a segunda pergunta é a que interessa
+    para este curso e a primeira não.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <p>Primeira lição — não há nada de anterior para recuperar. Em vez disso, <strong>responde de memória e
+    escreve as respostas num papel</strong>, sem correr nada e sem procurar. Daqui a vinte minutos vais
+    confrontá-las. Errar agora é o ponto: o palpite errado deixa uma marca que a correção depois preenche.</p>
+    <ol>
+      <li>Um ficheiro <code>.wav</code> de 1 minuto, mono, 44 100 amostras por segundo, 16 bits por amostra.
+      Quantos <em>megabytes</em> ocupa, mais ou menos?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>60 × 44 100 × 2 bytes = 5 292 000 bytes ≈ <strong>5,3 MB</strong>. Dois bytes por amostra porque
+          16 bits são 2 bytes; um canal só. É aritmética, não é nada de áudio — e é por isso que está aqui:
+          o ficheiro é mais simples do que a palavra «áudio» sugere.</p>
+        </details>
+      </li>
+      <li>Se duplicares a taxa para 88 200 amostras por segundo, o que é que ganhas?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>O ficheiro passa a ocupar o dobro, e o que ganhas é <strong>largura de banda</strong>: passas a
+          poder representar frequências até ao dobro. Não ganhas «mais qualidade» de forma difusa — ganhas
+          uma coisa concreta e mensurável. O que <em>não</em> ganhas é resolução de amplitude: isso é o número
+          de bits, e é uma escolha independente.</p>
+        </details>
+      </li>
+      <li>Uma gravação de uma fita de computador. Achas que precisas de <em>mais</em> ou de <em>menos</em>
+      taxa de amostragem do que para música?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Guarda o teu palpite. A resposta está na secção 3 e quase de certeza não é a que escreveste —
+          porque a pergunta certa não é «que frequências lá estão» mas «que intervalos de tempo preciso de
+          medir». São coisas diferentes e dão números diferentes.</p>
+        </details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p>Um microfone é um transdutor: converte pressão do ar em tensão elétrica. A tensão é uma grandeza
+    contínua — existe em todos os instantes e pode tomar qualquer valor. Um computador não guarda coisas
+    contínuas. Guarda números, e um número de cada vez.</p>
+
+    <p>A conversão faz <strong>duas discretizações independentes</strong>, e confundi-las é o erro mais comum
+    de quem chega a isto vindo da programação:</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="As duas discretizações, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Discretização</th><th>O que corta</th><th>Parâmetro</th><th>O que limita</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Amostragem</strong></td><td>o tempo: só se olha de <em>x</em> em <em>x</em> segundos</td>
+            <td>taxa de amostragem (Hz)</td><td>que <strong>frequências</strong> cabem</td></tr>
+          <tr><td><strong>Quantização</strong></td><td>a amplitude: cada valor arredonda para o degrau mais próximo</td>
+            <td>bits por amostra</td><td>que <strong>diferenças pequenas</strong> se distinguem do ruído</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 520 215" role="img" aria-labelledby="t-amostra d-amostra">
+        <title id="t-amostra">Uma onda contínua, os instantes em que é medida, e a lista de inteiros que sai</title>
+        <desc id="d-amostra">Uma curva suave atravessa a figura. Onze linhas verticais igualmente espaçadas marcam os
+        instantes de medição; em cada uma há um ponto sobre a curva. Por baixo de cada linha está o valor medido
+        nesse instante, em milhares. Entre dois instantes de medição nada é guardado.</desc>
+        <text class="svg-texto" x="30" y="14">contínuo</text>
+        <path class="svg-traco" d="M30.0 90.0 L34.0 83.6 L38.0 77.3 L42.0 71.1 L46.0 65.1 L50.0 59.4 L54.0 54.1 L58.0 49.2 L62.0 44.7 L66.0 40.8 L70.0 37.4 L74.0 34.6 L78.0 32.5 L82.0 31.0 L86.0 30.2 L90.0 30.0 L94.0 30.6 L98.0 31.8 L102.0 33.7 L106.0 36.3 L110.0 39.4 L114.0 43.2 L118.0 47.4 L122.0 52.2 L126.0 57.4 L130.0 62.9 L134.0 68.8 L138.0 74.9 L142.0 81.2 L146.0 87.6 L150.0 94.0 L154.0 100.4 L158.0 106.6 L162.0 112.7 L166.0 118.5 L170.0 124.0 L174.0 129.0 L178.0 133.7 L182.0 137.8 L186.0 141.4 L190.0 144.4 L194.0 146.8 L198.0 148.5 L202.0 149.6 L206.0 150.0 L210.0 149.7 L214.0 148.7 L218.0 147.1 L222.0 144.8 L226.0 141.8 L230.0 138.3 L234.0 134.2 L238.0 129.6 L242.0 124.6 L246.0 119.2 L250.0 113.4 L254.0 107.4 L258.0 101.2 L262.0 94.8 L266.0 88.4 L270.0 82.0 L274.0 75.7 L278.0 69.6 L282.0 63.7 L286.0 58.1 L290.0 52.8 L294.0 48.0 L298.0 43.7 L302.0 39.9 L306.0 36.6 L310.0 34.0 L314.0 32.0 L318.0 30.7 L322.0 30.1 L326.0 30.1 L330.0 30.8 L334.0 32.2 L338.0 34.3 L342.0 37.0 L346.0 40.3 L350.0 44.2 L354.0 48.6 L358.0 53.4 L362.0 58.7 L366.0 64.4 L370.0 70.3 L374.0 76.5 L378.0 82.8 L382.0 89.2 L386.0 95.6 L390.0 102.0 L394.0 108.2 L398.0 114.2 L402.0 119.9 L406.0 125.3 L410.0 130.2 L414.0 134.8 L418.0 138.8 L422.0 142.2 L426.0 145.1 L430.0 147.3 L434.0 148.9 L438.0 149.8 L442.0 150.0 L446.0 149.5 L450.0 148.4 L454.0 146.5 L458.0 144.1 L462.0 141.0 L466.0 137.3 L470.0 133.1 L474.0 128.4 L478.0 123.3 L482.0 117.8 L486.0 111.9 L490.0 105.9 L494.0 99.6 L498.0 93.2"/>
+        <g class="svg-traco" opacity="0.4"><path d="M30 20 V160"/><path d="M77 20 V160"/><path d="M124 20 V160"/><path d="M171 20 V160"/><path d="M218 20 V160"/><path d="M265 20 V160"/><path d="M312 20 V160"/><path d="M359 20 V160"/><path d="M406 20 V160"/><path d="M453 20 V160"/><path d="M500 20 V160"/></g>
+        <g class="svg-realce"><circle cx="30" cy="90.0" r="5"/><circle cx="77" cy="32.9" r="5"/><circle cx="124" cy="54.7" r="5"/><circle cx="171" cy="125.3" r="5"/><circle cx="218" cy="147.1" r="5"/><circle cx="265" cy="90.0" r="5"/><circle cx="312" cy="32.9" r="5"/><circle cx="359" cy="54.7" r="5"/><circle cx="406" cy="125.3" r="5"/><circle cx="453" cy="147.1" r="5"/><circle cx="500" cy="90.0" r="5"/></g>
+        <text class="svg-texto" x="30" y="184" text-anchor="middle">0</text><text class="svg-texto" x="77" y="184" text-anchor="middle">19</text><text class="svg-texto" x="124" y="184" text-anchor="middle">12</text><text class="svg-texto" x="171" y="184" text-anchor="middle">-12</text><text class="svg-texto" x="218" y="184" text-anchor="middle">-19</text><text class="svg-texto" x="265" y="184" text-anchor="middle">0</text><text class="svg-texto" x="312" y="184" text-anchor="middle">19</text><text class="svg-texto" x="359" y="184" text-anchor="middle">12</text><text class="svg-texto" x="406" y="184" text-anchor="middle">-12</text><text class="svg-texto" x="453" y="184" text-anchor="middle">-19</text><text class="svg-texto" x="500" y="184" text-anchor="middle">0</text>
+        <text class="svg-texto" x="30" y="208">valores guardados, em milhares</text>
+      </svg>
+      <figcaption>Entre dois traços verticais não fica guardado <strong>nada</strong>. Tudo o que o resto do curso
+      faz é decidir o que se pode reconstruir a partir desses pontos — e o que não se pode.</figcaption>
+    </figure>
+
+    <h3>A taxa de amostragem decide que frequências cabem</h3>
+
+    <p>O teorema da amostragem diz que um sinal cuja energia está toda abaixo de <em>B</em> hertz fica
+    completamente determinado por amostras tiradas a mais de 2<em>B</em> por segundo. Shannon enuncia-o assim, em
+    1949: «se uma função não contém frequências superiores a <em>W</em> ciclos por segundo, está completamente
+    determinada dando as suas ordenadas numa série de pontos espaçados de 1/2<em>W</em> segundos». Daí sair o
+    número 44 100: o ouvido humano vai até cerca de 20 kHz, e 44 100 dá folga sobre os 40 000 mínimos.</p>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ E agora a parte que quase toda a gente salta</span>
+      <p>O teorema fala de <strong>reconstruir a forma de onda</strong>. Nós não queremos reconstruir forma de
+      onda nenhuma. Queremos <strong>medir quando é que o sinal muda de sinal</strong> — a que horas cruza o
+      zero — porque, como vais ver na lição 4, é aí que a informação está gravada numa fita de computador.</p>
+      <p>Medir um instante com precisão é um problema diferente de reconstruir uma onda. Precisa de mais
+      amostras do que o mínimo de Shannon, e a lição 6 mede quantas.</p>
+    </div>
+
+    <h3>O ficheiro: RIFF, três pedaços e uma lista de inteiros</h3>
+
+    <p>Um <code>.wav</code> é um contentor RIFF. A especificação original é da Microsoft e da IBM (1991) e a
+    estrutura mínima são três pedaços:</p>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Estrutura de um ficheiro WAV, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Pedaço</th><th>Bytes</th><th>O que lá está</th></tr></thead>
+        <tbody>
+          <tr><td><code>RIFF</code></td><td>4 + 4 + 4</td><td>a marca <code>RIFF</code>, o tamanho do ficheiro menos 8, e a marca <code>WAVE</code></td></tr>
+          <tr><td><code>fmt&nbsp;</code></td><td>4 + 4 + 16</td><td>formato (1 = PCM), canais, taxa, bytes por segundo, alinhamento, bits por amostra</td></tr>
+          <tr><td><code>data</code></td><td>4 + 4 + <em>n</em></td><td>as amostras, uma a seguir à outra</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Três regras que tens de saber de cor porque são elas que fazem o <code>struct.unpack</code> funcionar
+    ou dar lixo:</p>
+    <ul>
+      <li><strong>Little-endian</strong>, do princípio ao fim.</li>
+      <li><strong>16 bits são inteiros com sinal</strong>, complemento para dois: −32768 a 32767. <strong>8 bits
+      são sem sinal</strong>, 0 a 255, com o silêncio em 128. A mudança de convenção a meio é uma armadilha real.</li>
+      <li><strong>Os canais estão entrelaçados</strong>: em estéreo, a ordem é esquerdo, direito, esquerdo,
+      direito. Uma «frame» é um valor por canal.</li>
+    </ul>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ A documentação do Python não diz isto</span>
+      <p>Fui ver: a página do módulo <code>wave</code> descreve <code>readframes(n)</code> como devolvendo
+      «no máximo <em>n</em> frames como um objeto <code>bytes</code>» e <strong>não diz</strong> a ordem dos
+      bytes, nem se as amostras têm sinal, nem como os canais estão entrelaçados. Isso está na especificação
+      do formato, não na documentação da biblioteca. É um caso limpo da regra da casa: a documentação diz
+      <em>o que a ferramenta faz</em>; para saber <em>porque é assim</em>, abre-se a especificação.</p>
+    </div>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p>Vamos construir um <code>.wav</code> com uma onda quadrada de <strong>2047 Hz</strong> e depois lê-lo de
+    volta. O número 2047 não é arbitrário: é exatamente a frequência da onda que o ZX Spectrum grava para um
+    bit <strong>0</strong>. Vais reencontrá-lo na lição 5, já com o significado todo.</p>
+
+    <h3>Passo 1 — porquê uma onda quadrada e não uma sinusoide</h3>
+    <p>Porque é o que a fita leva. O Spectrum não tem conversor digital-analógico: tem um bit de saída que liga
+    e desliga. O sinal que sai é quadrado por construção, não por escolha. Começar pelo caso real evita ter de
+    desaprender o caso bonito.</p>
+
+    <h3>Passo 2 — escrever o ficheiro</h3>
+    <p>Meio período a +20000, meio período a −20000, repetido. <code>44100 / 2047 ≈ 21,5</code> amostras por
+    período, portanto <strong>não</strong> dá um número inteiro — e é por isso que se acumula a posição em
+    vírgula flutuante em vez de usar <code>range()</code>. Arredondar cada meio período para 10 ou 11 amostras
+    faria a frequência oscilar.</p>
+<pre><code>import math, struct, wave
+
+TAXA, FREQ, SEGUNDOS = 44100, 2047.0, 0.05
+meio = TAXA / FREQ / 2          # amostras por MEIA onda: 10.772...
+
+amostras, nivel, limite = [], 20000, meio
+while len(amostras) &lt; int(TAXA * SEGUNDOS):
+    while len(amostras) &lt; limite:
+        amostras.append(nivel)
+    nivel = -nivel              # troca de lado
+    limite += meio              # e a fronteira seguinte anda meio periodo
+
+with wave.open(&quot;quadrada.wav&quot;, &quot;wb&quot;) as w:
+    w.setnchannels(1)
+    w.setsampwidth(2)           # 2 bytes = 16 bits
+    w.setframerate(TAXA)
+    w.writeframes(struct.pack(&quot;&lt;%dh&quot; % len(amostras), *amostras))
+
+print(len(amostras), &quot;amostras =&quot;, len(amostras)/TAXA, &quot;s&quot;)</code></pre>
+    <p>O <code>"&lt;%dh"</code> é onde as três regras acima entram em código: <code>&lt;</code> é
+    little-endian, <code>h</code> é inteiro com sinal de 2 bytes. Trocar <code>h</code> por <code>H</code>
+    (sem sinal) produz um ficheiro que abre e soa a ruído — não dá erro nenhum.</p>
+
+    <h3>Passo 3 — ler de volta e conferir</h3>
+    <p>Conferir <em>o quê</em>, exatamente? Não «se parece bem». A afirmação verificável é: <strong>a distância
+    média entre mudanças de sinal tem de ser 10,77 amostras</strong>. Se der isso, a frequência está certa.</p>
+<pre><code>import struct, wave
+
+with wave.open(&quot;quadrada.wav&quot;, &quot;rb&quot;) as w:
+    taxa, largura, canais = w.getframerate(), w.getsampwidth(), w.getnchannels()
+    bruto = w.readframes(w.getnframes())
+
+x = list(struct.unpack(&quot;&lt;%dh&quot; % (len(bruto) // 2), bruto))[::canais]
+
+trocas = [i for i in range(1, len(x)) if (x[i] &lt; 0) != (x[i-1] &lt; 0)]
+passos = [b - a for a, b in zip(trocas, trocas[1:])]
+
+print(&quot;taxa&quot;, taxa, &quot;| largura&quot;, largura, &quot;| canais&quot;, canais)
+print(&quot;amostras&quot;, len(x), &quot;| minimo&quot;, min(x), &quot;| maximo&quot;, max(x))
+print(&quot;meia onda: media&quot;, sum(passos)/len(passos), &quot;amostras&quot;)
+print(&quot;frequencia medida:&quot;, taxa / (2 * sum(passos)/len(passos)), &quot;Hz&quot;)</code></pre>
+
+    <h3>Passo 4 — o que o resultado diz</h3>
+<pre><code>2209 amostras = 0.0500907029478458 s
+
+taxa 44100 | largura 2 | canais 1
+amostras 2209 | minimo -20000 | maximo 20000
+meia onda: media 10.773399014778326 amostras
+frequencia medida: 2046.707818930041 Hz</code></pre>
+    <div class="caixa ok">
+      <span class="titulo">✅ Corrido, não julgado</span>
+      <p>Esta saída é a que a máquina deu, não a que eu esperava — e as diferenças ensinam mais do que a
+      coincidência ensinaria.</p>
+      <p><strong>2209 amostras e não 2205.</strong> O ciclo exterior pára quando já passou de 2205, mas o
+      interior enche sempre até ao fim da meia onda em curso. Não corta a meio de uma meia onda, portanto
+      ultrapassa. Nada de mal: é o comportamento que queres.</p>
+      <p><strong>2046,71 Hz e não 2047,00.</strong> Erro de 0,014 %. A causa é a mesma: o sinal acaba a meio
+      de uma meia onda e essa meia onda entra na média truncada. Com 205 meias ondas medidas, uma truncada
+      chega para mover a terceira casa decimal. 🔴 <strong>Isto é o que se faz com um número que não bate:
+      procura-se a causa.</strong> «Está perto» não é uma explicação; «a última meia onda está cortada» é.</p>
+      <p><strong>10,77 amostras por meia onda</strong> — guarda este número. Na lição 6 vais medir que o
+      descodificador ainda funciona quando ele desce até <strong>1,6</strong>, e essa surpresa é metade do curso.</p>
+    </div>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <p>O mesmo problema, com a mesma estrutura, mas a 8000 amostras por segundo em vez de 44 100 — que é a taxa
+    de um telefone. Os passos que já viste estão dados; os outros são teus.</p>
+
+    <div class="exercicio">
+      <h3>Completa</h3>
+      <ol>
+        <li><strong>Dado:</strong> a frequência continua a ser 2047 Hz e a taxa passa a 8000 Hz.</li>
+        <li><strong>______</strong> Quantas amostras tem agora cada meia onda? Escreve a conta.</li>
+        <li><strong>Dado:</strong> o código é o mesmo; só muda a constante <code>TAXA</code>.</li>
+        <li><strong>______</strong> A que valor máximo de frequência é que este ficheiro obedece, segundo
+        Shannon? Os 2047 Hz cabem lá dentro?</li>
+        <li><strong>______</strong> Mesmo cabendo, porque é que medir <em>onde</em> está cada troca de sinal
+        fica muito pior a 8000 do que a 44 100? Responde em termos de <em>erro em amostras</em>, não de
+        «qualidade».</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>Passo 2:</strong> <code>8000 / 2047 / 2 = 1,954</code> amostras por meia onda. Menos de duas.</p>
+        <p><strong>Passo 4:</strong> o limite de Shannon é metade da taxa: <strong>4000 Hz</strong>. Os 2047 Hz
+        cabem com folga — o ficheiro <em>consegue</em> representar esta frequência.</p>
+        <p><strong>Passo 5:</strong> aqui está o salto que interessa. Cada troca de sinal só pode ser localizada
+        até à amostra mais próxima, ou seja com um erro de até ±0,5 amostras. A 44 100, isso é ±0,5 em 10,77 =
+        <strong>±4,6 %</strong> do comprimento da meia onda. A 8000, é ±0,5 em 1,95 = <strong>±26 %</strong>.
+        Como o que distingue um bit 0 de um bit 1 é o comprimento da meia onda ser <em>um</em> ou <em>dois</em>,
+        um erro de 26 % começa a ser perigoso e um erro de 50 % torna a distinção impossível.</p>
+        <p>Repara no que aconteceu: o critério de Shannon diz «cabe» e mesmo assim a coisa fica má. Não é
+        contradição — é que o teorema responde a <em>«consigo reconstruir a onda?»</em> e nós estamos a
+        perguntar <em>«consigo cronometrar a onda?»</em>. É a mesma armadilha da caixa amarela da secção 3, e
+        agora com um número em cima.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>«44 100 Hz quer dizer que grava até 44 100 Hz»</td>
+            <td>Alguém diz que um CD chega aos 44 kHz</td>
+            <td>Chega a <strong>metade</strong>: 22 050 Hz. A taxa é quantas vezes se <em>olha</em>, e é preciso
+            olhar pelo menos duas vezes por período para o período existir nos dados</td>
+          </tr>
+          <tr>
+            <td>«Mais bits por amostra dá mais agudos»</td>
+            <td>«Pus 24 bits para não perder os agudos»</td>
+            <td>Duas escolhas independentes. Bits = degraus de amplitude, e portanto piso de ruído. Agudos = taxa</td>
+          </tr>
+          <tr>
+            <td>«Shannon diz 2× — logo 4100 Hz chegam para um sinal de 2047 Hz»</td>
+            <td>Escolher a taxa pela frequência máxima do sinal e mais nada</td>
+            <td>Chega para <em>reconstruir</em>. Não chega para <em>cronometrar</em>. Na lição 6 mede-se: abaixo
+            de ~1,6 amostras por meia onda o descodificador parte</td>
+          </tr>
+          <tr>
+            <td>«<code>readframes()</code> devolve-me as amostras»</td>
+            <td>Tratar o resultado como se fosse uma lista de números</td>
+            <td>Devolve <code>bytes</code> crus. Falta desempacotar, e desempacotar mal não dá erro — dá números</td>
+          </tr>
+          <tr>
+            <td>«O silêncio é zero»</td>
+            <td>Procurar zeros para achar os intervalos entre blocos</td>
+            <td>A 16 bits sim; a <strong>8 bits o silêncio é 128</strong>, porque são inteiros sem sinal. E numa
+            gravação real o silêncio nunca é constante: tem ruído e tem desvio de zero (lição 3)</td>
+          </tr>
+          <tr>
+            <td>«Estéreo é só o dobro dos dados»</td>
+            <td>Ler um ficheiro estéreo com <code>unpack</code> e usar tudo como se fosse um canal</td>
+            <td>Está <strong>entrelaçado</strong>. Usar tudo dá uma onda com o dobro da frequência e artefactos.
+            Precisas de <code>x[::canais]</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — aritmética, sem computador</h3>
+      <p>Uma gravação de uma cassete de dados: 10 minutos, estéreo, 44 100 Hz, 16 bits.</p>
+      <ol>
+        <li>Quantos bytes ocupa o pedaço <code>data</code>?</li>
+        <li>Quantas <em>frames</em> tem?</li>
+        <li>Se converteres para mono a 22 050 Hz, quanto passa a ocupar — e o que perdes em concreto?</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>1.</strong> 10 × 60 × 44 100 × 2 canais × 2 bytes = <strong>105 840 000 bytes</strong> ≈ 106 MB.</p>
+        <p><strong>2.</strong> 10 × 60 × 44 100 = <strong>26 460 000 frames</strong>. Uma frame são 4 bytes aqui
+        (dois canais × dois bytes), e o número de frames <em>não</em> depende dos canais — é a confusão que o
+        exercício está a testar.</p>
+        <p><strong>3.</strong> Um quarto: <strong>26 460 000 bytes</strong> ≈ 26 MB. Perdes o segundo canal
+        (irrelevante: a fita é mono e o segundo canal é a outra pista) e a banda acima de <strong>11 025 Hz</strong>.
+        Para uma fita de Spectrum, cujo sinal vive entre 807 e 2047 Hz, nada disso interessa. O que perdes mesmo é
+        <strong>precisão de cronometragem</strong>: de 10,8 para 5,4 amostras por meia onda de um bit 0.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: o inspetor</h3>
+      <p>Escreve <code>inspecionar.py</code>, que recebe o caminho de um <code>.wav</code> na linha de comandos
+      e imprime: taxa, canais, bits por amostra, duração em segundos, mínimo, máximo, e a <strong>média do valor
+      absoluto</strong> (que é uma medida grosseira de quão alto está gravado). Corre-o sobre o
+      <code>quadrada.wav</code> do exemplo trabalhado.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>import struct, sys, wave
+
+def ler(caminho):
+    with wave.open(caminho, &quot;rb&quot;) as w:
+        taxa, largura, canais = w.getframerate(), w.getsampwidth(), w.getnchannels()
+        bruto = w.readframes(w.getnframes())
+    if largura != 2:
+        raise SystemExit(&quot;so leio 16 bits por amostra&quot;)
+    x = list(struct.unpack(&quot;&lt;%dh&quot; % (len(bruto) // 2), bruto))
+    return taxa, canais, x
+
+taxa, canais, x = ler(sys.argv[1])
+print(&quot;taxa        &quot;, taxa, &quot;Hz&quot;)
+print(&quot;canais      &quot;, canais)
+print(&quot;bits        &quot;, 16)
+print(&quot;duracao     &quot;, round(len(x) / canais / taxa, 3), &quot;s&quot;)
+print(&quot;minimo      &quot;, min(x))
+print(&quot;maximo      &quot;, max(x))
+print(&quot;media |x|   &quot;, round(sum(abs(v) for v in x) / len(x), 1))</code></pre>
+        <p>Saída sobre o <code>quadrada.wav</code>:</p>
+<pre><code>taxa         44100 Hz
+canais       1
+bits         16
+duracao      0.05 s
+minimo       -20000
+maximo       20000
+media |x|    20000.0</code></pre>
+        <p>A média do valor absoluto dá exatamente 20000 porque uma onda quadrada está <em>sempre</em> no
+        máximo — nunca passa pelos valores intermédios. Numa sinusoide daria cerca de 0,64 do pico. É um
+        pormenor que vais reencontrar na lição 2: a fita reage ao <em>percurso</em> do sinal, não à sua média.</p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — código que corre: o primeiro tijolo do projeto</h3>
+      <p>Escreve a função <code>ler_wav(caminho)</code> que devolve <code>(taxa, amostras)</code>, em que
+      <code>amostras</code> é uma lista de inteiros <strong>de um canal só</strong>, funcionando quer o ficheiro
+      seja mono quer seja estéreo. Esta função vai ser literalmente o primeiro passo do descodificador da
+      lição 6, por isso vale a pena ficar bem.</p>
+      <p><strong>Testa-a a sério:</strong> gera um ficheiro estéreo em que o canal esquerdo é a onda quadrada
+      de 2047 Hz e o direito é silêncio, lê-o com a tua função, e verifica que <code>max()</code> dá 20000 e não 0.
+      Um teste que não distingue os dois canais não testa nada.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>import struct, wave
+
+def ler_wav(caminho):
+    with wave.open(caminho, &quot;rb&quot;) as w:
+        taxa, largura, canais = w.getframerate(), w.getsampwidth(), w.getnchannels()
+        bruto = w.readframes(w.getnframes())
+    if largura != 2:
+        raise SystemExit(&quot;so leio 16 bits por amostra&quot;)
+    todas = struct.unpack(&quot;&lt;%dh&quot; % (len(bruto) // 2), bruto)
+    return taxa, list(todas[::canais])      # fica so o canal esquerdo
+
+# --- o teste ---------------------------------------------------------
+TAXA, FREQ = 44100, 2047.0
+meio, esq, nivel, limite = TAXA / FREQ / 2, [], 20000, TAXA / FREQ / 2
+while len(esq) &lt; 2205:
+    while len(esq) &lt; limite:
+        esq.append(nivel)
+    nivel, limite = -nivel, limite + meio
+
+entrelacado = [v for par in zip(esq, [0] * len(esq)) for v in par]
+with wave.open(&quot;estereo.wav&quot;, &quot;wb&quot;) as w:
+    w.setnchannels(2); w.setsampwidth(2); w.setframerate(TAXA)
+    w.writeframes(struct.pack(&quot;&lt;%dh&quot; % len(entrelacado), *entrelacado))
+
+print(&quot;gerou&quot;, len(esq), &quot;amostras no canal esquerdo&quot;)
+
+taxa, x = ler_wav(&quot;estereo.wav&quot;)
+print(&quot;taxa&quot;, taxa, &quot;| amostras&quot;, len(x), &quot;| max&quot;, max(x), &quot;| min&quot;, min(x))
+assert len(x) == len(esq), &quot;o numero de amostras nao pode contar os dois canais&quot;
+assert max(x) == 20000 and min(x) == -20000, &quot;apanhaste o canal errado&quot;
+print(&quot;passou&quot;)</code></pre>
+        <p>Saída:</p>
+<pre><code>gerou 2209 amostras no canal esquerdo
+taxa 44100 | amostras 2209 | max 20000 | min -20000
+passou</code></pre>
+        <div class="caixa aviso">
+          <span class="titulo">⚠️ A armadilha do <code>[::canais]</code></span>
+          <p><code>todas[::canais]</code> funciona porque o entrelaçamento é regular e o canal esquerdo é sempre
+          o primeiro de cada frame. Tirei o <code>[::canais]</code> e medi o que sai: <strong>4418 amostras em vez
+          de 2209</strong>, e a frequência medida passa de 2046,7 Hz para <strong>11 078 Hz</strong>. Não é «o
+          dobro» — é o que resultar de intercalar o sinal com o outro canal, e por isso não há regra de cabeça
+          que te salve: só medir.</p>
+          <p>Repara no que o teste tem de especial: um canal com sinal e o outro em <strong>silêncio</strong>.
+          Se os dois canais tivessem a mesma onda, o erro passava despercebido — <code>max()</code> dava 20000
+          à mesma. É o teste que torna o erro barulhento, não a biblioteca.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+
+    <p>Corrige-se aqui, sem rede. Cada opção tem a sua explicação — inclusive as erradas, que é onde está o que
+    faltava perceber. Lê-as todas, mesmo quando acertas.</p>
+    <div class="quiz" data-quiz="l0">
+      <ol class="perguntas">
+        <li class="pergunta">
+          <p class="enunciado">Um <code>.wav</code> mono a 16 000 amostras por segundo. Qual é a frequência mais alta que pode representar?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l0-1" value="a" data-certa="false"><span class="rotulo">16 000 Hz</span></label>
+              <p class="explicacao" hidden>É a taxa, não o limite. A taxa diz quantas vezes por segundo se mede; para um período existir nos dados é preciso pelo menos uma medição na parte de cima e uma na de baixo — logo duas por período.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-1" value="b" data-certa="true"><span class="rotulo">8 000 Hz</span></label>
+              <p class="explicacao" hidden>Metade da taxa. É o limite de Shannon: com 16 000 medições por segundo cabem no máximo 8 000 períodos completos por segundo, um por cada par de medições.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-1" value="c" data-certa="false"><span class="rotulo">32 000 Hz</span></label>
+              <p class="explicacao" hidden>O dobro da taxa. Esta troca sai de aplicar o «2×» ao contrário — multiplicando em vez de dividir. O factor 2 está do lado da taxa: taxa ≥ 2 × frequência, logo frequência ≤ taxa / 2.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-1" value="d" data-certa="false"><span class="rotulo">Depende dos bits por amostra</span></label>
+              <p class="explicacao" hidden>Não depende. Os bits fixam quantos degraus de amplitude há, e portanto o piso de ruído. A frequência máxima sai só da taxa. Confundir as duas é o erro mais comum desta lição.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Um ficheiro estéreo de 16 bits. O que é que <code>readframes(1)</code> devolve?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l0-2" value="a" data-certa="true"><span class="rotulo">4 bytes</span></label>
+              <p class="explicacao" hidden>Uma frame = 1 amostra × 2 canais × 2 bytes. É por isso que <code>getnframes()</code> não muda quando o ficheiro passa de mono a estéreo, mas o tamanho do ficheiro duplica.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-2" value="b" data-certa="false"><span class="rotulo">Um inteiro</span></label>
+              <p class="explicacao" hidden>Devolve sempre <code>bytes</code>, nunca um número. Quem trata o resultado como número tem um <code>TypeError</code> à espera — ou pior, um <code>len()</code> que devolve um número plausível.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-2" value="c" data-certa="false"><span class="rotulo">2 bytes</span></label>
+              <p class="explicacao" hidden>Seriam 2 bytes se fosse mono. Uma <em>frame</em> tem uma amostra <strong>por canal</strong>, e em estéreo são duas amostras.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-2" value="d" data-certa="false"><span class="rotulo">Depende do conteúdo</span></label>
+              <p class="explicacao" hidden>Não depende: o formato é de tamanho fixo. <code>nBlockAlign</code> no pedaço <code>fmt</code> guarda exatamente este número. Formatos comprimidos teriam frames de tamanho variável, mas o módulo <code>wave</code> só lê PCM não comprimido.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Gravaste um sinal de 2047 Hz a 5000 amostras por segundo. Segundo Shannon, cabe. Porque é que ainda assim é uma má ideia para este curso?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l0-3" value="a" data-certa="false"><span class="rotulo">Porque 5000 não é múltiplo de 2047</span></label>
+              <p class="explicacao" hidden>A taxa não precisa de ser múltiplo da frequência — se precisasse, nenhuma gravação funcionava. É por isso que o exemplo trabalhado acumula a posição em vírgula flutuante em vez de contar inteiros.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-3" value="b" data-certa="false"><span class="rotulo">Porque 16 bits não chegam a essa taxa</span></label>
+              <p class="explicacao" hidden>Os bits por amostra e a taxa são independentes: podes ter 16 bits a 5000 Hz sem problema nenhum. A dificuldade aqui é toda de <em>tempo</em>, não de <em>amplitude</em>.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-3" value="c" data-certa="false"><span class="rotulo">Porque o teorema de Shannon só vale para sinusoides</span></label>
+              <p class="explicacao" hidden>Vale para qualquer sinal com a energia abaixo do limite. Uma onda quadrada tem harmónicos acima do limite e por isso fica arredondada — mas o problema aqui não é esse: é a resolução temporal.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-3" value="d" data-certa="true"><span class="rotulo">Porque cada cruzamento por zero só se localiza com um erro de cerca de um quarto do comprimento da meia onda</span></label>
+              <p class="explicacao" hidden>Exatamente. Com 5000/2047/2 = 1,22 amostras por meia onda, um erro de ±0,5 amostras é ±41 %. E como a diferença entre um bit 0 e um bit 1 é «o dobro do comprimento», 41 % de incerteza come essa margem.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Leste um <code>.wav</code> de 8 bits com <code>struct.unpack(&quot;&lt;%db&quot; % n, bruto)</code> e o «silêncio» aparece como −128 em vez de 0. Porquê?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l0-4" value="a" data-certa="false"><span class="rotulo">O ficheiro está corrompido</span></label>
+              <p class="explicacao" hidden>Está perfeitamente bem. O valor −128 é demasiado certinho para ser corrupção: é o mesmo valor sempre, e corrupção não é consistente. Um valor constante e suspeito é quase sempre um erro de interpretação, não de dados.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-4" value="b" data-certa="false"><span class="rotulo">Falta aplicar o factor de escala do pedaço <code>fmt</code></span></label>
+              <p class="explicacao" hidden>Não existe factor de escala nenhum no <code>fmt</code>. Os campos são formato, canais, taxa, débito, alinhamento e bits por amostra — e mais nada em PCM.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-4" value="c" data-certa="true"><span class="rotulo">As amostras de 8 bits são sem sinal (0 a 255, silêncio em 128) e leste-as com sinal</span></label>
+              <p class="explicacao" hidden>É isso. O byte 128 lido como inteiro com sinal dá −128. A especificação RIFF muda de convenção entre 8 e 16 bits: 8 bits em binário deslocado, 16 bits em complemento para dois. A correção é <code>&quot;&lt;%dB&quot;</code> e subtrair 128.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-4" value="d" data-certa="false"><span class="rotulo">O ficheiro é little-endian e leste-o como big-endian</span></label>
+              <p class="explicacao" hidden>Com um byte por amostra a ordem dos bytes não tem como estar errada: não há bytes para trocar. Este erro existe mesmo, mas só a partir de 16 bits.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Que par de escolhas é <strong>independente</strong> uma da outra?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l0-5" value="a" data-certa="false"><span class="rotulo">Taxa de amostragem e frequência máxima representável</span></label>
+              <p class="explicacao" hidden>Estas são rigidamente dependentes: a máxima é sempre metade da taxa. É a única relação fixa da lição.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-5" value="b" data-certa="true"><span class="rotulo">Taxa de amostragem e bits por amostra</span></label>
+              <p class="explicacao" hidden>Independentes. Uma corta o tempo, a outra a amplitude. Podes ter 8 bits a 96 kHz ou 24 bits a 8 kHz — ambos existem e servem para coisas diferentes.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-5" value="c" data-certa="false"><span class="rotulo">Bits por amostra e tamanho do ficheiro</span></label>
+              <p class="explicacao" hidden>Dependentes por multiplicação directa: passar de 8 para 16 bits duplica o pedaço <code>data</code>.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-5" value="d" data-certa="false"><span class="rotulo">Número de canais e tamanho de uma frame</span></label>
+              <p class="explicacao" hidden>Dependentes: uma frame tem uma amostra por canal, logo o seu tamanho é canais × bytes por amostra.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que o exemplo trabalhado acumula <code>limite += meio</code> em vírgula flutuante em vez de escrever <code>for _ in range(11)</code>?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l0-6" value="a" data-certa="true"><span class="rotulo">Porque 44100/2047/2 = 10,77 não é inteiro e o arredondamento por período acumularia erro de frequência</span></label>
+              <p class="explicacao" hidden>É isso. Acumulando a posição real, os arredondamentos individuais compensam-se e a frequência média sai certa. É a mesma razão por que um relógio se corrige pelo tempo absoluto e não somando intervalos.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-6" value="b" data-certa="false"><span class="rotulo">Por elegância — o resultado é o mesmo</span></label>
+              <p class="explicacao" hidden>Não é o mesmo. Arredondar cada meia onda para 11 amostras dava 44100/22 = 2004,5 Hz em vez de 2047 Hz: um erro de 2 %. Pequeno aqui, fatal quando o descodificador estiver a classificar comprimentos.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-6" value="c" data-certa="false"><span class="rotulo">Porque o módulo <code>wave</code> exige vírgula flutuante</span></label>
+              <p class="explicacao" hidden>O módulo <code>wave</code> só recebe <code>bytes</code> já empacotados — nem sabe que existiu vírgula flutuante nenhuma. A escolha é toda do lado de quem gera o sinal.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l0-6" value="d" data-certa="false"><span class="rotulo">Para poder gerar frequências acima do limite de Shannon</span></label>
+              <p class="explicacao" hidden>Não permite nada disso — nenhuma técnica de geração permite. Acima de metade da taxa o sinal aparece dobrado para baixo (<em>aliasing</em>), independentemente de como foi gerado.</p>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="feynman-1">Explica a um colega que programa mas nunca mexeu em áudio: o que é um ficheiro .wav, e porque é que a taxa de amostragem que chega para ouvir música pode não chegar para ler dados de uma fita.
+        <span class="pista">Sem usar «Nyquist», «Shannon», «largura de banda» nem «domínio da frequência». Se precisares destes termos, é sinal de que ainda não está — o mecanismo tem de sobreviver sem eles.</span>
+      </label>
+      <textarea id="feynman-1" data-pergunta="Explica a um colega que programa mas nunca mexeu em áudio: o que é um ficheiro .wav, e porque é que a taxa de amostragem que chega para ouvir música pode não chegar para ler dados de uma fita."></textarea>
+    </div>
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/cassete-dados/respostas/AAAA-MM-DD.md</code> e correr
+      <code>/corrigir cassete-dados</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Digitalizar som são <strong>duas</strong> discretizações independentes: o tempo (taxa de amostragem) e
+      a amplitude (bits por amostra). A primeira decide que frequências cabem; a segunda, o piso de ruído.</li>
+      <li>A frequência máxima representável é <strong>metade da taxa</strong>. É a única relação fixa.</li>
+      <li>Um <code>.wav</code> é RIFF: um cabeçalho, um <code>fmt</code> com os parâmetros, e um <code>data</code>
+      com inteiros little-endian — <strong>com sinal a 16 bits, sem sinal a 8</strong>, canais entrelaçados.</li>
+      <li><code>readframes()</code> devolve <code>bytes</code>. Desempacotar mal não dá erro; dá números errados.</li>
+      <li>🔴 Para este curso a pergunta não é «que frequências cabem» mas <strong>«com que precisão consigo
+      cronometrar uma mudança de sinal»</strong> — e a resposta é ±0,5 amostras, o que só significa alguma coisa
+      quando comparado com o comprimento da meia onda.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Especificação WAVE/RIFF</strong> — Peter Kabal, <em>Audio File Format Specifications</em>,
+      laboratório MMSP da Universidade McGill, que reproduz e anota a especificação original da Microsoft/IBM
+      («WAVE specifications, Version 1.0, 1991-08»). É daqui que saem os campos do <code>fmt</code>, a ordem
+      little-endian e a mudança de convenção entre 8 e 16 bits.
+      <a href="https://mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html">mmsp.ece.mcgill.ca</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Documentação do módulo <code>wave</code> do Python</strong> — a API que o curso usa.
+      ⚠️ Conferi e <strong>não</strong> documenta a ordem dos bytes, o sinal das amostras nem o entrelaçamento
+      dos canais; para isso é preciso a especificação acima.
+      <a href="https://docs.python.org/3/library/wave.html">docs.python.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Livro (não é documentação)</strong> — Steven W. Smith, <em>The Scientist and Engineer's Guide
+      to Digital Signal Processing</em>, California Technical Publishing. <strong>Porquê:</strong> é o livro que
+      explica o <em>porquê</em> da amostragem com desenhos em vez de integrais, e o autor publica-o inteiro de
+      graça («You can browse and/or download the entire book without charge»). <strong>O que ler:</strong>
+      o capítulo 3, <em>ADC and DAC</em>, e dentro dele a secção <em>The Sampling Theorem</em>.
+      <strong>O que saltar:</strong> tudo a partir do capítulo 14 — filtros digitais não entram neste curso.
+      <a href="https://www.dspguide.com/pdfbook.htm">dspguide.com</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Artigo original</strong> — Claude E. Shannon, «Communication in the Presence of Noise»,
+      <em>Proceedings of the IRE</em>, vol. 37, n.º 1, janeiro de 1949, pp. 10–21. É onde o teorema da amostragem
+      aparece enunciado na forma que hoje se cita. <strong>O que ler:</strong> só a secção I e o Teorema 1 —
+      duas páginas. O resto é capacidade de canal, que não é preciso aqui.
+      <span class="verificado">🌐 Verificado a 2026-09-16</span> ⚠️ Confirmei a referência (revista, volume,
+      número, mês, páginas) em catálogos e numa cópia do artigo em PDF; <strong>não</strong> confirmei a
+      paginação exacta da frase que cito na secção 3 contra o original impresso.</li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> · Próxima: <a href="01-fita-magnetismo.html">1 · Como o som fica preso na fita →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

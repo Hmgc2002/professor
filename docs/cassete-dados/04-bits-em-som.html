@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4 · De bits a som: porque é que nenhuma ideia óbvia funciona — A cassete como memória</title>
+<meta name="description" content="Corrente contínua, amplitude e tempo como veículos de bits numa cassete, com o Kansas City e o ZX Spectrum comparados lado a lado e implementados em código.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/cassete-dados/04-bits-em-som.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">A cassete como memória</a> <span aria-hidden="true">›</span> Lição 4
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p><span class="etiqueta núcleo">Lição 4 · núcleo</span> <span class="etiqueta">~1 hora</span></p>
+    <h1>De bits a som: porque é que nenhuma ideia óbvia funciona</h1>
+    <p class="subtitulo">Três tentativas, duas falham, e a que funciona escolheu a única grandeza que a fita não estraga. É a última lição do núcleo: a partir daqui já consegues atacar qualquer formato de fita sozinho.</p>
+
+    <h2 id="objetivo">1. Objetivo</h2>
+
+    <p>No fim consegues explicar, sem consultar, <strong>porque é que nenhum esquema óbvio de gravar bits numa
+    fita funciona</strong>, e reconhecer num esquema qualquer se ele é <em>auto-sincronizado</em> ou não. E
+    consegues calcular o débito de um formato a partir dos seus tempos — e dizer porque é que o do ZX Spectrum
+    depende dos dados e o do Kansas City não.</p>
+
+    <h2 id="recuperar">2. Recuperar</h2>
+
+    <ol>
+      <li>Da lição 1: a cabeça de leitura dá tensão proporcional a quê? E o que é que sai dela com a fita parada?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>À <strong>taxa de variação</strong> do fluxo. Com a fita parada, sai zero.</p>
+        </details>
+      </li>
+      <li>Da lição 3: qual é o defeito da fita que é fatal para dados, e qual é a solução?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>O erro <strong>constante</strong> de velocidade. A solução é medir o limiar no próprio sinal — no
+          tom-piloto — em vez de o fixar em amostras.</p>
+        </details>
+      </li>
+      <li>Da lição 1: entre que frequências é que uma cassete é confortável, e porquê?
+        <details class="solucao"><summary>Resposta</summary>
+          <p>Nas baixas. A 4,7625 cm/s, 1 kHz ocupa 47,6 µm na fita e 15 kHz ocupam 3,18 µm — à escala da fenda
+          da cabeça e das partículas. Tudo o que é mau é pior nos agudos.</p>
+        </details>
+      </li>
+    </ol>
+
+    <h2 id="mecanismo">3. O mecanismo</h2>
+
+    <p>Temos um problema de engenharia bem posto. O canal é: <strong>não passa corrente contínua</strong>
+    (a cabeça diferencia), <strong>tem ruído</strong>, <strong>corta os agudos</strong> e <strong>não anda a
+    velocidade fixa</strong>. Queremos lá pôr bytes. Vamos tentar as soluções por ordem de obviedade e ver
+    cada uma falhar.</p>
+
+    <h3>Tentativa 1: níveis de tensão. 0 V para um 0, 1 V para um 1</h3>
+
+    <p>É como funciona um cabo entre dois chips, portanto é a primeira ideia de qualquer programador. E é a que
+    falha pior.</p>
+
+    <p>A cabeça de leitura dá <em>V</em> = −<em>N</em> d<em>Φ</em>/d<em>t</em>. Um nível constante tem derivada
+    zero. Doze uns seguidos são um nível constante durante doze bits, e o que sai da cabeça é: um salto na
+    primeira transição e depois <strong>nada</strong>. O canal não transporta o valor — transporta só a
+    <em>mudança</em> do valor.</p>
+
+    <p>Não é uma questão de grau. O exemplo trabalhado mede: com doze uns seguidos, o nível lido é 0,45 no
+    primeiro bit, <strong>0,07 no segundo e 0,00 a partir do quarto</strong>.</p>
+
+    <h3>Tentativa 2: amplitude. Um 1 é forte, um 0 é fraco</h3>
+
+    <p>Resolve a corrente contínua — há sempre oscilação — mas escolhe a <strong>pior</strong> grandeza que uma
+    fita tem para oferecer. Repara em tudo o que mexe na amplitude sem ninguém pedir:</p>
+    <ul>
+      <li>o nível de gravação, que o utilizador regulava à mão num botão;</li>
+      <li>o contacto da fita com a cabeça, que varia com pó, desgaste e a própria ondulação da fita
+      (<em>dropouts</em>);</li>
+      <li>a coercividade da fita e o bias com que foi gravada (lição 2);</li>
+      <li>a redução de ruído, cujo trabalho é <em>literalmente</em> mexer na amplitude (lição 3);</li>
+      <li>o controlo de volume do leitor.</li>
+    </ul>
+    <p>Qualquer esquema que dependa de amplitude tem de ser recalibrado a cada gravação, em cada máquina. Na
+    prática era isso que se pedia ao utilizador — «ajusta o volume até carregar» — e é a razão principal por que
+    carregar fitas falhava tanto.</p>
+
+    <h3>Tentativa 3: tempo. A informação está em <em>quando</em> o sinal muda de lado</h3>
+
+    <p>Esta funciona, e funciona por três razões que se encaixam:</p>
+    <ol>
+      <li><strong>A transição é justamente aquilo que a cabeça lê melhor.</strong> Onde o fluxo muda depressa,
+      a tensão induzida é grande. O canal é bom precisamente na grandeza que escolhemos usar.</li>
+      <li><strong>A amplitude deixa de ter significado.</strong> Só interessa o sinal cruzar o zero — para cima
+      ou para baixo. Metade do volume dá exactamente os mesmos instantes de cruzamento.</li>
+      <li><strong>Filtrar os agudos quase não move os cruzamentos.</strong> Um filtro passa-baixo baixa a
+      amplitude e arredonda os cantos, mas o sítio onde a onda troca de sinal move-se pouco. Na lição 6 vais
+      medir quanto: o descodificador ainda funciona com um corte a <strong>800 Hz</strong>, num sinal cuja
+      frequência mais alta é 2047 Hz.</li>
+    </ol>
+
+    <figure>
+      <svg viewBox="0 0 520 285" role="img" aria-labelledby="t-mod d-mod">
+        <title id="t-mod">Três esquemas de gravar os mesmos bits, e o que sobra de cada um depois da fita</title>
+        <desc id="d-mod">Três painéis com os mesmos oito bits. No primeiro, por nível, a linha de cima é o que se
+        envia, patamares altos e baixos; a de baixo é o que a fita devolve: um pico curto em cada mudança e linha
+        reta no resto. No segundo, por amplitude, a oscilação enviada é forte ou fraca; a devolvida tem alturas
+        alteradas e já não se distingue bem qual era qual. No terceiro, por comprimento, a onda tem meias ondas
+        longas e curtas, e os pontos marcam os cruzamentos por zero, que são o que a fita preserva.</desc>
+        <text class="svg-texto" x="10" y="12">1 · por nível — enviado (em cima) e devolvido (em baixo)</text>
+        <path class="svg-traco" d="M10.0 22.0 L70.0 22.0 L70.0 22.0 L130.0 22.0 L130.0 22.0 L190.0 22.0 L190.0 44.0 L250.0 44.0 L250.0 44.0 L310.0 44.0 L310.0 22.0 L370.0 22.0 L370.0 44.0 L430.0 44.0 L430.0 22.0 L490.0 22.0" style="fill:none"/>
+        <path class="svg-traco" d="M10.0 86.0 L12.0 72.0 L24.0 86.0 L70.0 86.0 L130.0 86.0 L190.0 86.0 L190.0 86.0 L192.0 100.0 L204.0 86.0 L250.0 86.0 L310.0 86.0 L310.0 86.0 L312.0 72.0 L324.0 86.0 L370.0 86.0 L370.0 86.0 L372.0 100.0 L384.0 86.0 L430.0 86.0 L430.0 86.0 L432.0 72.0 L444.0 86.0 L490.0 86.0" style="fill:none"/>
+        <text class="svg-texto" x="10" y="122">2 · por amplitude — enviado e devolvido</text>
+        <path class="svg-traco" d="M10.0 132.0 L15.0 164.0 L20.0 132.0 L25.0 164.0 L30.0 132.0 L35.0 164.0 L40.0 132.0 L45.0 164.0 L50.0 132.0 L55.0 164.0 L60.0 132.0 L65.0 164.0 L70.0 132.0 L75.0 164.0 L80.0 132.0 L85.0 164.0 L90.0 132.0 L95.0 164.0 L100.0 132.0 L105.0 164.0 L110.0 132.0 L115.0 164.0 L120.0 132.0 L125.0 164.0 L130.0 132.0 L135.0 164.0 L140.0 132.0 L145.0 164.0 L150.0 132.0 L155.0 164.0 L160.0 132.0 L165.0 164.0 L170.0 132.0 L175.0 164.0 L180.0 132.0 L185.0 164.0 L190.0 143.0 L195.0 153.0 L200.0 143.0 L205.0 153.0 L210.0 143.0 L215.0 153.0 L220.0 143.0 L225.0 153.0 L230.0 143.0 L235.0 153.0 L240.0 143.0 L245.0 153.0 L250.0 143.0 L255.0 153.0 L260.0 143.0 L265.0 153.0 L270.0 143.0 L275.0 153.0 L280.0 143.0 L285.0 153.0 L290.0 143.0 L295.0 153.0 L300.0 143.0 L305.0 153.0 L310.0 132.0 L315.0 164.0 L320.0 132.0 L325.0 164.0 L330.0 132.0 L335.0 164.0 L340.0 132.0 L345.0 164.0 L350.0 132.0 L355.0 164.0 L360.0 132.0 L365.0 164.0 L370.0 143.0 L375.0 153.0 L380.0 143.0 L385.0 153.0 L390.0 143.0 L395.0 153.0 L400.0 143.0 L405.0 153.0 L410.0 143.0 L415.0 153.0 L420.0 143.0 L425.0 153.0 L430.0 132.0 L435.0 164.0 L440.0 132.0 L445.0 164.0 L450.0 132.0 L455.0 164.0 L460.0 132.0 L465.0 164.0 L470.0 132.0 L475.0 164.0 L480.0 132.0 L485.0 164.0" style="fill:none;stroke-width:1"/>
+        <path class="svg-traco" d="M10.0 180.4 L15.0 199.6 L20.0 180.4 L25.0 199.6 L30.0 180.4 L35.0 199.6 L40.0 180.4 L45.0 199.6 L50.0 180.4 L55.0 199.6 L60.0 180.4 L65.0 199.6 L70.0 175.6 L75.0 204.4 L80.0 175.6 L85.0 204.4 L90.0 175.6 L95.0 204.4 L100.0 175.6 L105.0 204.4 L110.0 175.6 L115.0 204.4 L120.0 175.6 L125.0 204.4 L130.0 182.0 L135.0 198.0 L140.0 182.0 L145.0 198.0 L150.0 182.0 L155.0 198.0 L160.0 182.0 L165.0 198.0 L170.0 182.0 L175.0 198.0 L180.0 182.0 L185.0 198.0 L190.0 179.1 L195.0 200.9 L200.0 179.1 L205.0 200.9 L210.0 179.1 L215.0 200.9 L220.0 179.1 L225.0 200.9 L230.0 179.1 L235.0 200.9 L240.0 179.1 L245.0 200.9 L250.0 175.5 L255.0 204.5 L260.0 175.5 L265.0 204.5 L270.0 175.5 L275.0 204.5 L280.0 175.5 L285.0 204.5 L290.0 175.5 L295.0 204.5 L300.0 175.5 L305.0 204.5 L310.0 182.8 L315.0 197.2 L320.0 182.8 L325.0 197.2 L330.0 182.8 L335.0 197.2 L340.0 182.8 L345.0 197.2 L350.0 182.8 L355.0 197.2 L360.0 182.8 L365.0 197.2 L370.0 182.7 L375.0 197.3 L380.0 182.7 L385.0 197.3 L390.0 182.7 L395.0 197.3 L400.0 182.7 L405.0 197.3 L410.0 182.7 L415.0 197.3 L420.0 182.7 L425.0 197.3 L430.0 178.8 L435.0 201.2 L440.0 178.8 L445.0 201.2 L450.0 178.8 L455.0 201.2 L460.0 178.8 L465.0 201.2 L470.0 178.8 L475.0 201.2 L480.0 178.8 L485.0 201.2" style="fill:none;stroke-width:1"/>
+        <text class="svg-texto" x="10" y="226">3 · por comprimento — os cruzamentos não se movem</text>
+        <path class="svg-traco" d="M10.0 250.0 L10.0 236.0 L40.0 236.0 L40.0 264.0 L70.0 264.0 L70.0 236.0 L100.0 236.0 L100.0 264.0 L130.0 264.0 L130.0 236.0 L160.0 236.0 L160.0 264.0 L190.0 264.0 L190.0 236.0 L205.0 236.0 L205.0 264.0 L220.0 264.0 L220.0 236.0 L235.0 236.0 L235.0 264.0 L250.0 264.0 L250.0 236.0 L280.0 236.0 L280.0 264.0 L310.0 264.0 L310.0 236.0 L325.0 236.0 L325.0 264.0 L340.0 264.0 L340.0 236.0 L370.0 236.0 L370.0 264.0 L400.0 264.0" style="fill:none"/>
+        <g class="svg-realce"><circle cx="40" cy="250" r="3"/><circle cx="70" cy="250" r="3"/><circle cx="100" cy="250" r="3"/><circle cx="130" cy="250" r="3"/><circle cx="160" cy="250" r="3"/><circle cx="190" cy="250" r="3"/><circle cx="205" cy="250" r="3"/><circle cx="220" cy="250" r="3"/><circle cx="235" cy="250" r="3"/><circle cx="250" cy="250" r="3"/><circle cx="280" cy="250" r="3"/><circle cx="310" cy="250" r="3"/><circle cx="325" cy="250" r="3"/><circle cx="340" cy="250" r="3"/><circle cx="370" cy="250" r="3"/></g>
+      </svg>
+      <figcaption>Os pontos marcam os cruzamentos por zero. São eles que carregam a informação — e são a única
+      coisa que sobrevive intacta às três coisas que a fita faz ao sinal.</figcaption>
+    </figure>
+
+    <h3>Auto-sincronização: o relógio tem de vir dentro dos dados</h3>
+
+    <p>Falta uma peça. O leitor não tem relógio comum com o gravador — nem sequer sabe a que velocidade a fita
+    anda (lição 3). Portanto o esquema tem de ser <strong>auto-sincronizado</strong>: <strong>tem de haver
+    pelo menos uma transição por bit</strong>, para que o leitor consiga saber onde acaba um bit e começa o
+    seguinte, seja qual for a sequência de dados.</p>
+
+    <p>Isto elimina de vez a tentativa 1, mesmo que a corrente contínua não fosse problema: uma sequência de
+    zeros não teria transição nenhuma e o leitor perderia a conta.</p>
+
+    <h3>Duas famílias, e a diferença entre elas</h3>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Comparação dos dois formatos, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th></th><th>Kansas City (1975)</th><th>ZX Spectrum (1982)</th></tr></thead>
+        <tbody>
+          <tr><td>A informação está em</td><td><strong>frequência</strong> do tom</td><td><strong>comprimento</strong> da meia onda</td></tr>
+          <tr><td>Bit 0</td><td>4 ciclos de 1200 Hz</td><td>2 meias ondas de 855 T (2047 Hz)</td></tr>
+          <tr><td>Bit 1</td><td>8 ciclos de 2400 Hz</td><td>2 meias ondas de 1710 T (1023 Hz)</td></tr>
+          <tr><td>Duração de um bit</td><td><strong>igual</strong>: 3,333 ms sempre</td><td><strong>variável</strong>: 0,489 ms ou 0,977 ms</td></tr>
+          <tr><td>Enquadramento</td><td>1 arranque + 8 dados (LSB primeiro) + 2 paragem = 11 bits</td><td>nenhum: os bits seguem-se</td></tr>
+          <tr><td>Débito</td><td>300 baud = 27,27 byte/s</td><td>~1365 bit/s = ~171 byte/s</td></tr>
+          <tr><td>Banda ocupada</td><td>1200–2400 Hz</td><td>807–2624 Hz</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>O Kansas City gasta o mesmo tempo em todos os bits.</strong> Um 0 são quatro ciclos de um tom
+    lento e um 1 são oito ciclos de um tom rápido — e as duas contas dão 3,333 ms. Isso é uma escolha
+    deliberada: torna o descodificador trivial (mede a célula, conta cruzamentos) e o débito
+    <strong>previsível</strong>, o que importa quando se está a definir uma norma para máquinas que ainda não
+    existem.</p>
+
+    <p><strong>O Spectrum faz o contrário:</strong> um 0 demora <em>metade</em> de um 1. O débito passa a
+    depender do que se está a gravar — 2047 bit/s se forem só zeros, 1023 se forem só uns — mas em média é
+    <strong>seis vezes mais rápido</strong> do que o Kansas City. Sete anos depois, e com um mercado em vez de
+    uma norma para defender, a Sinclair podia arriscar.</p>
+
+    <div class="caixa dica">
+      <span class="titulo">⭐ Porque é que os dois escolheram estas frequências</span>
+      <p>A acta do simpósio de 1975 diz-o sem rodeios: <em>«assumiu-se uma largura de banda fiável de 3000 Hz
+      ao escolher as frequências de marca e espaço, devido ao desalinhamento de cabeças esperado entre vários
+      gravadores de cassetes»</em>. Ou seja: não escolheram 1200 e 2400 por serem bonitos — escolheram-nos por
+      caberem, com margem, na pior cassete que esperavam encontrar.</p>
+      <p>O Spectrum vive entre 807 e 2624 Hz. Também cabe nos mesmos 3000 Hz. <strong>Dois formatos
+      independentes, sete anos e um continente à distância, aterraram na mesma banda</strong> — porque o canal
+      é que decide, não o gosto de quem desenha.</p>
+    </div>
+
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+
+    <p><strong>Pergunta:</strong> quão mau é gravar bits por nível de tensão numa fita? Não «não funciona» —
+    quantos bits é que se perdem, e ao fim de quanto tempo.</p>
+
+    <h3>Passo 1 — o que simular, e porquê um passa-alto</h3>
+    <p>O par fita+cabeça não transporta corrente contínua. A aproximação mais simples e mais honesta disso é um
+    <strong>filtro passa-alto</strong>: deixa passar as mudanças e mata os patamares. Não é um modelo detalhado
+    da física — é um modelo do <em>único</em> aspeto que interessa aqui.</p>
+    <p>A sequência de teste tem doze uns seguidos de propósito. Uma sequência alternada esconderia o problema,
+    porque em <code>0101</code> há transições constantes. <strong>O teste tem de conter o caso mau.</strong></p>
+
+    <h3>Passo 2 — o código</h3>
+<pre><code>import math
+
+TAXA = 44100.0
+BITS = [1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0]
+DURACAO = 0.01                                # 10 ms por bit -&gt; 100 bit/s
+
+def por_nivel(bits):
+    &quot;&quot;&quot;Tentativa 1: 0 V para um 0, 1 V para um 1. O obvio.&quot;&quot;&quot;
+    n = int(TAXA*DURACAO)
+    return [float(b) for b in bits for _ in range(n)]
+
+def por_transicao(bits):
+    &quot;&quot;&quot;Tentativa 3: a informacao esta no COMPRIMENTO entre transicoes.
+    Um 0 e uma meia onda curta, um 1 e uma meia onda com o dobro.&quot;&quot;&quot;
+    saida, nivel = [], 1.0
+    for b in bits:
+        n = int(TAXA*DURACAO*(1.0 if b else 0.5))
+        saida += [nivel]*n; nivel = -nivel
+    return saida
+
+def cabeca_e_fita(x, taxa, corte_hz=30.0):
+    &quot;&quot;&quot;O que o par fita+cabeca faz ao sinal: NAO passa continua.
+    Um passa-alto de 1 polo e a aproximacao mais simples disso.&quot;&quot;&quot;
+    a = math.exp(-2*math.pi*corte_hz/taxa)
+    y, ax, ay = [], 0.0, 0.0
+    for v in x:
+        ay = a*(ay + v - ax); ax = v; y.append(ay)
+    return y
+
+def ler_por_nivel(y, bits):
+    n = int(TAXA*DURACAO)
+    return [1 if sum(y[i*n:(i+1)*n])/n &gt; 0.5 else 0 for i in range(len(bits))]
+
+for corte in (5.0, 30.0, 100.0):
+    y = cabeca_e_fita(por_nivel(BITS), TAXA, corte)
+    erros = sum(1 for a, b in zip(BITS, ler_por_nivel(y, BITS)) if a != b)
+    print(f&quot;por nivel, passa-alto a {corte:5.0f} Hz -&gt; {erros:2d} erros em {len(BITS)} bits&quot;)
+
+y = cabeca_e_fita(por_nivel(BITS), TAXA, 30.0)
+n = int(TAXA*DURACAO)
+print(&quot;\nnivel medido no meio de cada bit (os 12 primeiros sao todos 1):&quot;)
+print(&quot;  &quot;, &quot; &quot;.join(f&quot;{sum(y[i*n:(i+1)*n])/n:5.2f}&quot; for i in range(12)))
+
+print(&quot;\npor transicao: comprimentos das meias ondas depois do MESMO passa-alto&quot;)
+z = cabeca_e_fita(por_transicao(BITS), TAXA, 30.0)
+cruz = [i for i in range(1, len(z)) if (z[i] &lt; 0) != (z[i-1] &lt; 0)]
+print(&quot;  &quot;, [b-a for a, b in zip(cruz, cruz[1:])][:14], &quot;...&quot;)
+print(&quot;   esperado: 441 amostras para um 1, 220 para um 0&quot;)</code></pre>
+
+    <h3>Passo 3 — a saída</h3>
+<pre><code>por nivel, passa-alto a     5 Hz -&gt; 11 erros em 26 bits
+por nivel, passa-alto a    30 Hz -&gt; 14 erros em 26 bits
+por nivel, passa-alto a   100 Hz -&gt; 14 erros em 26 bits
+
+nivel medido no meio de cada bit (os 12 primeiros sao todos 1):
+    0.45  0.07  0.01  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+
+por transicao: comprimentos das meias ondas depois do MESMO passa-alto
+   [441, 441, 441, 441, 441, 441, 441, 441, 441, 441, 441, 220, 441, 220] ...
+   esperado: 441 amostras para um 1, 220 para um 0</code></pre>
+
+    <h3>Passo 4 — ler a segunda linha com atenção</h3>
+
+    <p><strong>14 erros em 26 bits.</strong> Mais de metade. Um esquema que acerta em metade dos bits é
+    exactamente tão bom como atirar uma moeda ao ar — não é «mau», é <em>nada</em>.</p>
+
+    <p>Mas a linha que explica tudo é a dos níveis: <strong>0,45 · 0,07 · 0,01 · 0,00 · 0,00 …</strong> Doze uns
+    seguidos, e o sinal já morreu ao quarto. O canal não guarda o valor; guarda só a notícia de que o valor
+    mudou. Isto não é ruído nem atenuação — é o canal a não ter, literalmente, onde pôr a informação.</p>
+
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ Um filtro mais suave não salva — e há uma armadilha na tabela</span>
+      <p>Olha para as três primeiras linhas: 11 erros a 5 Hz, 14 a 30 Hz, 14 a 100 Hz. A tentação é ler «a 5 Hz
+      é melhor, logo com um filtro suave o suficiente isto resolve-se».</p>
+      <p>Não resolve, e a tabela até diz porquê se se pensar mais um bocado: 11 erros em 26 bits
+      <em>continua</em> a ser metade. A diferença entre 11 e 14 não é a diferença entre funcionar e não
+      funcionar — é a diferença entre dois modos de não funcionar. E a corrente contínua não passa por razões
+      <strong>físicas</strong> (a cabeça diferencia), não por escolha de projeto: não há filtro que se possa
+      abrandar, porque não há filtro nenhum a abrandar.</p>
+    </div>
+
+    <p><strong>E a última linha</strong> é a solução inteira num sítio só. Os mesmos bits, o mesmo filtro, e os
+    comprimentos saem <strong>441 e 220 amostras — exactos</strong>. Não «aproximadamente»: exactos. O filtro
+    arredondou os cantos da onda quadrada e não mexeu um único cruzamento por zero.</p>
+
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+
+    <div class="exercicio">
+      <h3>Completa: as contas dos dois formatos</h3>
+      <ol>
+        <li><strong>Dado:</strong> no Spectrum, um bit 0 ocupa 2 × 855 = 1710 T e um bit 1 ocupa 2 × 1710 =
+        3420 T, com o relógio a 3 500 000 T/s.</li>
+        <li><strong>______</strong> Quantos bits por segundo se o ficheiro for só zeros? E só uns?</li>
+        <li><strong>______</strong> E em média, com dados equilibrados? Converte a bytes por segundo.</li>
+        <li><strong>Dado:</strong> um Spectrum de 48K tem 49 152 bytes de RAM.</li>
+        <li><strong>______</strong> Quanto tempo demora a carregar um jogo que ocupe a RAM toda? Confere com a
+        tua memória (ou com a de alguém) do tempo que isso demorava.</li>
+        <li><strong>______</strong> O Kansas City faz 300 baud com enquadramento de 11 bits por byte. Quantos
+        bytes por segundo? Quantas vezes mais lento do que o Spectrum?</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>2.</strong> Só zeros: 3 500 000 ÷ 1710 = <strong>2046,8 bit/s</strong>. Só uns:
+        3 500 000 ÷ 3420 = <strong>1023,4 bit/s</strong>. Repara que é exactamente o dobro e metade — porque um
+        1 é literalmente o dobro de um 0.</p>
+        <p><strong>3.</strong> Um bit médio ocupa (1710 + 3420)/2 = 2565 T, logo 3 500 000 ÷ 2565 =
+        <strong>1364,5 bit/s</strong> = <strong>170,6 byte/s</strong>.</p>
+        <p><strong>5.</strong> 49 152 ÷ 170,6 = 288 s = <strong>4,8 minutos</strong>. ⭐ É este número que está
+        por trás de toda a memória cultural do assunto: os cinco minutos a olhar para as riscas no ecrã não são
+        exagero de quem conta a história, são aritmética.</p>
+        <p><strong>6.</strong> 300 ÷ 11 = <strong>27,27 byte/s</strong>. O Spectrum é 170,6 ÷ 27,27 =
+        <strong>6,3 vezes mais rápido</strong>. O mesmo jogo de 48K demoraria <strong>trinta minutos</strong> a
+        300 baud — o que explica porque é que os computadores da geração seguinte não podiam ficar-se pela
+        norma de 1975.</p>
+      </details>
+    </div>
+
+    <h2 id="erros">6. Erros comuns</h2>
+
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>«Bastava gravar tensões altas e baixas»</td>
+            <td>Desenhar o sinal de dados como uma onda quadrada de níveis</td>
+            <td>A cabeça diferencia: um patamar não produz saída nenhuma. Medido: ao fim de 4 bits iguais, o
+            nível lido é 0,00</td>
+          </tr>
+          <tr>
+            <td>«O problema da contínua resolve-se com um filtro mais suave»</td>
+            <td>Ver 11 erros a 5 Hz e 14 a 30 Hz e concluir que é uma questão de grau</td>
+            <td>11 em 26 continua a ser metade. E não há filtro a abrandar: a diferenciação é física, não é uma
+            escolha de circuito</td>
+          </tr>
+          <tr>
+            <td>«Codificar por amplitude é razoável, é o que o rádio faz»</td>
+            <td>Propor «forte = 1, fraco = 0»</td>
+            <td>Numa fita, a amplitude é mexida por seis coisas diferentes, incluindo o botão do volume e o
+            próprio sistema de redução de ruído. É a grandeza menos fiável que a fita tem</td>
+          </tr>
+          <tr>
+            <td>«Auto-sincronizado quer dizer que tem um sinal de relógio separado»</td>
+            <td>Procurar uma segunda pista para o relógio</td>
+            <td>É o contrário: quer dizer que o relógio se <strong>extrai dos próprios dados</strong>, porque
+            há pelo menos uma transição garantida por bit. Uma pista separada teria o problema do azimute</td>
+          </tr>
+          <tr>
+            <td>«O Spectrum é mais rápido porque a fita anda mais depressa»</td>
+            <td>Procurar a diferença no hardware</td>
+            <td>A fita anda à mesma velocidade — é a mesma cassete. O Spectrum é mais rápido porque
+            <strong>gasta menos tempo num bit 0</strong>: célula variável em vez de célula fixa</td>
+          </tr>
+          <tr>
+            <td>«Célula variável é sempre melhor»</td>
+            <td>Concluir que o Kansas City foi mal desenhado</td>
+            <td>Célula fixa dá débito <strong>previsível</strong> e descodificador trivial — o que importa numa
+            norma para máquinas que ainda não existem. São escolhas para problemas diferentes, não uma melhor
+            do que a outra</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="praticar">7. Praticar</h2>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+      <h3>E1 — reconhecer auto-sincronização</h3>
+      <p>Para cada esquema, diz se é auto-sincronizado e porquê. Se não for, dá a sequência de bits que o parte.</p>
+      <ol>
+        <li>Nível: 1 V para um 1, 0 V para um 0, durante 1 ms cada.</li>
+        <li>Manchester: cada bit é uma transição a meio da célula — para cima significa 1, para baixo 0.</li>
+        <li>ZX Spectrum: duas meias ondas de 855 T para um 0, duas de 1710 T para um 1.</li>
+        <li>«Uma transição marca um 1; nenhuma transição marca um 0», com células de 1 ms.</li>
+      </ol>
+      <details class="solucao"><summary>Solução</summary>
+        <p><strong>1. Não.</strong> Parte-se com qualquer sequência de bits iguais: <code>0000000000</code> não
+        tem transição nenhuma e o leitor não sabe se passaram dois bits ou dez.</p>
+        <p><strong>2. Sim.</strong> Há <em>sempre</em> uma transição a meio de cada célula, seja qual for o
+        dado. É essa a garantia. O custo é que se gasta o dobro da largura de banda de um esquema por nível.</p>
+        <p><strong>3. Sim.</strong> Cada bit tem duas transições, sempre. E tem uma propriedade extra que o
+        Manchester não tem: o comprimento da meia onda <em>é</em> o dado, portanto não é preciso manter conta
+        de onde está a fronteira da célula.</p>
+        <p><strong>4. Não</strong>, e é a resposta que mais gente erra. Parece auto-sincronizado porque há
+        transições, mas <code>0000000000</code> continua a não ter nenhuma. É o mesmo problema do número 1
+        disfarçado — e é por isso que a pergunta certa não é «há transições?» mas <strong>«há uma transição
+        garantida em <em>todos</em> os bits?»</strong></p>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+      <h3>E2 — código que corre: a experiência que falta no exemplo trabalhado</h3>
+      <p>O exemplo trabalhado mostrou que o esquema por transição sobrevive ao passa-alto. Falta a outra
+      metade: mostrar que sobrevive ao <strong>passa-baixo</strong>, que é o outro defeito da fita.</p>
+      <p>Aplica um passa-baixo de um polo ao sinal de <code>por_transicao(BITS)</code> e mede os comprimentos
+      das meias ondas para cortes de 5000, 1000, 500, 200 e 100 Hz. O sinal tem meias ondas de 441 e 220
+      amostras, ou seja frequências de 50 e 100 Hz.</p>
+      <p><strong>Prevê antes:</strong> a que corte é que esperas que parta?</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>def passa_baixo(x, taxa, corte_hz):
+    a = 1.0 - math.exp(-2*math.pi*corte_hz/taxa)
+    y, ant = [], 0.0
+    for v in x:
+        ant += a*(v - ant); y.append(ant)
+    return y
+
+def comprimentos(y):
+    cruz = [i for i in range(1, len(y)) if (y[i] &lt; 0) != (y[i-1] &lt; 0)]
+    return [b-a for a, b in zip(cruz, cruz[1:])]
+
+base = por_transicao(BITS)
+print(f&quot;{&#x27;corte&#x27;:&gt;8} {&#x27;comprimentos medidos&#x27;:&gt;44}&quot;)
+for corte in (5000, 1000, 500, 200, 100, 60):
+    c = comprimentos(passa_baixo(base, TAXA, corte))
+    print(f&quot;{corte:6d} Hz   {str(c[:8]):&gt;40}&quot;)</code></pre>
+        <p>Saída:</p>
+<pre><code>   corte                         comprimentos medidos
+  5000 Hz   [441, 441, 441, 441, 441, 441, 441, 441]
+  1000 Hz   [441, 441, 441, 441, 441, 441, 441, 441]
+   500 Hz   [441, 441, 441, 441, 441, 441, 441, 441]
+   200 Hz   [441, 441, 441, 441, 441, 441, 441, 441]
+   100 Hz   [441, 441, 441, 441, 441, 441, 441, 441]
+    60 Hz   [440, 441, 441, 441, 441, 441, 441, 441]</code></pre>
+        <div class="caixa ok">
+          <span class="titulo">✅ Não parte — e isso é o resultado, não a ausência de resultado</span>
+          <p>Cortar a <strong>60 Hz</strong> um sinal cuja componente mais baixa é de 50 Hz e cuja mais alta é
+          de 100 Hz, e ainda assim os comprimentos saem 441 e 441 e 441. Só a primeira meia onda se desvia, e
+          por <strong>uma</strong> amostra (440 em vez de 441): é o transitório de arranque do filtro, que só
+          existe porque o filtro começa com memória a zero. Nas linhas de 5000 a 100 Hz nem isso acontece.</p>
+          <p><strong>Porquê?</strong> Um filtro passa-baixo de um polo atrasa e atenua, mas atrasa
+          <em>todas</em> as transições da mesma maneira. Um atraso igual em todas não muda os
+          <strong>intervalos entre elas</strong> — e os intervalos é que são os dados.</p>
+          <p>🔴 Aqui está a razão de fundo por que se grava por tempo numa fita: <strong>a informação está numa
+          grandeza que o canal não distorce</strong>. Não é robustez conquistada com esforço, com redundância
+          ou com códigos corretores. É ter escolhido a grandeza certa.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="exercicio">
+      <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+      <h3>E3 — código que corre: o Kansas City, de ponta a ponta</h3>
+      <p>Implementa o padrão de 1975 completo: codificador e descodificador, com enquadramento de 11 bits
+      (arranque, 8 dados com o <strong>menos significativo primeiro</strong>, 2 de paragem). Verifica a ida e
+      volta de uma cadeia de bytes, com ruído crescente.</p>
+      <p>Este exercício é o ensaio geral da lição 6: mesma estrutura, formato mais simples.</p>
+      <details class="solucao"><summary>Solução</summary>
+<pre><code>import math, random
+
+TAXA, BAUD = 44100, 300
+CELULA = TAXA // BAUD            # 147 amostras por bit
+MARCA, ESPACO = 2400, 1200       # 1 = 8 ciclos de 2400 ; 0 = 4 ciclos de 1200
+
+def onda(freq, n):
+    return [math.sin(2*math.pi*freq*i/TAXA) for i in range(n)]
+
+def codificar(dados, marcas_iniciais=20):
+    x = []
+    for _ in range(marcas_iniciais):                  # tom de marca para sincronizar
+        x += onda(MARCA, CELULA)
+    for byte in dados:
+        quadro = [0] + [(byte &gt;&gt; i) &amp; 1 for i in range(8)] + [1, 1]   # LSB primeiro
+        for b in quadro:
+            x += onda(MARCA if b else ESPACO, CELULA)
+    return x + onda(MARCA, CELULA*4)
+
+def estragar(x, ruido=0.05, semente=1):
+    r = random.Random(semente)
+    return [v + r.gauss(0, ruido) for v in x]
+
+def cruzamentos(x):
+    return [i for i in range(1, len(x)) if (x[i] &lt; 0) != (x[i-1] &lt; 0)]
+
+def descodificar(x):
+    cruz = cruzamentos(x)
+    def bit_em(inicio):
+        # 4 ciclos -&gt; 8 cruzamentos ; 8 ciclos -&gt; 16. O meio-termo e 12.
+        n = sum(1 for c in cruz if inicio &lt;= c &lt; inicio + CELULA)
+        return 1 if n &gt; 12 else 0
+    i, saida = 0, bytearray()
+    while i + CELULA*11 &lt; len(x):
+        if bit_em(i) == 0:                            # bit de arranque
+            v = 0
+            for k in range(1, 9):
+                v |= bit_em(i + CELULA*k) &lt;&lt; (k-1)    # LSB primeiro
+            saida.append(v); i += CELULA*11
+        else:
+            i += CELULA // 4
+    return bytes(saida)
+
+dados = b&quot;OLA MUNDO! 0123456789&quot;
+x = codificar(dados)
+print(f&quot;{len(dados)} bytes -&gt; {len(x)/TAXA:.3f} s&quot;)
+print(f&quot;debito util: {len(dados)/(len(x)/TAXA):.2f} bytes/s   (teorico: {BAUD/11:.2f})&quot;)
+for ruido in (0.0, 0.05, 0.2, 0.4):
+    lido = descodificar(estragar(x, ruido))
+    print(f&quot;  ruido {ruido:4.2f} -&gt; {&#x27;IGUAL&#x27; if lido == dados else &#x27;DIFERENTE&#x27;}  {lido[:24]!r}&quot;)</code></pre>
+        <p>Saída:</p>
+<pre><code>21 bytes -&gt; 0.850 s
+debito util: 24.71 bytes/s   (teorico: 27.27)
+  ruido 0.00 -&gt; IGUAL  b&#x27;OLA MUNDO! 0123456789&#x27;
+  ruido 0.05 -&gt; DIFERENTE  b&#x27;OLA ]UNDO! 0123456789&#x27;
+  ruido 0.20 -&gt; DIFERENTE  b&#x27;\xef\xae\xd1\xc9\xd3\xdd\xcd\xed\x1f\x94\xfc\xec&gt;\xe3\x96\xfb&#x27;
+  ruido 0.40 -&gt; DIFERENTE  b&#x27;&#x27;</code></pre>
+        <div class="caixa aviso">
+          <span class="titulo">⚠️ Funciona sem ruído e parte com 0,05. Isso é pouco.</span>
+          <p>Repara no erro a 0,05: <code>OLA ]UNDO!</code> — o <code>M</code> (0x4D) virou <code>]</code>
+          (0x5D). Um bit só, o quarto. Não é um descodificador que se desfaz: é um que erra um bit ocasional.</p>
+          <p><strong>E o débito não bate com o teórico</strong>: 24,71 contra 27,27 byte/s. A diferença são os
+          20 células de tom de marca no princípio e as 4 no fim, diluídas por apenas 21 bytes. Com um ficheiro
+          grande, aproximar-se-ia dos 27,27.</p>
+        </div>
+        <p><strong>A causa do erro a 0,05:</strong> <code>cruzamentos()</code> conta uma transição sempre que o
+        sinal muda de sinal — e o ruído faz o sinal oscilar em volta do zero várias vezes em cada travessia.
+        Um cruzamento a mais numa célula chega para a contagem passar de 8 para 9, ou de 16 para 15.</p>
+        <p><strong>A correção</strong> é a mesma de qualquer entrada ruidosa em eletrónica: <strong>histerese</strong>.
+        Exigir que o sinal passe de um limiar positivo para um negativo, com uma zona morta pelo meio, em vez de
+        reagir ao zero exacto.</p>
+<pre><code>def cruzamentos_histerese(x, fraccao=0.3):
+    &quot;&quot;&quot;Schmitt trigger: um limiar para subir, outro para descer.&quot;&quot;&quot;
+    env, lado, saida = 0.0, 1, []
+    dec = math.exp(-2*math.pi*20.0/TAXA)
+    for i, v in enumerate(x):
+        env = max(abs(v), env*dec)          # seguidor de envelope
+        lim = fraccao*env
+        if lado &gt; 0 and v &lt; -lim: lado = -1; saida.append(i)
+        elif lado &lt; 0 and v &gt; lim: lado = 1; saida.append(i)
+    return saida</code></pre>
+        <p>Trocando <code>cruzamentos</code> por <code>cruzamentos_histerese</code> dentro de
+        <code>descodificar</code>:</p>
+<pre><code>com histerese:
+  ruido 0.00 -&gt; IGUAL  b&#x27;OLA MUNDO! 0123456789&#x27;
+  ruido 0.05 -&gt; IGUAL  b&#x27;OLA MUNDO! 0123456789&#x27;
+  ruido 0.10 -&gt; IGUAL  b&#x27;OLA MUNDO! 0123456789&#x27;
+  ruido 0.20 -&gt; IGUAL  b&#x27;OLA MUNDO! 0123456789&#x27;
+  ruido 0.30 -&gt; DIFERENTE  b&#x27;OLA ]UNDO! p123456789&#x27;
+  ruido 0.40 -&gt; DIFERENTE  b&#x27;OLA MUNDO! x12nL\xb2ss\xb3&#x27;
+  ruido 0.50 -&gt; DIFERENTE  b&#x27;OLA ]UNDO\xa1 \xb412\xee\xb3\xb3\xb3;\x96&#x27;</code></pre>
+        <div class="caixa ok">
+          <span class="titulo">✅ De 0,05 para 0,20: quatro vezes mais ruído, por uma função</span>
+          <p>Uma alteração — parar de olhar para o zero e passar a olhar para dois limiares — multiplica por
+          quatro o ruído que o descodificador aguenta. <strong>Guarda esta função:</strong> ela reaparece
+          praticamente igual no descodificador do Spectrum, na lição 6, e é lá que está o passo 3 dos cinco.</p>
+          <p>⭐ E repara no padrão dos erros que sobram a 0,30: <code>OLA ]UNDO!</code> outra vez, o mesmo
+          <code>M</code>, o mesmo bit. Não é coincidência — é a mesma semente de ruído, portanto o mesmo ruído
+          nos mesmos sítios. Uma experiência reprodutível erra sempre no mesmo sítio, e isso é o que a torna
+          útil para depurar.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="quiz">8. Quiz</h2>
+
+    <p>Cada opção tem explicação, também as erradas.</p>
+    <div class="quiz" data-quiz="l4">
+      <ol class="perguntas">
+        <li class="pergunta">
+          <p class="enunciado">Porque é que não se pode gravar bits numa fita como níveis de tensão?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l4-1" value="a" data-certa="false"><span class="rotulo">Porque a fita satura</span></label>
+              <p class="explicacao" hidden>A saturação limita o nível máximo, e podia-se gravar mais baixo. O problema é de outra natureza e não se resolve baixando nada.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-1" value="b" data-certa="true"><span class="rotulo">Porque a cabeça de leitura dá tensão proporcional à <em>variação</em> do fluxo, e um patamar tem variação zero</span></label>
+              <p class="explicacao" hidden>Medido: com doze uns seguidos, o nível lido é 0,45 no primeiro bit e 0,00 a partir do quarto. O canal transporta a mudança, não o valor.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-1" value="c" data-certa="false"><span class="rotulo">Porque o ruído da fita é maior do que a diferença entre 0 V e 1 V</span></label>
+              <p class="explicacao" hidden>Não é: o chiado de uma cassete anda muito abaixo de um volt de sinal. Se fosse esse o problema, bastava gravar mais alto — e não basta.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-1" value="d" data-certa="false"><span class="rotulo">Porque a velocidade da fita não é constante</span></label>
+              <p class="explicacao" hidden>Isso é um problema real (lição 3) e afeta qualquer esquema baseado em tempo. Mas um esquema por nível nem chega a essa dificuldade: falha antes, por razões de corrente contínua.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">O que é que torna um esquema «auto-sincronizado»?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l4-2" value="a" data-certa="true"><span class="rotulo">Garantir pelo menos uma transição em cada bit, seja qual for o dado</span></label>
+              <p class="explicacao" hidden>A garantia tem de valer para <em>qualquer</em> sequência, incluindo a pior. É por isso que a pergunta certa nunca é «há transições?» mas «há uma transição garantida em todos os bits?»</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-2" value="b" data-certa="false"><span class="rotulo">Ter um tom de referência no princípio</span></label>
+              <p class="explicacao" hidden>Descreve uma coisa que existe mesmo — é o tom-piloto do Spectrum — mas serve para outra coisa: dá a <em>escala</em> de tempo. Não impede o leitor de perder a conta a meio de uma sequência longa de bits iguais, e auto-sincronização é uma garantia <em>em cada bit</em>.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-2" value="c" data-certa="false"><span class="rotulo">Usar uma pista separada para o relógio</span></label>
+              <p class="explicacao" hidden>É o contrário de auto-sincronizado: seria sincronização externa. E numa cassete teria o problema do azimute (lição 3) — as duas pistas seriam lidas com desfasamento.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-2" value="d" data-certa="false"><span class="rotulo">Ter um bit de paridade no fim de cada byte</span></label>
+              <p class="explicacao" hidden>Paridade deteta erros depois de os bits estarem lidos. Não ajuda em nada a saber <em>onde</em> um bit acaba e o seguinte começa.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">Porque é que o ZX Spectrum é cerca de seis vezes mais rápido do que o Kansas City?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l4-3" value="a" data-certa="false"><span class="rotulo">Porque a fita anda mais depressa</span></label>
+              <p class="explicacao" hidden>É a mesma cassete e a mesma velocidade: 4,7625 cm/s, fixada pela norma. Nenhum dos dois formatos controla o transporte.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-3" value="b" data-certa="false"><span class="rotulo">Porque usa frequências mais altas</span></label>
+              <p class="explicacao" hidden>Usa frequências mais <em>baixas</em> na parte que conta: o tom-piloto está a 807 Hz e um bit 1 a 1023 Hz, ambos abaixo dos 1200 Hz do Kansas City.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-3" value="c" data-certa="false"><span class="rotulo">Porque não tem bits de arranque e paragem</span></label>
+              <p class="explicacao" hidden>Não tem mesmo, e isso ajuda — poupa 3 bits em 11, ou seja 27 %. Mas a diferença total é de 6,3 vezes, portanto o enquadramento explica só uma pequena parte.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-3" value="d" data-certa="true"><span class="rotulo">Porque usa células de duração variável: um bit 0 demora metade de um bit 1</span></label>
+              <p class="explicacao" hidden>No Kansas City todos os bits demoram 3,333 ms. No Spectrum um 0 demora 0,489 ms e um 1 demora 0,977 ms. Em média 2565 T contra 11667 T por bit.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">No E2 mediste que os comprimentos das meias ondas sobrevivem a um passa-baixo a 60 Hz, num sinal com componentes a 50 e 100 Hz. Porquê?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l4-4" value="a" data-certa="false"><span class="rotulo">Porque o filtro de um polo é muito suave e quase não atenua</span></label>
+              <p class="explicacao" hidden>Atenua bastante — a 100 Hz com corte a 60 Hz a amplitude cai visivelmente. O que interessa é que a atenuação não move os cruzamentos.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-4" value="b" data-certa="false"><span class="rotulo">Porque o sinal é quadrado e ondas quadradas não são afetadas por filtros</span></label>
+              <p class="explicacao" hidden>São muito afetadas: um passa-baixo arredonda os cantos e uma onda quadrada filtrada deixa de ser quadrada. O que não muda é <em>onde</em> ela cruza o zero.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-4" value="c" data-certa="true"><span class="rotulo">Porque o filtro atrasa todas as transições da mesma maneira, e um atraso igual não muda os intervalos entre elas</span></label>
+              <p class="explicacao" hidden>E os intervalos é que são os dados. É a razão de fundo por que se codifica em tempo numa fita: escolheu-se a grandeza que o canal não distorce.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-4" value="d" data-certa="false"><span class="rotulo">Porque 60 Hz está acima de 50 Hz e por isso deixa passar a fundamental</span></label>
+              <p class="explicacao" hidden>Chega perto, mas não explica o 441 <em>exacto</em>. Se o filtro só «deixasse passar» a fundamental, a onda ficava uma sinusoide — e ficou — mas os cruzamentos podiam ter-se movido. Não se moveram, e é isso que precisa de explicação.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">O descodificador do Kansas City passou de falhar com ruído 0,05 para aguentar 0,20. O que mudou?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l4-5" value="a" data-certa="false"><span class="rotulo">Passou a usar uma taxa de amostragem mais alta</span></label>
+              <p class="explicacao" hidden>A taxa manteve-se em 44 100 Hz. Mais amostras davam melhor resolução de tempo, mas não resolviam este problema em particular.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-5" value="b" data-certa="true"><span class="rotulo">Passou a detetar as transições com dois limiares e uma zona morta pelo meio, em vez de reagir ao cruzamento exacto do zero</span></label>
+              <p class="explicacao" hidden>Histerese, ou Schmitt trigger. Sem ela, o ruído em volta do zero conta várias transições onde há uma — e basta uma a mais numa célula para a contagem passar de 8 para 9.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-5" value="c" data-certa="false"><span class="rotulo">Passou a usar um filtro para tirar o ruído antes de contar</span></label>
+              <p class="explicacao" hidden>Também funcionaria até certo ponto, e é o que muitos descodificadores fazem além da histerese. Mas não foi o que mudou aqui: a única alteração foi a função de deteção de transições.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-5" value="d" data-certa="false"><span class="rotulo">Passou a verificar a paridade e a repetir os bytes errados</span></label>
+              <p class="explicacao" hidden>O padrão Kansas City prevê um bit de paridade opcional, mas o código não o usa — e paridade deteta, não corrige. E não há como «repetir» quando se está a ler uma fita.</p>
+            </li>
+          </ul>
+        </li>
+        <li class="pergunta">
+          <p class="enunciado">A acta do simpósio de 1975 diz que se assumiu «uma largura de banda fiável de 3000 Hz». Porque é que isso importa para o formato do ZX Spectrum, sete anos depois e noutro continente?</p>
+          <ul class="opcoes">
+            <li class="opcao">
+              <label><input type="radio" name="l4-6" value="a" data-certa="true"><span class="rotulo">Porque é o canal que impõe o limite, e o canal é o mesmo: uma cassete comum lida numa máquina comum</span></label>
+              <p class="explicacao" hidden>Dois desenhos independentes convergiram porque estavam a resolver o mesmo constrangimento físico. É por isso que perceber o canal ensina mais do que decorar formatos.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-6" value="b" data-certa="false"><span class="rotulo">Não importa: são formatos independentes</span></label>
+              <p class="explicacao" hidden>São independentes no desenho, mas não no constrangimento. O Spectrum acabou a viver entre 807 e 2624 Hz — dentro dos mesmos 3000 Hz. Isso pede explicação.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-6" value="c" data-certa="false"><span class="rotulo">Porque a Sinclair copiou o padrão Kansas City</span></label>
+              <p class="explicacao" hidden>Não copiou: o formato do Spectrum é de comprimento de pulso, não de frequência, não tem bits de arranque e paragem, e é seis vezes mais rápido. As semelhanças são de constrangimento, não de cópia.</p>
+            </li>
+            <li class="opcao">
+              <label><input type="radio" name="l4-6" value="d" data-certa="false"><span class="rotulo">Porque a norma IEC obrigava a ficar abaixo de 3000 Hz</span></label>
+              <p class="explicacao" hidden>Nenhuma norma da cassete limita a banda a 3000 Hz — as cassetes de música vão bem mais alto. Os 3000 Hz do simpósio eram uma estimativa prudente do <em>pior caso</em> entre máquinas desalinhadas, não um limite legal.</p>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      <p class="accoes nao-imprimir">
+        <button class="botao principal" type="button" data-verificar>Verificar</button>
+        <button class="botao" type="button" data-limpar>Limpar</button>
+      </p>
+      <p class="resultado" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+    <div class="aberta">
+      <label for="feynman-1">Explica a um colega porque é que, para guardar dados numa fita, a informação tem de estar no «quando» e não no «quanto» — e o que é que obriga a que cada bit tenha uma transição.
+        <span class="pista">São duas coisas distintas e é fácil colá-las numa só. Uma é sobre que grandeza o canal transporta; a outra é sobre o leitor não ter relógio. Uma boa resposta separa-as.</span>
+      </label>
+      <textarea id="feynman-1" data-pergunta="Explica a um colega porque é que, para guardar dados numa fita, a informação tem de estar no «quando» e não no «quanto» — e o que é que obriga a que cada bit tenha uma transição."></textarea>
+    </div>
+    <div class="entrega nao-imprimir">
+      <h3>Entregar</h3>
+      <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as tuas respostas
+      abertas e o resultado do quiz; colas o ficheiro no repositório e a correção acontece aí.</p>
+      <p class="accoes">
+        <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+      </p>
+      <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+      <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+      <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+      <p class="aviso-copia">Guardar em <code>topicos/cassete-dados/respostas/AAAA-MM-DD.md</code> e correr
+      <code>/corrigir cassete-dados</code>.</p>
+    </div>
+
+    <h2 id="resumo">10. Resumo</h2>
+
+    <ul>
+      <li>Gravar por <strong>nível</strong> não funciona: a cabeça diferencia e um patamar não produz saída.
+      Medido: ao quarto bit igual, o nível lido é 0,00.</li>
+      <li>Gravar por <strong>amplitude</strong> não funciona: é a grandeza que mais coisas mexem — volume,
+      contacto, bias, redução de ruído.</li>
+      <li>Gravar por <strong>tempo</strong> funciona, e por três razões que se encaixam: a transição é o que a
+      cabeça lê melhor; a amplitude passa a ser irrelevante; e filtrar não move os cruzamentos (medido: sobrevive
+      a um corte a 60 Hz num sinal de 50–100 Hz).</li>
+      <li><strong>Auto-sincronizado</strong> = pelo menos uma transição garantida em <em>cada</em> bit, para
+      qualquer sequência de dados. Sem isso o leitor perde a conta.</li>
+      <li>Duas famílias: <strong>Kansas City</strong> (frequência, célula fixa, 27,27 byte/s, previsível e
+      simples) e <strong>ZX Spectrum</strong> (comprimento, célula variável, ~171 byte/s, 6,3× mais rápido mas
+      com débito dependente dos dados). 🔴 Ambos vivem abaixo dos 3000 Hz — porque é o canal que decide.</li>
+    </ul>
+
+    <h2 id="fontes">11. Fontes</h2>
+
+    <ul class="fontes">
+      <li><strong>Fonte primária — a acta do simpósio</strong> — «BYTE's Audio Cassette Standards Symposium»,
+      <em>BYTE</em>, fevereiro de 1976, relato de Manfred e Virginia Peschke do encontro de 7–8 de novembro de
+      1975 em Kansas City. Daqui saem, literalmente: os 300 baud, «um bit "0" é representado por quatro ciclos
+      de uma onda sinusoidal de 1200 Hz» e «um bit "1" por oito ciclos de 2400 Hz», o enquadramento
+      («um bit de arranque "0", oito bits de dados, e dois ou mais "1" como bits de paragem»), a ordem
+      («menos significativo primeiro, mais significativo por último») e a justificação da banda de 3000 Hz.
+      Arquivado na coleção SWTPC.
+      <a href="https://www.swtpc.com/mholley/byte/feb1976/byte_symposium.html">swtpc.com</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Artigo de revista (não é documentação)</strong> — Harold Mauch, «Digital Data on Cassette
+      Recorders», <em>BYTE</em>, março de 1976. <strong>Porquê:</strong> Mauch foi um dos dois autores do
+      padrão e este artigo é onde ele explica os <em>porquês</em> técnicos que a acta só resume.
+      <span class="verificado">🌐 Verificado a 2026-09-16 — confirmei autor, título e número da revista</span>
+      ⚠️ <strong>Não li este artigo</strong>: não consegui aceder ao texto. Está aqui como percurso de leitura,
+      e nenhuma afirmação desta lição vem dele.</li>
+
+      <li><strong>Fonte secundária</strong> — Wikipédia (inglês), <em>Kansas City standard</em>, para o débito
+      de 27+3/11 bytes por segundo, o nome do esquema (<em>audio frequency-shift keying</em>) e o contexto de
+      quem escreveu o padrão (Lee Felsenstein e Harold Mauch).
+      <a href="https://en.wikipedia.org/wiki/Kansas_City_standard">en.wikipedia.org</a>
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+
+      <li><strong>Especificação do formato do Spectrum</strong> — os valores em T-states (2168 para o piloto,
+      667 e 735 para o sincronismo, 855 e 1710 para os bits) confirmados em <strong>duas</strong> fontes
+      independentes que descrevem a ROM: o <em>Sinclair Wiki</em> e a desmontagem comentada da ROM. A lição 5
+      trata-os a fundo e lista as duas.
+      <span class="verificado">🌐 Verificado a 2026-09-16</span></li>
+    </ul>
+
+    <footer class="rodape">
+      <p><a href="index.html">↑ Índice do curso</a> · <a href="bibliografia.html">bibliografia</a> · Anterior: <a href="03-limites.html">← 3 · Os limites</a> · Próxima: <a href="05-formato-zx.html">5 · O formato do ZX Spectrum →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>
