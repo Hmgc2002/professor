@@ -94,11 +94,11 @@ Por esta ordem e com estes títulos:
 | 8 | **Quiz** | 5–10 perguntas, correção imediata, e explicação de **cada** opção errada — não só da certa |
 | 9 | **Explica por palavras tuas** | Pergunta aberta (técnica de Feynman). Vai para a entrega |
 | 10 | **Resumo** | O mínimo a reter, em 5 linhas |
-| 11 | **Fontes** | 🌐 *Verificado a AAAA-MM-DD*. Primárias sempre que existam. 🔴 **Pelo menos uma fonte que não seja documentação** — livro, artigo original, curso — com o **porquê** e **o que saltar**. Se o tópico não tiver nenhuma, escreve-se *que se procurou e não se encontrou*, que é informação diferente de silêncio |
+| 11 | **Fontes** | 🌐 *Verificado a AAAA-MM-DD*. Primárias sempre que existam. 🔴 **Pelo menos uma fonte que não seja documentação** — livro, artigo original, curso, **documentário, filme, série, palestra, vídeo ou podcast**: qualquer media serve, desde que responda ao *porque é assim* em vez do *o que faz* — com o **porquê** e **o que saltar**. Se o tópico não tiver nenhuma, escreve-se *que se procurou e não se encontrou*, que é informação diferente de silêncio |
 
 ### No fim do tópico
 
-- **`bibliografia.html`** — o percurso de leitura, ordenado por **por onde começar** e não por autor. Cada
+- **`bibliografia.html`** — o percurso, ordenado por **por onde começar** e não por autor. **Não é só leitura:** um documentário, uma série, uma palestra ou um canal de vídeo entram aqui como qualquer livro, com o mesmo rigor (o que é, o porquê, o que ver, e se foi mesmo visto). Cada
   entrada com o **porquê**, **o que saltar**, e a distinção primária/secundária. 🔴 Uma referência que não
   abriste não se escreve, e um ISBN que não confirmaste **não se cita** — diz-se que não se confirmou.
 - **`folha.html`** — imprimível (A4, `@media print`), só o que se consulta.

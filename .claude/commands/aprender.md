@@ -71,7 +71,8 @@ Parte de `modelo/topico.html` e `modelo/licao.html`. **Nunca copies a página de
 - Pelo menos um exercício com código que corre, se o tópico for técnico.
 - Fontes com 🌐 *Verificado a AAAA-MM-DD*. **Não inventes fontes, DOIs, páginas nem citações** —
   abre cada uma. Se não conseguires verificar, escreve que não verificaste.
-- 🔴 **Pelo menos uma fonte por lição que não seja documentação oficial**: livro, artigo original, curso.
+- 🔴 **Pelo menos uma fonte por lição que não seja documentação oficial**: livro, artigo original, curso,
+  documentário, filme, série, palestra, vídeo ou podcast — qualquer media conta.
   Documentação diz *o que a ferramenta faz*; um livro ou um artigo diz *porque é assim*. Se para este tópico
   não existir nenhuma, escreve **que procuraste e não encontraste** — é informação, não é falha.
   Um ISBN, uma edição ou um número de página que não confirmaste junto do editor **não se escrevem**.
@@ -105,7 +106,7 @@ Relê **como aluno que não sabe a matéria**, não como autor que acabou de a e
   | ⬜ | Um pré-requisito em falta é **lição 0**, não nota de rodapé |
   | ⬜ | Soluções em `<details>` **fechado**; quiz com explicação em **cada** opção |
   | ⬜ | Pelo menos um exercício com **código que corre**, se o tópico o permitir |
-  | ⬜ | **Pelo menos uma fonte que não seja documentação** por lição — ou a declaração de que não há |
+  | ⬜ | **Pelo menos uma fonte que não seja documentação** por lição (livro, artigo, documentário, palestra, vídeo…) — ou a declaração de que não há |
   | ⬜ | `bibliografia.html`, `folha.html`, `teste.html`, `flashcards.csv`, `revisao.ics` |
   | ⬜ | O que é **convenção** está dito que é convenção |
 

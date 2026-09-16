@@ -3,6 +3,27 @@
 O formato é uma entrada por sessão de trabalho, com data. O que muda o que eu
 consigo aprender fica no topo da entrada; o que muda só a mecânica fica no fim.
 
+## 2026-09-16 (3) — A bibliografia deixou de ser só leitura
+
+**Processo**
+
+- Regra alargada, a pedido do dono do repositório: «pelo menos uma fonte que não seja documentação» passa a
+  incluir **qualquer media** — documentários, filmes, séries, palestras, vídeos, podcasts — e não só livros,
+  artigos e cursos. A razão é a mesma de sempre: o que se procura é quem responda ao *porque é assim* em vez do
+  *o que faz*, e isso tanto pode estar num livro como num documentário.
+- Actualizados o `PROCESSO.md` (secção 11 e `bibliografia.html`) e os comandos `/aprender` e `/aprofundar`, que são
+  quem executa a regra.
+
+**Conteúdo**
+
+- `docs/cassete-captura/bibliografia.html`: secção nova **«6. Em vídeo»**, com o documentário *Cassette: A
+  Documentary Mixtape* (Smoot e Taylor, 2016) — marcado como **não visto**, porque não consigo ver vídeo, com a
+  ficha confirmada e uma discrepância de duração entre fichas registada. E a declaração do que procurei e
+  **não** recomendo: há dezenas de tutoriais de azimute no YouTube, não os vi nem sei avaliar a proveniência, e
+  uma afinação mal explicada estraga fitas.
+- `docs/cassete-dados/bibliografia.html`: o mesmo documentário na secção da história, onde Lou Ottens conta as
+  escolhas do formato que a lição 7 explica.
+
 ## 2026-09-16 (2) — Digitalizar cassetes a sério: o curso que põe o simulador à prova de uma máquina real
 
 **Novo**

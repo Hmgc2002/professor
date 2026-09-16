@@ -245,6 +245,7 @@ o que já está escrito.
   - [3. A máquina e a física](docs/cassete-captura/bibliografia.html#maquina)
   - [4. Medir: sinal e frequência](docs/cassete-captura/bibliografia.html#medir)
   - [5. As ferramentas](docs/cassete-captura/bibliografia.html#ferramentas)
+  - [6. Em vídeo](docs/cassete-captura/bibliografia.html#video)
   - [O que não consegui abrir](docs/cassete-captura/bibliografia.html#nao-abri)
 
 ## `docs/cassete-captura/folha.html` — Folha de consulta — Digitalizar cassetes
