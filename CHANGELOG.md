@@ -3,6 +3,26 @@
 O formato é uma entrada por sessão de trabalho, com data. O que muda o que eu
 consigo aprender fica no topo da entrada; o que muda só a mecânica fica no fim.
 
+## 2026-09-17 — O documentário tem um realizador, não dois, e dura 87 minutos
+
+**Conteúdo**
+
+- `docs/cassete-dados/bibliografia.html` e `docs/cassete-captura/bibliografia.html`: *Cassette: A Documentary
+  Mixtape* dizia «realizado por Seth Smoot e Zack Taylor, 2016, 80 minutos». Está «realizado por Zack Taylor,
+  2016, 87 minutos», com a correção à vista nas duas páginas. O sítio do filme dá Zack Taylor como realizador e
+  Seth Smoot como fotógrafo; a Vimeo On Demand dá 1 h 27 min; o ano confirma-se pela exibição mais antiga que o
+  sítio lista (East End Film Festival, Londres, 24 de junho de 2016). A ligação ao Letterboxd saiu: era uma
+  ficha agregada e foi de lá que o erro veio. A entrada de 2026-09-16 (3) abaixo fica como estava, por ser
+  histórico.
+
+**Mecânica**
+
+- `validar.sh`, passo 6: acusava «secretária» como termo sensível, porque com o locale C o «á» não conta como
+  letra e o `grep -w` via «secret» lá dentro. O `grep` passou a correr com `LC_ALL=C.UTF-8`; testado que
+  «secret» isolado continua a ser apanhado.
+- `docs/indices-btree-sql/02-do-indice-a-linha.html`: o rótulo «estiver marcada → Heap Fetches» saía 11 px fora
+  do `viewBox` (passo 4 do validador). Partido em duas linhas, `viewBox` com mais 10 px de altura.
+
 ## 2026-09-16 (5) — «O almanaque»: um curso que mede o seu próprio erro contra o livro oficial
 
 Tópico novo, **`almanaque`**, 10 lições, a partir de <https://en.wikipedia.org/wiki/Almanac>.
