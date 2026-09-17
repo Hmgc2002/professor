@@ -141,7 +141,9 @@ echo "${G}✓${Z} ficheiros de fim de tópico verificados"
 passo "6/6  nada de pessoal no que vai para um repositório público (DECISOES.md D-001)"
 # -w: palavra inteira. Sem isto, «nif» apanha «sig{nif}icam» — e um validador
 # que grita por causa de «significam» é um validador que se deixa de correr.
-if grep -rwniE 'morada|código postal|nif|iban|contribuinte|cartão de cidadão|palavra-passe|password|api[_-]?key|secret|token' \
+# LC_ALL=C.UTF-8: com o locale C, o «á» são dois bytes que não contam como
+# letra, e -w vê «secret» dentro de «secretária» (apanhado a 2026-09-17).
+if LC_ALL=C.UTF-8 grep -rwniE 'morada|código postal|nif|iban|contribuinte|cartão de cidadão|palavra-passe|password|api[_-]?key|secret|token' \
      docs/ topicos/ --include='*.html' --include='*.md' --include='*.csv' 2>/dev/null \
      | grep -vE 'validar|palavra-passe do|exemplo:' ; then
   echo "${V}Há termos sensíveis nos ficheiros publicados. Confirma cada um antes do commit.${Z}"

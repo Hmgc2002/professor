@@ -533,7 +533,7 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
     <code>Index Only Scan</code> — é o <code>Heap Fetches</code> que denuncia. Vais medir isso já a seguir.</p>
 
     <figure>
-      <svg viewBox="0 0 578 240" role="img" aria-labelledby="t-tres d-tres">
+      <svg viewBox="0 0 578 250" role="img" aria-labelledby="t-tres d-tres">
         <title id="t-tres">As três formas de chegar da folha do índice à linha da tabela</title>
         <desc id="d-tres">Três colunas lado a lado. Index Scan salta do índice para a tabela linha a linha.
         Bitmap Heap Scan constrói primeiro um mapa de páginas e depois lê as páginas por ordem. Index Only Scan
@@ -576,7 +576,8 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
         <text class="svg-suave" x="200" y="205">ordem física, cada</text>
         <text class="svg-suave" x="200" y="221">página uma só vez</text>
         <text class="svg-suave" x="410" y="205">só se a página não</text>
-        <text class="svg-suave" x="410" y="221">estiver marcada → Heap Fetches</text>
+        <text class="svg-suave" x="410" y="221">estiver marcada,</text>
+        <text class="svg-suave" x="410" y="237">→ Heap Fetches</text>
         <defs><marker id="s2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/></marker></defs>
       </svg>
       <figcaption>A diferença entre as três está toda na seta do meio: quantas vezes se toca na tabela, e por que ordem.</figcaption>
