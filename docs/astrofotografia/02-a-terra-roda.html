@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>O almanaque — professor</title>
-<meta name="description" content="Curso sobre o almanaque: da tábua de 1088 ao almanaque do GPS, e a construção de um almanaque náutico próprio medido contra o Nautical Almanac oficial.">
+<title>2 · A Terra roda — Astrofotografia</title>
+<meta name="description" content="Velocidade sideral, traço em píxeis, a regra dos 500 contra a regra NPF, e a conta que decide o tempo de pose sem regras decoradas.">
 <style>
 /* INICIO ESTILO */
 /* ------------------------------------------------------------------
@@ -413,11 +413,14 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
 /* FIM ESTILO */
 </style>
 </head>
-<body data-pagina="docs/almanaque/index.html">
+<body data-pagina="docs/astrofotografia/02-a-terra-roda.html">
 <a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
 
 <header class="barra">
-  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> O almanaque</p>
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Astrofotografia</a> <span aria-hidden="true">›</span> lição 2
+  </p>
   <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
 </header>
 
@@ -425,338 +428,443 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
   <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
 
   <nav class="indice" id="indice-pagina" aria-label="Índice da página">
-    <h2>Nesta página</h2>
+    <h2>Nesta lição</h2>
     <ol>
-      <li><a href="#conseguir">O que vais conseguir fazer</a></li>
-      <li><a href="#nao-e">O que este curso não é</a></li>
-      <li><a href="#assumi">O que assumi</a></li>
-      <li><a href="#mapa">O mapa</a></li>
-      <li><a href="#plano">O plano no tempo</a></li>
-      <li><a href="#fases">Nota das fases</a></li>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
     </ol>
   </nav>
 
   <main id="conteudo">
-    <p class="etiqueta nucleo">pronto</p>
-    <h1>O almanaque</h1>
-    <p class="subtitulo">Do <em>Almanaque de Azarquiel</em> de 1088 ao almanaque que o satélite de
-    GPS te transmite: a mesma decisão de engenharia, oito séculos separados. E, no fim, o teu —
-    gerado por ti, medido contra o <em>Nautical Almanac</em> oficial, com a tolerância declarada
-    antes de comparar.</p>
+    <p class="etiqueta nucleo">Lição 2 · núcleo</p>
+    <h1>A Terra roda</h1>
+    <p class="subtitulo">O limite que define este curso. Sem seguimento, a pose tem um teto — e é dele que nasce tudo o resto: muitas poses curtas em vez de uma longa.</p>
+    <h2 id="objetivo">1. Objetivo</h2>
+<p>No fim desta lição <strong>calculas o tempo máximo de pose</strong> para a
+    tua objetiva, o teu sensor e a declinação do teu alvo, com uma tolerância de traço que
+    <strong>tu</strong> escolhes — e explicas porque é que a «regra dos 500» é, por baixo, uma
+    regra sobre o passo do píxel disfarçada de regra sobre a focal.</p>
+    <h2 id="recuperar">2. Recuperar</h2>
+<p>Responde <strong>antes</strong> de continuar a ler, de memória. Falhar aqui é útil: o esforço de tentar puxar da memória é o que consolida, e é por isso que as respostas estão escondidas.</p><ol>
+  <li>Porque é que dividir a mesma integração total em mais poses <em>piora</em> o sinal-ruído?
+    <details class="solucao"><summary>Resposta</summary><p>Porque o ruído de leitura se paga uma vez por leitura, e não depende do tempo de pose. Todos os outros termos ficam iguais. (Lição 1, §3.)</p></details>
+  </li>
+  <li>Numa pose de 8 s num céu urbano, qual dos quatro ruídos manda?
+    <details class="solucao"><summary>Resposta</summary><p>O céu, com 77 % da variância. Era 6,5 % para a leitura e 0,3 % para o escuro.</p></details>
+  </li>
+</ol>
+    <h2 id="mecanismo">3. O mecanismo</h2>
+<p>A Terra dá uma volta em relação às estrelas em 86 164,0905 segundos — o dia
+    <strong>sideral</strong>, cerca de quatro minutos mais curto do que o dia solar, porque
+    entretanto a Terra também andou na órbita. Dividindo 360° por esse tempo:</p>
+<pre><code>360° ÷ 86164,0905 s = 15,0411 segundos de arco por segundo de tempo</code></pre>
+    <p>Esse valor é para uma estrela no equador celeste. Uma estrela mais perto do polo descreve
+    um círculo menor e, no céu, percorre menos arco no mesmo tempo — por um fator
+    <strong>cos δ</strong>, onde δ é a declinação. No polo, cos 90° = 0: a Polar praticamente não
+    se mexe, o que é a razão histórica de servir para orientar.</p>
+    <div class="caixa dica"><span class="titulo">⭐ Onde é que a declinação vive</span>
+    <p>A declinação, o ângulo horário e o resto da astronomia de posição são do tópico
+    <a href="../almanaque/index.html">O almanaque</a>, que os ensina de raiz. Aqui só se usa uma
+    coisa: <strong>δ é a «latitude» do astro no céu</strong>, 0° no equador celeste e 90° no polo.
+    Se isso for palavra nova, a <a href="../almanaque/00-esfera-celeste.html">lição 0 desse
+    tópico</a> resolve em meia hora.</p></div>
 
-    <h2 id="conseguir">O que vais conseguir fazer no fim</h2>
-    <ul>
-      <li><strong>Implementar</strong>, só com a biblioteca padrão, a posição do Sol e da Lua, o
-        tempo sidéreo, o nascer, o pôr e os crepúsculos, e a redução de uma altura de sextante.</li>
-      <li><strong>Reproduzir</strong> as colunas de uma página diária real do <em>Nautical
-        Almanac</em> e <strong>dizer com um número</strong> quais é que batem e quais não.</li>
-      <li><strong>Fazer uma consulta completa</strong> numa página do livro — hora inteira,
-        incremento, correções <em>v</em> e <em>d</em>, com os sinais certos — sem consultar.</li>
-      <li><strong>Explicar</strong> porque é que o almanaque nasceu em 1088 como mudança de
-        <em>formato</em> e não de astronomia, e porque é que continua a ser publicado.</li>
-      <li><strong>Diagnosticar</strong>, dado um resultado errado por décimas de minuto de arco,
-        qual dos cinco relógios ou qual das cinco correções é que foi trocada.</li>
-      <li><strong>Declarar uma tolerância antes de medir</strong> — e perceber porque é que a ordem
-        dessas duas coisas é a diferença entre medir e justificar.</li>
-    </ul>
+    <h3>De arco para píxeis</h3>
+    <p>O traço em segundos de arco não te serve para nada: o que aparece na imagem é o traço em
+    <strong>píxeis</strong>, e para isso é preciso saber quantos segundos de arco cabe num píxel
+    — a escala, que a lição 3 trata a sério. Por agora basta a fórmula:</p>
+<pre><code>escala (″/px) = 206265 × passo do píxel (mm) ÷ focal (mm)
+              = 206,265 × passo (µm) ÷ focal (mm)</code></pre>
+    <p>E então:</p>
+<pre><code>traço (px) = 15,0411 × t × cos δ ÷ escala</code></pre>
+<pre><code>  focal   escala     arrasto em 10 s (px)        pose para 1 px (s)
+           (″/px)   δ=0°    δ=45°   δ=80°      δ=0°   δ=45°   δ=80°
+    14 mm   58.93    2.55    1.80    0.44      3.92    5.54   22.56
+    24 mm   34.38    4.38    3.09    0.76      2.29    3.23   13.16
+    50 mm   16.50    9.12    6.45    1.58      1.10    1.55    6.32
+   135 mm    6.11   24.61   17.40    4.27      0.41    0.57    2.34
+   300 mm    2.75   54.69   38.67    9.50      0.18    0.26    1.05</code></pre>
+    <p>(Píxeis de 4 µm, <code>ensaio.py</code> §2.) <strong>A leitura que muda a vida:</strong>
+    com 50 mm, uma pose de 10 s deixa um traço de nove píxeis. Não é uma estrela ligeiramente
+    oval: é um risco. E com 300 mm, a pose que mantém a estrela dentro de um píxel dura menos de
+    dois décimos de segundo.</p>
 
-    <h2 id="nao-e">O que este curso não é</h2>
-    <ul>
-      <li><strong>Não é astronomia observacional</strong>: não há telescópios nem fotografia do
-        céu. ⚠️ <em>Corrigido a 2026-09-18 — esta linha dizia só «não há fotografia do céu» e não
-        remetia para lado nenhum, porque em 2026-09-16 não havia para onde. Agora há:
-        <a href="../astrofotografia/index.html">Astrofotografia</a> é o tópico que apanha
-        precisamente o que este recusou, e usa a esfera celeste daqui como pré-requisito.</em></li>
-      <li><strong>Não é mecânica celeste</strong>: ninguém integra órbitas aqui. Usam-se séries
-        ajustadas e publicadas, e diz-se de onde vêm e quanto erram.</li>
-      <li>🔴 <strong>Não substitui o <em>Nautical Almanac</em> a bordo.</strong> O curso ensina a
-        lê-lo, a reproduzi-lo com tolerância declarada, e — sobretudo — a saber quando a reprodução
-        não serve. Quatro das seis colunas tabeladas <em>não</em> chegam à precisão do livro, e
-        isso está medido e escrito.</li>
-      <li><strong>Não é um curso de navegação prática.</strong> Não há sextante, não há horizonte do
-        mar, não há observação real. A lição 7 reduz alturas <em>dadas</em>.</li>
-      <li><strong>Não repete a interpolação de picos de FFT</strong> — isso é do tópico
-        <a href="../cassete-captura/00-espetro.html">Digitalizar cassetes</a>. A palavra
-        «interpolação» aparece nos dois e os mecanismos são diferentes; a fronteira está declarada
-        nas lições 6 e 8.</li>
-    </ul>
+    <h3>As duas regras que se usam, e o que elas realmente dizem</h3>
+    <p>A <strong>regra dos 500</strong> diz: pose máxima = 500 ÷ focal. É folclore útil vindo da
+    era do filme, e continua a circular. Vamos medir o que ela permite:</p>
+<pre><code>  focal   regra 500   arrasto que ela deixa   NPF      arrasto do NPF
+    14 mm     35.71 s            9.12 px      6.43 s          1.64 px
+    24 mm     20.83 s            9.12 px      3.79 s          1.66 px
+    50 mm     10.00 s            9.12 px      1.87 s          1.71 px
+   135 mm      3.70 s            9.12 px      0.76 s          1.86 px
+   300 mm      1.67 s            9.12 px      2.16 px</code></pre>
+    <p>🔴 <strong>Repara na terceira coluna: é constante.</strong> Não é coincidência nenhuma —
+    é álgebra:</p>
+<pre><code>traço = 15,0411 × (500/f) ÷ (206,265 × p / f)
 
-    <h2 id="assumi">O que assumi</h2>
-    <p>Do <a href="../../topicos/almanaque/DIAGNOSTICO.md">diagnóstico</a>. Cada pressuposto traz
-    <strong>o que muda se estiver errado</strong>.</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Pressupostos do curso e o que muda se estiverem errados, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>Assumi que…</th><th>De onde veio</th><th>Se estiver errado…</th></tr></thead>
-    <tbody><tr><td>Não tens sextante nem horizonte do mar</td><td>Não foi perguntado e não foi mencionado</td><td>A lição 7 ganha uma segunda metade com observação real. Como está, reduz <strong>alturas dadas</strong> — o mecanismo é o mesmo, falta o instrumento</td></tr><tr><td>Todo o código é biblioteca padrão</td><td>«Calcular eu próprio» era um dos objetivos</td><td>Nada muda: é uma decisão, não um pressuposto sobre ti. Um almanaque feito sobre <code>skyfield</code> funcionava e não ensinava. Ele aparece só na lição 9</td></tr><tr><td>A posição de exemplo pode ser pública e arbitrária</td><td>Decisão de privacidade (D-001)</td><td>Muda-se uma constante em <code>gerar.py</code>. Nenhum mecanismo depende do sítio</td></tr><tr><td>Interessa a época atual (1950–2050)</td><td>«Gerar um almanaque meu» lê-se como «para o ano que vem»</td><td>As séries usadas estão declaradas para 1950–2050. Fora disso parte primeiro o ΔT, que é medido e não calculado — e o curso passaria a precisar de uma lição sobre calendários históricos e a reforma gregoriana</td></tr><tr><td>Inglês técnico lê-se sem atrito</td><td>Todas as fontes primárias estão em inglês</td><td>O curso teria de traduzir as páginas do <em>Nautical Almanac</em> em vez de as usar</td></tr></tbody>
-  </table>
-</div>
+o f cancela  →  traço = 15,0411 × 500 ÷ (206,265 × p)</code></pre>
+    <p>Ou seja: <strong>a regra dos 500 não é uma regra sobre a focal. É uma regra sobre o passo
+    do píxel, escrita numa época em que o «píxel» era o grão do filme e era sempre o mesmo.</strong>
+    Com píxeis de 4 µm ela autoriza um traço de 9,12 px; com píxeis de 2 µm, 18,2 px.</p>
+<pre><code>  passo do píxel   arrasto que a regra 500 deixa passar
+         2.0 µm        18.23 px
+         3.0 µm        12.15 px
+         4.0 µm         9.12 px
+         6.0 µm         6.08 px
+         8.5 µm         4.29 px</code></pre>
+    <p>A <strong>regra NPF</strong>, publicada por Frédéric Michaud na Société Astronomique du
+    Havre, conhece o passo do píxel e a declinação:</p>
+<pre><code>t = k × (16,9·N + 0,1·f + 13,7·p) ÷ (f × cos δ)</code></pre>
+    <p>com N o número de abertura, f a focal em mm, p o passo em µm, e k entre 1 e 3 conforme o
+    alongamento que aceitas. Dá traços de 1,6 a 2,2 px na tabela acima — muito mais conservadora,
+    e coerente entre focais. ⚠️ Mas também <strong>não é física</strong>: é um ajuste empírico com
+    um parâmetro à escolha, e o termo 0,1·f não sai de lado nenhum que se possa derivar aqui.</p>
 
-    <div class="caixa aviso">
-      <span class="titulo">⚠️ A tensão que o diagnóstico encontrou, e como se resolveu</span>
-      <p>Pediste as três coisas: <strong>usar um almanaque náutico a sério</strong>,
-      <strong>perceber o objeto histórico</strong> e <strong>calcular tu próprio</strong>. As
-      primeira e terceira quase se contradizem: as séries que cabem numa lição dão o Sol a cerca de
-      0,4′ e o livro publica a 0,1′.</p>
-      <p>A resolução não foi escolher uma — foi tornar a diferença <strong>o assunto</strong>. Todas
-      as lições declaram o que a sua aproximação custa, em minutos de arco e em milhas náuticas, e a
-      lição 9 junta tudo num orçamento de erro. É o eixo do curso.</p>
+    <h3>A conta que substitui as duas regras</h3>
+    <p>Escolhe tu a tolerância. Quantos píxeis de traço aceitas? Inverte a fórmula:</p>
+<pre><code>t_max = tolerância × escala ÷ (15,0411 × cos δ)</code></pre>
+    <p>É isto que o <code>foton.t_max_por_arrasto</code> faz, e é a única forma de a decisão ser
+    tua e não de uma regra decorada.</p>
+
+    <h3>O compromisso, inteiro e medido</h3>
+    <p>Poses curtas cortam o traço e pagam ruído de leitura. Quanto? Com o mesmo tempo total:</p>
+<pre><code>   poses   cada     SNR      perda contra 1×64 s   arrasto por pose
+     1×   64.0s    16.90                 0.0 %          58.34 px
+     2×   32.0s    16.83                 0.4 %          29.17 px
+     4×   16.0s    16.69                 1.3 %          14.58 px
+     8×    8.0s    16.41                 2.9 %           7.29 px
+    16×    4.0s    15.91                 5.9 %           3.65 px
+    32×    2.0s    15.02                11.2 %           1.82 px
+    64×    1.0s    13.61                19.5 %           0.91 px</code></pre>
+    <p>🔴 <strong>É esta tabela que responde à pergunta «que pose uso?».</strong> Passar de uma
+    pose de 64 s para oito de 8 s custa <strong>2,9 % de sinal-ruído</strong> e reduz o traço de
+    58 px para 7,3 px. Nenhuma pessoa razoável recusa essa troca. Já passar a 64 poses de 1 s
+    custa 19,5 % — e aí a pergunta passa a ter duas respostas defensáveis.</p>
+    <div class="caixa aviso"><span class="titulo">⚠️ Este é o eixo do curso</span>
+    <p>É daqui que sai tudo o resto. Sem seguimento tens de usar poses curtas; poses curtas
+    obrigam a empilhar; empilhar obriga a alinhar; alinhar obriga a calibrar primeiro. As lições 4
+    e 5 existem por causa desta tabela.</p></div>
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+<h3>O problema</h3>
+    <p>Queres fotografar a região de Oríon (δ ≈ −5°, portanto cos δ ≈ 0,996 — praticamente o pior
+    caso) com 50 mm a f/2 e píxeis de 4 µm. Tolerância: queres que o traço não passe de
+    <strong>1,5 píxeis</strong>, porque na lição 3 vais ver que a estrela já tem 2,6 px de largura
+    e um traço menor do que metade disso não se nota.</p>
+
+    <h3>Passo 1 — a escala</h3>
+<pre><code>206,265 × 4 ÷ 50 = 16,50 ″/px</code></pre>
+    <p>Porque este passo primeiro: sem a escala, o traço em arco não diz nada. Repara que ela só
+    depende do sensor e da objetiva — não muda durante a noite.</p>
+
+    <h3>Passo 2 — a velocidade aparente do alvo</h3>
+<pre><code>15,0411 × cos(−5°) = 14,98 ″/s</code></pre>
+    <p>A declinação quase não ajuda aqui. Se o alvo fosse a Estrela Polar seria outra conversa —
+    e é por isso que os primeiros ensaios de quem começa costumam ser feitos ao norte.</p>
+
+    <h3>Passo 3 — o tempo máximo</h3>
+<pre><code>t = 1,5 px × 16,50 ″/px ÷ 14,98 ″/s = 1,65 s</code></pre>
+<pre><code>python3 -c "import foton; print(foton.t_max_por_arrasto(1.5, 50, 4.0, -5))"
+1.6524…</code></pre>
+    <p>E compara com as regras: a dos 500 dava-te 10 s (um traço de 9,1 px, seis vezes a tua
+    tolerância); a NPF com k=1 dá 1,88 s, próxima do teu resultado — porque a tolerância implícita
+    dela, 1,71 px, é parecida com a tua.</p>
+
+    <h3>Passo 4 — o que isso custa, e porque é que se aceita</h3>
+    <p>Poses de 1,6 s num céu urbano estão acima do limiar da lição 1 (0,68 s), logo continuam
+    limitadas pelo céu — <strong>a perda por ruído de leitura é pequena</strong>. Uma hora de
+    integração são 2250 poses. É muito ficheiro, mas não é muita perda.</p>
+
+    <h3>Passo 5 — a decisão, escrita</h3>
+    <p>Poses de 1,6 s, ISO alto o suficiente para que o ruído de leitura em ADU não domine
+    (lição 4 mede-o), e esperar ter 30 a 60 minutos de integração. ⚠️ E um aviso que vem da conta
+    do passo 3: se mudares para 135 mm <em>com a mesma tolerância</em>, a pose cai para 0,6 s e
+    a perda por leitura passa a ser séria. Nessa altura, ou aceitas mais traço, ou o problema
+    deixa de ter solução sem uma montagem.</p>
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+<div class="exercicio">
+      <h3>Completa</h3>
+      <p>Agora um alvo perto do polo: a galáxia de Andrómeda está a δ ≈ +41°. Mesma câmara, mas
+      objetiva de 135 mm, e aceitas 2 píxeis de traço.</p>
+      <ol>
+        <li>Escala: 206,265 × 4 ÷ 135 = <em>6,11 ″/px</em> (dado).</li>
+        <li>Velocidade aparente do alvo: <strong>______</strong></li>
+        <li>Tempo máximo de pose: <strong>______</strong></li>
+        <li>O que a regra dos 500 te daria, e que traço isso produzia: <strong>______</strong></li>
+        <li>Para uma hora de integração, quantas poses? <strong>______</strong></li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>2.</strong> 15,0411 × cos 41° = <strong>11,35 ″/s</strong>. A declinação
+        poupa-te 25 %.</p>
+        <p><strong>3.</strong> t = 2 × 6,11 ÷ 11,35 = <strong>1,08 s</strong>. Confere:</p>
+<pre><code>python3 -c "import foton; print(foton.t_max_por_arrasto(2, 135, 4.0, 41))"
+1.0765…</code></pre>
+        <p><strong>4.</strong> 500/135 = 3,70 s, que produz 9,12 px de traço — <em>o mesmo 9,12 de
+        todas as focais</em>, porque a regra é afinal sobre o passo do píxel. Quatro vezes e meia
+        a tua tolerância.</p>
+        <p><strong>5.</strong> 3600 ÷ 1,08 ≈ <strong>3340 poses</strong>. Vale a pena parar aqui:
+        3340 ficheiros RAW ocupam dezenas de gigabytes e o teu <em>pipeline</em> vai demorar. É um
+        constrangimento real que a lição 5 tem de levar em conta, e é a primeira razão pela qual
+        alguém compra uma montagem.</p>
+      </details>
     </div>
-
-    <h2 id="mapa">O mapa</h2>
-    <p>🔴 O diagnóstico registou «astronomia esférica: nenhuma». Por isso a esfera celeste é a
-    <strong>lição 0</strong>, com onze secções como qualquer outra, e não uma caixa de recordação no
-    meio da lição 3.</p>
-<figure>
-  <svg viewBox="0 0 1034 278" role="img" aria-labelledby="t-mapa d-mapa">
-    <title id="t-mapa">Mapa das dez lições e das suas dependências</title>
-    <desc id="d-mapa">As lições 0 e 1 não dependem de nada e alimentam a 2. A 2 alimenta a 3, que é o eixo do curso. Da 3 saem a 4 e a 5, que convergem na 6; a 6 alimenta a 7 e a 7 alimenta a 9, que é o projeto. A lição 8, sobre marés, sai da 5 e é extensão. A mesma informação está na tabela do plano, logo a seguir.</desc>
-    <defs><marker id="seta-mapa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/></marker></defs>
-    <rect class="svg-realce" x="24" y="88" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="24" y="158" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="192" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="360" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="528" y="53" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="528" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="696" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="864" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-fundo" x="696" y="200" width="146" height="44" rx="6"/>
-    <rect class="svg-realce" x="864" y="46" width="146" height="44" rx="6"/>
-    <path class="svg-traco-grosso" d="M 170 110 C 184 110 178 145 186 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 170 180 C 184 180 178 145 186 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 338 145 H 354" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 506 145 C 520 145 514 75 522 75" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 506 145 H 522" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 75 C 688 75 682 145 690 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 145 H 690" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 842 145 H 858" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 937 167 C 937 191 937 114 937 90" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 145 C 688 145 682 222 690 222" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 842 222 C 856 222 850 68 858 68" marker-end="url(#seta-mapa)"/>
-    <text class="svg-texto-pequeno" x="97" y="107" text-anchor="middle">0 · A esfera celeste</text>
-    <text class="svg-texto-pequeno" x="97" y="123" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="97" y="177" text-anchor="middle">1 · O que é um almanaque</text>
-    <text class="svg-texto-pequeno" x="97" y="193" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="265" y="142" text-anchor="middle">2 · O tempo</text>
-    <text class="svg-texto-pequeno" x="265" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="433" y="142" text-anchor="middle">3 · O Sol</text>
-    <text class="svg-texto-pequeno" x="433" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="601" y="72" text-anchor="middle">4 · Nascer e pôr</text>
-    <text class="svg-texto-pequeno" x="601" y="88" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="601" y="142" text-anchor="middle">5 · A Lua</text>
-    <text class="svg-texto-pequeno" x="601" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="769" y="142" text-anchor="middle">6 · Ler as tábuas</text>
-    <text class="svg-texto-pequeno" x="769" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="937" y="142" text-anchor="middle">7 · Reduzir uma altura</text>
-    <text class="svg-texto-pequeno" x="937" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="769" y="219" text-anchor="middle">8 · As marés</text>
-    <text class="svg-texto-pequeno" x="769" y="235" text-anchor="middle">extensão</text>
-    <text class="svg-texto-pequeno" x="937" y="65" text-anchor="middle">9 · O teu almanaque</text>
-    <text class="svg-texto-pequeno" x="937" y="81" text-anchor="middle">núcleo</text>
-  </svg>
-  <figcaption>As caixas destacadas são o princípio (lição 0) e o fim (o projeto). A lição 8 é <strong>extensão</strong>: serve o objetivo histórico e não o critério de sucesso. O mesmo está em texto na tabela seguinte.</figcaption>
-</figure>
-
-    <h2 id="plano">O plano no tempo</h2>
-    <p>Distribuído pelas <strong>6 horas ou mais por semana</strong> que o diagnóstico registou. Sem
-    prazo: se forem 8 horas, são 8 semanas. A lição 8 é <strong>extensão</strong> — faz-se quando
-    apetecer, ou nunca.</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Plano das lições no tempo, tabela rolável na horizontal">
+    <h2 id="erros">6. Erros comuns</h2>
+<p>As conceções erradas <strong>típicas deste assunto</strong> — e como se reconhecem quando aparecem.</p><div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
   <table>
-    <thead><tr><th>Semana</th><th>Lição</th><th>Depende de</th><th>O que lá está</th><th>Estado</th></tr></thead>
-    <tbody><tr><td>1</td><td><a href="00-esfera-celeste.html">0 · A esfera celeste</a></td><td>—</td><td>Coordenadas, ponto subastral, triângulo de posição. O pré-requisito em falta.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>2</td><td><a href="01-o-que-e-um-almanaque.html">1 · O que é um almanaque</a></td><td>—</td><td>História e mecanismo: um resultado publicado, não um método. O almanaque do GPS.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>3</td><td><a href="02-o-tempo.html">2 · O tempo</a></td><td>lição 0</td><td>Dia juliano, TT/UT1/UTC, ΔT medido, tempo sidéreo médio e aparente.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>4</td><td><a href="03-o-sol.html">3 · O Sol</a></td><td>lições 0 e 2</td><td>A pilha de correções, a equação do tempo, e o orçamento de erro do curso.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>5</td><td><a href="04-nascer-e-por.html">4 · Nascer, pôr e crepúsculos</a></td><td>lição 3</td><td>−0° 50′, bisseção, e os dois casos em que não há resposta.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>6</td><td><a href="05-a-lua.html">5 · A Lua</a></td><td>lição 3</td><td>Paralaxe, fases, o ciclo de 18,6 anos. Onde as aproximações do Sol caem.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>7</td><td><a href="06-ler-as-tabuas.html">6 · Ler as tábuas</a></td><td>lições 3 e 5</td><td>v, d, incrementos. Um formato é uma máquina de evitar um erro.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>8</td><td><a href="07-reduzir-uma-altura.html">7 · Reduzir uma altura</a></td><td>lições 0 e 6</td><td>As cinco correções e Marcq St Hilaire. De um ângulo a uma linha no mapa.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>—</td><td><a href="08-mares.html">8 · As marés</a></td><td>lição 5</td><td>O almanaque que se identifica em vez de se calcular.</td><td><span class="etiqueta extensao">extensão</span></td></tr><tr><td>10</td><td><a href="09-o-teu-almanaque.html">9 · O teu almanaque</a></td><td>lições 3 a 7</td><td>O projeto: declarar a tolerância antes, gerar, comparar, relatar.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr></tbody>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody>
+      <tr><td>«A regra dos 500 é a regra; o NPF é para quem exagera.»</td><td>Aparece sempre que alguém justifica uma pose sem dizer que traço aceita.</td><td>A regra dos 500 autoriza 9,12 px de traço com píxeis de 4 µm, e 18 px com píxeis de 2 µm — <strong>sem nunca mencionar o píxel</strong>. Não é uma regra errada, é uma regra sobre outra coisa.</td></tr>
+      <tr><td>«Uma focal maior obriga a poses mais curtas.»</td><td>«Com 300 mm tenho de ser mais rápido.»</td><td>É verdade na prática mas a razão está trocada: o que encurta a pose é a <strong>escala mais fina</strong> (menos ″/px). A mesma focal com píxeis maiores dá a mesma liberdade da focal curta com píxeis pequenos.</td></tr>
+      <tr><td>«Ao apontar ao norte a rotação desaparece.»</td><td>«Junto à Polar não há traço.»</td><td>Diminui por cos δ, não desaparece. A 80° de declinação o traço em 10 s com 50 mm ainda é 1,58 px. E há uma segunda armadilha: o <em>campo</em> roda à volta do polo, portanto as estrelas das bordas arrastam-se em arco mesmo com o centro parado.</td></tr>
+      <tr><td>«Como as poses vão ser curtas, o ISO tem de ir ao máximo.»</td><td>ISO no topo «porque a pose é curta».</td><td>A pose curta já está limitada pelo céu se estiver acima do limiar da lição 1 — e aí o ISO alto só desperdiça poço e satura estrelas mais cedo. O ISO decide-se com a medição da lição 4, não com a duração da pose.</td></tr>
+    </tbody>
   </table>
 </div>
-
-    <h3>O código</h3>
-    <p>Quatro ficheiros, todos de biblioteca padrão, que são a fonte de tudo o que as lições
-    mostram:</p>
-    <ul>
-      <li><a href="codigo/almanaque.py"><code>almanaque.py</code></a> — o motor. Cada função traz no
-        <em>docstring</em> de onde veio a fórmula e <strong>quanto erra</strong>.</li>
-      <li><a href="codigo/ensaio.py"><code>ensaio.py</code></a> — o que prova que está certo. Oito
-        secções, todas contra fontes exteriores e datadas.</li>
-      <li><a href="codigo/gerar.py"><code>gerar.py</code></a> — o projeto: gera o teu almanaque
-        anual.</li>
-      <li><a href="codigo/comparar.py"><code>comparar.py</code></a> — lê o PDF oficial e mede a
-        diferença, coluna a coluna.</li>
-    </ul>
-
-    <h3>O orçamento de erro, medido</h3>
-    <p>Contra a página diária de 20 de março de 2026 do <em>Nautical Almanac</em>:</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Orçamento de erro medido contra a página oficial, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>O que se publica</th><th>Erro medido</th><th>O livro imprime a</th><th>Passa?</th></tr></thead>
-    <tbody><tr><td>GHA de Áries</td><td>0,053′</td><td>0,1′</td><td>✅</td></tr><tr><td>Paralaxe da Lua</td><td>0,077′</td><td>0,1′</td><td>✅</td></tr><tr><td>Dec do Sol</td><td>0,195′</td><td>0,1′</td><td>❌</td></tr><tr><td>GHA do Sol</td><td>0,415′</td><td>0,1′</td><td>❌</td></tr><tr><td>Dec da Lua</td><td>2,1′</td><td>0,1′</td><td>❌</td></tr><tr><td>GHA da Lua</td><td>5,7′</td><td>0,1′</td><td>❌</td></tr><tr><td>Nascer, pôr e crepúsculos</td><td>0 min nas seis colunas</td><td>1 min</td><td>✅</td></tr><tr><td>Nascer e ocaso da Lua</td><td>≤ 1 min</td><td>1 min</td><td>✅</td></tr></tbody>
-  </table>
+    <h2 id="praticar">7. Praticar</h2>
+<p>Do mais fácil ao mais difícil. Tenta antes de abrir a solução — abrir cedo dá a sensação de perceber sem a aprendizagem.</p><div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — ler a tabela ao contrário</h3>
+<p>Sem contas: se passares de um sensor com píxeis de 4 µm para um com píxeis de 6 µm,
+         mantendo tudo o resto, o teu tempo máximo de pose sobe, desce ou fica igual? Porquê?
+         E a imagem fica melhor ou pior?</p>
+  <details class="solucao"><summary>Solução</summary>
+<p><strong>Sobe</strong>, em 50 %: o píxel maior cobre mais céu (24,75 ″/px em vez de
+         16,50), portanto a estrela demora mais a atravessá-lo. A fórmula do traço tem a escala no
+         denominador.</p>
+         <p>Se a imagem fica melhor é outra pergunta e a resposta é «depende»: ganhas tempo de
+         pose e perdes resolução. A lição 3 mostra que, abaixo de dois píxeis por largura de
+         estrela, a informação já não cabe na grelha — e que acima disso o píxel maior só te está
+         a dar sinal por píxel mais alto, o que <em>ajuda</em> quando o ruído de leitura conta.
+         🔴 Não há resposta universal; há a conta.</p>
+  </details>
 </div>
-    <p>🔴 <strong>Quatro das seis colunas tabeladas não passam</strong>, e isso é o resultado do
-    curso e não o seu fracasso: sabes quais, por quanto, e o que seria preciso para as corrigir.</p>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — a tolerância honesta</h3>
+<p>Escolher «1 píxel de traço» é arbitrário. Argumenta, com o que sabes da lição 1 e
+         com o que vais ver na lição 3, qual é a tolerância <em>defensável</em> — e depois calcula
+         a pose máxima para 50 mm, δ = 0°, píxeis de 4 µm, com essa tolerância.</p>
+  <details class="solucao"><summary>Solução</summary>
+<p>O argumento defensável: o traço só importa quando alarga visivelmente a estrela, e a
+         estrela já tem uma largura própria (a FWHM, tipicamente 2 a 3 px com uma objetiva boa).
+         Como as larguras se somam em quadratura, um traço de <em>metade</em> da FWHM alarga a
+         estrela em √(1 + 0,25) = 12 %, e um traço igual à FWHM alarga-a 41 %.</p>
+         <p>Com FWHM ≈ 2,6 px, uma tolerância de 1,3 px alarga 12 % — invisível. Logo:</p>
+<pre><code>python3 -c "import foton; print(foton.t_max_por_arrasto(1.3, 50, 4.0, 0))"
+1.4262…</code></pre>
+         <p><strong>1,4 s.</strong> E agora o número tem uma justificação que se pode discutir:
+         alguém que ache 20 % de alargamento aceitável chega a 1,8 s, e a discussão é sobre os
+         20 %, não sobre folclore.</p>
+  </details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código que corre: a tua tabela de decisão</h3>
+<p>Escreve um programa que produza, para o <em>teu</em> material, uma tabela de decisão:
+         para cada focal que tens e para três declinações (0°, 45°, 80°), a pose máxima com a tua
+         tolerância, e ao lado a perda de SNR que essa pose implica face a uma pose de 60 s, num
+         céu de 19 mag/arcsec².</p>
+         <p>🔴 Antes de correres, escreve a tua previsão: em que focal é que a perda passa dos
+         5 %?</p>
+  <details class="solucao"><summary>Solução</summary>
+<pre><code>import math, foton
 
-    <h3>No fim</h3>
-    <ul>
-      <li><a href="bibliografia.html">Bibliografia</a> — o percurso, por onde começar.</li>
-      <li><a href="folha.html">Folha de consulta</a> — imprimível, só o que se consulta.</li>
-      <li><a href="teste.html">Teste de domínio</a> — intercalado, sem soluções à vista.</li>
-      <li><a href="flashcards.csv">Flashcards</a> (CSV para o Anki) e
-        <a href="revisao.ics">calendário de revisão</a> (.ics).</li>
-    </ul>
+PASSO, FNUM, TOL, CEU, LEITURA, NPX = 4.0, 2.0, 1.3, 19.0, 3.0, 9
 
-    <h2 id="fases">Nota das fases</h2>
-    <p>O que cada fase encontrou. É isto que distingue um curso que passou pelo processo de um que
-    só parece ter passado.</p>
+def snr_total(t_pose, total=60.0):
+    n = max(1, round(total / t_pose))
+    s = foton.electroes_estrela(12, 50, FNUM, n * t_pose)
+    c = foton.electroes_ceu_px(CEU, 50, FNUM, PASSO, n * t_pose)
+    var = s + NPX * (c + 0.05 * n * t_pose + n * LEITURA ** 2)
+    return s / math.sqrt(var), n
 
-    <h3 id="fase0">Fase 0 — Verificar</h3>
-    <p><strong>O que se procurou</strong> (tudo registado em
-    <a href="../../topicos/almanaque/DIAGNOSTICO.md">DIAGNOSTICO.md</a>):</p>
-    <ul>
-      <li><code>grep -ri</code> em <code>docs/</code> e <code>topicos/</code> por <em>almanaque,
-        almanac, efeméride, astronom, juliano, sextante, latitude, longitude, declinação, tempo
-        sidéreo, órbita, maré, navegação</em> — <strong>0 ficheiros em todos</strong>.</li>
-      <li>Por sintoma e por verbo: <em>tabela pré-calculada, pré-calcul, lookup, memoiz, consulta em
-        tabela, data e hora, segundos intercalares, esfera, trigonom</em> — 0 em todos.</li>
-      <li><em>calendário</em> deu 8 ficheiros, <strong>todos</strong> sobre o <code>revisao.ics</code>
-        da revisão espaçada. <em>fuso</em> deu 10, quase todos falsos — apanha
-        <strong>parafuso</strong> em <code>cassete-captura</code>.</li>
-      <li><code>git log -S</code> para nove termos: <strong>nada</strong>. Nunca existiu e nunca foi
-        removido.</li>
-    </ul>
-    <p><strong>O que se encontrou:</strong> tópico novo, sem pré-requisitos no repositório. Um
-    <strong>vizinho a declarar</strong> — a interpolação parabólica de picos de FFT em
-    <a href="../cassete-captura/00-espetro.html">cassete-captura</a>, mecanismo diferente com o
-    mesmo nome — e uma <strong>analogia a aproveitar</strong>: o <em>cache</em>, que aparece em 14
-    ficheiros em sentido informático e estrutura a lição 1.</p>
-    <p><strong>Fontes primárias localizadas:</strong> o <em>Nautical Almanac</em> em PDF gratuito
-    (1911–2030), as fórmulas de baixa precisão do <em>Astronomical Almanac</em>, o NOAA Solar
-    Calculator, as constituintes de maré. ⚠️ <strong>Duas não abriram:</strong> o sítio do USNO
-    recusou a ligação e a tabela da NOAA é desenhada por JavaScript — está dito em cada lição onde
-    isso afeta uma afirmação.</p>
-
-    <h3 id="fase1">Fase 1 — Criar</h3>
-    <p>Dez lições, quatro ficheiros de código, e uma decisão que estruturou tudo: <strong>nenhuma
-    saída de código foi escrita à mão</strong>. Cada bloco das lições foi executado numa pasta
-    temporária e a saída colada de uma execução real — o mecanismo que o registo de falhas do
-    <code>PROCESSO.md</code> exigiu depois de duas sessões em que os números foram escritos primeiro
-    e corridos depois.</p>
-    <p>Decisões tomadas durante a escrita: biblioteca padrão só (o <code>skyfield</code> só aparece
-    na lição 9, como padrão de comparação); longitude <strong>leste-positiva</strong>, contra a
-    convenção náutica clássica, porque é a de todo o código moderno — declarado em caixa de aviso na
-    lição 0; e o PDF oficial <strong>não entra no repositório</strong>, por direitos de autor,
-    ficando só o extrator.</p>
-
-    <h3 id="fase2">Fase 2 — Aprofundar</h3>
-    <p><strong>O que a Fase 1 errou</strong>, item a item, tudo apanhado a correr o que estava
-    escrito:</p>
-    <ol>
-      <li>🔴 <strong>O bug maior: <code>gha()</code> usava o tempo sidéreo MÉDIO.</strong> O
-        <em>Nautical Almanac</em> publica o <strong>aparente</strong>. O erro sistemático contra a
-        página de 20 de março de 2026 era de −0,09′ no GHA de Áries; com o GAST desce para +0,004′,
-        que é o arredondamento do próprio livro. Virou a secção «Erros comuns» da lição 2.</li>
-      <li><strong>O ensaio do dia sidéreo media a taxa com passo de 1 segundo</strong> e dava
-        86164,56 s em vez de 86164,09 s — cancelamento catastrófico. Não era da fórmula: com passo
-        de 1 hora dá certo. Virou caixa de aviso na lição 2.</li>
-      <li><strong>O ensaio da obliquidade comparava a verdadeira com a constante da média</strong> e
-        falhava por 5,4″ — que é exatamente a nutação em obliquidade. Erro do <em>ensaio</em>, não
-        do código.</li>
-      <li><strong>Escrevi «a tabela pesa centenas de vezes mais do que o código»</strong> na lição 1.
-        Medido: <strong>30 vezes</strong>. Corrigido para o que o bloco imprime.</li>
-      <li><strong>Escrevi que a equação dos equinócios vale 0,29′.</strong> Medida sobre 20 anos:
-        <strong>0,263′</strong>. Corrigida em quatro sítios, incluindo dois <em>docstrings</em>.</li>
-      <li><strong>Um comentário no <code>almanaque.py</code> dizia que trocar UT1 por TT custa
-        0,29′.</strong> Custa 0,0008′ no Sol e <strong>17,25′</strong> na rotação da Terra — a mesma
-        quantidade de tempo vale coisas diferentes conforme o que indexa. O comentário passou a
-        dizer as três.</li>
-      <li><strong>O detetor de luas novas da lição 5 dava um mês sinódico de 30,48 dias</strong>,
-        fora do intervalo publicado (29,26–29,80). Era bug do detetor — saltava quase um mês e
-        bissectava na lunação errada. Reescrito para varrer dia a dia: 29,29 a 29,81.</li>
-      <li><strong>O intercepto do exemplo trabalhado da lição 7 dava 178 milhas náuticas</strong>,
-        porque inventei a altura do sextante. Passou a ser obtida <em>por inversão</em> a partir de
-        uma posição real: 18,4 milhas.</li>
-      <li><strong>Escrevi que a fixação recuperava a posição «a menos de um milésimo de milha».</strong>
-        Mede 0,264 milhas à primeira, e cai para 0,00001 à segunda iteração. O resíduo virou a parte
-        mais interessante do exercício: Marcq St Hilaire é uma linearização, e comporta-se como um
-        passo de Newton.</li>
-      <li><strong>O <code>round()</code> do Python arredonda ao par e o livro não.</strong> A minha
-        reconstrução da tabela de incrementos dava 0,1 onde a página imprime 0,2. Virou entrada na
-        tabela de erros comuns da lição 6.</li>
-      <li><strong>O E2 da lição 6 media uma tautologia</strong> — confirmava a definição de
-        <em>v</em>, não a qualidade da interpolação. Reescrito para medir a curvatura desprezada
-        <em>dentro</em> da hora: 0,006′, dezasseis vezes abaixo do passo de impressão.</li>
-      <li><strong>O gerador etiquetava 25 dias do ano em Lisboa como «sempre-acima».</strong> A Lua
-        em Lisboa não é circumpolar coisa nenhuma — eram dias em que ela saltou o nascer. A exceção
-        <code>SemEvento</code> passou a distinguir <strong>três</strong> causas.</li>
-      <li><strong>O <code>ensaio.py</code> rebentou com <code>UnicodeEncodeError</code> na primeira
-        execução</strong>, por causa de um «Δ» numa consola <code>cp1252</code> — a mesma falha que
-        o <code>PROCESSO.md</code> já registava para o <code>validar.py</code>, repetida.</li>
-      <li>🔴 <strong>Um bloco de código corria, falhava, e imprimia nada — com código de saída
-        <em>zero</em>.</strong> O <code>gerar.py</code> não estava a ser copiado para a pasta
-        temporária onde os blocos correm; o subprocesso rebentava, o bloco imprimia um
-        <code>stdout</code> vazio, e a lição 9 publicava um <code>&lt;samp&gt;</code> em branco que
-        parecia «o programa não disse nada». <strong>Só o <code>tidy</code> deu por isso</strong>,
-        ao avisar de um <code>&lt;samp&gt;</code> vazio. Corrigido em três níveis: o ficheiro passou
-        a ser copiado, o bloco passa a verificar o código de saída do subprocesso, e o gerador das
-        lições passa a <strong>recusar</strong> um bloco cuja saída seja vazia.</li>
-      <li><strong>Três figuras erradas que passaram todas as verificações automáticas.</strong> O
-        mapa do curso tinha o <code>viewBox</code> escrito à mão e as lições 6 a 9 ficavam fora dele;
-        a figura da reta de altura precisou de <strong>três versões</strong> (rótulos sobrepostos, e
-        depois geometria cortada pelo topo); um rótulo do mapa saía truncado a meio de uma palavra.
-        Correções: <code>viewBox</code> calculado do envelope da geometria, rótulos em coluna fixa
-        ordenados pela altura do alvo, e nomes curtos explícitos em vez de cortar o título.</li>
-      <li><strong>A figura da soma de uma consulta discordava do bloco de código da mesma
-        lição</strong> por uma décima de minuto de arco: dizia 8° 59,6′ e o valor é 8° 59,7′.</li>
-      <li>⬜ <strong>A lista de verificação do processo, percorrida:</strong> 11 secções por ordem em
-        todas as lições ✅ · objetivos verificáveis ✅ · fronteira com remissão para o tópico vizinho
-        ✅ · cada pressuposto com consequência ✅ · pré-requisito como lição 0 ✅ · soluções em
-        <code>&lt;details&gt;</code> fechado ✅ · explicação em cada opção de quiz ✅ · código que
-        corre em todas as lições ✅ · <strong>fonte que não é documentação em todas as dez</strong>
-        ✅ — e nas três em que não encontrei nenhuma peça audiovisual citável, está escrito que
-        <em>procurei e não encontrei</em> ✅ · convenções declaradas como convenções ✅.</li>
-    </ol>
-
-    <h3 id="fase3">Fase 3 — Validar</h3>
-    <p><strong>O que se correu:</strong> todo o código de todas as lições, por construção — o
-    gerador executa cada bloco e cola a saída, por isso um bloco que não corra faz a página não
-    existir. Mais o <code>ensaio.py</code> completo (oito secções) e o <code>gerar.py</code> para um
-    ano inteiro em duas latitudes.</p>
-    <p><strong>Contra que fontes exteriores:</strong></p>
-    <ul>
-      <li><em>Nautical Almanac</em> 2026, página de 20–22 de março: GHA de Áries e do Sol,
-        declinação, colunas da Lua, tabela de nascer/pôr/crepúsculos por latitude, tabela de
-        incrementos (pág. 263), e o ΔT que a própria página declara.</li>
-      <li>Instantes publicados dos <strong>equinócios e solstícios</strong> de 2025 a 2027 —
-        referência independente do livro.</li>
-      <li>Os quatro extremos e as quatro passagens por zero da <strong>equação do tempo</strong>,
-        com data. <strong>Todos batem</strong>, o que são oito coincidências independentes.</li>
-      <li>Instantes publicados de três <strong>luas cheias</strong> de 2026.</li>
-      <li>Duas fórmulas independentes para o tempo sidéreo (IAU 1982 e o Ângulo de Rotação da Terra
-        da IAU 2000), cuja diferença é a precessão acumulada e bate com a expressão dela.</li>
-    </ul>
-    <p><strong>O que isso apanhou:</strong> os treze itens da Fase 2 — nenhum deles teria aparecido
-    a reler. E o resultado final, que é o produto do curso: <strong>as seis colunas de nascer, pôr e
-    crepúsculos batem ao minuto</strong>, o GHA de Áries bate à precisão de impressão do livro, e
-    <strong>quatro das seis colunas tabeladas não batem</strong> — por 0,2′, 0,4′, 2,1′ e 5,7′.</p>
-    <p>⚠️ <strong>O que ficou por validar, dito à letra:</strong></p>
-    <ul>
-      <li><strong>Não há observação real.</strong> Não há sextante; a lição 7 valida a álgebra da
-        fixação com alturas simuladas, e isso valida a álgebra, não a astronomia.</li>
-      <li><strong>Não corri o <code>skyfield</code></strong> — sem rede para o instalar nem para
-        descarregar as efemérides do JPL. A lição 9 descreve o procedimento e não afirma nada sobre
-        os números dele.</li>
-      <li><strong>Duas fontes primárias não abriram</strong> (USNO e a tabela da NOAA). Onde isso
-        afeta uma afirmação, está escrito na própria lição qual foi a reprodução usada e qual foi a
-        medição que a substituiu.</li>
-      <li><strong>As constantes harmónicas da lição 8 são inventadas</strong>, e está dito no código
-        e na prosa.</li>
-      <li><strong>O <code>tidy</code> ficou por correr na primeira passagem</strong> — não estava
-        instalado. Foi apontado a um <code>tidy-html5 5.8</code> e correu: apanhou o
-        <code>&lt;samp&gt;</code> vazio descrito acima, e mais nada.</li>
-      <li><strong>O passo 5 do <code>validar.sh</code> (termos sensíveis) disparou</strong> numa
-        frase do diagnóstico, com razão — ele procura a palavra e pede confirmação humana. A frase
-        foi reescrita, <strong>e não se acrescentou uma exceção ao validador</strong>: a exceção
-        enfraquecia-o para sempre e a frase não perdia nada.</li>
-    </ul>
+base, _ = snr_total(60.0)
+print("focal  delta   pose max   poses em 60s   SNR    perda")
+for f in (24, 50, 135, 300):
+    for d in (0, 45, 80):
+        t = foton.t_max_por_arrasto(TOL, f, PASSO, d)
+        snr, n = snr_total(t)
+        print("%4dmm %5d°   %7.2fs   %12d   %5.2f   %5.1f %%"
+              % (f, d, t, n, snr, 100 * (1 - snr / base)))</code></pre>
+         <p>Saída (corrida a 2026-09-18):</p>
+<pre><code>focal  delta   pose max   poses em 60s   SNR    perda
+  24mm     0°      2.97s             20   15.01     8.2 %
+  24mm    45°      4.20s             14   15.29     6.5 %
+  24mm    80°     17.11s              4   17.28    -5.6 %
+  50mm     0°      1.43s             42   13.93    14.9 %
+  50mm    45°      2.02s             30   14.61    10.7 %
+  50mm    80°      8.21s              7   15.57     4.8 %
+ 135mm     0°      0.53s            114   11.49    29.8 %
+ 135mm    45°      0.75s             80   12.42    24.1 %
+ 135mm    80°      3.04s             20   15.22     7.0 %
+ 300mm     0°      0.24s            252    8.99    45.1 %
+ 300mm    45°      0.34s            178   10.07    38.4 %
+ 300mm    80°      1.37s             44   13.89    15.1 %</code></pre>
+         <p><strong>A resposta, e provavelmente não era a tua previsão.</strong> Os 5 % já
+         aparecem aos <strong>24 mm</strong> perto do equador celeste, e aos 300 mm a perda chega
+         a <strong>45 %</strong>. É muito pior do que a tabela do §3 fazia esperar — e a razão é
+         que ali eram 64 s divididos em poucas poses, enquanto aqui a tolerância de 1,3 px impõe
+         centenas de leituras em 60 s.</p>
+         <p>🔴 <strong>Não há uma focal limite: há uma focal limite <em>por alvo</em>.</strong>
+         A 80° de declinação os 24 mm aparecem com perda <em>negativa</em> — ou seja, ganho — e
+         essa linha estranha denuncia um pormenor do código que não é decorativo: o número de
+         poses é <code>round(60/t)</code>, portanto o tempo total <strong>não</strong> é
+         exatamente 60 s em todas as linhas. Com poses de 17,11 s dá 4 poses = 68,4 s, e 14 % mais
+         tempo dá mais sinal. Um comparador honesto fixaria o tempo total em vez do número de
+         poses; fica como melhoria para quem quiser.</p>
+         <p>O que a montagem compra não é «poses mais longas» por gosto: é deixar de pagar esta
+         coluna.</p>
+  </details>
+</div>
+    <h2 id="quiz">8. Quiz</h2>
+<p>Corrige-se aqui, sem rede. Cada opção tem a sua explicação — é aí que está o que faltava perceber, por isso lê-as todas, mesmo quando acertas.</p><div class="quiz" data-quiz="02-a-terra-roda">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Porque é que a coluna «arrasto que a regra 500 deixa» é a mesma para todas as focais?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-1" value="a" data-certa="false"><span class="rotulo">Porque a tabela foi calculada sempre com a mesma focal, por engano.</span></label>
+          <p class="explicacao" hidden>Não foi: cada linha usa a sua focal, tanto no tempo (500/f) como na escala (206,265·p/f). O f cancela-se algebricamente.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-1" value="b" data-certa="false"><span class="rotulo">Porque o traço em píxeis é sempre proporcional ao tempo, e o tempo é o mesmo.</span></label>
+          <p class="explicacao" hidden>O tempo não é o mesmo: varia de 35,7 s a 1,67 s na tabela. O que é constante é o produto que sai da álgebra.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-1" value="c" data-certa="true"><span class="rotulo">Porque o f aparece no numerador do tempo e no denominador da escala, e cancela-se: sobra uma expressão que só depende do passo do píxel.</span></label>
+          <p class="explicacao" hidden>Exato — e é a descoberta desta lição. A «regra da focal» é uma regra sobre o passo do píxel, herdada de quando o grão do filme era constante.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Um alvo a δ = 60° arrasta-se, no mesmo tempo, que fração do que arrasta um alvo a δ = 0°?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-2" value="a" data-certa="true"><span class="rotulo">Metade, porque cos 60° = 0,5.</span></label>
+          <p class="explicacao" hidden>Exato. E é por isso que os alvos altos em declinação são os mais fáceis para quem não tem seguimento.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-2" value="b" data-certa="false"><span class="rotulo">Dois terços, porque 60/90 = 0,67.</span></label>
+          <p class="explicacao" hidden>A dependência é o cosseno da declinação, não uma proporção linear do ângulo. A diferença entre as duas é grande junto aos extremos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-2" value="c" data-certa="false"><span class="rotulo">O mesmo, porque a Terra roda à mesma velocidade seja qual for o alvo.</span></label>
+          <p class="explicacao" hidden>A Terra roda à mesma velocidade, mas o círculo que o astro descreve no céu é menor junto ao polo — e o que se vê na imagem é o arco percorrido, não o ângulo de rotação.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Tens 64 s de integração para dar. Passar de 1 pose de 64 s para 8 poses de 8 s custa:</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-3" value="a" data-certa="false"><span class="rotulo">Nada, porque o tempo total é o mesmo.</span></label>
+          <p class="explicacao" hidden>O tempo total é o mesmo e o sinal também — mas o ruído de leitura paga-se oito vezes em vez de uma.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-3" value="b" data-certa="true"><span class="rotulo">2,9 % de sinal-ruído, e só por causa do ruído de leitura repetido.</span></label>
+          <p class="explicacao" hidden>É o valor medido. Em troca, o traço cai de 58 px para 7,3 px: é das melhores trocas disponíveis em toda a astrofotografia sem seguimento.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-3" value="c" data-certa="false"><span class="rotulo">Um oitavo do sinal-ruído, porque cada pose tem oito vezes menos sinal.</span></label>
+          <p class="explicacao" hidden>Cada pose tem menos sinal, mas somam-se as oito: o sinal total é idêntico. O SNR da pilha não é o SNR de uma pose.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Qual destas mudanças <strong>aumenta</strong> o tempo máximo de pose sem seguimento?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-4" value="a" data-certa="false"><span class="rotulo">Trocar por uma objetiva de focal maior.</span></label>
+          <p class="explicacao" hidden>Faz o contrário: focal maior dá escala mais fina (menos ″/px) e a estrela atravessa o píxel mais depressa.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-4" value="b" data-certa="false"><span class="rotulo">Abrir mais o diafragma.</span></label>
+          <p class="explicacao" hidden>Recolhe mais luz por segundo, o que é ótimo, mas não muda a velocidade a que a estrela atravessa a imagem: o traço é o mesmo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-4" value="c" data-certa="true"><span class="rotulo">Trocar por um sensor com píxeis maiores.</span></label>
+          <p class="explicacao" hidden>Sim: o píxel maior cobre mais céu, e a estrela demora mais a atravessá-lo. O preço é resolução, que a lição 3 quantifica.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A regra NPF é preferível à dos 500 porque:</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-5" value="a" data-certa="false"><span class="rotulo">É uma lei física derivada da ótica.</span></label>
+          <p class="explicacao" hidden>Não é: é um ajuste empírico com um parâmetro k à escolha, e o termo 0,1·f não se deriva de nada que esteja neste curso.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-5" value="b" data-certa="false"><span class="rotulo">Dá sempre poses mais longas, o que recolhe mais luz.</span></label>
+          <p class="explicacao" hidden>Dá poses mais <em>curtas</em> na tabela desta lição — entre três e cinco vezes mais curtas do que a dos 500.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-5" value="c" data-certa="true"><span class="rotulo">Inclui o passo do píxel e a declinação, que são as duas coisas que a dos 500 ignora.</span></label>
+          <p class="explicacao" hidden>É a razão certa — e continua a ser uma regra, não física. A alternativa honesta é escolher a tolerância em píxeis e inverter a fórmula do traço.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que este limite é «o eixo do curso»?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-6" value="a" data-certa="false"><span class="rotulo">Porque sem o resolver não se consegue fotografar nada.</span></label>
+          <p class="explicacao" hidden>Consegue-se: traços de estrelas são uma fotografia legítima, e há quem os procure de propósito. O que o limite decide é o <em>método</em>, não a possibilidade.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-6" value="b" data-certa="true"><span class="rotulo">Porque obriga a empilhar, e empilhar obriga a alinhar e a calibrar — que são as lições 4 e 5.</span></label>
+          <p class="explicacao" hidden>Exato: sem seguimento não há poses longas; sem poses longas há muitas poses; e daí nasce todo o resto do curso.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="02-a-terra-roda-6" value="c" data-certa="false"><span class="rotulo">Porque é o único limite que não se pode ultrapassar com dinheiro.</span></label>
+          <p class="explicacao" hidden>Esse é o ruído de Poisson, da lição 1. Este limite ultrapassa-se, sim, com uma montagem equatorial — e é exatamente por isso que elas existem.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+<p>Explicar em voz alta, sem jargão, expõe os buracos que a leitura esconde. Esta resposta vai para a entrega.</p><div class="aberta">
+  <label for="feynman-1">Explica a alguém que nunca fotografou o céu porque é que não se pode simplesmente deixar o obturador aberto dez minutos — e porque é que somar 400 poses de 1,5 segundos não é a mesma coisa que uma pose de dez minutos, nem para melhor nem para pior.
+    <span class="pista">Sem usar «declinação», «escala» nem «ruído de leitura».</span>
+  </label>
+  <textarea id="feynman-1" data-pergunta="Explica a alguém que nunca fotografou o céu porque é que não se pode simplesmente deixar o obturador aberto dez minutos — e porque é que somar 400 poses de 1,5 segundos não é a mesma coisa que uma pose de dez minutos, nem para melhor nem para pior."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as
+  tuas respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção
+  acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/astrofotografia/respostas/AAAA-MM-DD.md</code>
+  e correr <code>/corrigir astrofotografia</code>.</p>
+</div>
+    <h2 id="resumo">10. Resumo</h2>
+<ul><li>As estrelas andam 15,04 ″/s no equador celeste, e ×cos δ fora dele.</li><li>O que importa é o traço em <strong>píxeis</strong>: traço = 15,04·t·cos δ ÷ escala.</li><li>A «regra dos 500» é, por álgebra, uma regra sobre o <strong>passo do píxel</strong>: autoriza 9,12 px de traço com píxeis de 4 µm.</li><li>A regra NPF conhece o píxel e a declinação, mas continua a ser um ajuste com um k à escolha — escolhe antes a tua tolerância e inverte a fórmula.</li><li>Dividir 64 s em 8 poses custa 2,9 % de SNR e corta o traço de 58 px para 7,3: é a troca que define este curso.</li></ul>
+    <h2 id="fontes">11. Fontes</h2>
+<ul class="fontes"><li><strong>Artigo</strong> — Frédéric Michaud, <em>La règle NPF</em>, Société Astronomique du Havre · <a href="https://sahavre.fr/wp/regle-npf-rule/">sahavre.fr</a>. <span class="verificado">🌐 Verificado a 2026-09-18</span> <strong>Porquê:</strong> é a fonte da regra, escrita por quem a propôs (2010), com as duas formas — a simples, (35N + 30p)/f, e a completa com cos δ e o fator k. <strong>O que saltar:</strong> a discussão de aplicações para telemóvel. ⚠️ Está em francês, e não há tradução oficial.</li><li><strong>Livro</strong> — Thierry Legault, <em>Astrophotography</em>, Rocky Nook, julho de 2014. <strong>Porquê:</strong> cobre exatamente a progressão deste curso — da câmara no tripé ao equipamento dedicado — com a disciplina de quem mede. <strong>O que saltar:</strong> os capítulos de planetária e solar, fora do âmbito aqui. ⚠️ <span class="verificado">Verificação incompleta a 2026-09-18</span>: o ISBN 978-1-937538-43-9 e as 240 páginas aparecem na ficha do editor tal como a pesquisa a devolve, mas a ligação direta para essa ficha deu <strong>404</strong> hoje. Fica dito.</li><li><strong>Fonte secundária</strong> — Wikipédia, <em>Astrophotography</em> · <a href="https://en.wikipedia.org/wiki/Astrophotography">en.wikipedia.org</a>. <span class="verificado">🌐 Verificado a 2026-09-18</span> <strong>Porquê:</strong> é o ponto de partida do pedido e a fonte das datas históricas desta lição. <strong>O que saltar:</strong> a secção de equipamento é uma lista de compras sem mecanismo.</li></ul>
 
     <footer class="rodape">
-      <p><a href="../index.html">Todos os tópicos</a> · <a href="../metodo.html">O método</a></p>
+      <p><a href="#conteudo">Voltar ao início</a> · <a href="index.html">Mapa do tópico</a> · <a href="../metodo.html">Porque é que a lição tem esta forma</a></p>
+      <p><a href="01-o-ruido.html">← Lição 1 · O ruído</a> · <a href="03-do-ceu-ao-pixel.html">Lição 3 · Do céu ao píxel →</a></p>
     </footer>
   </main>
 </div>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>O almanaque — professor</title>
-<meta name="description" content="Curso sobre o almanaque: da tábua de 1088 ao almanaque do GPS, e a construção de um almanaque náutico próprio medido contra o Nautical Almanac oficial.">
+<title>1 · O ruído, e porque é que empilhar resolve — Astrofotografia</title>
+<meta name="description" content="Ruído de Poisson, de leitura, térmico e do céu: de onde vem cada um, qual manda em cada regime, e porque é que N poses dão √N de melhoria.">
 <style>
 /* INICIO ESTILO */
 /* ------------------------------------------------------------------
@@ -413,11 +413,14 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
 /* FIM ESTILO */
 </style>
 </head>
-<body data-pagina="docs/almanaque/index.html">
+<body data-pagina="docs/astrofotografia/01-o-ruido.html">
 <a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
 
 <header class="barra">
-  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> O almanaque</p>
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Astrofotografia</a> <span aria-hidden="true">›</span> lição 1
+  </p>
   <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
 </header>
 
@@ -425,338 +428,473 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
   <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
 
   <nav class="indice" id="indice-pagina" aria-label="Índice da página">
-    <h2>Nesta página</h2>
+    <h2>Nesta lição</h2>
     <ol>
-      <li><a href="#conseguir">O que vais conseguir fazer</a></li>
-      <li><a href="#nao-e">O que este curso não é</a></li>
-      <li><a href="#assumi">O que assumi</a></li>
-      <li><a href="#mapa">O mapa</a></li>
-      <li><a href="#plano">O plano no tempo</a></li>
-      <li><a href="#fases">Nota das fases</a></li>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
     </ol>
   </nav>
 
   <main id="conteudo">
-    <p class="etiqueta nucleo">pronto</p>
-    <h1>O almanaque</h1>
-    <p class="subtitulo">Do <em>Almanaque de Azarquiel</em> de 1088 ao almanaque que o satélite de
-    GPS te transmite: a mesma decisão de engenharia, oito séculos separados. E, no fim, o teu —
-    gerado por ti, medido contra o <em>Nautical Almanac</em> oficial, com a tolerância declarada
-    antes de comparar.</p>
+    <p class="etiqueta nucleo">Lição 1 · núcleo</p>
+    <h1>O ruído, e porque é que empilhar resolve</h1>
+    <p class="subtitulo">Quatro ruídos, um deles impossível de remover, e a raiz de N que explica porque é que a astrofotografia moderna é somar muitas fotografias medíocres.</p>
+    <h2 id="objetivo">1. Objetivo</h2>
+<p>No fim desta lição, dado um cenário (magnitude do alvo, brilho do céu, tempo
+    de pose, ruído de leitura), <strong>calculas o sinal-ruído de uma pose e quantas poses precisas
+    para chegar a um alvo</strong> — e dizes <strong>qual dos quatro ruídos manda</strong>, que é a
+    única coisa que te diz o que fazer a seguir.</p>
+    <h2 id="recuperar">2. Recuperar</h2>
+<p>Responde <strong>antes</strong> de continuar a ler, de memória. Falhar aqui é útil: o esforço de tentar puxar da memória é o que consolida, e é por isso que as respostas estão escondidas.</p><ol>
+  <li>Uma estrela de V = 15 dá 16 electrões numa pose de 10 s com a objetiva de referência. Que incerteza tem essa contagem, e de onde vem?
+    <details class="solucao"><summary>Resposta</summary><p>±4, ou seja √16. Vem de os fotões chegarem ao acaso — a lição 0 anunciou-a na coluna √N. Esta lição explica-a.</p></details>
+  </li>
+  <li>Se subires o ISO, o que muda no número de electrões?
+    <details class="solucao"><summary>Resposta</summary><p>Nada. Muda a escala em que são escritos no ficheiro. (Lição 0, §3.)</p></details>
+  </li>
+</ol>
+    <h2 id="mecanismo">3. O mecanismo</h2>
+<p>Há uma regra única por baixo de tudo o que se segue:
+    <strong>somam-se variâncias, nunca desvios-padrão.</strong> Se duas fontes de erro forem
+    independentes, o erro total é √(σ₁² + σ₂²), não σ₁ + σ₂. É por isso que o maior dos ruídos
+    domina tão depressa: um ruído três vezes menor acrescenta 5 % ao total, não 33 %.</p>
 
-    <h2 id="conseguir">O que vais conseguir fazer no fim</h2>
+    <h3>1. O ruído que não é um defeito</h3>
+    <p>Os fotões não chegam em fila. Chegam ao acaso, independentes uns dos outros, com uma taxa
+    média. Isso é exatamente a definição de um processo de Poisson, e um processo de Poisson tem
+    uma propriedade que decide tudo: <strong>a variância é igual à média.</strong> Contar N
+    fotões traz √N de dispersão.</p>
+<pre><code>  média pedida   média obtida   variância obtida   √média   desvio obtido
+             4          3.999              3.998     2.00           1.999
+            25         25.006             24.961     5.00           4.996
+           400        400.036            401.349    20.00          20.034
+         10000      10000.008           9995.038   100.00          99.975</code></pre>
+    <p>(200 000 amostras por linha, <code>ensaio.py</code> §1.) Isto não é uma limitação da tua
+    câmara nem do teu bolso: <strong>é a luz.</strong> Uma máquina perfeita, arrefecida ao zero
+    absoluto, com eficiência quântica de 100 %, mediria na mesma este ruído.</p>
+    <p>E repara no que isso implica: o sinal-ruído de uma contagem pura é N/√N = √N. <strong>Mais
+    luz é sempre melhor, mas com rendimentos decrescentes.</strong> Quatro vezes mais fotões dão
+    o dobro do SNR.</p>
+
+    <h3>2, 3 e 4 — os outros três</h3>
     <ul>
-      <li><strong>Implementar</strong>, só com a biblioteca padrão, a posição do Sol e da Lua, o
-        tempo sidéreo, o nascer, o pôr e os crepúsculos, e a redução de uma altura de sextante.</li>
-      <li><strong>Reproduzir</strong> as colunas de uma página diária real do <em>Nautical
-        Almanac</em> e <strong>dizer com um número</strong> quais é que batem e quais não.</li>
-      <li><strong>Fazer uma consulta completa</strong> numa página do livro — hora inteira,
-        incremento, correções <em>v</em> e <em>d</em>, com os sinais certos — sem consultar.</li>
-      <li><strong>Explicar</strong> porque é que o almanaque nasceu em 1088 como mudança de
-        <em>formato</em> e não de astronomia, e porque é que continua a ser publicado.</li>
-      <li><strong>Diagnosticar</strong>, dado um resultado errado por décimas de minuto de arco,
-        qual dos cinco relógios ou qual das cinco correções é que foi trocada.</li>
-      <li><strong>Declarar uma tolerância antes de medir</strong> — e perceber porque é que a ordem
-        dessas duas coisas é a diferença entre medir e justificar.</li>
+      <li><strong>Ruído de leitura</strong> — a eletrónica que converte carga em número acrescenta
+      uma incerteza fixa, em electrões, <em>de cada vez que lê</em>. Não depende do tempo de pose.
+      É a razão pela qual mil poses de um segundo não valem uma pose de mil segundos.</li>
+      <li><strong>Corrente escura</strong> — agitação térmica que liberta electrões sem que haja
+      luz nenhuma. Cresce com o tempo e com a temperatura, e também é de Poisson.</li>
+      <li><strong>Céu</strong> — o fundo do céu é luz a sério: chega ao sensor, conta-se, e traz o
+      seu √N como qualquer outra luz. 🔴 Este é o que quase toda a gente subestima, e é o que
+      manda na maior parte das noites urbanas.</li>
     </ul>
 
-    <h2 id="nao-e">O que este curso não é</h2>
-    <ul>
-      <li><strong>Não é astronomia observacional</strong>: não há telescópios nem fotografia do
-        céu. ⚠️ <em>Corrigido a 2026-09-18 — esta linha dizia só «não há fotografia do céu» e não
-        remetia para lado nenhum, porque em 2026-09-16 não havia para onde. Agora há:
-        <a href="../astrofotografia/index.html">Astrofotografia</a> é o tópico que apanha
-        precisamente o que este recusou, e usa a esfera celeste daqui como pré-requisito.</em></li>
-      <li><strong>Não é mecânica celeste</strong>: ninguém integra órbitas aqui. Usam-se séries
-        ajustadas e publicadas, e diz-se de onde vêm e quanto erram.</li>
-      <li>🔴 <strong>Não substitui o <em>Nautical Almanac</em> a bordo.</strong> O curso ensina a
-        lê-lo, a reproduzi-lo com tolerância declarada, e — sobretudo — a saber quando a reprodução
-        não serve. Quatro das seis colunas tabeladas <em>não</em> chegam à precisão do livro, e
-        isso está medido e escrito.</li>
-      <li><strong>Não é um curso de navegação prática.</strong> Não há sextante, não há horizonte do
-        mar, não há observação real. A lição 7 reduz alturas <em>dadas</em>.</li>
-      <li><strong>Não repete a interpolação de picos de FFT</strong> — isso é do tópico
-        <a href="../cassete-captura/00-espetro.html">Digitalizar cassetes</a>. A palavra
-        «interpolação» aparece nos dois e os mecanismos são diferentes; a fronteira está declarada
-        nas lições 6 e 8.</li>
-    </ul>
+    <figure>
+      <svg viewBox="0 0 560 230" role="img" aria-labelledby="t-var d-var">
+        <title id="t-var">As variâncias somam-se em quadratura</title>
+        <desc id="d-var">Cinco barras verticais desenhadas à escala, a 3,4 píxeis por electrão. O
+        sinal vale 25,4, o céu 21,9, o escuro 1,3 — quase invisível — e a leitura 9,0. A quinta
+        barra, destacada, é o total: 34,7, apenas 37 % acima da barra mais alta, porque o que se
+        soma são os quadrados e não as alturas.</desc>
+        <line class="svg-traco" x1="40" y1="190" x2="530" y2="190"/>
+        <rect class="svg-caixa" x="60"  y="104" width="46" height="86"/>
+        <rect class="svg-caixa" x="140" y="116" width="46" height="74"/>
+        <rect class="svg-caixa" x="220" y="186" width="46" height="4"/>
+        <rect class="svg-caixa" x="300" y="159" width="46" height="31"/>
+        <rect class="svg-realce" x="420" y="72" width="60" height="118"/>
+        <text class="svg-suave" x="83"  y="208" text-anchor="middle">sinal</text>
+        <text class="svg-suave" x="163" y="208" text-anchor="middle">céu</text>
+        <text class="svg-suave" x="243" y="208" text-anchor="middle">escuro</text>
+        <text class="svg-suave" x="323" y="208" text-anchor="middle">leitura</text>
+        <text class="svg-suave" x="450" y="208" text-anchor="middle">total</text>
+        <text class="svg-texto-pequeno" x="83"  y="96"  text-anchor="middle">25,4</text>
+        <text class="svg-texto-pequeno" x="163" y="108" text-anchor="middle">21,9</text>
+        <text class="svg-texto-pequeno" x="243" y="178" text-anchor="middle">1,3</text>
+        <text class="svg-texto-pequeno" x="323" y="151" text-anchor="middle">9,0</text>
+        <text class="svg-texto-pequeno" x="450" y="64"  text-anchor="middle">34,7</text>
+        <text class="svg-suave" x="285" y="30" text-anchor="middle">pose de 4 s, céu de 19 mag/arcsec², estrela V=10</text>
+        <text class="svg-suave" x="285" y="48" text-anchor="middle">√(25,4² + 21,9² + 1,3² + 9,0²) = 34,7 — e não 57,6</text>
+      </svg>
+      <figcaption>Valores em electrões, medidos em <code>ensaio.py</code> §1, e as barras estão à
+      escala. O escuro, que é o que mais preocupa quem começa, é a barra que quase não se vê:
+      contribui com 1,3 num total de 34,7, e apagá-lo por completo melhorava o ruído em
+      0,07 %.</figcaption>
+    </figure>
 
-    <h2 id="assumi">O que assumi</h2>
-    <p>Do <a href="../../topicos/almanaque/DIAGNOSTICO.md">diagnóstico</a>. Cada pressuposto traz
-    <strong>o que muda se estiver errado</strong>.</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Pressupostos do curso e o que muda se estiverem errados, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>Assumi que…</th><th>De onde veio</th><th>Se estiver errado…</th></tr></thead>
-    <tbody><tr><td>Não tens sextante nem horizonte do mar</td><td>Não foi perguntado e não foi mencionado</td><td>A lição 7 ganha uma segunda metade com observação real. Como está, reduz <strong>alturas dadas</strong> — o mecanismo é o mesmo, falta o instrumento</td></tr><tr><td>Todo o código é biblioteca padrão</td><td>«Calcular eu próprio» era um dos objetivos</td><td>Nada muda: é uma decisão, não um pressuposto sobre ti. Um almanaque feito sobre <code>skyfield</code> funcionava e não ensinava. Ele aparece só na lição 9</td></tr><tr><td>A posição de exemplo pode ser pública e arbitrária</td><td>Decisão de privacidade (D-001)</td><td>Muda-se uma constante em <code>gerar.py</code>. Nenhum mecanismo depende do sítio</td></tr><tr><td>Interessa a época atual (1950–2050)</td><td>«Gerar um almanaque meu» lê-se como «para o ano que vem»</td><td>As séries usadas estão declaradas para 1950–2050. Fora disso parte primeiro o ΔT, que é medido e não calculado — e o curso passaria a precisar de uma lição sobre calendários históricos e a reforma gregoriana</td></tr><tr><td>Inglês técnico lê-se sem atrito</td><td>Todas as fontes primárias estão em inglês</td><td>O curso teria de traduzir as páginas do <em>Nautical Almanac</em> em vez de as usar</td></tr></tbody>
-  </table>
-</div>
+    <h3>A conta inteira, e quem manda</h3>
+    <p>Para uma estrela medida numa abertura de <em>n</em> píxeis:</p>
+<pre><code>variância = sinal + n·(céu + escuro + leitura²)
 
-    <div class="caixa aviso">
-      <span class="titulo">⚠️ A tensão que o diagnóstico encontrou, e como se resolveu</span>
-      <p>Pediste as três coisas: <strong>usar um almanaque náutico a sério</strong>,
-      <strong>perceber o objeto histórico</strong> e <strong>calcular tu próprio</strong>. As
-      primeira e terceira quase se contradizem: as séries que cabem numa lição dão o Sol a cerca de
-      0,4′ e o livro publica a 0,1′.</p>
-      <p>A resolução não foi escolher uma — foi tornar a diferença <strong>o assunto</strong>. Todas
-      as lições declaram o que a sua aproximação custa, em minutos de arco e em milhas náuticas, e a
-      lição 9 junta tudo num orçamento de erro. É o eixo do curso.</p>
+SNR = sinal / √variância</code></pre>
+    <p>O sinal aparece nos dois sítios — é ele próprio uma fonte de ruído. A leitura entra ao
+    <strong>quadrado</strong> porque é dada como desvio-padrão e o que se soma são variâncias.
+    E tudo o que é por píxel multiplica pelo número de píxeis que estás a somar, que é a razão
+    pela qual medir uma estrela numa abertura desnecessariamente grande <em>piora</em> o
+    resultado.</p>
+<pre><code>  pose    céu     sinal    σ_sinal  σ_céu   σ_escuro  σ_leitura   SNR   manda
+   0.25s     3.3        40       6.4     5.5      0.34        9.0    3.3   leitura
+   1.00s    13.3       162      12.7    10.9      0.67        9.0    8.5   sinal
+   4.00s    53.1       646      25.4    21.9      1.34        9.0   18.6   sinal
+  16.00s   212.6      2585      50.8    43.7      2.68        9.0   38.2   sinal
+  64.00s   850.3     10341     101.7    87.5      5.37        9.0   76.9   sinal
+ 256.00s  3401.3     41364     203.4   175.0     10.73        9.0  154.0   sinal</code></pre>
+    <div class="caixa critico"><span class="titulo">🔴 Quem manda depende do alvo, e isto é o mais importante da lição</span>
+    <p>Nesta tabela a estrela é de magnitude 10 — <strong>brilhante</strong> — e por isso o maior
+    termo é o <em>próprio sinal</em>. O exemplo trabalhado do §4 usa uma estrela de magnitude 12,
+    e aí o céu passa a valer <strong>77 %</strong> da variância. <strong>Não há uma resposta fixa
+    à pergunta «qual dos ruídos manda»: há a conta, feita para o teu alvo.</strong></p>
+    <p>A regra de ordem de grandeza: <em>o teu alvo domina o ruído quando é brilhante, e o céu
+    domina quando ele é fraco</em> — e como quase tudo o que vale a pena fotografar é fraco, o céu
+    ganha na maior parte das noites. Mas «quase tudo» não é «tudo», e a coluna «manda» existe para
+    o obrigares a verificar.</p></div>
+    <p>🔴 <strong>A linha que decide a tua pose mínima.</strong> Aos 0,25 s quem manda é a leitura:
+    a eletrónica acrescenta mais incerteza do que a luz. A partir de <strong>0,68 s</strong>, com
+    este céu, o ruído do céu já é maior do que o de leitura — e daí para cima a pose está
+    «limitada pelo céu», que é a situação que queres. Esse número não é universal: sai de
+    9·σ_leitura² = 9·céu·t, e com um céu escuro e um sensor ruidoso pode ser dez vezes maior.</p>
+
+    <h3>Porque é que empilhar dá exatamente √N</h3>
+    <p>Somar N poses multiplica o sinal por N e a variância também por N (são independentes).
+    O SNR fica N/√N = √N vezes melhor. É isso e nada mais.</p>
+<pre><code>  Uma pose de 8 s numa estrela V=12: sinal 205 e⁻, céu 106.3 e⁻/px, SNR 5.80
+    4 poses → SNR  11.61   (×2.00 = √4)
+   16 poses → SNR  23.21   (×4.00 = √16)
+   64 poses → SNR  46.43   (×8.00 = √64)
+  256 poses → SNR  92.86   (×16.00 = √256)</code></pre>
+    <div class="caixa critico"><span class="titulo">🔴 A consequência que muda como planeias uma noite</span>
+    <p>Como o ganho vai com √N, <strong>o dobro de SNR custa quatro vezes o tempo</strong>. Medido:
+    para SNR = 20 nesta estrela são 12 poses (2 minutos); para SNR = 40 são 48 poses (6 minutos).
+    Uma imagem «duas vezes mais limpa» não é «mais uma horita»: é a noite toda.</p></div>
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+<h3>O problema</h3>
+    <p>Céu urbano (19 mag/arcsec²), objetiva de 50 mm a f/2, píxeis de 4 µm, ruído de leitura
+    3 e⁻, corrente escura 0,05 e⁻/px/s. Queres SNR = 30 numa galáxia fraca cuja luz, na tua
+    abertura de 9 píxeis, equivale a uma estrela de V = 12. Poses de 8 s. Quantas precisas?</p>
+
+    <h3>Passo 1 — o sinal de uma pose</h3>
+    <p>Da lição 0: 205 electrões em 8 s. É pouco — menos de dez por segundo. Fixa este número,
+    porque é ele que vai perder para o céu.</p>
+
+    <h3>Passo 2 — o céu de uma pose, por píxel</h3>
+    <p>Porque é que o céu se conta <em>por píxel</em> e o sinal não: a estrela é uma fonte
+    pontual e a luz dela está toda na abertura, seja qual for o tamanho do píxel; o céu é uma
+    fonte extensa e cada píxel apanha a sua fatia. Em 8 s: 106,3 e⁻ por píxel, e são 9 píxeis.</p>
+
+    <h3>Passo 3 — a variância, termo a termo</h3>
+<pre><code>sinal    : 205
+céu      : 9 × 106,3 = 956,7
+escuro   : 9 × 0,4   = 3,6
+leitura  : 9 × 3²    = 81
+                      ------
+variância total      = 1246,3     →  σ = 35,3</code></pre>
+    <p><strong>O que esta lista diz, e é a razão de a fazer:</strong> o céu sozinho vale 77 % da
+    variância. Arrefecer a câmara (escuro) mexeria em 0,3 %. Comprar um sensor com metade do ruído
+    de leitura mexeria em 5 %. <strong>Ir para um sítio mais escuro é a única mudança grande
+    disponível</strong> — e é a lição 7.</p>
+
+    <h3>Passo 4 — o SNR de uma pose e o salto para N</h3>
+<pre><code>SNR₁ = 205 / 35,3 = 5,80
+
+N = (30 / 5,80)² = 26,8  →  27 poses  →  3,6 minutos</code></pre>
+    <p>Confere com o código:</p>
+<pre><code>python3 -c "import foton; s=foton.electroes_estrela(12,50,2,8); c=foton.electroes_ceu_px(19,50,2,4,8); print(foton.snr_pose(s,c,9,0.4,3.0), foton.poses_para_snr(30,s,c,9,0.4,3.0))"
+5.800… 27</code></pre>
+
+    <h3>Passo 5 — a pergunta que o resultado obriga a fazer</h3>
+    <p>3,6 minutos parece bom demais, e é: este alvo é muito mais brilhante do que uma nebulosa a
+    sério. A lição 7 refaz a conta para V = 14 e dá <strong>54 minutos</strong> no mesmo céu —
+    e 11 minutos num céu de 21,5. É sempre esta conta; o que muda é o alvo.</p>
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+<div class="exercicio">
+      <h3>Completa</h3>
+      <p>Mesmo material, mas agora poses de <strong>2 s</strong> em vez de 8, e queres o mesmo
+      SNR = 30. O sinal da estrela em 2 s é 51,2 e⁻ e o céu é 26,6 e⁻/px.</p>
+      <ol>
+        <li>Variância do sinal: <em>51,2</em> (dado).</li>
+        <li>Variância do céu: <strong>______</strong></li>
+        <li>Variância da leitura: <strong>______</strong></li>
+        <li>σ total e SNR de uma pose: <strong>______</strong></li>
+        <li>Número de poses e <strong>tempo total</strong>: <strong>______</strong>
+        — e compara com os 3,6 minutos das poses de 8 s.</li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>2.</strong> 9 × 26,6 = 239,4. <strong>3.</strong> 9 × 3² = 81 — <em>o mesmo de
+        antes</em>, porque o ruído de leitura não sabe quanto tempo esteve o obturador aberto.</p>
+        <p><strong>4.</strong> variância = 51,2 + 239,4 + 0,9 + 81 = 372,5; σ = 19,3;
+        SNR₁ = 51,2/19,3 = <strong>2,65</strong>.</p>
+        <p><strong>5.</strong> N = (30/2,65)² = 128 poses × 2 s = <strong>4,3 minutos</strong>,
+        contra 3,6 minutos com poses de 8 s. <strong>20 % mais tempo para o mesmo resultado</strong>,
+        e a diferença é inteiramente o ruído de leitura, que agora se paga 128 vezes em vez de 27.</p>
+        <p>Confere:</p>
+<pre><code>python3 -c "import foton
+for t in (2,8):
+    s=foton.electroes_estrela(12,50,2,t); c=foton.electroes_ceu_px(19,50,2,4,t)
+    n=foton.poses_para_snr(30,s,c,9,0.05*t,3.0)
+    print(t,'s ->',n,'poses =',round(n*t/60,2),'min')"
+2 s -> 128 poses = 4.27 min
+8 s -> 27 poses = 3.6 min</code></pre>
+      </details>
     </div>
-
-    <h2 id="mapa">O mapa</h2>
-    <p>🔴 O diagnóstico registou «astronomia esférica: nenhuma». Por isso a esfera celeste é a
-    <strong>lição 0</strong>, com onze secções como qualquer outra, e não uma caixa de recordação no
-    meio da lição 3.</p>
-<figure>
-  <svg viewBox="0 0 1034 278" role="img" aria-labelledby="t-mapa d-mapa">
-    <title id="t-mapa">Mapa das dez lições e das suas dependências</title>
-    <desc id="d-mapa">As lições 0 e 1 não dependem de nada e alimentam a 2. A 2 alimenta a 3, que é o eixo do curso. Da 3 saem a 4 e a 5, que convergem na 6; a 6 alimenta a 7 e a 7 alimenta a 9, que é o projeto. A lição 8, sobre marés, sai da 5 e é extensão. A mesma informação está na tabela do plano, logo a seguir.</desc>
-    <defs><marker id="seta-mapa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/></marker></defs>
-    <rect class="svg-realce" x="24" y="88" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="24" y="158" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="192" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="360" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="528" y="53" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="528" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="696" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="864" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-fundo" x="696" y="200" width="146" height="44" rx="6"/>
-    <rect class="svg-realce" x="864" y="46" width="146" height="44" rx="6"/>
-    <path class="svg-traco-grosso" d="M 170 110 C 184 110 178 145 186 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 170 180 C 184 180 178 145 186 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 338 145 H 354" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 506 145 C 520 145 514 75 522 75" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 506 145 H 522" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 75 C 688 75 682 145 690 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 145 H 690" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 842 145 H 858" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 937 167 C 937 191 937 114 937 90" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 145 C 688 145 682 222 690 222" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 842 222 C 856 222 850 68 858 68" marker-end="url(#seta-mapa)"/>
-    <text class="svg-texto-pequeno" x="97" y="107" text-anchor="middle">0 · A esfera celeste</text>
-    <text class="svg-texto-pequeno" x="97" y="123" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="97" y="177" text-anchor="middle">1 · O que é um almanaque</text>
-    <text class="svg-texto-pequeno" x="97" y="193" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="265" y="142" text-anchor="middle">2 · O tempo</text>
-    <text class="svg-texto-pequeno" x="265" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="433" y="142" text-anchor="middle">3 · O Sol</text>
-    <text class="svg-texto-pequeno" x="433" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="601" y="72" text-anchor="middle">4 · Nascer e pôr</text>
-    <text class="svg-texto-pequeno" x="601" y="88" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="601" y="142" text-anchor="middle">5 · A Lua</text>
-    <text class="svg-texto-pequeno" x="601" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="769" y="142" text-anchor="middle">6 · Ler as tábuas</text>
-    <text class="svg-texto-pequeno" x="769" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="937" y="142" text-anchor="middle">7 · Reduzir uma altura</text>
-    <text class="svg-texto-pequeno" x="937" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="769" y="219" text-anchor="middle">8 · As marés</text>
-    <text class="svg-texto-pequeno" x="769" y="235" text-anchor="middle">extensão</text>
-    <text class="svg-texto-pequeno" x="937" y="65" text-anchor="middle">9 · O teu almanaque</text>
-    <text class="svg-texto-pequeno" x="937" y="81" text-anchor="middle">núcleo</text>
-  </svg>
-  <figcaption>As caixas destacadas são o princípio (lição 0) e o fim (o projeto). A lição 8 é <strong>extensão</strong>: serve o objetivo histórico e não o critério de sucesso. O mesmo está em texto na tabela seguinte.</figcaption>
-</figure>
-
-    <h2 id="plano">O plano no tempo</h2>
-    <p>Distribuído pelas <strong>6 horas ou mais por semana</strong> que o diagnóstico registou. Sem
-    prazo: se forem 8 horas, são 8 semanas. A lição 8 é <strong>extensão</strong> — faz-se quando
-    apetecer, ou nunca.</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Plano das lições no tempo, tabela rolável na horizontal">
+    <h2 id="erros">6. Erros comuns</h2>
+<p>As conceções erradas <strong>típicas deste assunto</strong> — e como se reconhecem quando aparecem.</p><div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
   <table>
-    <thead><tr><th>Semana</th><th>Lição</th><th>Depende de</th><th>O que lá está</th><th>Estado</th></tr></thead>
-    <tbody><tr><td>1</td><td><a href="00-esfera-celeste.html">0 · A esfera celeste</a></td><td>—</td><td>Coordenadas, ponto subastral, triângulo de posição. O pré-requisito em falta.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>2</td><td><a href="01-o-que-e-um-almanaque.html">1 · O que é um almanaque</a></td><td>—</td><td>História e mecanismo: um resultado publicado, não um método. O almanaque do GPS.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>3</td><td><a href="02-o-tempo.html">2 · O tempo</a></td><td>lição 0</td><td>Dia juliano, TT/UT1/UTC, ΔT medido, tempo sidéreo médio e aparente.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>4</td><td><a href="03-o-sol.html">3 · O Sol</a></td><td>lições 0 e 2</td><td>A pilha de correções, a equação do tempo, e o orçamento de erro do curso.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>5</td><td><a href="04-nascer-e-por.html">4 · Nascer, pôr e crepúsculos</a></td><td>lição 3</td><td>−0° 50′, bisseção, e os dois casos em que não há resposta.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>6</td><td><a href="05-a-lua.html">5 · A Lua</a></td><td>lição 3</td><td>Paralaxe, fases, o ciclo de 18,6 anos. Onde as aproximações do Sol caem.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>7</td><td><a href="06-ler-as-tabuas.html">6 · Ler as tábuas</a></td><td>lições 3 e 5</td><td>v, d, incrementos. Um formato é uma máquina de evitar um erro.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>8</td><td><a href="07-reduzir-uma-altura.html">7 · Reduzir uma altura</a></td><td>lições 0 e 6</td><td>As cinco correções e Marcq St Hilaire. De um ângulo a uma linha no mapa.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>—</td><td><a href="08-mares.html">8 · As marés</a></td><td>lição 5</td><td>O almanaque que se identifica em vez de se calcular.</td><td><span class="etiqueta extensao">extensão</span></td></tr><tr><td>10</td><td><a href="09-o-teu-almanaque.html">9 · O teu almanaque</a></td><td>lições 3 a 7</td><td>O projeto: declarar a tolerância antes, gerar, comparar, relatar.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr></tbody>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody>
+      <tr><td>«O ruído vem da câmara ser fraca.»</td><td>«Com uma câmara melhor não tinha este ruído.»</td><td>Para um alvo fraco — que é o caso normal — o maior termo é o <strong>céu</strong> e o segundo é a própria luz do alvo, e nenhum dos dois melhora com dinheiro: no exemplo trabalhado do §4, o céu vale 77 % da variância e a eletrónica 6,5 %. Para um alvo brilhante manda o sinal, e aí <em>também</em> não há câmara que ajude.</td></tr>
+      <tr><td>«Empilhar 100 poses dá 100 vezes menos ruído.»</td><td>Vê-se em quem espera milagres de uma sessão longa e fica desiludido.</td><td>Dá <strong>10</strong> vezes menos: √100. É a razão pela qual as sessões de astrofotografia se medem em horas e não em minutos — e pela qual o dobro de qualidade custa o quádruplo do tempo.</td></tr>
+      <tr><td>«O ruído térmico é o inimigo principal; é preciso arrefecer.»</td><td>Aparece na pergunta «vale a pena uma câmara arrefecida?» feita antes de medir.</td><td>Numa pose de 8 s com uma câmara a temperatura ambiente, o escuro contribui com 1,3 electrões de σ contra 34,7 do total. ⚠️ Em poses de <em>minutos</em> a conta inverte-se: o erro não é a resposta, é responder sem medir. A lição 4 mede.</td></tr>
+      <tr><td>«Somam-se os ruídos: 25 + 22 + 9 = 56.»</td><td>Contas de ruído que dão sempre demasiado.</td><td>Somam-se as <strong>variâncias</strong>: √(25,4²+21,9²+1,3²+9,0²) = 34,7. É por isso que atacar o segundo maior ruído quase nunca compensa.</td></tr>
+    </tbody>
   </table>
 </div>
-
-    <h3>O código</h3>
-    <p>Quatro ficheiros, todos de biblioteca padrão, que são a fonte de tudo o que as lições
-    mostram:</p>
-    <ul>
-      <li><a href="codigo/almanaque.py"><code>almanaque.py</code></a> — o motor. Cada função traz no
-        <em>docstring</em> de onde veio a fórmula e <strong>quanto erra</strong>.</li>
-      <li><a href="codigo/ensaio.py"><code>ensaio.py</code></a> — o que prova que está certo. Oito
-        secções, todas contra fontes exteriores e datadas.</li>
-      <li><a href="codigo/gerar.py"><code>gerar.py</code></a> — o projeto: gera o teu almanaque
-        anual.</li>
-      <li><a href="codigo/comparar.py"><code>comparar.py</code></a> — lê o PDF oficial e mede a
-        diferença, coluna a coluna.</li>
-    </ul>
-
-    <h3>O orçamento de erro, medido</h3>
-    <p>Contra a página diária de 20 de março de 2026 do <em>Nautical Almanac</em>:</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Orçamento de erro medido contra a página oficial, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>O que se publica</th><th>Erro medido</th><th>O livro imprime a</th><th>Passa?</th></tr></thead>
-    <tbody><tr><td>GHA de Áries</td><td>0,053′</td><td>0,1′</td><td>✅</td></tr><tr><td>Paralaxe da Lua</td><td>0,077′</td><td>0,1′</td><td>✅</td></tr><tr><td>Dec do Sol</td><td>0,195′</td><td>0,1′</td><td>❌</td></tr><tr><td>GHA do Sol</td><td>0,415′</td><td>0,1′</td><td>❌</td></tr><tr><td>Dec da Lua</td><td>2,1′</td><td>0,1′</td><td>❌</td></tr><tr><td>GHA da Lua</td><td>5,7′</td><td>0,1′</td><td>❌</td></tr><tr><td>Nascer, pôr e crepúsculos</td><td>0 min nas seis colunas</td><td>1 min</td><td>✅</td></tr><tr><td>Nascer e ocaso da Lua</td><td>≤ 1 min</td><td>1 min</td><td>✅</td></tr></tbody>
-  </table>
+    <h2 id="praticar">7. Praticar</h2>
+<p>Do mais fácil ao mais difícil. Tenta antes de abrir a solução — abrir cedo dá a sensação de perceber sem a aprendizagem.</p><div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — qual deles manda</h3>
+<p>Para cada cenário, diz qual dos quatro ruídos domina, <em>sem</em> fazer a conta
+         toda — só olhando para as ordens de grandeza:</p>
+         <ol><li>Pose de 0,5 s, céu de deserto (22 mag/arcsec²), sensor com leitura de 5 e⁻.</li>
+         <li>Pose de 300 s, câmara a 25 °C com 0,5 e⁻/px/s de corrente escura, céu escuro.</li>
+         <li>Pose de 10 s no meio de uma cidade, alvo fraco.</li></ol>
+  <details class="solucao"><summary>Solução</summary>
+<p><strong>1.</strong> A leitura. Com 22 mag/arcsec² e meio segundo, o céu dá menos de
+         um electrão por píxel; a leitura dá 5 de σ, ou seja 25 de variância. Esta pose está a
+         medir sobretudo a eletrónica — é o caso em que subir o ISO ajuda mesmo.</p>
+         <p><strong>2.</strong> A corrente escura: 0,5 × 300 = 150 e⁻ por píxel, contra 25 de
+         variância de leitura. Aqui arrefecer paga-se.</p>
+         <p><strong>3.</strong> O céu, com folga. É o caso normal deste curso, e a resposta certa
+         para ele não está na câmara: está no sítio, ou num filtro (lição 7).</p>
+  </details>
 </div>
-    <p>🔴 <strong>Quatro das seis colunas tabeladas não passam</strong>, e isso é o resultado do
-    curso e não o seu fracasso: sabes quais, por quanto, e o que seria preciso para as corrigir.</p>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — a pose mínima que faz sentido</h3>
+<p>Deriva a fórmula do limiar em que o céu passa a mandar sobre a leitura, e calcula-a
+         para: céu de 19 e de 21,5 mag/arcsec², com a objetiva de referência (50 mm, f/2, 4 µm) e
+         leitura de 3 e⁻. Comenta o que a diferença significa para quem fotografa em cada sítio.</p>
+  <details class="solucao"><summary>Solução</summary>
+<p>O ruído de leitura contribui com n·σ² e o céu com n·(taxa·t). Iguala-se:</p>
+<pre><code>t_limite = σ² / taxa_do_céu_por_segundo</code></pre>
+<pre><code>python3 -c "import foton
+for mu in (19.0, 21.5):
+    taxa = foton.electroes_ceu_px(mu, 50, 2, 4.0, 1.0)
+    print(mu, 'mag/arcsec² -> céu', round(taxa,3), 'e-/px/s -> t =', round(9/taxa,2), 's')"
+19.0 mag/arcsec² -> céu 13.288 e-/px/s -> t = 0.68 s
+21.5 mag/arcsec² -> céu 1.33 e-/px/s -> t = 6.77 s</code></pre>
+         <p><strong>A leitura:</strong> na cidade, qualquer pose acima de um segundo já está
+         limitada pelo céu — e por isso não há vantagem nenhuma em poses longas do ponto de vista
+         do ruído (só do ponto de vista do número de leituras). Num sítio escuro, precisas de
+         quase sete segundos só para que a tua eletrónica deixe de ser o problema, e aí poses
+         curtas custam mesmo. 🔴 <strong>O céu escuro não só te dá menos ruído: também te obriga a
+         poses mais longas</strong>, que é precisamente o que a lição 2 te vai dificultar.</p>
+  </details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código que corre: verificar o √N à mão</h3>
+<p>Não acredites na fórmula: mede-a. Escreve um programa que simule <em>N</em> poses de
+         uma fonte com Poisson mais ruído de leitura, some-as, e compare o SNR medido com o
+         previsto. Usa 200 repetições para que o resultado não seja uma amostra só.</p>
+         <p>Pergunta a responder <strong>antes</strong> de correr: para que valor de N é que
+         esperas ver desvios visíveis do √N, e porquê?</p>
+  <details class="solucao"><summary>Solução</summary>
+<p>A previsão é que não haja desvio nenhum para nenhum N — a igualdade é exata para
+         poses independentes e idênticas. O que há é <em>dispersão</em> da medição, e essa desce
+         com o número de repetições, não com N.</p>
+         <div class="caixa aviso"><span class="titulo">⚠️ As primeiras linhas do programa não são ruído</span>
+         <p>A primeira versão deste exercício imprimia «raiz de N» com o símbolo e
+         <strong>rebentava</strong> com <code>UnicodeEncodeError</code> numa consola de Windows em
+         cp1252. O registo de falhas do <code>PROCESSO.md</code> já tinha essa linha <em>duas</em>
+         vezes, e eu voltei a cometê-la ao escrever este exercício. Força-se UTF-8 à saída, e o
+         cabeçalho passou a ASCII.</p></div>
+<pre><code>import math, sys
+import numpy as np
 
-    <h3>No fim</h3>
-    <ul>
-      <li><a href="bibliografia.html">Bibliografia</a> — o percurso, por onde começar.</li>
-      <li><a href="folha.html">Folha de consulta</a> — imprimível, só o que se consulta.</li>
-      <li><a href="teste.html">Teste de domínio</a> — intercalado, sem soluções à vista.</li>
-      <li><a href="flashcards.csv">Flashcards</a> (CSV para o Anki) e
-        <a href="revisao.ics">calendário de revisão</a> (.ics).</li>
-    </ul>
+for f in (sys.stdout, sys.stderr):
+    try:
+        f.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
-    <h2 id="fases">Nota das fases</h2>
-    <p>O que cada fase encontrou. É isto que distingue um curso que passou pelo processo de um que
-    só parece ter passado.</p>
+rng = np.random.default_rng(7)
+SINAL, CEU, NPX, LEITURA, REPS = 200.0, 100.0, 9, 3.0, 200
 
-    <h3 id="fase0">Fase 0 — Verificar</h3>
-    <p><strong>O que se procurou</strong> (tudo registado em
-    <a href="../../topicos/almanaque/DIAGNOSTICO.md">DIAGNOSTICO.md</a>):</p>
-    <ul>
-      <li><code>grep -ri</code> em <code>docs/</code> e <code>topicos/</code> por <em>almanaque,
-        almanac, efeméride, astronom, juliano, sextante, latitude, longitude, declinação, tempo
-        sidéreo, órbita, maré, navegação</em> — <strong>0 ficheiros em todos</strong>.</li>
-      <li>Por sintoma e por verbo: <em>tabela pré-calculada, pré-calcul, lookup, memoiz, consulta em
-        tabela, data e hora, segundos intercalares, esfera, trigonom</em> — 0 em todos.</li>
-      <li><em>calendário</em> deu 8 ficheiros, <strong>todos</strong> sobre o <code>revisao.ics</code>
-        da revisão espaçada. <em>fuso</em> deu 10, quase todos falsos — apanha
-        <strong>parafuso</strong> em <code>cassete-captura</code>.</li>
-      <li><code>git log -S</code> para nove termos: <strong>nada</strong>. Nunca existiu e nunca foi
-        removido.</li>
-    </ul>
-    <p><strong>O que se encontrou:</strong> tópico novo, sem pré-requisitos no repositório. Um
-    <strong>vizinho a declarar</strong> — a interpolação parabólica de picos de FFT em
-    <a href="../cassete-captura/00-espetro.html">cassete-captura</a>, mecanismo diferente com o
-    mesmo nome — e uma <strong>analogia a aproveitar</strong>: o <em>cache</em>, que aparece em 14
-    ficheiros em sentido informático e estrutura a lição 1.</p>
-    <p><strong>Fontes primárias localizadas:</strong> o <em>Nautical Almanac</em> em PDF gratuito
-    (1911–2030), as fórmulas de baixa precisão do <em>Astronomical Almanac</em>, o NOAA Solar
-    Calculator, as constituintes de maré. ⚠️ <strong>Duas não abriram:</strong> o sítio do USNO
-    recusou a ligação e a tabela da NOAA é desenhada por JavaScript — está dito em cada lição onde
-    isso afeta uma afirmação.</p>
+def uma_pose():
+    s = rng.poisson(SINAL + NPX * CEU, REPS) - NPX * CEU
+    return s + rng.normal(0, LEITURA * math.sqrt(NPX), REPS)
 
-    <h3 id="fase1">Fase 1 — Criar</h3>
-    <p>Dez lições, quatro ficheiros de código, e uma decisão que estruturou tudo: <strong>nenhuma
-    saída de código foi escrita à mão</strong>. Cada bloco das lições foi executado numa pasta
-    temporária e a saída colada de uma execução real — o mecanismo que o registo de falhas do
-    <code>PROCESSO.md</code> exigiu depois de duas sessões em que os números foram escritos primeiro
-    e corridos depois.</p>
-    <p>Decisões tomadas durante a escrita: biblioteca padrão só (o <code>skyfield</code> só aparece
-    na lição 9, como padrão de comparação); longitude <strong>leste-positiva</strong>, contra a
-    convenção náutica clássica, porque é a de todo o código moderno — declarado em caixa de aviso na
-    lição 0; e o PDF oficial <strong>não entra no repositório</strong>, por direitos de autor,
-    ficando só o extrator.</p>
-
-    <h3 id="fase2">Fase 2 — Aprofundar</h3>
-    <p><strong>O que a Fase 1 errou</strong>, item a item, tudo apanhado a correr o que estava
-    escrito:</p>
-    <ol>
-      <li>🔴 <strong>O bug maior: <code>gha()</code> usava o tempo sidéreo MÉDIO.</strong> O
-        <em>Nautical Almanac</em> publica o <strong>aparente</strong>. O erro sistemático contra a
-        página de 20 de março de 2026 era de −0,09′ no GHA de Áries; com o GAST desce para +0,004′,
-        que é o arredondamento do próprio livro. Virou a secção «Erros comuns» da lição 2.</li>
-      <li><strong>O ensaio do dia sidéreo media a taxa com passo de 1 segundo</strong> e dava
-        86164,56 s em vez de 86164,09 s — cancelamento catastrófico. Não era da fórmula: com passo
-        de 1 hora dá certo. Virou caixa de aviso na lição 2.</li>
-      <li><strong>O ensaio da obliquidade comparava a verdadeira com a constante da média</strong> e
-        falhava por 5,4″ — que é exatamente a nutação em obliquidade. Erro do <em>ensaio</em>, não
-        do código.</li>
-      <li><strong>Escrevi «a tabela pesa centenas de vezes mais do que o código»</strong> na lição 1.
-        Medido: <strong>30 vezes</strong>. Corrigido para o que o bloco imprime.</li>
-      <li><strong>Escrevi que a equação dos equinócios vale 0,29′.</strong> Medida sobre 20 anos:
-        <strong>0,263′</strong>. Corrigida em quatro sítios, incluindo dois <em>docstrings</em>.</li>
-      <li><strong>Um comentário no <code>almanaque.py</code> dizia que trocar UT1 por TT custa
-        0,29′.</strong> Custa 0,0008′ no Sol e <strong>17,25′</strong> na rotação da Terra — a mesma
-        quantidade de tempo vale coisas diferentes conforme o que indexa. O comentário passou a
-        dizer as três.</li>
-      <li><strong>O detetor de luas novas da lição 5 dava um mês sinódico de 30,48 dias</strong>,
-        fora do intervalo publicado (29,26–29,80). Era bug do detetor — saltava quase um mês e
-        bissectava na lunação errada. Reescrito para varrer dia a dia: 29,29 a 29,81.</li>
-      <li><strong>O intercepto do exemplo trabalhado da lição 7 dava 178 milhas náuticas</strong>,
-        porque inventei a altura do sextante. Passou a ser obtida <em>por inversão</em> a partir de
-        uma posição real: 18,4 milhas.</li>
-      <li><strong>Escrevi que a fixação recuperava a posição «a menos de um milésimo de milha».</strong>
-        Mede 0,264 milhas à primeira, e cai para 0,00001 à segunda iteração. O resíduo virou a parte
-        mais interessante do exercício: Marcq St Hilaire é uma linearização, e comporta-se como um
-        passo de Newton.</li>
-      <li><strong>O <code>round()</code> do Python arredonda ao par e o livro não.</strong> A minha
-        reconstrução da tabela de incrementos dava 0,1 onde a página imprime 0,2. Virou entrada na
-        tabela de erros comuns da lição 6.</li>
-      <li><strong>O E2 da lição 6 media uma tautologia</strong> — confirmava a definição de
-        <em>v</em>, não a qualidade da interpolação. Reescrito para medir a curvatura desprezada
-        <em>dentro</em> da hora: 0,006′, dezasseis vezes abaixo do passo de impressão.</li>
-      <li><strong>O gerador etiquetava 25 dias do ano em Lisboa como «sempre-acima».</strong> A Lua
-        em Lisboa não é circumpolar coisa nenhuma — eram dias em que ela saltou o nascer. A exceção
-        <code>SemEvento</code> passou a distinguir <strong>três</strong> causas.</li>
-      <li><strong>O <code>ensaio.py</code> rebentou com <code>UnicodeEncodeError</code> na primeira
-        execução</strong>, por causa de um «Δ» numa consola <code>cp1252</code> — a mesma falha que
-        o <code>PROCESSO.md</code> já registava para o <code>validar.py</code>, repetida.</li>
-      <li>🔴 <strong>Um bloco de código corria, falhava, e imprimia nada — com código de saída
-        <em>zero</em>.</strong> O <code>gerar.py</code> não estava a ser copiado para a pasta
-        temporária onde os blocos correm; o subprocesso rebentava, o bloco imprimia um
-        <code>stdout</code> vazio, e a lição 9 publicava um <code>&lt;samp&gt;</code> em branco que
-        parecia «o programa não disse nada». <strong>Só o <code>tidy</code> deu por isso</strong>,
-        ao avisar de um <code>&lt;samp&gt;</code> vazio. Corrigido em três níveis: o ficheiro passou
-        a ser copiado, o bloco passa a verificar o código de saída do subprocesso, e o gerador das
-        lições passa a <strong>recusar</strong> um bloco cuja saída seja vazia.</li>
-      <li><strong>Três figuras erradas que passaram todas as verificações automáticas.</strong> O
-        mapa do curso tinha o <code>viewBox</code> escrito à mão e as lições 6 a 9 ficavam fora dele;
-        a figura da reta de altura precisou de <strong>três versões</strong> (rótulos sobrepostos, e
-        depois geometria cortada pelo topo); um rótulo do mapa saía truncado a meio de uma palavra.
-        Correções: <code>viewBox</code> calculado do envelope da geometria, rótulos em coluna fixa
-        ordenados pela altura do alvo, e nomes curtos explícitos em vez de cortar o título.</li>
-      <li><strong>A figura da soma de uma consulta discordava do bloco de código da mesma
-        lição</strong> por uma décima de minuto de arco: dizia 8° 59,6′ e o valor é 8° 59,7′.</li>
-      <li>⬜ <strong>A lista de verificação do processo, percorrida:</strong> 11 secções por ordem em
-        todas as lições ✅ · objetivos verificáveis ✅ · fronteira com remissão para o tópico vizinho
-        ✅ · cada pressuposto com consequência ✅ · pré-requisito como lição 0 ✅ · soluções em
-        <code>&lt;details&gt;</code> fechado ✅ · explicação em cada opção de quiz ✅ · código que
-        corre em todas as lições ✅ · <strong>fonte que não é documentação em todas as dez</strong>
-        ✅ — e nas três em que não encontrei nenhuma peça audiovisual citável, está escrito que
-        <em>procurei e não encontrei</em> ✅ · convenções declaradas como convenções ✅.</li>
-    </ol>
-
-    <h3 id="fase3">Fase 3 — Validar</h3>
-    <p><strong>O que se correu:</strong> todo o código de todas as lições, por construção — o
-    gerador executa cada bloco e cola a saída, por isso um bloco que não corra faz a página não
-    existir. Mais o <code>ensaio.py</code> completo (oito secções) e o <code>gerar.py</code> para um
-    ano inteiro em duas latitudes.</p>
-    <p><strong>Contra que fontes exteriores:</strong></p>
-    <ul>
-      <li><em>Nautical Almanac</em> 2026, página de 20–22 de março: GHA de Áries e do Sol,
-        declinação, colunas da Lua, tabela de nascer/pôr/crepúsculos por latitude, tabela de
-        incrementos (pág. 263), e o ΔT que a própria página declara.</li>
-      <li>Instantes publicados dos <strong>equinócios e solstícios</strong> de 2025 a 2027 —
-        referência independente do livro.</li>
-      <li>Os quatro extremos e as quatro passagens por zero da <strong>equação do tempo</strong>,
-        com data. <strong>Todos batem</strong>, o que são oito coincidências independentes.</li>
-      <li>Instantes publicados de três <strong>luas cheias</strong> de 2026.</li>
-      <li>Duas fórmulas independentes para o tempo sidéreo (IAU 1982 e o Ângulo de Rotação da Terra
-        da IAU 2000), cuja diferença é a precessão acumulada e bate com a expressão dela.</li>
-    </ul>
-    <p><strong>O que isso apanhou:</strong> os treze itens da Fase 2 — nenhum deles teria aparecido
-    a reler. E o resultado final, que é o produto do curso: <strong>as seis colunas de nascer, pôr e
-    crepúsculos batem ao minuto</strong>, o GHA de Áries bate à precisão de impressão do livro, e
-    <strong>quatro das seis colunas tabeladas não batem</strong> — por 0,2′, 0,4′, 2,1′ e 5,7′.</p>
-    <p>⚠️ <strong>O que ficou por validar, dito à letra:</strong></p>
-    <ul>
-      <li><strong>Não há observação real.</strong> Não há sextante; a lição 7 valida a álgebra da
-        fixação com alturas simuladas, e isso valida a álgebra, não a astronomia.</li>
-      <li><strong>Não corri o <code>skyfield</code></strong> — sem rede para o instalar nem para
-        descarregar as efemérides do JPL. A lição 9 descreve o procedimento e não afirma nada sobre
-        os números dele.</li>
-      <li><strong>Duas fontes primárias não abriram</strong> (USNO e a tabela da NOAA). Onde isso
-        afeta uma afirmação, está escrito na própria lição qual foi a reprodução usada e qual foi a
-        medição que a substituiu.</li>
-      <li><strong>As constantes harmónicas da lição 8 são inventadas</strong>, e está dito no código
-        e na prosa.</li>
-      <li><strong>O <code>tidy</code> ficou por correr na primeira passagem</strong> — não estava
-        instalado. Foi apontado a um <code>tidy-html5 5.8</code> e correu: apanhou o
-        <code>&lt;samp&gt;</code> vazio descrito acima, e mais nada.</li>
-      <li><strong>O passo 5 do <code>validar.sh</code> (termos sensíveis) disparou</strong> numa
-        frase do diagnóstico, com razão — ele procura a palavra e pede confirmação humana. A frase
-        foi reescrita, <strong>e não se acrescentou uma exceção ao validador</strong>: a exceção
-        enfraquecia-o para sempre e a frase não perdia nada.</li>
-    </ul>
+previsto1 = SINAL / math.sqrt(SINAL + NPX * (CEU + LEITURA ** 2))
+print("SNR de uma pose: previsto %.3f" % previsto1)
+print(" N   SNR medido   previsto   razao ao raiz(N)")
+for n in (1, 4, 16, 64, 256):
+    soma = sum(uma_pose() for _ in range(n))
+    medido = soma.mean() / soma.std(ddof=1)
+    print("%3d   %10.2f   %8.2f   %16.4f"
+          % (n, medido, previsto1 * math.sqrt(n), medido / (previsto1 * math.sqrt(n))))</code></pre>
+         <p>Saída (corrida a 2026-09-18):</p>
+<pre><code>SNR de uma pose: previsto 5.820
+ N   SNR medido   previsto   razao ao raiz(N)
+  1         5.67       5.82             0.9743
+  4        12.18      11.64             1.0461
+ 16        23.84      23.28             1.0239
+ 64        44.06      46.56             0.9464
+256        96.74      93.12             1.0389</code></pre>
+         <p><strong>O que isto confirma e o que não confirma.</strong> Confirma o √N sem tendência
+         nenhuma: as razões oscilam para os dois lados, entre 0,95 e 1,05. A dispersão esperada de
+         um desvio-padrão estimado com 200 amostras é 1/√(2×200) = 3,5 %, e o que se vê é
+         compatível com isso. <strong>Não</strong> confirma que a tua pilha real vá dar √N: aqui as
+         poses são idênticas por construção. A lição 5 mede o que acontece quando não são.</p>
+  </details>
+</div>
+    <h2 id="quiz">8. Quiz</h2>
+<p>Corrige-se aqui, sem rede. Cada opção tem a sua explicação — é aí que está o que faltava perceber, por isso lê-as todas, mesmo quando acertas.</p><div class="quiz" data-quiz="01-o-ruido">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Qual destes ruídos existiria numa câmara perfeita, sem eletrónica nenhuma e ao zero absoluto?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-1" value="a" data-certa="false"><span class="rotulo">Nenhum — é essa a definição de perfeita.</span></label>
+          <p class="explicacao" hidden>Perfeita quanto ao instrumento, mas o ruído de Poisson não é do instrumento: é da luz. Chega ao acaso e contar traz √N.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-1" value="b" data-certa="true"><span class="rotulo">O ruído de Poisson do próprio sinal.</span></label>
+          <p class="explicacao" hidden>Exato: os fotões chegam ao acaso e a variância de uma contagem é igual à contagem. Nenhuma engenharia remove isto.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-1" value="c" data-certa="false"><span class="rotulo">O ruído de leitura, que é inevitável em qualquer conversor.</span></label>
+          <p class="explicacao" hidden>O ruído de leitura é do amplificador e do conversor — é precisamente o que uma câmara hipoteticamente perfeita não teria.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Duas fontes de ruído independentes valem 20 e 5 electrões de desvio-padrão. Quanto vale o total?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-2" value="a" data-certa="true"><span class="rotulo">20,6 electrões — √(20² + 5²).</span></label>
+          <p class="explicacao" hidden>Exato, e repara no que significa: a segunda fonte, que é um quarto da primeira, acrescentou 3 %. Atacá-la seria trabalho quase todo perdido.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-2" value="b" data-certa="false"><span class="rotulo">25 electrões.</span></label>
+          <p class="explicacao" hidden>Isso seria somar desvios-padrão, que não se somam. Só as variâncias é que se somam, e é essa a razão de o maior dominar tanto.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-2" value="c" data-certa="false"><span class="rotulo">12,5 electrões, a média das duas.</span></label>
+          <p class="explicacao" hidden>Ruídos acumulam-se, não se medeiam: o total nunca pode ser menor do que a maior das parcelas.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Tens 64 poses empilhadas e queres <em>metade</em> do ruído. Quantas poses precisas ao todo?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-3" value="a" data-certa="false"><span class="rotulo">128, porque é o dobro.</span></label>
+          <p class="explicacao" hidden>O dobro das poses dá √2 = 1,41 de melhoria, não 2. Ficavas a 71 % do ruído, não a 50 %.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-3" value="b" data-certa="true"><span class="rotulo">256, porque o ganho vai com √N e para ×2 é preciso ×4.</span></label>
+          <p class="explicacao" hidden>Exato. É a aritmética que faz as sessões durarem horas: metade do ruído custa quatro vezes o tempo já investido.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-3" value="c" data-certa="false"><span class="rotulo">96, porque 64 + metade de 64.</span></label>
+          <p class="explicacao" hidden>A relação não é linear: o ruído desce com √N, e nenhuma soma parcial desse tipo corresponde a um fator no ruído.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o ruído de leitura é o argumento contra poses muito curtas?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-4" value="a" data-certa="false"><span class="rotulo">Porque em poses curtas o sensor não tem tempo de estabilizar a temperatura.</span></label>
+          <p class="explicacao" hidden>A temperatura afeta a corrente escura, não a leitura — e em poses curtas a corrente escura é desprezável.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-4" value="b" data-certa="false"><span class="rotulo">Porque poses curtas têm menos sinal, e menos sinal é sempre pior.</span></label>
+          <p class="explicacao" hidden>O sinal total é o mesmo se o tempo total for o mesmo: a divisão em poses não muda quantos fotões recolheste, só quantas vezes leste o sensor.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-4" value="c" data-certa="true"><span class="rotulo">Porque ele entra uma vez por leitura e não depende do tempo de pose: N poses pagam-no N vezes.</span></label>
+          <p class="explicacao" hidden>Exato. O sinal e o céu acumulam-se com o tempo total, mas o ruído de leitura paga-se por leitura — e é o único termo que a divisão em poses piora.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Numa pose de 8 s num céu urbano, o céu contribui com 77 % da variância. O que é que isso torna prioritário?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-5" value="a" data-certa="false"><span class="rotulo">Comprar um sensor com menos ruído de leitura.</span></label>
+          <p class="explicacao" hidden>A leitura vale 6,5 % da variância aqui. Reduzi-la a zero melhorava o ruído total em cerca de 3 % — é um investimento a atacar a parcela errada.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-5" value="b" data-certa="true"><span class="rotulo">Reduzir o céu: sítio mais escuro, filtro, ou escolher a noite.</span></label>
+          <p class="explicacao" hidden>É a única parcela grande sobre a qual tens poder. A lição 7 quantifica: 2,5 magnitudes de céu valem um fator 5 no tempo necessário.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-5" value="c" data-certa="false"><span class="rotulo">Arrefecer a câmara.</span></label>
+          <p class="explicacao" hidden>O escuro vale 0,3 % da variância nesta pose. É a parcela mais pequena das quatro, e atacá-la primeiro é o erro clássico de quem não fez a lista.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Aumentar a abertura de medição de 9 para 25 píxeis, para «apanhar toda a luz da estrela», faz o quê ao SNR?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-6" value="a" data-certa="false"><span class="rotulo">Melhora, porque apanha mais sinal.</span></label>
+          <p class="explicacao" hidden>Apanha o pouco que faltava nas asas — mas traz o céu e a leitura de 16 píxeis novos, cada um com a sua variância inteira.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-6" value="b" data-certa="false"><span class="rotulo">Não muda nada, porque o ruído por píxel é o mesmo.</span></label>
+          <p class="explicacao" hidden>É o mesmo <em>por píxel</em>, e é precisamente por isso que somar mais píxeis soma mais variância ao total.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="01-o-ruido-6" value="c" data-certa="true"><span class="rotulo">Normalmente piora: o sinal extra é pequeno e o ruído do céu cresce com o número de píxeis.</span></label>
+          <p class="explicacao" hidden>Exato, e é por isso que a abertura ótima é da ordem da largura da estrela e não maior. A lição 3 dá a largura e a lição 9 fá-la medir.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+<p>Explicar em voz alta, sem jargão, expõe os buracos que a leitura esconde. Esta resposta vai para a entrega.</p><div class="aberta">
+  <label for="feynman-1">Explica porque é que somar 100 fotografias ruidosas dá uma boa, e porque é que somar 10 000 não dá uma dez vezes melhor do que as 100.
+    <span class="pista">Sem usar «√N», «variância» nem «Poisson». Um exemplo com moedas ou com contagens serve melhor do que uma fórmula.</span>
+  </label>
+  <textarea id="feynman-1" data-pergunta="Explica porque é que somar 100 fotografias ruidosas dá uma boa, e porque é que somar 10 000 não dá uma dez vezes melhor do que as 100."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as
+  tuas respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção
+  acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/astrofotografia/respostas/AAAA-MM-DD.md</code>
+  e correr <code>/corrigir astrofotografia</code>.</p>
+</div>
+    <h2 id="resumo">10. Resumo</h2>
+<ul><li>Somam-se <strong>variâncias</strong>, não desvios: o maior ruído domina muito depressa.</li><li>O ruído de Poisson é da luz, não do equipamento: contar N traz √N, e nenhuma câmara o evita.</li><li>Os outros três: leitura (por leitura, independente do tempo), escuro (cresce com t e com T) e céu (luz a sério).</li><li>Escolhe a pose mínima onde o céu passa a mandar sobre a leitura — 0,68 s num céu urbano, 6,8 s num escuro.</li><li>Empilhar N poses dá exatamente √N; logo o dobro de SNR custa <strong>quatro</strong> vezes o tempo.</li></ul>
+    <h2 id="fontes">11. Fontes</h2>
+<ul class="fontes"><li><strong>Artigo original</strong> — W. J. Merline &amp; S. B. Howell (1995), <em>A realistic model for point-sources imaged on array detectors: the model and initial results</em>, <em>Experimental Astronomy</em> <strong>6</strong>, 163 · DOI <a href="https://doi.org/10.1007/BF00421131">10.1007/BF00421131</a>. <span class="verificado">🌐 Referência verificada a 2026-09-18</span> <strong>Porquê:</strong> é o artigo que mostra que a «equação do CCD» de uso corrente <em>sobrestima</em> o sinal-ruído, e propõe a correção. 🔴 <strong>O que não se fez:</strong> o PDF é digitalizado e não foi possível lê-lo daqui. Por isso a equação do §3 <strong>não</strong> é citada do artigo — é derivada de Poisson no próprio texto, e o artigo fica como leitura, não como autoridade.</li><li><strong>Livro</strong> — Steve B. Howell, <em>Handbook of CCD Astronomy</em>, 2.ª ed., Cambridge University Press. ISBN 978-0-521-85215-9 (cartonado) e 978-0-521-61762-8 (brochado), confirmados na ficha do editor. <span class="verificado">🌐 Verificado a 2026-09-18</span> <strong>Porquê:</strong> é o texto que trata o sensor como instrumento de medida e não como acessório de fotografia. <strong>O que saltar:</strong> os capítulos 6 e 7 (espetroscopia, CCD no espaço) não servem nada deste curso. ⚠️ Não tenho o exemplar: não se cita página nenhuma.</li><li><strong>Norma industrial</strong> — EMVA 1288, versão 4.0 (em vigor desde junho de 2021) · <a href="https://www.emva.org/standards-technology/emva-1288/">emva.org</a>. <span class="verificado">🌐 Verificado a 2026-09-18</span> <strong>Porquê:</strong> é a norma que fixa <em>como se mede</em> um sensor, e é por isso que as folhas de especificações de câmaras industriais são comparáveis entre si. ⚠️ A página pública não diz que parâmetros normaliza nem se o documento é gratuito: não se lhe atribui aqui conteúdo que não foi lido.</li></ul>
 
     <footer class="rodape">
-      <p><a href="../index.html">Todos os tópicos</a> · <a href="../metodo.html">O método</a></p>
+      <p><a href="#conteudo">Voltar ao início</a> · <a href="index.html">Mapa do tópico</a> · <a href="../metodo.html">Porque é que a lição tem esta forma</a></p>
+      <p><a href="00-a-luz-como-contagem.html">← Lição 0 · A luz como contagem</a> · <a href="02-a-terra-roda.html">Lição 2 · A Terra roda →</a></p>
     </footer>
   </main>
 </div>

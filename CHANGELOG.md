@@ -3,6 +3,70 @@
 O formato é uma entrada por sessão de trabalho, com data. O que muda o que eu
 consigo aprender fica no topo da entrada; o que muda só a mecânica fica no fim.
 
+## 2026-09-18 — «Astrofotografia»: o curso descobriu, a meio, que estava a medir-se a si próprio
+
+Tópico novo, **`astrofotografia`**, 10 lições, a partir de <https://en.wikipedia.org/wiki/Astrophotography>.
+Passou as quatro fases.
+
+**O que o tópico é.** Câmara, objetiva e tripé — sem seguimento. A rotação da Terra impõe um teto à
+pose, e todo o curso é a consequência disso: muitas poses curtas, calibradas, alinhadas, somadas e
+**medidas**. O *pipeline* é escrito de raiz em biblioteca padrão mais `numpy`, incluindo os leitores
+de PGM, FITS e PNG.
+
+**A descoberta que vale o tópico.** Na Fase 3, a primeira medição do ganho de sinal-ruído de uma
+pilha de 32 poses deu **×1,43 em vez de ×5,66** — 75 % abaixo do previsto. Havia uma explicação
+pronta e plausível, já escrita: a mediana custa ruído, o sigma-clip rejeita, a interpolação
+correlaciona. **A explicação não era falsa; era irrelevante.** O erro estava na fotometria, que
+contava o ruído de Poisson do próprio astro 32 vezes a mais, porque uma pilha é uma *média* e não
+uma soma. Uma explicação plausível para um resultado errado é a coisa mais perigosa que um
+relatório pode ter — e foi isso que se tornou a lição 9 e a razão de o `projeto.py` se recusar a
+correr sem `PREVISOES.md` commitado.
+
+**Conteúdo**
+
+- `docs/astrofotografia/`: dez lições, `index.html`, `bibliografia.html`, `folha.html`,
+  `teste.html`, `flashcards.csv` (47 cartões) e `revisao.ics`.
+- `docs/astrofotografia/codigo/`: oito ficheiros — `imagem.py` (PGM, FITS e PNG de raiz),
+  `foton.py`, `campo.py` (o simulador), `pilha.py`, `medir.py`, `esticar.py`, `projeto.py` e
+  `ensaio.py`, que **produz todos os números citados nas lições**.
+- `topicos/astrofotografia/`: diagnóstico, progresso, e as pastas de respostas e correções.
+- `docs/index.html`: cartão novo.
+- `docs/almanaque/index.html`: a fronteira dizia «não é astronomia observacional: não há
+  telescópios nem fotografia do céu» sem remeter para lado nenhum, porque em 2026-09-16 não havia
+  para onde. ⚠️ Corrigida à vista, a remeter para o tópico novo.
+
+**O que a Fase 2 apanhou**
+
+- **Sete exercícios com saídas inventadas** — escritas antes de o código correr, que é a falha que o
+  registo de falhas já tem em quatro linhas. Seis dos sete estavam errados. A tabela de perdas da
+  lição 2 dizia 0,6 % onde a medição diz 8,2 %.
+- **Um exercício que rebentava** com `UnicodeEncodeError` ao imprimir «√N» numa consola cp1252 — a
+  mesma falha registada duas vezes antes. O caso ficou escrito dentro do próprio exercício.
+- **Uma regra afirmada sem medir**: a lição 6 dizia que o ponto preto se põe abaixo da mediana «para
+  não perder contraste». Medido, o contraste é **máximo** na mediana. A regra é sobre informação, e
+  a lição passou a mostrar a troca.
+- **Uma contradição interna**: a figura da lição 1 usa uma estrela brilhante (onde manda o sinal) e
+  os «erros comuns» citavam-na a dizer que manda o céu (que é o caso do exemplo trabalhado, com uma
+  estrela fraca). Duas coisas certas, uma remissão errada.
+
+**O que a Fase 3 apanhou** — onze erros que só apareceram a correr, entre eles o estimador de FWHM
+que inflacionava com o ruído (12,66 px para uma estrela de 6,0), a fórmula do ponto médio do
+esticamento com os argumentos trocados (escurecia em vez de esticar, e a imagem saía plausível), o
+ajuste de gradiente enviesado (23 ADU onde estavam 40) e **duas figuras que passaram o verificador
+automático e estavam más** — as barras de variância não estavam à escala, precisamente na figura
+cuja mensagem é «a barra do escuro quase não se vê». Quinta ocorrência desta família no registo.
+
+**Mecânica**
+
+- A posição da resposta certa nos quizzes passa a ser **construída equilibrada** e depois baralhada
+  com semente fixa (D-052, revê D-036). O digest por pergunta tinha dado 29 de 60 na «c» — 48 %, a
+  um ponto percentual do limiar do validador. Agora dá 20/20/20 por construção.
+- ⚠️ **O passo 2 do `validar.sh` (tidy) ficou por correr** e não se apresenta como passado: não há
+  `tidy-html5` 5.x nesta máquina, a descarga do binário oficial falha na verificação do certificado
+  e a única compilação no npm é de 2015 e não conhece `<main>` nem SVG. Em substituição correu-se um
+  verificador de equilíbrio de etiquetas sobre as 78 páginas e os 3 modelos — zero problemas,
+  incluindo nas páginas que o `tidy` já tinha validado noutra máquina (D-055).
+
 ## 2026-09-17 — O documentário tem um realizador, não dois, e dura 87 minutos
 
 **Conteúdo**

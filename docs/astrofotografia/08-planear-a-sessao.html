@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>O almanaque — professor</title>
-<meta name="description" content="Curso sobre o almanaque: da tábua de 1088 ao almanaque do GPS, e a construção de um almanaque náutico próprio medido contra o Nautical Almanac oficial.">
+<title>8 · Planear a sessão — Astrofotografia</title>
+<meta name="description" content="Massa de ar, extinção atmosférica, a altura do alvo ao longo da noite e o orçamento de integração que sai daí.">
 <style>
 /* INICIO ESTILO */
 /* ------------------------------------------------------------------
@@ -413,11 +413,14 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
 /* FIM ESTILO */
 </style>
 </head>
-<body data-pagina="docs/almanaque/index.html">
+<body data-pagina="docs/astrofotografia/08-planear-a-sessao.html">
 <a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
 
 <header class="barra">
-  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> O almanaque</p>
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Astrofotografia</a> <span aria-hidden="true">›</span> lição 8
+  </p>
   <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
 </header>
 
@@ -425,338 +428,490 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
   <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
 
   <nav class="indice" id="indice-pagina" aria-label="Índice da página">
-    <h2>Nesta página</h2>
+    <h2>Nesta lição</h2>
     <ol>
-      <li><a href="#conseguir">O que vais conseguir fazer</a></li>
-      <li><a href="#nao-e">O que este curso não é</a></li>
-      <li><a href="#assumi">O que assumi</a></li>
-      <li><a href="#mapa">O mapa</a></li>
-      <li><a href="#plano">O plano no tempo</a></li>
-      <li><a href="#fases">Nota das fases</a></li>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
     </ol>
   </nav>
 
   <main id="conteudo">
-    <p class="etiqueta nucleo">pronto</p>
-    <h1>O almanaque</h1>
-    <p class="subtitulo">Do <em>Almanaque de Azarquiel</em> de 1088 ao almanaque que o satélite de
-    GPS te transmite: a mesma decisão de engenharia, oito séculos separados. E, no fim, o teu —
-    gerado por ti, medido contra o <em>Nautical Almanac</em> oficial, com a tolerância declarada
-    antes de comparar.</p>
+    <p class="etiqueta extensao">Lição 8 · extensão</p>
+    <h1>Planear a sessão</h1>
+    <p class="subtitulo">A decisão que vale mais horas do que qualquer processamento: quando e para onde apontar. E o coeficiente de extinção do teu sítio, que se mede numa noite.</p>
+    <h2 id="objetivo">1. Objetivo</h2>
+<p>No fim desta lição <strong>escolhes a janela da noite</strong> em que um alvo
+    rende mais, <strong>calculas o que a atmosfera te come</strong> a cada altura, e
+    <strong>medes o coeficiente de extinção do teu sítio</strong> a partir das tuas próprias poses.</p>
+    <div class="caixa dica"><span class="titulo">⭐ Esta lição é extensão, e o pré-requisito dela vive noutro tópico</span>
+    <p>É extensão porque não precisas dela para ter a imagem do projeto — precisas dela para não
+    desperdiçar noites. E o que ela usa (declinação, ângulo horário, altura, azimute) é do tópico
+    <a href="../almanaque/index.html">O almanaque</a>. Se ainda não o fizeste, a
+    <a href="../almanaque/00-esfera-celeste.html">lição 0 dele</a> chega para acompanhar esta.</p></div>
+    <h2 id="recuperar">2. Recuperar</h2>
+<p>Responde <strong>antes</strong> de continuar a ler, de memória. Falhar aqui é útil: o esforço de tentar puxar da memória é o que consolida, e é por isso que as respostas estão escondidas.</p><ol>
+  <li>Como é que a extinção atmosférica entra na conta dos fotões?
+    <details class="solucao"><summary>Resposta</summary><p>Soma-se à magnitude, porque magnitude é logaritmo de fluxo. (Lição 0, §3.)</p></details>
+  </li>
+  <li>Quanto tempo custa um céu duas vezes e meia mais brilhante, em magnitudes?
+    <details class="solucao"><summary>Resposta</summary><p>2,5 magnitudes são um fator 10 no fluxo e cerca de um fator 5 no tempo — não 10, porque nessa zona a leitura começa a mandar. (Lição 7.)</p></details>
+  </li>
+</ol>
+    <h2 id="mecanismo">3. O mecanismo</h2>
+<h3>A atmosfera cobra por distância percorrida</h3>
+    <p>A luz que vem do zénite atravessa a espessura mínima de atmosfera. A que vem de baixo
+    atravessa mais — e quanto mais atravessa, mais é absorvida e espalhada. Chama-se
+    <strong>massa de ar</strong> à razão entre o caminho percorrido e o caminho no zénite. Para
+    alturas moderadas basta a geometria plana:</p>
+<pre><code>X = 1 / sen(h)</code></pre>
+    <p>⚠️ <strong>Esta fórmula só serve acima de uns 15° a 20°.</strong> Abaixo disso a curvatura
+    da Terra e a refração deixam de ser desprezáveis e a fórmula exagera. Há aproximações melhores
+    publicadas; este curso não precisa delas, porque <strong>abaixo de 20° não se fotografa nada
+    que valha a pena</strong> — a tabela seguinte explica porquê.</p>
+    <p>A extinção é proporcional à massa de ar, em magnitudes:</p>
+<pre><code>extinção (mag) = k × X</code></pre>
+    <p>O coeficiente <em>k</em> é do teu sítio e da tua banda. Um valor de referência para um sítio
+    limpo na banda V é ≈0,20 mag por massa de ar; num sítio com aerossóis é bastante maior. ⚠️ Esse
+    0,20 é <strong>um valor de referência, não medido aqui</strong> — e o E3 mostra como medir o
+    teu, que é a única coisa que interessa.</p>
+<pre><code>  altura h   massa de ar   extinção (0,20 mag/massa)   fluxo que resta
+      10°         5.759                       1.15 mag            34.6 %
+      20°         2.924                       0.58 mag            58.4 %
+      30°         2.000                       0.40 mag            69.2 %
+      45°         1.414                       0.28 mag            77.1 %
+      60°         1.155                       0.23 mag            80.8 %
+      90°         1.000                       0.20 mag            83.2 %</code></pre>
+    <p>A 20° perde-se <strong>30 % da luz</strong> em relação ao zénite. A 10°, metade. E isto é
+    só a extinção — junta-lhe que o céu é mais brilhante junto ao horizonte (a mesma atmosfera que
+    absorve também espalha luz da cidade) e que a turbulência é pior.</p>
 
-    <h2 id="conseguir">O que vais conseguir fazer no fim</h2>
+    <h3>A altura de um alvo ao longo da noite</h3>
+    <p>Da esfera celeste (tópico <a href="../almanaque/00-esfera-celeste.html">almanaque</a>):</p>
+<pre><code>sen h = sen φ · sen δ + cos φ · cos δ · cos H</code></pre>
+    <p>com φ a tua latitude, δ a declinação do alvo e H o ângulo horário (zero no trânsito, uma
+    hora por cada 15°). O máximo é no trânsito e vale <strong>90° − |φ − δ|</strong>.</p>
+    <p>Em Lisboa (38,7° N), calculado para três alvos correntes:</p>
+<pre><code>   H(h)   M31 (δ=+41)   M42 (δ=-5)   M13 (δ=+36)
+     -4         44.9         19.2         43.3
+     -3         55.8         29.4         54.6
+     -2         67.0         37.9         66.2
+     -1         78.2         43.8         77.9
+      0         87.4         45.9         87.8
+      1         78.2         43.8         77.9
+      2         67.0         37.9         66.2
+      3         55.8         29.4         54.6
+      4         44.9         19.2         43.3</code></pre>
+    <p>🔴 <strong>M31 e M13 passam quase pelo zénite; M42 nunca passa dos 46°.</strong> Não é
+    azar: a declinação deles está perto da latitude de Lisboa, e a de M42 está 44° abaixo. Esta é a
+    consequência prática mais direta da esfera celeste — e explica por que razão a mesma pessoa,
+    no mesmo sítio, obtém resultados muito diferentes em alvos com o mesmo brilho.</p>
+
+    <figure>
+      <svg viewBox="0 0 560 230" role="img" aria-labelledby="t-alt d-alt">
+        <title id="t-alt">Altura de três alvos ao longo da noite, em Lisboa</title>
+        <desc id="d-alt">Três curvas em forma de arco, com o ângulo horário no eixo horizontal de
+        menos quatro a mais quatro horas e a altura no eixo vertical de zero a noventa graus. As
+        curvas de M31 e M13 quase coincidem e atingem 87 graus no trânsito; a de M42 é muito mais
+        baixa e não passa dos 46 graus. Uma linha tracejada marca os 30 graus, abaixo dos quais a
+        extinção passa de 0,4 magnitudes.</desc>
+        <line class="svg-traco" x1="56" y1="196" x2="536" y2="196"/>
+        <line class="svg-traco" x1="56" y1="196" x2="56" y2="26"/>
+        <line class="svg-realce-traco" x1="56" y1="139" x2="536" y2="139"/>
+        <text class="svg-texto-pequeno" x="540" y="143">30°</text>
+        <text class="svg-texto-pequeno" x="26" y="31">90°</text>
+        <text class="svg-texto-pequeno" x="26" y="200">0°</text>
+        <text class="svg-suave" x="296" y="220" text-anchor="middle">ângulo horário (horas do trânsito)</text>
+        <text class="svg-texto-pequeno" x="56"  y="212" text-anchor="middle">−4</text>
+        <text class="svg-texto-pequeno" x="176" y="212" text-anchor="middle">−2</text>
+        <text class="svg-texto-pequeno" x="296" y="212" text-anchor="middle">0</text>
+        <text class="svg-texto-pequeno" x="416" y="212" text-anchor="middle">+2</text>
+        <text class="svg-texto-pequeno" x="536" y="212" text-anchor="middle">+4</text>
+        <path class="svg-traco-grosso" d="M56 111 L116 90 L176 69 L236 48 L296 31 L356 48 L416 69 L476 90 L536 111"/>
+        <path class="svg-traco-fino"   d="M56 114 L116 93 L176 71 L236 49 L296 30 L356 49 L416 71 L476 93 L536 114"/>
+        <path class="svg-traco-grosso" d="M56 160 L116 141 L176 124 L236 113 L296 109 L356 113 L416 124 L476 141 L536 160"/>
+        <text class="svg-texto-pequeno" x="300" y="24"  text-anchor="middle">M31 e M13</text>
+        <text class="svg-texto-pequeno" x="300" y="103" text-anchor="middle">M42</text>
+      </svg>
+      <figcaption>Traçado a partir da tabela acima. As duas curvas de cima estão praticamente
+      sobrepostas: M31 (δ=+41°) e M13 (δ=+36°) têm declinação perto da latitude de Lisboa.</figcaption>
+    </figure>
+
+    <h3>O orçamento da noite</h3>
+    <p>Junta-se tudo: a extinção corta o sinal, o céu põe o ruído, e o resultado é quantas poses
+    precisas.</p>
+<pre><code>  Alvo V=13 medido em 9 píxeis, poses de 8 s, céu 19 mag/arcsec².
+
+  altura   extinção   e⁻ por pose   SNR/pose   poses p/ SNR 30   tempo
+     15°     0.77 mag            48       1.46               424    56.5 min
+     25°     0.47 mag            63       1.91               248    33.1 min
+     40°     0.31 mag            74       2.20               186    24.8 min
+     60°     0.23 mag            79       2.37               161    21.5 min
+     80°     0.20 mag            81       2.43               153    20.4 min</code></pre>
+    <p><strong>Fotografar aos 15° custa quase três vezes o tempo de fotografar aos 80°.</strong> E
+    repara que de 40° para 80° a diferença já é pequena (24,8 contra 20,4 minutos): a curva é
+    muito mais dura em baixo. <strong>A regra prática que sai daqui: 30° é o chão, 40° é
+    confortável, e acima de 60° a diferença deixa de pagar a espera.</strong></p>
+
+    <h3>O que isto decide, na prática</h3>
     <ul>
-      <li><strong>Implementar</strong>, só com a biblioteca padrão, a posição do Sol e da Lua, o
-        tempo sidéreo, o nascer, o pôr e os crepúsculos, e a redução de uma altura de sextante.</li>
-      <li><strong>Reproduzir</strong> as colunas de uma página diária real do <em>Nautical
-        Almanac</em> e <strong>dizer com um número</strong> quais é que batem e quais não.</li>
-      <li><strong>Fazer uma consulta completa</strong> numa página do livro — hora inteira,
-        incremento, correções <em>v</em> e <em>d</em>, com os sinais certos — sem consultar.</li>
-      <li><strong>Explicar</strong> porque é que o almanaque nasceu em 1088 como mudança de
-        <em>formato</em> e não de astronomia, e porque é que continua a ser publicado.</li>
-      <li><strong>Diagnosticar</strong>, dado um resultado errado por décimas de minuto de arco,
-        qual dos cinco relógios ou qual das cinco correções é que foi trocada.</li>
-      <li><strong>Declarar uma tolerância antes de medir</strong> — e perceber porque é que a ordem
-        dessas duas coisas é a diferença entre medir e justificar.</li>
+      <li><strong>Que alvo, nesta noite.</strong> Não o que apetece: o que está alto na janela de
+      horas que tens.</li>
+      <li><strong>Que janela.</strong> Duas horas centradas no trânsito valem muito mais do que
+      quatro horas a começar quando o alvo nasce.</li>
+      <li><strong>Quando desistir.</strong> Quando o alvo desce dos 30°, o tempo que estás a gastar
+      rende metade. Muda de alvo ou vai dormir.</li>
     </ul>
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+<h3>O problema</h3>
+    <p>É janeiro, tens das 21h às 00h, estás em Lisboa, e queres fotografar Oríon (δ ≈ −5°).
+    Vale a pena? E quando?</p>
 
-    <h2 id="nao-e">O que este curso não é</h2>
-    <ul>
-      <li><strong>Não é astronomia observacional</strong>: não há telescópios nem fotografia do
-        céu. ⚠️ <em>Corrigido a 2026-09-18 — esta linha dizia só «não há fotografia do céu» e não
-        remetia para lado nenhum, porque em 2026-09-16 não havia para onde. Agora há:
-        <a href="../astrofotografia/index.html">Astrofotografia</a> é o tópico que apanha
-        precisamente o que este recusou, e usa a esfera celeste daqui como pré-requisito.</em></li>
-      <li><strong>Não é mecânica celeste</strong>: ninguém integra órbitas aqui. Usam-se séries
-        ajustadas e publicadas, e diz-se de onde vêm e quanto erram.</li>
-      <li>🔴 <strong>Não substitui o <em>Nautical Almanac</em> a bordo.</strong> O curso ensina a
-        lê-lo, a reproduzi-lo com tolerância declarada, e — sobretudo — a saber quando a reprodução
-        não serve. Quatro das seis colunas tabeladas <em>não</em> chegam à precisão do livro, e
-        isso está medido e escrito.</li>
-      <li><strong>Não é um curso de navegação prática.</strong> Não há sextante, não há horizonte do
-        mar, não há observação real. A lição 7 reduz alturas <em>dadas</em>.</li>
-      <li><strong>Não repete a interpolação de picos de FFT</strong> — isso é do tópico
-        <a href="../cassete-captura/00-espetro.html">Digitalizar cassetes</a>. A palavra
-        «interpolação» aparece nos dois e os mecanismos são diferentes; a fronteira está declarada
-        nas lições 6 e 8.</li>
-    </ul>
+    <h3>Passo 1 — a altura máxima possível</h3>
+<pre><code>h_max = 90° − |φ − δ| = 90° − |38,7 − (−5)| = 90° − 43,7 = 46,3°</code></pre>
+    <p>Este número decide-se antes de qualquer outra coisa: <strong>por muito que esperes, Oríon
+    nunca passa dos 46° em Lisboa.</strong> Se o teu critério fosse «só acima de 60°», Oríon estava
+    fora — e é útil saber isso antes de montar o tripé.</p>
 
-    <h2 id="assumi">O que assumi</h2>
-    <p>Do <a href="../../topicos/almanaque/DIAGNOSTICO.md">diagnóstico</a>. Cada pressuposto traz
-    <strong>o que muda se estiver errado</strong>.</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Pressupostos do curso e o que muda se estiverem errados, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>Assumi que…</th><th>De onde veio</th><th>Se estiver errado…</th></tr></thead>
-    <tbody><tr><td>Não tens sextante nem horizonte do mar</td><td>Não foi perguntado e não foi mencionado</td><td>A lição 7 ganha uma segunda metade com observação real. Como está, reduz <strong>alturas dadas</strong> — o mecanismo é o mesmo, falta o instrumento</td></tr><tr><td>Todo o código é biblioteca padrão</td><td>«Calcular eu próprio» era um dos objetivos</td><td>Nada muda: é uma decisão, não um pressuposto sobre ti. Um almanaque feito sobre <code>skyfield</code> funcionava e não ensinava. Ele aparece só na lição 9</td></tr><tr><td>A posição de exemplo pode ser pública e arbitrária</td><td>Decisão de privacidade (D-001)</td><td>Muda-se uma constante em <code>gerar.py</code>. Nenhum mecanismo depende do sítio</td></tr><tr><td>Interessa a época atual (1950–2050)</td><td>«Gerar um almanaque meu» lê-se como «para o ano que vem»</td><td>As séries usadas estão declaradas para 1950–2050. Fora disso parte primeiro o ΔT, que é medido e não calculado — e o curso passaria a precisar de uma lição sobre calendários históricos e a reforma gregoriana</td></tr><tr><td>Inglês técnico lê-se sem atrito</td><td>Todas as fontes primárias estão em inglês</td><td>O curso teria de traduzir as páginas do <em>Nautical Almanac</em> em vez de as usar</td></tr></tbody>
-  </table>
-</div>
+    <h3>Passo 2 — quando é o trânsito</h3>
+    <p>Isto é a parte que pertence ao <a href="../almanaque/index.html">almanaque</a>: precisas do
+    tempo sidéreo local. Em meados de janeiro, a ascensão reta de Oríon (≈5h35m) passa pelo
+    meridiano de Lisboa por volta das 23h30 locais.</p>
+    <p>⚠️ <strong>Esse valor é aproximado e não foi calculado aqui.</strong> Se precisares dele ao
+    minuto, é o `gerar.py` do tópico do almanaque que o dá — este curso usa-o como entrada.</p>
 
-    <div class="caixa aviso">
-      <span class="titulo">⚠️ A tensão que o diagnóstico encontrou, e como se resolveu</span>
-      <p>Pediste as três coisas: <strong>usar um almanaque náutico a sério</strong>,
-      <strong>perceber o objeto histórico</strong> e <strong>calcular tu próprio</strong>. As
-      primeira e terceira quase se contradizem: as séries que cabem numa lição dão o Sol a cerca de
-      0,4′ e o livro publica a 0,1′.</p>
-      <p>A resolução não foi escolher uma — foi tornar a diferença <strong>o assunto</strong>. Todas
-      as lições declaram o que a sua aproximação custa, em minutos de arco e em milhas náuticas, e a
-      lição 9 junta tudo num orçamento de erro. É o eixo do curso.</p>
+    <h3>Passo 3 — a altura na tua janela</h3>
+    <p>Das 21h às 00h, o ângulo horário vai de −2,5h a +0,5h. Pela tabela do §3: aos −2,5h a
+    altura é ≈41°, no trânsito 46°, e às 00h ainda 45°.</p>
+    <p><strong>A janela toda está acima dos 40°.</strong> É boa.</p>
+
+    <h3>Passo 4 — o que isso custa em extinção</h3>
+<pre><code>X(41°) = 1/sen(41°) = 1,524   →   0,20 × 1,524 = 0,30 mag
+X(46°) = 1/sen(46°) = 1,390   →   0,20 × 1,390 = 0,28 mag</code></pre>
+    <p>Duas centésimas de magnitude de diferença entre o pior e o melhor momento da tua janela —
+    ou seja, <strong>2 % de sinal</strong>. A conclusão prática é a que interessa: não vale a pena
+    esperar pelo trânsito. Começa às 21h.</p>
+
+    <h3>Passo 5 — o orçamento</h3>
+    <p>Três horas menos meia hora de montagem e calibrações dá 2,5 horas úteis. Com poses de 1,6 s
+    (a tolerância da lição 2 para 50 mm a δ=−5°), são 5600 poses. <strong>Verifica o cartão e o
+    disco antes de sair.</strong> Em RAW de 25 MB, são 140 GB — e é aqui que o planeamento deixa de
+    ser astronomia e passa a ser logística.</p>
+    <p>⭐ É por esta conta que muita gente passa a gravar em JPEG a meio da noite, e é por esta
+    conta que não se deve: sem RAW, a lição 4 deixa de funcionar.</p>
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+<div class="exercicio">
+      <h3>Completa</h3>
+      <p>Queres fotografar M13 (δ = +36,5°) de um sítio a 41° N, e só tens das 22h às 01h. O
+      trânsito é às 23h00.</p>
+      <ol>
+        <li>Altura máxima possível: <strong>______</strong></li>
+        <li>Ângulo horário no início e no fim da janela: <strong>______</strong></li>
+        <li>Altura no pior momento da janela (usa a fórmula do §3): <strong>______</strong></li>
+        <li>Extinção no pior e no melhor momento, com k = 0,20: <strong>______</strong></li>
+        <li>Vale a pena esperar pelo trânsito? <strong>______</strong></li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>1.</strong> 90° − |41 − 36,5| = <strong>85,5°</strong>. Quase no zénite.</p>
+        <p><strong>2.</strong> De −1h a +2h.</p>
+        <p><strong>3.</strong> O pior é +2h. sen h = sen41·sen36,5 + cos41·cos36,5·cos30° =
+        0,656×0,595 + 0,755×0,804×0,866 = 0,390 + 0,526 = 0,916 → h = <strong>66,3°</strong>.</p>
+<pre><code>python3 -c "
+import math
+def altura(lat, dec, H):
+    lat, dec, H = map(math.radians, (lat, dec, H * 15.0))
+    return math.degrees(math.asin(math.sin(lat) * math.sin(dec)
+                                  + math.cos(lat) * math.cos(dec) * math.cos(H)))
+for H in (-1, 0, 1, 2):
+    print(H, 'h ->', round(altura(41, 36.5, H), 1), 'graus')"
+-1 h -> 80.8 graus
+0 h -> 85.5 graus
+1 h -> 80.8 graus
+2 h -> 66.3 graus</code></pre>
+        <p><strong>4.</strong> X(66,3°) = 1,092 → 0,22 mag; X(85,5°) = 1,003 → 0,20 mag.
+        <strong>Dois centésimos de magnitude</strong> entre o melhor e o pior momento.</p>
+        <p><strong>5.</strong> <strong>Não.</strong> A diferença é de 2 % no sinal, e cada minuto
+        de espera é um minuto de integração perdido, que vale muito mais. 🔴 A regra que sai daqui:
+        <strong>acima de 60° a altura deixa de importar</strong>; o que importa é o tempo total.
+        Esperar pelo trânsito só compensa para alvos baixos.</p>
+      </details>
     </div>
-
-    <h2 id="mapa">O mapa</h2>
-    <p>🔴 O diagnóstico registou «astronomia esférica: nenhuma». Por isso a esfera celeste é a
-    <strong>lição 0</strong>, com onze secções como qualquer outra, e não uma caixa de recordação no
-    meio da lição 3.</p>
-<figure>
-  <svg viewBox="0 0 1034 278" role="img" aria-labelledby="t-mapa d-mapa">
-    <title id="t-mapa">Mapa das dez lições e das suas dependências</title>
-    <desc id="d-mapa">As lições 0 e 1 não dependem de nada e alimentam a 2. A 2 alimenta a 3, que é o eixo do curso. Da 3 saem a 4 e a 5, que convergem na 6; a 6 alimenta a 7 e a 7 alimenta a 9, que é o projeto. A lição 8, sobre marés, sai da 5 e é extensão. A mesma informação está na tabela do plano, logo a seguir.</desc>
-    <defs><marker id="seta-mapa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/></marker></defs>
-    <rect class="svg-realce" x="24" y="88" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="24" y="158" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="192" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="360" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="528" y="53" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="528" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="696" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="864" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-fundo" x="696" y="200" width="146" height="44" rx="6"/>
-    <rect class="svg-realce" x="864" y="46" width="146" height="44" rx="6"/>
-    <path class="svg-traco-grosso" d="M 170 110 C 184 110 178 145 186 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 170 180 C 184 180 178 145 186 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 338 145 H 354" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 506 145 C 520 145 514 75 522 75" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 506 145 H 522" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 75 C 688 75 682 145 690 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 145 H 690" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 842 145 H 858" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 937 167 C 937 191 937 114 937 90" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 145 C 688 145 682 222 690 222" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 842 222 C 856 222 850 68 858 68" marker-end="url(#seta-mapa)"/>
-    <text class="svg-texto-pequeno" x="97" y="107" text-anchor="middle">0 · A esfera celeste</text>
-    <text class="svg-texto-pequeno" x="97" y="123" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="97" y="177" text-anchor="middle">1 · O que é um almanaque</text>
-    <text class="svg-texto-pequeno" x="97" y="193" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="265" y="142" text-anchor="middle">2 · O tempo</text>
-    <text class="svg-texto-pequeno" x="265" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="433" y="142" text-anchor="middle">3 · O Sol</text>
-    <text class="svg-texto-pequeno" x="433" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="601" y="72" text-anchor="middle">4 · Nascer e pôr</text>
-    <text class="svg-texto-pequeno" x="601" y="88" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="601" y="142" text-anchor="middle">5 · A Lua</text>
-    <text class="svg-texto-pequeno" x="601" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="769" y="142" text-anchor="middle">6 · Ler as tábuas</text>
-    <text class="svg-texto-pequeno" x="769" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="937" y="142" text-anchor="middle">7 · Reduzir uma altura</text>
-    <text class="svg-texto-pequeno" x="937" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="769" y="219" text-anchor="middle">8 · As marés</text>
-    <text class="svg-texto-pequeno" x="769" y="235" text-anchor="middle">extensão</text>
-    <text class="svg-texto-pequeno" x="937" y="65" text-anchor="middle">9 · O teu almanaque</text>
-    <text class="svg-texto-pequeno" x="937" y="81" text-anchor="middle">núcleo</text>
-  </svg>
-  <figcaption>As caixas destacadas são o princípio (lição 0) e o fim (o projeto). A lição 8 é <strong>extensão</strong>: serve o objetivo histórico e não o critério de sucesso. O mesmo está em texto na tabela seguinte.</figcaption>
-</figure>
-
-    <h2 id="plano">O plano no tempo</h2>
-    <p>Distribuído pelas <strong>6 horas ou mais por semana</strong> que o diagnóstico registou. Sem
-    prazo: se forem 8 horas, são 8 semanas. A lição 8 é <strong>extensão</strong> — faz-se quando
-    apetecer, ou nunca.</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Plano das lições no tempo, tabela rolável na horizontal">
+    <h2 id="erros">6. Erros comuns</h2>
+<p>As conceções erradas <strong>típicas deste assunto</strong> — e como se reconhecem quando aparecem.</p><div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
   <table>
-    <thead><tr><th>Semana</th><th>Lição</th><th>Depende de</th><th>O que lá está</th><th>Estado</th></tr></thead>
-    <tbody><tr><td>1</td><td><a href="00-esfera-celeste.html">0 · A esfera celeste</a></td><td>—</td><td>Coordenadas, ponto subastral, triângulo de posição. O pré-requisito em falta.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>2</td><td><a href="01-o-que-e-um-almanaque.html">1 · O que é um almanaque</a></td><td>—</td><td>História e mecanismo: um resultado publicado, não um método. O almanaque do GPS.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>3</td><td><a href="02-o-tempo.html">2 · O tempo</a></td><td>lição 0</td><td>Dia juliano, TT/UT1/UTC, ΔT medido, tempo sidéreo médio e aparente.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>4</td><td><a href="03-o-sol.html">3 · O Sol</a></td><td>lições 0 e 2</td><td>A pilha de correções, a equação do tempo, e o orçamento de erro do curso.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>5</td><td><a href="04-nascer-e-por.html">4 · Nascer, pôr e crepúsculos</a></td><td>lição 3</td><td>−0° 50′, bisseção, e os dois casos em que não há resposta.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>6</td><td><a href="05-a-lua.html">5 · A Lua</a></td><td>lição 3</td><td>Paralaxe, fases, o ciclo de 18,6 anos. Onde as aproximações do Sol caem.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>7</td><td><a href="06-ler-as-tabuas.html">6 · Ler as tábuas</a></td><td>lições 3 e 5</td><td>v, d, incrementos. Um formato é uma máquina de evitar um erro.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>8</td><td><a href="07-reduzir-uma-altura.html">7 · Reduzir uma altura</a></td><td>lições 0 e 6</td><td>As cinco correções e Marcq St Hilaire. De um ângulo a uma linha no mapa.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>—</td><td><a href="08-mares.html">8 · As marés</a></td><td>lição 5</td><td>O almanaque que se identifica em vez de se calcular.</td><td><span class="etiqueta extensao">extensão</span></td></tr><tr><td>10</td><td><a href="09-o-teu-almanaque.html">9 · O teu almanaque</a></td><td>lições 3 a 7</td><td>O projeto: declarar a tolerância antes, gerar, comparar, relatar.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr></tbody>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody>
+      <tr><td>«O melhor momento é sempre o trânsito.»</td><td>Esperar pela passagem meridiana antes de começar.</td><td>Para um alvo alto, a diferença entre 66° e 85° é <strong>2 % de sinal</strong>. Cada minuto de espera custa um minuto de integração, que vale muito mais. Esperar só compensa quando o alvo está baixo.</td></tr>
+      <tr><td>«Vou fotografar aquele objeto porque é bonito.»</td><td>Escolher o alvo antes de ver onde ele está.</td><td>Se ele não subir dos 30° do teu sítio, vais pagar quase o dobro do tempo. A altura máxima é 90° − |φ − δ| e calcula-se em cinco segundos.</td></tr>
+      <tr><td>«A massa de ar é 1/sen(h) e pronto.»</td><td>Usar a fórmula a 5° de altura.</td><td>Abaixo de ≈15° a curvatura da Terra e a refração deixam de ser desprezáveis e a fórmula exagera. Há aproximações melhores publicadas — mas abaixo de 20° não vale a pena fotografar, o que torna a questão académica.</td></tr>
+      <tr><td>«Uso 0,20 mag por massa de ar, que é o valor padrão.»</td><td>Assumir o coeficiente sem o medir.</td><td>É um valor de referência para um sítio limpo em V. Num sítio com aerossóis é bastante maior, e mede-se numa noite com o E3 — a mesma estrela a várias alturas.</td></tr>
+    </tbody>
   </table>
 </div>
-
-    <h3>O código</h3>
-    <p>Quatro ficheiros, todos de biblioteca padrão, que são a fonte de tudo o que as lições
-    mostram:</p>
-    <ul>
-      <li><a href="codigo/almanaque.py"><code>almanaque.py</code></a> — o motor. Cada função traz no
-        <em>docstring</em> de onde veio a fórmula e <strong>quanto erra</strong>.</li>
-      <li><a href="codigo/ensaio.py"><code>ensaio.py</code></a> — o que prova que está certo. Oito
-        secções, todas contra fontes exteriores e datadas.</li>
-      <li><a href="codigo/gerar.py"><code>gerar.py</code></a> — o projeto: gera o teu almanaque
-        anual.</li>
-      <li><a href="codigo/comparar.py"><code>comparar.py</code></a> — lê o PDF oficial e mede a
-        diferença, coluna a coluna.</li>
-    </ul>
-
-    <h3>O orçamento de erro, medido</h3>
-    <p>Contra a página diária de 20 de março de 2026 do <em>Nautical Almanac</em>:</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Orçamento de erro medido contra a página oficial, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>O que se publica</th><th>Erro medido</th><th>O livro imprime a</th><th>Passa?</th></tr></thead>
-    <tbody><tr><td>GHA de Áries</td><td>0,053′</td><td>0,1′</td><td>✅</td></tr><tr><td>Paralaxe da Lua</td><td>0,077′</td><td>0,1′</td><td>✅</td></tr><tr><td>Dec do Sol</td><td>0,195′</td><td>0,1′</td><td>❌</td></tr><tr><td>GHA do Sol</td><td>0,415′</td><td>0,1′</td><td>❌</td></tr><tr><td>Dec da Lua</td><td>2,1′</td><td>0,1′</td><td>❌</td></tr><tr><td>GHA da Lua</td><td>5,7′</td><td>0,1′</td><td>❌</td></tr><tr><td>Nascer, pôr e crepúsculos</td><td>0 min nas seis colunas</td><td>1 min</td><td>✅</td></tr><tr><td>Nascer e ocaso da Lua</td><td>≤ 1 min</td><td>1 min</td><td>✅</td></tr></tbody>
-  </table>
+    <h2 id="praticar">7. Praticar</h2>
+<p>Do mais fácil ao mais difícil. Tenta antes de abrir a solução — abrir cedo dá a sensação de perceber sem a aprendizagem.</p><div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — o alvo certo para a noite</h3>
+<p>Estás a 40° N e tens das 22h às 02h. Três alvos: A (δ = +60°), B (δ = +40°),
+         C (δ = −25°). Sem calcular alturas hora a hora, ordena-os do melhor para o pior e diz
+         porquê.</p>
+  <details class="solucao"><summary>Solução</summary>
+<p><strong>B, A, C.</strong></p>
+         <p>B tem δ = +40°, praticamente igual à latitude: passa quase pelo zénite (altura máxima
+         90° − 0 = 90°). A tem δ = +60°, altura máxima 70° — e, em compensação, fica alto durante
+         <em>mais horas</em>, porque descreve um círculo pequeno em torno do polo. C tem δ = −25°,
+         altura máxima 25°: <strong>nunca sai do chão</strong>, e a essa altura a extinção come
+         0,47 mag.</p>
+         <p>⭐ A escolha entre A e B depende da janela: se tiveres muitas horas, A pode render mais
+         no total, porque fica utilizável quase a noite toda. É o compromisso entre «alto» e
+         «alto durante muito tempo», e é o tipo de decisão que a tabela do §3 torna concreta.</p>
+  </details>
 </div>
-    <p>🔴 <strong>Quatro das seis colunas tabeladas não passam</strong>, e isso é o resultado do
-    curso e não o seu fracasso: sabes quais, por quanto, e o que seria preciso para as corrigir.</p>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — a janela útil</h3>
+<p>Escreve o código que, dada a tua latitude, a declinação do alvo e uma altura mínima
+         aceitável, imprime durante quantas horas por noite esse alvo está utilizável. Aplica-o a
+         três alvos em Lisboa com um mínimo de 30°.</p>
+  <details class="solucao"><summary>Solução</summary>
+<pre><code>import math
 
-    <h3>No fim</h3>
-    <ul>
-      <li><a href="bibliografia.html">Bibliografia</a> — o percurso, por onde começar.</li>
-      <li><a href="folha.html">Folha de consulta</a> — imprimível, só o que se consulta.</li>
-      <li><a href="teste.html">Teste de domínio</a> — intercalado, sem soluções à vista.</li>
-      <li><a href="flashcards.csv">Flashcards</a> (CSV para o Anki) e
-        <a href="revisao.ics">calendário de revisão</a> (.ics).</li>
-    </ul>
+def altura(lat, dec, H):
+    lat, dec, H = map(math.radians, (lat, dec, H * 15.0))
+    s = math.sin(lat) * math.sin(dec) + math.cos(lat) * math.cos(dec) * math.cos(H)
+    return math.degrees(math.asin(max(-1.0, min(1.0, s))))
 
-    <h2 id="fases">Nota das fases</h2>
-    <p>O que cada fase encontrou. É isto que distingue um curso que passou pelo processo de um que
-    só parece ter passado.</p>
+def horas_acima(lat, dec, minimo, passo=0.05):
+    h = 0.0
+    x = -12.0
+    while x < 12.0:
+        if altura(lat, dec, x) >= minimo:
+            h += passo
+        x += passo
+    return h
 
-    <h3 id="fase0">Fase 0 — Verificar</h3>
-    <p><strong>O que se procurou</strong> (tudo registado em
-    <a href="../../topicos/almanaque/DIAGNOSTICO.md">DIAGNOSTICO.md</a>):</p>
-    <ul>
-      <li><code>grep -ri</code> em <code>docs/</code> e <code>topicos/</code> por <em>almanaque,
-        almanac, efeméride, astronom, juliano, sextante, latitude, longitude, declinação, tempo
-        sidéreo, órbita, maré, navegação</em> — <strong>0 ficheiros em todos</strong>.</li>
-      <li>Por sintoma e por verbo: <em>tabela pré-calculada, pré-calcul, lookup, memoiz, consulta em
-        tabela, data e hora, segundos intercalares, esfera, trigonom</em> — 0 em todos.</li>
-      <li><em>calendário</em> deu 8 ficheiros, <strong>todos</strong> sobre o <code>revisao.ics</code>
-        da revisão espaçada. <em>fuso</em> deu 10, quase todos falsos — apanha
-        <strong>parafuso</strong> em <code>cassete-captura</code>.</li>
-      <li><code>git log -S</code> para nove termos: <strong>nada</strong>. Nunca existiu e nunca foi
-        removido.</li>
-    </ul>
-    <p><strong>O que se encontrou:</strong> tópico novo, sem pré-requisitos no repositório. Um
-    <strong>vizinho a declarar</strong> — a interpolação parabólica de picos de FFT em
-    <a href="../cassete-captura/00-espetro.html">cassete-captura</a>, mecanismo diferente com o
-    mesmo nome — e uma <strong>analogia a aproveitar</strong>: o <em>cache</em>, que aparece em 14
-    ficheiros em sentido informático e estrutura a lição 1.</p>
-    <p><strong>Fontes primárias localizadas:</strong> o <em>Nautical Almanac</em> em PDF gratuito
-    (1911–2030), as fórmulas de baixa precisão do <em>Astronomical Almanac</em>, o NOAA Solar
-    Calculator, as constituintes de maré. ⚠️ <strong>Duas não abriram:</strong> o sítio do USNO
-    recusou a ligação e a tabela da NOAA é desenhada por JavaScript — está dito em cada lição onde
-    isso afeta uma afirmação.</p>
+LAT = 38.7083
+print("alvo            dec     h_max   horas acima de 30 graus")
+for nome, dec in (("M31", 41.3), ("M13", 36.5), ("M42", -5.4), ("Sagitario", -29.0)):
+    print("%-14s %+6.1f  %6.1f   %10.1f" % (nome, dec, 90 - abs(LAT - dec),
+                                            horas_acima(LAT, dec, 30.0)))</code></pre>
+         <p>Saída (corrida a 2026-09-18):</p>
+<pre><code>alvo            dec     h_max   horas acima de 30 graus
+M31             +41.3    87.4         10.9
+M13             +36.5    87.8         10.5
+M42              -5.4    45.9          5.8
+Sagitario       -29.0    22.3          0.0</code></pre>
+         <p><strong>O Sagitário nunca passa dos 22° em Lisboa</strong> — e é por isso que o centro
+         da Via Láctea, que é o pedaço de céu mais espetacular que existe, é tão difícil daqui e
+         tão fácil no hemisfério sul. Não é falta de equipamento: é geometria.</p>
+         <p>⚠️ Estas horas são as que o alvo passa acima de 30° <em>ao longo de um dia inteiro</em>,
+         incluindo as que são de dia. Quantas delas são noite depende da época do ano, e é a parte
+         que pertence ao <a href="../almanaque/04-nascer-e-por.html">almanaque</a>.</p>
+  </details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código que corre: mede o teu coeficiente de extinção</h3>
+<p>Fotografa a <strong>mesma estrela</strong> a alturas diferentes ao longo da noite,
+         mede o fluxo em cada uma, e ajusta uma reta a (massa de ar, magnitude instrumental). O
+         declive é o coeficiente de extinção do teu sítio. Chama-se <em>reta de Bouguer</em>.</p>
+         <p>Verifica o método num campo sintético em que sabes a resposta.</p>
+  <details class="solucao"><summary>Solução</summary>
+<pre><code>import math
+import numpy as np
+import medir, pilha
+from campo import Camara, Campo, Sessao
 
-    <h3 id="fase1">Fase 1 — Criar</h3>
-    <p>Dez lições, quatro ficheiros de código, e uma decisão que estruturou tudo: <strong>nenhuma
-    saída de código foi escrita à mão</strong>. Cada bloco das lições foi executado numa pasta
-    temporária e a saída colada de uma execução real — o mecanismo que o registo de falhas do
-    <code>PROCESSO.md</code> exigiu depois de duas sessões em que os números foram escritos primeiro
-    e corridos depois.</p>
-    <p>Decisões tomadas durante a escrita: biblioteca padrão só (o <code>skyfield</code> só aparece
-    na lição 9, como padrão de comparação); longitude <strong>leste-positiva</strong>, contra a
-    convenção náutica clássica, porque é a de todo o código moderno — declarado em caixa de aviso na
-    lição 0; e o PDF oficial <strong>não entra no repositório</strong>, por direitos de autor,
-    ficando só o extrator.</p>
+cam = Camara(); ses = Sessao(cam, semente=808)
+K_VERDADEIRO = 0.23
+Xs, mags = [], []
+for h in (75, 60, 45, 35, 25, 20, 15):
+    X = 1.0 / math.sin(math.radians(h))
+    # a estrela é a mesma; o que muda é o que a atmosfera lhe tira
+    campo = (Campo(semente=808).povoar(40)
+             .acrescentar(256, 256, 1500.0 * 10 ** (-0.4 * K_VERDADEIRO * X)))
+    zm = pilha.mestre([ses.zero_bruto() for _ in range(8)], "media")
+    pm = pilha.mestre([ses.plano_bruto(7000.0) for _ in range(8)])
+    img = pilha.calibrar(ses.pose(campo, 8.0, 12.0), zm, None, pm, 8.0, 8.0)
+    f = medir.fotometria(img, 256, 256, ganho_e_adu=1.0)["fluxo_adu"]
+    Xs.append(X); mags.append(-2.5 * math.log10(f))
+    print("  h=%2d  X=%.3f  fluxo=%8.0f  m_inst=%.4f" % (h, X, f, mags[-1]))
 
-    <h3 id="fase2">Fase 2 — Aprofundar</h3>
-    <p><strong>O que a Fase 1 errou</strong>, item a item, tudo apanhado a correr o que estava
-    escrito:</p>
-    <ol>
-      <li>🔴 <strong>O bug maior: <code>gha()</code> usava o tempo sidéreo MÉDIO.</strong> O
-        <em>Nautical Almanac</em> publica o <strong>aparente</strong>. O erro sistemático contra a
-        página de 20 de março de 2026 era de −0,09′ no GHA de Áries; com o GAST desce para +0,004′,
-        que é o arredondamento do próprio livro. Virou a secção «Erros comuns» da lição 2.</li>
-      <li><strong>O ensaio do dia sidéreo media a taxa com passo de 1 segundo</strong> e dava
-        86164,56 s em vez de 86164,09 s — cancelamento catastrófico. Não era da fórmula: com passo
-        de 1 hora dá certo. Virou caixa de aviso na lição 2.</li>
-      <li><strong>O ensaio da obliquidade comparava a verdadeira com a constante da média</strong> e
-        falhava por 5,4″ — que é exatamente a nutação em obliquidade. Erro do <em>ensaio</em>, não
-        do código.</li>
-      <li><strong>Escrevi «a tabela pesa centenas de vezes mais do que o código»</strong> na lição 1.
-        Medido: <strong>30 vezes</strong>. Corrigido para o que o bloco imprime.</li>
-      <li><strong>Escrevi que a equação dos equinócios vale 0,29′.</strong> Medida sobre 20 anos:
-        <strong>0,263′</strong>. Corrigida em quatro sítios, incluindo dois <em>docstrings</em>.</li>
-      <li><strong>Um comentário no <code>almanaque.py</code> dizia que trocar UT1 por TT custa
-        0,29′.</strong> Custa 0,0008′ no Sol e <strong>17,25′</strong> na rotação da Terra — a mesma
-        quantidade de tempo vale coisas diferentes conforme o que indexa. O comentário passou a
-        dizer as três.</li>
-      <li><strong>O detetor de luas novas da lição 5 dava um mês sinódico de 30,48 dias</strong>,
-        fora do intervalo publicado (29,26–29,80). Era bug do detetor — saltava quase um mês e
-        bissectava na lunação errada. Reescrito para varrer dia a dia: 29,29 a 29,81.</li>
-      <li><strong>O intercepto do exemplo trabalhado da lição 7 dava 178 milhas náuticas</strong>,
-        porque inventei a altura do sextante. Passou a ser obtida <em>por inversão</em> a partir de
-        uma posição real: 18,4 milhas.</li>
-      <li><strong>Escrevi que a fixação recuperava a posição «a menos de um milésimo de milha».</strong>
-        Mede 0,264 milhas à primeira, e cai para 0,00001 à segunda iteração. O resíduo virou a parte
-        mais interessante do exercício: Marcq St Hilaire é uma linearização, e comporta-se como um
-        passo de Newton.</li>
-      <li><strong>O <code>round()</code> do Python arredonda ao par e o livro não.</strong> A minha
-        reconstrução da tabela de incrementos dava 0,1 onde a página imprime 0,2. Virou entrada na
-        tabela de erros comuns da lição 6.</li>
-      <li><strong>O E2 da lição 6 media uma tautologia</strong> — confirmava a definição de
-        <em>v</em>, não a qualidade da interpolação. Reescrito para medir a curvatura desprezada
-        <em>dentro</em> da hora: 0,006′, dezasseis vezes abaixo do passo de impressão.</li>
-      <li><strong>O gerador etiquetava 25 dias do ano em Lisboa como «sempre-acima».</strong> A Lua
-        em Lisboa não é circumpolar coisa nenhuma — eram dias em que ela saltou o nascer. A exceção
-        <code>SemEvento</code> passou a distinguir <strong>três</strong> causas.</li>
-      <li><strong>O <code>ensaio.py</code> rebentou com <code>UnicodeEncodeError</code> na primeira
-        execução</strong>, por causa de um «Δ» numa consola <code>cp1252</code> — a mesma falha que
-        o <code>PROCESSO.md</code> já registava para o <code>validar.py</code>, repetida.</li>
-      <li>🔴 <strong>Um bloco de código corria, falhava, e imprimia nada — com código de saída
-        <em>zero</em>.</strong> O <code>gerar.py</code> não estava a ser copiado para a pasta
-        temporária onde os blocos correm; o subprocesso rebentava, o bloco imprimia um
-        <code>stdout</code> vazio, e a lição 9 publicava um <code>&lt;samp&gt;</code> em branco que
-        parecia «o programa não disse nada». <strong>Só o <code>tidy</code> deu por isso</strong>,
-        ao avisar de um <code>&lt;samp&gt;</code> vazio. Corrigido em três níveis: o ficheiro passou
-        a ser copiado, o bloco passa a verificar o código de saída do subprocesso, e o gerador das
-        lições passa a <strong>recusar</strong> um bloco cuja saída seja vazia.</li>
-      <li><strong>Três figuras erradas que passaram todas as verificações automáticas.</strong> O
-        mapa do curso tinha o <code>viewBox</code> escrito à mão e as lições 6 a 9 ficavam fora dele;
-        a figura da reta de altura precisou de <strong>três versões</strong> (rótulos sobrepostos, e
-        depois geometria cortada pelo topo); um rótulo do mapa saía truncado a meio de uma palavra.
-        Correções: <code>viewBox</code> calculado do envelope da geometria, rótulos em coluna fixa
-        ordenados pela altura do alvo, e nomes curtos explícitos em vez de cortar o título.</li>
-      <li><strong>A figura da soma de uma consulta discordava do bloco de código da mesma
-        lição</strong> por uma décima de minuto de arco: dizia 8° 59,6′ e o valor é 8° 59,7′.</li>
-      <li>⬜ <strong>A lista de verificação do processo, percorrida:</strong> 11 secções por ordem em
-        todas as lições ✅ · objetivos verificáveis ✅ · fronteira com remissão para o tópico vizinho
-        ✅ · cada pressuposto com consequência ✅ · pré-requisito como lição 0 ✅ · soluções em
-        <code>&lt;details&gt;</code> fechado ✅ · explicação em cada opção de quiz ✅ · código que
-        corre em todas as lições ✅ · <strong>fonte que não é documentação em todas as dez</strong>
-        ✅ — e nas três em que não encontrei nenhuma peça audiovisual citável, está escrito que
-        <em>procurei e não encontrei</em> ✅ · convenções declaradas como convenções ✅.</li>
-    </ol>
-
-    <h3 id="fase3">Fase 3 — Validar</h3>
-    <p><strong>O que se correu:</strong> todo o código de todas as lições, por construção — o
-    gerador executa cada bloco e cola a saída, por isso um bloco que não corra faz a página não
-    existir. Mais o <code>ensaio.py</code> completo (oito secções) e o <code>gerar.py</code> para um
-    ano inteiro em duas latitudes.</p>
-    <p><strong>Contra que fontes exteriores:</strong></p>
-    <ul>
-      <li><em>Nautical Almanac</em> 2026, página de 20–22 de março: GHA de Áries e do Sol,
-        declinação, colunas da Lua, tabela de nascer/pôr/crepúsculos por latitude, tabela de
-        incrementos (pág. 263), e o ΔT que a própria página declara.</li>
-      <li>Instantes publicados dos <strong>equinócios e solstícios</strong> de 2025 a 2027 —
-        referência independente do livro.</li>
-      <li>Os quatro extremos e as quatro passagens por zero da <strong>equação do tempo</strong>,
-        com data. <strong>Todos batem</strong>, o que são oito coincidências independentes.</li>
-      <li>Instantes publicados de três <strong>luas cheias</strong> de 2026.</li>
-      <li>Duas fórmulas independentes para o tempo sidéreo (IAU 1982 e o Ângulo de Rotação da Terra
-        da IAU 2000), cuja diferença é a precessão acumulada e bate com a expressão dela.</li>
-    </ul>
-    <p><strong>O que isso apanhou:</strong> os treze itens da Fase 2 — nenhum deles teria aparecido
-    a reler. E o resultado final, que é o produto do curso: <strong>as seis colunas de nascer, pôr e
-    crepúsculos batem ao minuto</strong>, o GHA de Áries bate à precisão de impressão do livro, e
-    <strong>quatro das seis colunas tabeladas não batem</strong> — por 0,2′, 0,4′, 2,1′ e 5,7′.</p>
-    <p>⚠️ <strong>O que ficou por validar, dito à letra:</strong></p>
-    <ul>
-      <li><strong>Não há observação real.</strong> Não há sextante; a lição 7 valida a álgebra da
-        fixação com alturas simuladas, e isso valida a álgebra, não a astronomia.</li>
-      <li><strong>Não corri o <code>skyfield</code></strong> — sem rede para o instalar nem para
-        descarregar as efemérides do JPL. A lição 9 descreve o procedimento e não afirma nada sobre
-        os números dele.</li>
-      <li><strong>Duas fontes primárias não abriram</strong> (USNO e a tabela da NOAA). Onde isso
-        afeta uma afirmação, está escrito na própria lição qual foi a reprodução usada e qual foi a
-        medição que a substituiu.</li>
-      <li><strong>As constantes harmónicas da lição 8 são inventadas</strong>, e está dito no código
-        e na prosa.</li>
-      <li><strong>O <code>tidy</code> ficou por correr na primeira passagem</strong> — não estava
-        instalado. Foi apontado a um <code>tidy-html5 5.8</code> e correu: apanhou o
-        <code>&lt;samp&gt;</code> vazio descrito acima, e mais nada.</li>
-      <li><strong>O passo 5 do <code>validar.sh</code> (termos sensíveis) disparou</strong> numa
-        frase do diagnóstico, com razão — ele procura a palavra e pede confirmação humana. A frase
-        foi reescrita, <strong>e não se acrescentou uma exceção ao validador</strong>: a exceção
-        enfraquecia-o para sempre e a frase não perdia nada.</li>
-    </ul>
+k, b = np.polyfit(Xs, mags, 1)
+print("declive da reta (coeficiente de extincao) = %.4f mag/massa de ar" % k)
+print("posto no simulador                        = %.4f" % K_VERDADEIRO)
+print("erro %+.1f %%" % (100 * (k / K_VERDADEIRO - 1)))</code></pre>
+         <p>Saída (corrida a 2026-09-18):</p>
+<pre><code>  h=75  X=1.035  fluxo=    7056  m_inst=-9.6214
+  h=60  X=1.155  fluxo=    6716  m_inst=-9.5678
+  h=45  X=1.414  fluxo=    6555  m_inst=-9.5414
+  h=35  X=1.743  fluxo=    5963  m_inst=-9.4386
+  h=25  X=2.366  fluxo=    5327  m_inst=-9.3162
+  h=20  X=2.924  fluxo=    4438  m_inst=-9.1179
+  h=15  X=3.864  fluxo=    3702  m_inst=-8.9210
+declive da reta (coeficiente de extincao) = 0.2488 mag/massa de ar
+posto no simulador                        = 0.2300
+erro +8.2 %</code></pre>
+         <p><strong>Oito por cento de erro</strong>, com uma estrela e uma pose por altura. Não é
+         mau, e é honesto dizer o que o melhoraria: várias estrelas por pose (a média dos declives
+         individuais), várias poses por altura, e um intervalo maior de massa de ar.</p>
+         <p>🔴 <strong>E a armadilha do método, que é o que interessa aprender:</strong> a reta de
+         Bouguer só funciona se a transparência for <em>constante</em> durante a medição. Se
+         passar um cirro entre a medição a 75° e a de 15°, o declive que medes é a soma da
+         extinção com a nuvem — e não há como as separar a partir de uma estrela só. A defesa é
+         medir <strong>subindo e descendo</strong>: se os dois ramos derem o mesmo, a noite estava
+         estável.</p>
+  </details>
+</div>
+    <h2 id="quiz">8. Quiz</h2>
+<p>Corrige-se aqui, sem rede. Cada opção tem a sua explicação — é aí que está o que faltava perceber, por isso lê-as todas, mesmo quando acertas.</p><div class="quiz" data-quiz="08-planear-a-sessao">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Qual é a altura máxima que um alvo de declinação +10° atinge a 40° de latitude norte?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-1" value="a" data-certa="false"><span class="rotulo">50°, porque 40 + 10.</span></label>
+          <p class="explicacao" hidden>A soma dá a altura do polo mais a declinação, que não é a altura no trânsito para um alvo a sul do zénite.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-1" value="b" data-certa="true"><span class="rotulo">60°, porque 90 − |40 − 10|.</span></label>
+          <p class="explicacao" hidden>Exato: a altura no trânsito é 90° menos a diferença entre a latitude e a declinação.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-1" value="c" data-certa="false"><span class="rotulo">Depende da época do ano.</span></label>
+          <p class="explicacao" hidden>A época do ano decide <em>quando</em> o trânsito acontece — de dia ou de noite — não a que altura.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A 20° de altura, quanto da luz chega em comparação com o zénite, com k = 0,20?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-2" value="a" data-certa="true"><span class="rotulo">Cerca de 58 % em absoluto, ou seja 70 % do que chega no zénite.</span></label>
+          <p class="explicacao" hidden>As duas leituras estão certas e convém não as confundir: 58,4 % do que havia acima da atmosfera, e 58,4/83,2 = 70 % do que chega no zénite.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-2" value="b" data-certa="false"><span class="rotulo">Cerca de 70 %.</span></label>
+          <p class="explicacao" hidden>Seria a 30°, onde X = 2. A 20° a massa de ar é 2,92, quase três vezes a do zénite.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-2" value="c" data-certa="false"><span class="rotulo">Cerca de 90 %: a atmosfera é fina.</span></label>
+          <p class="explicacao" hidden>A 20° a linha de visão atravessa quase três vezes a espessura do zénite, e isso são 0,58 magnitudes.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O teu alvo está a 66° e vai chegar a 85° daqui a duas horas. Esperas?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-3" value="a" data-certa="true"><span class="rotulo">Não: a diferença é de 2 % no sinal e duas horas de integração valem muito mais.</span></label>
+          <p class="explicacao" hidden>Exato. Acima de 60° a altura deixa de importar; o que importa é o tempo total. Esperar só compensa para alvos baixos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-3" value="b" data-certa="false"><span class="rotulo">Sim: no trânsito a extinção é menor e a imagem fica melhor.</span></label>
+          <p class="explicacao" hidden>A diferença é 0,22 contra 0,20 mag, ou seja 2 % de sinal. Duas horas de integração valem muito mais do que 2 %.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-3" value="c" data-certa="false"><span class="rotulo">Depende do céu: se estiver limpo, espero.</span></label>
+          <p class="explicacao" hidden>Um céu limpo é a razão para <em>começar já</em>, não para esperar — pode não estar limpo daqui a duas horas.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Mediste a reta de Bouguer e o declive deu o dobro do esperado. Qual é a primeira hipótese?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-4" value="a" data-certa="false"><span class="rotulo">O teu sítio tem mesmo muitos aerossóis.</span></label>
+          <p class="explicacao" hidden>Pode ter, mas há uma hipótese que se testa primeiro e é muito mais comum.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-4" value="b" data-certa="false"><span class="rotulo">A fórmula da massa de ar falhou porque foste abaixo de 15°.</span></label>
+          <p class="explicacao" hidden>Isso enviesaria os pontos mais baixos, não duplicaria o declive — e vê-se logo na curvatura dos pontos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-4" value="c" data-certa="true"><span class="rotulo">A transparência variou durante a medição — passou um cirro — e o declive é a soma da extinção com a nuvem.</span></label>
+          <p class="explicacao" hidden>É a primeira hipótese, e testa-se medindo a subir e a descer: se os dois ramos discordarem, a noite não estava estável.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o centro da Via Láctea é tão difícil de fotografar de Lisboa?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-5" value="a" data-certa="true"><span class="rotulo">Porque está a uma declinação de cerca de −29°, e de 38,7° N não passa dos 22° de altura.</span></label>
+          <p class="explicacao" hidden>É geometria pura: 90 − |38,7 − (−29)| = 22,3°. A essa altura a extinção come mais de meia magnitude e o céu junto ao horizonte é o mais poluído.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-5" value="b" data-certa="false"><span class="rotulo">Porque é demasiado ténue para uma objetiva de fotografia.</span></label>
+          <p class="explicacao" hidden>Não é: é das regiões mais brilhantes do céu. O problema não é o brilho dela.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-5" value="c" data-certa="false"><span class="rotulo">Porque só é visível no verão, e no verão as noites são curtas.</span></label>
+          <p class="explicacao" hidden>As noites curtas ajudam a explicar a dificuldade, mas a razão principal é a altura — que não melhora com a estação.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Qual destas decisões de planeamento vale mais horas?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-6" value="a" data-certa="false"><span class="rotulo">Esperar pelo momento exato do trânsito.</span></label>
+          <p class="explicacao" hidden>Para alvos altos vale 2 %. É a decisão de planeamento com menos retorno de todas.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-6" value="b" data-certa="true"><span class="rotulo">Escolher o alvo que está alto na janela que tens.</span></label>
+          <p class="explicacao" hidden>Fotografar aos 15° custa quase três vezes o tempo de fotografar aos 80°, e essa decisão não custa nada a tomar.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="08-planear-a-sessao-6" value="c" data-certa="false"><span class="rotulo">Usar poses mais longas para ter menos ficheiros.</span></label>
+          <p class="explicacao" hidden>As poses são decididas pelo traço da lição 2, não pelo conforto do disco — e os ficheiros são um problema de logística, não de astronomia.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+<p>Explicar em voz alta, sem jargão, expõe os buracos que a leitura esconde. Esta resposta vai para a entrega.</p><div class="aberta">
+  <label for="feynman-1">Explica a alguém que nunca pensou nisto porque é que a mesma fotografia, do mesmo objeto, com o mesmo equipamento, rende o dobro se for tirada três horas mais tarde — e porque é que às vezes não rende nada de diferente.
+    <span class="pista">Sem usar «massa de ar», «extinção» nem «declinação».</span>
+  </label>
+  <textarea id="feynman-1" data-pergunta="Explica a alguém que nunca pensou nisto porque é que a mesma fotografia, do mesmo objeto, com o mesmo equipamento, rende o dobro se for tirada três horas mais tarde — e porque é que às vezes não rende nada de diferente."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as
+  tuas respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção
+  acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/astrofotografia/respostas/AAAA-MM-DD.md</code>
+  e correr <code>/corrigir astrofotografia</code>.</p>
+</div>
+    <h2 id="resumo">10. Resumo</h2>
+<ul><li>Massa de ar X = 1/sen(h), válida acima de ≈15°; a extinção é k·X magnitudes.</li><li>A 20° perde-se 30 % da luz em relação ao zénite; a 10°, metade.</li><li>Altura máxima de um alvo = 90° − |latitude − declinação|; decide-se em cinco segundos e decide a noite.</li><li>Fotografar aos 15° custa quase três vezes o tempo de fotografar aos 80° — mas de 40° para 80° a diferença já é pequena.</li><li>O coeficiente k mede-se com a reta de Bouguer, e só é válido se a transparência estiver estável.</li></ul>
+    <h2 id="fontes">11. Fontes</h2>
+<ul class="fontes"><li><strong>Tópico deste repositório</strong> — <a href="../almanaque/index.html">O almanaque</a>, e em especial a <a href="../almanaque/00-esfera-celeste.html">lição 0 (a esfera celeste)</a> e a <a href="../almanaque/04-nascer-e-por.html">lição 4 (nascer, pôr e crepúsculos)</a>. <strong>Porquê:</strong> é onde a declinação, o ângulo horário e a altura são ensinados de raiz, com código que corre. Esta lição usa-os e não os repete. <strong>O que saltar:</strong> a lição 8 desse tópico (marés) não toca nisto.</li><li><strong>Documentário</strong> — <em>Seeing in the Dark</em>, de Timothy Ferris (PBS, 2007) · <a href="https://www.pbs.org/seeinginthedark/">pbs.org</a>. <span class="verificado">🌐 Verificado a 2026-09-18</span> <strong>Porquê:</strong> é sobre a única coisa que este curso não consegue ensinar — porque é que alguém passa a noite acordado a fazer isto. E mostra astrofotógrafos amadores a obter, com equipamento comprável, resultados que há trinta anos eram de observatório. <strong>O que ver:</strong> as partes com os amadores e as câmaras CCD arrefecidas; o sítio da própria emissora diz que foram usados «dedicated astronomical CCD devices operating at below-zero temperatures» na produção. ⚠️ <strong>Duração e data de estreia não confirmadas na fonte primária</strong>: aparecem num comunicado em PDF alojado no mesmo sítio que não se deixou ler daqui, e por isso não se escrevem. É o tipo de ficha que já levou este repositório a publicar dois erros (registo de falhas, 2026-09-17).</li><li><strong>Fonte secundária</strong> — Wikipédia, <em>Astrophotography</em> · <a href="https://en.wikipedia.org/wiki/Astrophotography">en.wikipedia.org</a>. <span class="verificado">🌐 Verificado a 2026-09-18</span> <strong>Porquê:</strong> é o ponto de partida do pedido e a fonte das datas históricas desta lição. <strong>O que saltar:</strong> a secção de equipamento é uma lista de compras sem mecanismo.</li></ul>
 
     <footer class="rodape">
-      <p><a href="../index.html">Todos os tópicos</a> · <a href="../metodo.html">O método</a></p>
+      <p><a href="#conteudo">Voltar ao início</a> · <a href="index.html">Mapa do tópico</a> · <a href="../metodo.html">Porque é que a lição tem esta forma</a></p>
+      <p><a href="07-o-ceu-que-atrapalha.html">← Lição 7 · O céu que atrapalha</a> · <a href="09-o-teu-relatorio.html">Lição 9 · A tua imagem, com relatório →</a></p>
     </footer>
   </main>
 </div>

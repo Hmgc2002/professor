@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>O almanaque — professor</title>
-<meta name="description" content="Curso sobre o almanaque: da tábua de 1088 ao almanaque do GPS, e a construção de um almanaque náutico próprio medido contra o Nautical Almanac oficial.">
+<title>Astrofotografia — professor</title>
+<meta name="description" content="Curso de astrofotografia com câmara, objetiva e tripé: da contagem de fotões ao relatório de medições, com o pipeline escrito de raiz.">
 <style>
 /* INICIO ESTILO */
 /* ------------------------------------------------------------------
@@ -413,11 +413,14 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
 /* FIM ESTILO */
 </style>
 </head>
-<body data-pagina="docs/almanaque/index.html">
+<body data-pagina="docs/astrofotografia/index.html">
 <a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
 
 <header class="barra">
-  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> O almanaque</p>
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    Astrofotografia
+  </p>
   <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
 </header>
 
@@ -438,326 +441,351 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
 
   <main id="conteudo">
     <p class="etiqueta nucleo">pronto</p>
-    <h1>O almanaque</h1>
-    <p class="subtitulo">Do <em>Almanaque de Azarquiel</em> de 1088 ao almanaque que o satélite de
-    GPS te transmite: a mesma decisão de engenharia, oito séculos separados. E, no fim, o teu —
-    gerado por ti, medido contra o <em>Nautical Almanac</em> oficial, com a tolerância declarada
-    antes de comparar.</p>
+    <h1>Astrofotografia</h1>
+    <p class="subtitulo">Câmara, objetiva e tripé. Sem seguimento, a rotação da Terra impõe um teto
+    à pose — e tudo o que este curso ensina é a consequência disso: muitas poses curtas, calibradas,
+    alinhadas, somadas e <strong>medidas</strong>. O código é todo teu, e é de raiz.</p>
 
     <h2 id="conseguir">O que vais conseguir fazer no fim</h2>
     <ul>
-      <li><strong>Implementar</strong>, só com a biblioteca padrão, a posição do Sol e da Lua, o
-        tempo sidéreo, o nascer, o pôr e os crepúsculos, e a redução de uma altura de sextante.</li>
-      <li><strong>Reproduzir</strong> as colunas de uma página diária real do <em>Nautical
-        Almanac</em> e <strong>dizer com um número</strong> quais é que batem e quais não.</li>
-      <li><strong>Fazer uma consulta completa</strong> numa página do livro — hora inteira,
-        incremento, correções <em>v</em> e <em>d</em>, com os sinais certos — sem consultar.</li>
-      <li><strong>Explicar</strong> porque é que o almanaque nasceu em 1088 como mudança de
-        <em>formato</em> e não de astronomia, e porque é que continua a ser publicado.</li>
-      <li><strong>Diagnosticar</strong>, dado um resultado errado por décimas de minuto de arco,
-        qual dos cinco relógios ou qual das cinco correções é que foi trocada.</li>
-      <li><strong>Declarar uma tolerância antes de medir</strong> — e perceber porque é que a ordem
-        dessas duas coisas é a diferença entre medir e justificar.</li>
+      <li><strong>Calcular</strong>, antes de sair de casa, quantos electrões um alvo te vai dar
+      numa pose — e a partir de que magnitude as estrelas do campo vão saturar.</li>
+      <li><strong>Escolher</strong> o tempo de pose a partir de uma tolerância de traço que sabes
+      defender, em vez de uma regra decorada.</li>
+      <li><strong>Medir</strong> o ganho, o ruído de leitura e a corrente escura da tua câmara, sem
+      abrir a folha de especificações de ninguém.</li>
+      <li><strong>Implementar</strong> o <em>pipeline</em> completo — calibrar, detetar estrelas,
+      alinhar, empilhar, esticar — em biblioteca padrão mais <code>numpy</code>.</li>
+      <li><strong>Medir</strong> o brilho do céu de onde fotografas, em magnitudes por segundo de
+      arco quadrado, a partir das tuas próprias poses.</li>
+      <li><strong>Diagnosticar</strong>: dado um ganho de sinal-ruído que não bateu com o previsto,
+      dizer qual das causas conhecidas o explica — e reconhecer quando o número saiu
+      <em>bom de mais</em>, que é sempre um erro de medição.</li>
+      <li><strong>Explicar</strong> porque é que subir o ISO não recolhe mais luz, porque é que um
+      filtro de banda larga duplica o tempo necessário, e porque é que tirar o gradiente melhora a
+      vista e não o sinal-ruído.</li>
     </ul>
 
     <h2 id="nao-e">O que este curso não é</h2>
     <ul>
-      <li><strong>Não é astronomia observacional</strong>: não há telescópios nem fotografia do
-        céu. ⚠️ <em>Corrigido a 2026-09-18 — esta linha dizia só «não há fotografia do céu» e não
-        remetia para lado nenhum, porque em 2026-09-16 não havia para onde. Agora há:
-        <a href="../astrofotografia/index.html">Astrofotografia</a> é o tópico que apanha
-        precisamente o que este recusou, e usa a esfera celeste daqui como pré-requisito.</em></li>
-      <li><strong>Não é mecânica celeste</strong>: ninguém integra órbitas aqui. Usam-se séries
-        ajustadas e publicadas, e diz-se de onde vêm e quanto erram.</li>
-      <li>🔴 <strong>Não substitui o <em>Nautical Almanac</em> a bordo.</strong> O curso ensina a
-        lê-lo, a reproduzi-lo com tolerância declarada, e — sobretudo — a saber quando a reprodução
-        não serve. Quatro das seis colunas tabeladas <em>não</em> chegam à precisão do livro, e
-        isso está medido e escrito.</li>
-      <li><strong>Não é um curso de navegação prática.</strong> Não há sextante, não há horizonte do
-        mar, não há observação real. A lição 7 reduz alturas <em>dadas</em>.</li>
-      <li><strong>Não repete a interpolação de picos de FFT</strong> — isso é do tópico
-        <a href="../cassete-captura/00-espetro.html">Digitalizar cassetes</a>. A palavra
-        «interpolação» aparece nos dois e os mecanismos são diferentes; a fronteira está declarada
-        nas lições 6 e 8.</li>
+      <li><strong>Não é astronomia de posição.</strong> Coordenadas, ângulo horário, nascer e pôr
+      são do tópico <a href="../almanaque/index.html">O almanaque</a>. Aqui usam-se, com remissão —
+      e a lição 8 declara-o à cabeça.</li>
+      <li><strong>Não é sobre montagens, guiagem nem alinhamento polar.</strong> Diz-se onde isso
+      entraria e o que mudaria; não se ensina o que não se pode praticar com o material que o
+      diagnóstico registou.</li>
+      <li><strong>Não é fotografia noturna como composição.</strong> Enquadramento e estética ficam
+      de fora. O que fica dentro é o que se mede.</li>
+      <li><strong>Não é um manual de um programa.</strong> Não há PixInsight, Siril nem
+      DeepSkyStacker no núcleo: o <em>pipeline</em> é teu. Eles aparecem na lição 9, como terceira
+      testemunha.</li>
+      <li><strong>Não é fotometria científica.</strong> Mede-se sinal-ruído e largura de estrela
+      para decidir o que fazer a seguir, não para publicar magnitudes.</li>
+      <li><strong>Não repete o que os tópicos da cassete já dizem sobre sinal e ruído</strong> —
+      mas declara as fronteiras, porque há três palavras que colidem: <em>bias</em>,
+      <em>dither</em> e <em>Bayer</em>. Estão desarmadas nas lições 4, 5 e 3.</li>
     </ul>
 
     <h2 id="assumi">O que assumi</h2>
-    <p>Do <a href="../../topicos/almanaque/DIAGNOSTICO.md">diagnóstico</a>. Cada pressuposto traz
-    <strong>o que muda se estiver errado</strong>.</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Pressupostos do curso e o que muda se estiverem errados, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>Assumi que…</th><th>De onde veio</th><th>Se estiver errado…</th></tr></thead>
-    <tbody><tr><td>Não tens sextante nem horizonte do mar</td><td>Não foi perguntado e não foi mencionado</td><td>A lição 7 ganha uma segunda metade com observação real. Como está, reduz <strong>alturas dadas</strong> — o mecanismo é o mesmo, falta o instrumento</td></tr><tr><td>Todo o código é biblioteca padrão</td><td>«Calcular eu próprio» era um dos objetivos</td><td>Nada muda: é uma decisão, não um pressuposto sobre ti. Um almanaque feito sobre <code>skyfield</code> funcionava e não ensinava. Ele aparece só na lição 9</td></tr><tr><td>A posição de exemplo pode ser pública e arbitrária</td><td>Decisão de privacidade (D-001)</td><td>Muda-se uma constante em <code>gerar.py</code>. Nenhum mecanismo depende do sítio</td></tr><tr><td>Interessa a época atual (1950–2050)</td><td>«Gerar um almanaque meu» lê-se como «para o ano que vem»</td><td>As séries usadas estão declaradas para 1950–2050. Fora disso parte primeiro o ΔT, que é medido e não calculado — e o curso passaria a precisar de uma lição sobre calendários históricos e a reforma gregoriana</td></tr><tr><td>Inglês técnico lê-se sem atrito</td><td>Todas as fontes primárias estão em inglês</td><td>O curso teria de traduzir as páginas do <em>Nautical Almanac</em> em vez de as usar</td></tr></tbody>
-  </table>
-</div>
+    <p>Do diagnóstico em <a href="../../topicos/astrofotografia/DIAGNOSTICO.md"><code>topicos/astrofotografia/DIAGNOSTICO.md</code></a>.
+    Cada pressuposto traz <strong>o que muda se estiver errado</strong>.</p>
 
-    <div class="caixa aviso">
-      <span class="titulo">⚠️ A tensão que o diagnóstico encontrou, e como se resolveu</span>
-      <p>Pediste as três coisas: <strong>usar um almanaque náutico a sério</strong>,
-      <strong>perceber o objeto histórico</strong> e <strong>calcular tu próprio</strong>. As
-      primeira e terceira quase se contradizem: as séries que cabem numa lição dão o Sol a cerca de
-      0,4′ e o livro publica a 0,1′.</p>
-      <p>A resolução não foi escolher uma — foi tornar a diferença <strong>o assunto</strong>. Todas
-      as lições declaram o que a sua aproximação custa, em minutos de arco e em milhas náuticas, e a
-      lição 9 junta tudo num orçamento de erro. É o eixo do curso.</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Pressupostos do curso, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Assumi que…</th><th>De onde veio</th><th>Se estiver errado…</th></tr></thead>
+        <tbody>
+          <tr><td>Câmara, objetiva e tripé — sem seguimento</td><td>Resposta direta</td>
+              <td>Com uma montagem, o núcleo não muda: muda o valor da velocidade angular residual
+              na lição 2 e abre-se a extensão sobre amostragem fina na lição 3</td></tr>
+          <tr><td>A câmara grava RAW e permite pose, ISO e foco manuais</td><td>Implícito no material</td>
+              <td>Sem RAW, a lição 4 mede coisas que a câmara já alterou (o JPEG já foi esticado e
+              já teve redução de ruído) e passa a ter uma segunda metade sobre o que se pode
+              recuperar de um JPEG</td></tr>
+          <tr><td>Python 3 e <code>numpy</code>, e mais nada</td><td>É programador full-stack</td>
+              <td>Nada muda no núcleo: é decisão de desenho (D-028). Um <em>pipeline</em>
+              construído sobre <code>astropy</code> ou <code>OpenCV</code> não ensina o que está lá
+              dentro</td></tr>
+          <tr><td>Fotografia, astronomia de posição e teoria do ruído são terreno novo</td>
+              <td>Resposta explícita: «nada disto a sério»</td>
+              <td>Se for modéstia, as lições 0 e 1 lêem-se em 20 minutos cada e nada mais muda. O
+              risco é assimétrico: quem sabe salta, quem não sabe fica sem chão na lição 2</td></tr>
+          <tr><td>Céu urbano ou suburbano</td><td>Posição de exemplo herdada do almanaque</td>
+              <td>Com céu escuro, o tempo de integração necessário desce muito — mas a lição 7 é
+              escrita para ser <em>medida</em>, não lida: é o teu céu que entra na conta</td></tr>
+          <tr><td>Inglês técnico lê-se sem atrito</td><td>Todas as fontes primárias estão em inglês</td>
+              <td>O curso teria de traduzir a norma FITS e a patente do mosaico de Bayer em vez de
+              remeter para elas</td></tr>
+        </tbody>
+      </table>
     </div>
 
     <h2 id="mapa">O mapa</h2>
-    <p>🔴 O diagnóstico registou «astronomia esférica: nenhuma». Por isso a esfera celeste é a
-    <strong>lição 0</strong>, com onze secções como qualquer outra, e não uma caixa de recordação no
-    meio da lição 3.</p>
-<figure>
-  <svg viewBox="0 0 1034 278" role="img" aria-labelledby="t-mapa d-mapa">
-    <title id="t-mapa">Mapa das dez lições e das suas dependências</title>
-    <desc id="d-mapa">As lições 0 e 1 não dependem de nada e alimentam a 2. A 2 alimenta a 3, que é o eixo do curso. Da 3 saem a 4 e a 5, que convergem na 6; a 6 alimenta a 7 e a 7 alimenta a 9, que é o projeto. A lição 8, sobre marés, sai da 5 e é extensão. A mesma informação está na tabela do plano, logo a seguir.</desc>
-    <defs><marker id="seta-mapa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/></marker></defs>
-    <rect class="svg-realce" x="24" y="88" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="24" y="158" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="192" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="360" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="528" y="53" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="528" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="696" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="864" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-fundo" x="696" y="200" width="146" height="44" rx="6"/>
-    <rect class="svg-realce" x="864" y="46" width="146" height="44" rx="6"/>
-    <path class="svg-traco-grosso" d="M 170 110 C 184 110 178 145 186 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 170 180 C 184 180 178 145 186 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 338 145 H 354" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 506 145 C 520 145 514 75 522 75" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 506 145 H 522" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 75 C 688 75 682 145 690 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 145 H 690" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 842 145 H 858" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 937 167 C 937 191 937 114 937 90" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 145 C 688 145 682 222 690 222" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 842 222 C 856 222 850 68 858 68" marker-end="url(#seta-mapa)"/>
-    <text class="svg-texto-pequeno" x="97" y="107" text-anchor="middle">0 · A esfera celeste</text>
-    <text class="svg-texto-pequeno" x="97" y="123" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="97" y="177" text-anchor="middle">1 · O que é um almanaque</text>
-    <text class="svg-texto-pequeno" x="97" y="193" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="265" y="142" text-anchor="middle">2 · O tempo</text>
-    <text class="svg-texto-pequeno" x="265" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="433" y="142" text-anchor="middle">3 · O Sol</text>
-    <text class="svg-texto-pequeno" x="433" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="601" y="72" text-anchor="middle">4 · Nascer e pôr</text>
-    <text class="svg-texto-pequeno" x="601" y="88" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="601" y="142" text-anchor="middle">5 · A Lua</text>
-    <text class="svg-texto-pequeno" x="601" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="769" y="142" text-anchor="middle">6 · Ler as tábuas</text>
-    <text class="svg-texto-pequeno" x="769" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="937" y="142" text-anchor="middle">7 · Reduzir uma altura</text>
-    <text class="svg-texto-pequeno" x="937" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="769" y="219" text-anchor="middle">8 · As marés</text>
-    <text class="svg-texto-pequeno" x="769" y="235" text-anchor="middle">extensão</text>
-    <text class="svg-texto-pequeno" x="937" y="65" text-anchor="middle">9 · O teu almanaque</text>
-    <text class="svg-texto-pequeno" x="937" y="81" text-anchor="middle">núcleo</text>
-  </svg>
-  <figcaption>As caixas destacadas são o princípio (lição 0) e o fim (o projeto). A lição 8 é <strong>extensão</strong>: serve o objetivo histórico e não o critério de sucesso. O mesmo está em texto na tabela seguinte.</figcaption>
-</figure>
+    <p>Há <strong>dois</strong> pré-requisitos em falta, e por isso há duas lições de fundação com
+    as onze secções: a luz (0) e o ruído (1). 🔴 Um pré-requisito que não tens vira lição, não nota
+    de rodapé. O terceiro pré-requisito — astronomia de posição — vive noutro tópico e está
+    remetido, não copiado.</p>
+
+    <figure>
+      <svg viewBox="0 0 560 300" role="img" aria-labelledby="t-mapa d-mapa">
+        <title id="t-mapa">Mapa das lições de astrofotografia</title>
+        <desc id="d-mapa">A lição 0 (a luz) alimenta a 1 (o ruído). A 1 alimenta a 2 (a Terra roda),
+        que alimenta a 3 (do céu ao píxel). A 3 e a 1 alimentam a 4 (calibrar), que alimenta a 5
+        (alinhar e empilhar), que alimenta a 6 (esticar). A 6 e a 1 alimentam a 7 (o céu). A 7
+        alimenta a 8 (planear), que é extensão e depende também do tópico do almanaque. Todas
+        convergem na 9, o projeto. A mesma informação está na tabela do plano, a seguir.</desc>
+        <rect class="svg-realce" x="14"  y="20"  width="116" height="40" rx="6"/>
+        <rect class="svg-realce" x="14"  y="80"  width="116" height="40" rx="6"/>
+        <rect class="svg-caixa"  x="170" y="20"  width="116" height="40" rx="6"/>
+        <rect class="svg-caixa"  x="170" y="80"  width="116" height="40" rx="6"/>
+        <rect class="svg-caixa"  x="170" y="140" width="116" height="40" rx="6"/>
+        <rect class="svg-caixa"  x="326" y="80"  width="116" height="40" rx="6"/>
+        <rect class="svg-caixa"  x="326" y="140" width="116" height="40" rx="6"/>
+        <rect class="svg-caixa"  x="326" y="200" width="116" height="40" rx="6"/>
+        <rect class="svg-caixa"  x="170" y="248" width="116" height="40" rx="6"/>
+        <rect class="svg-realce" x="470" y="140" width="76"  height="40" rx="6"/>
+        <text class="svg-texto" x="72"  y="45"  text-anchor="middle">0 · a luz</text>
+        <text class="svg-texto" x="72"  y="105" text-anchor="middle">1 · o ruído</text>
+        <text class="svg-texto" x="228" y="45"  text-anchor="middle">2 · a Terra roda</text>
+        <text class="svg-texto" x="228" y="105" text-anchor="middle">3 · o píxel</text>
+        <text class="svg-texto" x="228" y="165" text-anchor="middle">4 · calibrar</text>
+        <text class="svg-texto" x="384" y="105" text-anchor="middle">5 · empilhar</text>
+        <text class="svg-texto" x="384" y="165" text-anchor="middle">6 · esticar</text>
+        <text class="svg-texto" x="384" y="225" text-anchor="middle">7 · o céu</text>
+        <text class="svg-texto" x="228" y="273" text-anchor="middle">8 · planear</text>
+        <text class="svg-texto" x="508" y="165" text-anchor="middle">9 · projeto</text>
+        <path class="svg-traco" d="M72 60 V74"/>
+        <path class="svg-traco" d="M130 40 H164" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M130 100 H164" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M130 110 C150 110 150 160 164 160" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M228 60 V74" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M228 120 V134" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M286 160 C306 160 306 110 320 110" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M384 120 V134" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M384 180 V194" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M326 220 C300 220 300 268 290 268" marker-end="url(#seta-m)"/>
+        <path class="svg-traco" d="M442 160 H464" marker-end="url(#seta-m)"/>
+        <defs>
+          <marker id="seta-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>As duas caixas realçadas à esquerda são os pré-requisitos em falta, que aqui são
+      lições. A lição 8 é extensão e depende também do tópico do almanaque.</figcaption>
+    </figure>
 
     <h2 id="plano">O plano no tempo</h2>
-    <p>Distribuído pelas <strong>6 horas ou mais por semana</strong> que o diagnóstico registou. Sem
-    prazo: se forem 8 horas, são 8 semanas. A lição 8 é <strong>extensão</strong> — faz-se quando
-    apetecer, ou nunca.</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Plano das lições no tempo, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>Semana</th><th>Lição</th><th>Depende de</th><th>O que lá está</th><th>Estado</th></tr></thead>
-    <tbody><tr><td>1</td><td><a href="00-esfera-celeste.html">0 · A esfera celeste</a></td><td>—</td><td>Coordenadas, ponto subastral, triângulo de posição. O pré-requisito em falta.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>2</td><td><a href="01-o-que-e-um-almanaque.html">1 · O que é um almanaque</a></td><td>—</td><td>História e mecanismo: um resultado publicado, não um método. O almanaque do GPS.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>3</td><td><a href="02-o-tempo.html">2 · O tempo</a></td><td>lição 0</td><td>Dia juliano, TT/UT1/UTC, ΔT medido, tempo sidéreo médio e aparente.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>4</td><td><a href="03-o-sol.html">3 · O Sol</a></td><td>lições 0 e 2</td><td>A pilha de correções, a equação do tempo, e o orçamento de erro do curso.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>5</td><td><a href="04-nascer-e-por.html">4 · Nascer, pôr e crepúsculos</a></td><td>lição 3</td><td>−0° 50′, bisseção, e os dois casos em que não há resposta.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>6</td><td><a href="05-a-lua.html">5 · A Lua</a></td><td>lição 3</td><td>Paralaxe, fases, o ciclo de 18,6 anos. Onde as aproximações do Sol caem.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>7</td><td><a href="06-ler-as-tabuas.html">6 · Ler as tábuas</a></td><td>lições 3 e 5</td><td>v, d, incrementos. Um formato é uma máquina de evitar um erro.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>8</td><td><a href="07-reduzir-uma-altura.html">7 · Reduzir uma altura</a></td><td>lições 0 e 6</td><td>As cinco correções e Marcq St Hilaire. De um ângulo a uma linha no mapa.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>—</td><td><a href="08-mares.html">8 · As marés</a></td><td>lição 5</td><td>O almanaque que se identifica em vez de se calcular.</td><td><span class="etiqueta extensao">extensão</span></td></tr><tr><td>10</td><td><a href="09-o-teu-almanaque.html">9 · O teu almanaque</a></td><td>lições 3 a 7</td><td>O projeto: declarar a tolerância antes, gerar, comparar, relatar.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr></tbody>
-  </table>
-</div>
+    <p>Dez semanas a cerca de 6 horas, que foi o ritmo declarado. ⚠️ A coluna «precisa de céu» é a
+    que distingue este tópico dos outros do repositório: há lições que dependem de uma noite limpa
+    e sem lua, e em Lisboa no inverno isso pode ser uma janela por quinzena. <strong>Faz essas
+    lições primeiro com o campo sintético</strong> que o teu próprio código gera — assim o
+    <em>pipeline</em> já funciona quando a noite boa aparecer.</p>
 
-    <h3>O código</h3>
-    <p>Quatro ficheiros, todos de biblioteca padrão, que são a fonte de tudo o que as lições
-    mostram:</p>
-    <ul>
-      <li><a href="codigo/almanaque.py"><code>almanaque.py</code></a> — o motor. Cada função traz no
-        <em>docstring</em> de onde veio a fórmula e <strong>quanto erra</strong>.</li>
-      <li><a href="codigo/ensaio.py"><code>ensaio.py</code></a> — o que prova que está certo. Oito
-        secções, todas contra fontes exteriores e datadas.</li>
-      <li><a href="codigo/gerar.py"><code>gerar.py</code></a> — o projeto: gera o teu almanaque
-        anual.</li>
-      <li><a href="codigo/comparar.py"><code>comparar.py</code></a> — lê o PDF oficial e mede a
-        diferença, coluna a coluna.</li>
-    </ul>
-
-    <h3>O orçamento de erro, medido</h3>
-    <p>Contra a página diária de 20 de março de 2026 do <em>Nautical Almanac</em>:</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Orçamento de erro medido contra a página oficial, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>O que se publica</th><th>Erro medido</th><th>O livro imprime a</th><th>Passa?</th></tr></thead>
-    <tbody><tr><td>GHA de Áries</td><td>0,053′</td><td>0,1′</td><td>✅</td></tr><tr><td>Paralaxe da Lua</td><td>0,077′</td><td>0,1′</td><td>✅</td></tr><tr><td>Dec do Sol</td><td>0,195′</td><td>0,1′</td><td>❌</td></tr><tr><td>GHA do Sol</td><td>0,415′</td><td>0,1′</td><td>❌</td></tr><tr><td>Dec da Lua</td><td>2,1′</td><td>0,1′</td><td>❌</td></tr><tr><td>GHA da Lua</td><td>5,7′</td><td>0,1′</td><td>❌</td></tr><tr><td>Nascer, pôr e crepúsculos</td><td>0 min nas seis colunas</td><td>1 min</td><td>✅</td></tr><tr><td>Nascer e ocaso da Lua</td><td>≤ 1 min</td><td>1 min</td><td>✅</td></tr></tbody>
-  </table>
-</div>
-    <p>🔴 <strong>Quatro das seis colunas tabeladas não passam</strong>, e isso é o resultado do
-    curso e não o seu fracasso: sabes quais, por quanto, e o que seria preciso para as corrigir.</p>
+    <div class="tabela-rolavel" tabindex="0" role="region" aria-label="Plano das lições, tabela rolável na horizontal">
+      <table>
+        <thead><tr><th>Semana</th><th>Lição</th><th>Depende de</th><th>Precisa de céu?</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><a href="00-a-luz-como-contagem.html">0 · A luz como contagem</a></td><td>—</td><td>não</td><td><span class="etiqueta nucleo">núcleo</span></td></tr>
+          <tr><td>2</td><td><a href="01-o-ruido.html">1 · O ruído</a></td><td>lição 0</td><td>não</td><td><span class="etiqueta nucleo">núcleo</span></td></tr>
+          <tr><td>3</td><td><a href="02-a-terra-roda.html">2 · A Terra roda</a></td><td>lições 0 e 1</td><td>não</td><td><span class="etiqueta nucleo">núcleo</span></td></tr>
+          <tr><td>4</td><td><a href="03-do-ceu-ao-pixel.html">3 · Do céu ao píxel</a></td><td>lição 2</td><td>não</td><td><span class="etiqueta nucleo">núcleo</span></td></tr>
+          <tr><td>5</td><td><a href="04-calibrar.html">4 · Calibrar</a></td><td>lições 1 e 3</td><td>🔴 sim</td><td><span class="etiqueta nucleo">núcleo</span></td></tr>
+          <tr><td>6</td><td><a href="05-alinhar-e-empilhar.html">5 · Alinhar e empilhar</a></td><td>lições 3 e 4</td><td>🔴 sim</td><td><span class="etiqueta nucleo">núcleo</span></td></tr>
+          <tr><td>7</td><td><a href="06-esticar.html">6 · Esticar</a></td><td>lição 5</td><td>não</td><td><span class="etiqueta nucleo">núcleo</span></td></tr>
+          <tr><td>8</td><td><a href="07-o-ceu-que-atrapalha.html">7 · O céu que atrapalha</a></td><td>lições 1 e 6</td><td>🔴 sim</td><td><span class="etiqueta nucleo">núcleo</span></td></tr>
+          <tr><td>9</td><td><a href="08-planear-a-sessao.html">8 · Planear a sessão</a></td><td>lição 7 · almanaque</td><td>não</td><td><span class="etiqueta extensao">extensão</span></td></tr>
+          <tr><td>10</td><td><a href="09-o-teu-relatorio.html">9 · A tua imagem, com relatório</a></td><td>todas do núcleo</td><td>🔴 sim</td><td><span class="etiqueta nucleo">núcleo</span></td></tr>
+        </tbody>
+      </table>
+    </div>
 
     <h3>No fim</h3>
     <ul>
-      <li><a href="bibliografia.html">Bibliografia</a> — o percurso, por onde começar.</li>
-      <li><a href="folha.html">Folha de consulta</a> — imprimível, só o que se consulta.</li>
+      <li><a href="folha.html">Folha de consulta</a> — imprimível, só as fórmulas e os limiares.</li>
       <li><a href="teste.html">Teste de domínio</a> — intercalado, sem soluções à vista.</li>
+      <li><a href="bibliografia.html">Bibliografia</a> — ordenada por onde começar, não por autor.</li>
       <li><a href="flashcards.csv">Flashcards</a> (CSV para o Anki) e
-        <a href="revisao.ics">calendário de revisão</a> (.ics).</li>
+          <a href="revisao.ics">calendário de revisão</a> (.ics).</li>
+      <li><strong>O código:</strong> <a href="codigo/imagem.py"><code>imagem.py</code></a> (PGM,
+          FITS e PNG de raiz), <a href="codigo/foton.py"><code>foton.py</code></a> (fotões e ruído),
+          <a href="codigo/campo.py"><code>campo.py</code></a> (o simulador),
+          <a href="codigo/pilha.py"><code>pilha.py</code></a> (o <em>pipeline</em>),
+          <a href="codigo/medir.py"><code>medir.py</code></a> (as medições),
+          <a href="codigo/esticar.py"><code>esticar.py</code></a> (o esticamento),
+          <a href="codigo/projeto.py"><code>projeto.py</code></a> (de ponta a ponta) e
+          <a href="codigo/ensaio.py"><code>ensaio.py</code></a> — que produz
+          <strong>todos os números citados nas lições</strong>.</li>
     </ul>
 
     <h2 id="fases">Nota das fases</h2>
     <p>O que cada fase encontrou. É isto que distingue um curso que passou pelo processo de um que
     só parece ter passado.</p>
 
-    <h3 id="fase0">Fase 0 — Verificar</h3>
-    <p><strong>O que se procurou</strong> (tudo registado em
-    <a href="../../topicos/almanaque/DIAGNOSTICO.md">DIAGNOSTICO.md</a>):</p>
+    <h3>Fase 0 — Verificar</h3>
+    <p>O que se procurou está por extenso no
+    <a href="../../topicos/astrofotografia/DIAGNOSTICO.md">diagnóstico</a>. Em resumo:
+    <code>grep -ril</code> em <code>docs/</code> e <code>topicos/</code> por 30 termos, por sintoma
+    e por verbo; <code>git log -S</code> no histórico inteiro; e <code>grep</code> no
+    <code>INDICE.md</code>.</p>
+    <p><strong>Resultado: tópico novo, e três descobertas que mudaram o plano.</strong></p>
     <ul>
-      <li><code>grep -ri</code> em <code>docs/</code> e <code>topicos/</code> por <em>almanaque,
-        almanac, efeméride, astronom, juliano, sextante, latitude, longitude, declinação, tempo
-        sidéreo, órbita, maré, navegação</em> — <strong>0 ficheiros em todos</strong>.</li>
-      <li>Por sintoma e por verbo: <em>tabela pré-calculada, pré-calcul, lookup, memoiz, consulta em
-        tabela, data e hora, segundos intercalares, esfera, trigonom</em> — 0 em todos.</li>
-      <li><em>calendário</em> deu 8 ficheiros, <strong>todos</strong> sobre o <code>revisao.ics</code>
-        da revisão espaçada. <em>fuso</em> deu 10, quase todos falsos — apanha
-        <strong>parafuso</strong> em <code>cassete-captura</code>.</li>
-      <li><code>git log -S</code> para nove termos: <strong>nada</strong>. Nunca existiu e nunca foi
-        removido.</li>
+      <li>🔴 <strong>O tópico vizinho já tinha recusado isto por escrito.</strong> A fronteira do
+      <a href="../almanaque/index.html">almanaque</a> dizia «não é astronomia observacional: não há
+      telescópios nem fotografia do céu». Este tópico é exatamente o que ele recusou, o que torna a
+      fronteira recíproca obrigatória — e essa linha do almanaque passou a remeter para aqui.</li>
+      <li>🔴 <strong>Três colisões de vocabulário</strong> com os tópicos da cassete, todas
+      capazes de transferir a intuição errada: <em>bias</em> (lá, polarização de alta frequência da
+      gravação magnética; aqui, nível de zero do ADC), <em>dither</em> (lá, ruído somado antes de
+      quantizar; aqui, deslocar o enquadramento entre poses) e <strong>Bayer</strong> (o tópico dos
+      índices cita <em>Rudolf</em> Bayer, das B-trees; este cita <em>Bryce</em> Bayer, do mosaico de
+      cor). As três estão desarmadas por escrito, nas lições 4, 5 e 3.</li>
+      <li><strong>A magnitude como escala de fluxo não existia no repositório.</strong> O almanaque
+      trata astros em <em>posição</em>, nunca em <em>brilho</em>.</li>
     </ul>
-    <p><strong>O que se encontrou:</strong> tópico novo, sem pré-requisitos no repositório. Um
-    <strong>vizinho a declarar</strong> — a interpolação parabólica de picos de FFT em
-    <a href="../cassete-captura/00-espetro.html">cassete-captura</a>, mecanismo diferente com o
-    mesmo nome — e uma <strong>analogia a aproveitar</strong>: o <em>cache</em>, que aparece em 14
-    ficheiros em sentido informático e estrutura a lição 1.</p>
-    <p><strong>Fontes primárias localizadas:</strong> o <em>Nautical Almanac</em> em PDF gratuito
-    (1911–2030), as fórmulas de baixa precisão do <em>Astronomical Almanac</em>, o NOAA Solar
-    Calculator, as constituintes de maré. ⚠️ <strong>Duas não abriram:</strong> o sítio do USNO
-    recusou a ligação e a tabela da NOAA é desenhada por JavaScript — está dito em cada lição onde
-    isso afeta uma afirmação.</p>
 
-    <h3 id="fase1">Fase 1 — Criar</h3>
-    <p>Dez lições, quatro ficheiros de código, e uma decisão que estruturou tudo: <strong>nenhuma
-    saída de código foi escrita à mão</strong>. Cada bloco das lições foi executado numa pasta
-    temporária e a saída colada de uma execução real — o mecanismo que o registo de falhas do
-    <code>PROCESSO.md</code> exigiu depois de duas sessões em que os números foram escritos primeiro
-    e corridos depois.</p>
-    <p>Decisões tomadas durante a escrita: biblioteca padrão só (o <code>skyfield</code> só aparece
-    na lição 9, como padrão de comparação); longitude <strong>leste-positiva</strong>, contra a
-    convenção náutica clássica, porque é a de todo o código moderno — declarado em caixa de aviso na
-    lição 0; e o PDF oficial <strong>não entra no repositório</strong>, por direitos de autor,
-    ficando só o extrator.</p>
+    <h3>Fase 1 — Criar</h3>
+    <p>Dez lições, das quais <strong>duas são pré-requisitos em falta</strong> promovidos a lição
+    (a luz e o ruído), e um terceiro pré-requisito — a astronomia de posição — remetido para o
+    tópico que já é dono dele, em vez de copiado.</p>
+    <p>Decisões tomadas durante a escrita, registadas em <code>DECISOES.md</code>:</p>
+    <ul>
+      <li><strong>Biblioteca padrão mais <code>numpy</code>, e nada mais.</strong> Sem
+      <code>astropy</code>, sem <code>rawpy</code>, sem <code>OpenCV</code>. Os formatos de ficheiro
+      (PGM, FITS, PNG) são lidos e escritos de raiz, em cerca de 40 linhas cada, porque um formato
+      que é caixa preta transforma «o meu píxel vale 4096» numa pergunta sem resposta.</li>
+      <li><strong>Um simulador de campo em vez de dados descarregados.</strong> Serve para duas
+      coisas, e a segunda é a que importa: trabalhar sem céu, e <strong>saber a resposta certa</strong>
+      — numa pose tua não sabes quantos electrões aquela estrela deu nem onde estava o centro dela
+      ao décimo de píxel, e aqui sabes.</li>
+      <li><strong>Um <code>ensaio.py</code> que produz todos os números citados.</strong> O registo
+      de falhas do <code>PROCESSO.md</code> tem quatro linhas sobre prosa escrita antes de o código
+      correr. Nenhum número destas lições foi escrito à mão.</li>
+    </ul>
 
-    <h3 id="fase2">Fase 2 — Aprofundar</h3>
-    <p><strong>O que a Fase 1 errou</strong>, item a item, tudo apanhado a correr o que estava
-    escrito:</p>
+    <h3>Fase 2 — Aprofundar</h3>
+    <p><strong>O que a Fase 1 errou</strong>, item a item.</p>
+    <ul>
+      <li>🔴 <strong>Sete exercícios com saídas inventadas.</strong> A Fase 1 escreveu os blocos
+      «Saída (corrida a …)» de sete exercícios <em>antes</em> de os correr — exatamente a falha que
+      o registo do <code>PROCESSO.md</code> tem em quatro linhas separadas. Ao correr, <strong>seis
+      dos sete estavam errados</strong>, e dois deles de forma grosseira: a tabela de perdas da
+      lição 2 dizia 0,6 % onde a medição diz 8,2 %, e a da lição 3 dizia que o piso da grelha
+      aparecia sempre, quando na verdade só aparece em média sobre posições ao acaso dentro do
+      píxel. Todos substituídos pela saída real.</li>
+      <li>🔴 <strong>Um exercício que rebentava.</strong> O E3 da lição 1 imprimia «√N» no cabeçalho
+      e dava <code>UnicodeEncodeError</code> numa consola cp1252 — a mesma falha que o registo já
+      tinha <em>duas</em> vezes. Passou a forçar UTF-8, e o caso ficou escrito dentro do próprio
+      exercício.</li>
+      <li><strong>A lição 3 não tinha o passo que desmonta o folclore.</strong> Faltava a tabela
+      que compara difração, <em>seeing</em> e píxel para objetivas de fotografia — e é ela que
+      mostra que «o seeing estava mau» é uma explicação emprestada da astronomia de telescópio, que
+      a 50 mm vale 0,15 px.</li>
+      <li><strong>A lição 6 afirmava uma regra sem a medir.</strong> Dizia que o ponto preto se põe
+      abaixo da mediana «para não perder contraste». A medição do E2 mostra o contrário: o
+      contraste é <strong>máximo</strong> na mediana. A regra é sobre <em>informação</em>, não sobre
+      contraste, e a lição foi reescrita para dizer isso e mostrar a troca.</li>
+      <li>🔴 <strong>Uma contradição interna na lição 1.</strong> A figura das variâncias usa uma
+      estrela de magnitude 10, onde o maior termo é o <em>próprio sinal</em>; a secção «erros
+      comuns» citava-a a dizer que «o maior termo é quase sempre o céu», que é o que se passa no
+      exemplo trabalhado, com uma estrela de magnitude 12. Duas coisas certas, uma remissão errada.
+      A correção foi melhor do que a remissão: a lição passou a dizer explicitamente que
+      <strong>quem manda depende do alvo</strong>, e a pergunta 9 do teste passou a especificar o
+      brilho do alvo, porque sem isso não tinha resposta única.</li>
+      <li><strong>Faltava a verificação do processo.</strong> Percorrida a lista do
+      <code>PROCESSO.md</code>: onze secções em todas as lições ✅; objetivos verificáveis ✅;
+      fronteira com remissão para os três vizinhos ✅; pressupostos com consequência ✅;
+      pré-requisitos em falta como lição ✅; soluções em <code>&lt;details&gt;</code> fechado ✅;
+      quiz com explicação em cada opção ✅; código que corre em todas as lições ✅; pelo menos uma
+      fonte que não é documentação por lição ✅; bibliografia, folha, teste, flashcards e
+      <code>.ics</code> ✅; convenções ditas como convenções ✅ (a tolerância de 1,3 px, os 2,8 σ do
+      ponto preto, os 0,12 do alvo de fundo, os intervalos do <code>.ics</code>).</li>
+    </ul>
+
+    <h3>Fase 3 — Validar</h3>
+    <p><strong>O que se correu, e o que isso apanhou.</strong> Correram-se os oito ficheiros de
+    código, as dez secções do <code>ensaio.py</code>, os trinta exercícios e o
+    <code>projeto.py</code> de ponta a ponta. Nove erros só apareceram a correr:</p>
     <ol>
-      <li>🔴 <strong>O bug maior: <code>gha()</code> usava o tempo sidéreo MÉDIO.</strong> O
-        <em>Nautical Almanac</em> publica o <strong>aparente</strong>. O erro sistemático contra a
-        página de 20 de março de 2026 era de −0,09′ no GHA de Áries; com o GAST desce para +0,004′,
-        que é o arredondamento do próprio livro. Virou a secção «Erros comuns» da lição 2.</li>
-      <li><strong>O ensaio do dia sidéreo media a taxa com passo de 1 segundo</strong> e dava
-        86164,56 s em vez de 86164,09 s — cancelamento catastrófico. Não era da fórmula: com passo
-        de 1 hora dá certo. Virou caixa de aviso na lição 2.</li>
-      <li><strong>O ensaio da obliquidade comparava a verdadeira com a constante da média</strong> e
-        falhava por 5,4″ — que é exatamente a nutação em obliquidade. Erro do <em>ensaio</em>, não
-        do código.</li>
-      <li><strong>Escrevi «a tabela pesa centenas de vezes mais do que o código»</strong> na lição 1.
-        Medido: <strong>30 vezes</strong>. Corrigido para o que o bloco imprime.</li>
-      <li><strong>Escrevi que a equação dos equinócios vale 0,29′.</strong> Medida sobre 20 anos:
-        <strong>0,263′</strong>. Corrigida em quatro sítios, incluindo dois <em>docstrings</em>.</li>
-      <li><strong>Um comentário no <code>almanaque.py</code> dizia que trocar UT1 por TT custa
-        0,29′.</strong> Custa 0,0008′ no Sol e <strong>17,25′</strong> na rotação da Terra — a mesma
-        quantidade de tempo vale coisas diferentes conforme o que indexa. O comentário passou a
-        dizer as três.</li>
-      <li><strong>O detetor de luas novas da lição 5 dava um mês sinódico de 30,48 dias</strong>,
-        fora do intervalo publicado (29,26–29,80). Era bug do detetor — saltava quase um mês e
-        bissectava na lunação errada. Reescrito para varrer dia a dia: 29,29 a 29,81.</li>
-      <li><strong>O intercepto do exemplo trabalhado da lição 7 dava 178 milhas náuticas</strong>,
-        porque inventei a altura do sextante. Passou a ser obtida <em>por inversão</em> a partir de
-        uma posição real: 18,4 milhas.</li>
-      <li><strong>Escrevi que a fixação recuperava a posição «a menos de um milésimo de milha».</strong>
-        Mede 0,264 milhas à primeira, e cai para 0,00001 à segunda iteração. O resíduo virou a parte
-        mais interessante do exercício: Marcq St Hilaire é uma linearização, e comporta-se como um
-        passo de Newton.</li>
-      <li><strong>O <code>round()</code> do Python arredonda ao par e o livro não.</strong> A minha
-        reconstrução da tabela de incrementos dava 0,1 onde a página imprime 0,2. Virou entrada na
-        tabela de erros comuns da lição 6.</li>
-      <li><strong>O E2 da lição 6 media uma tautologia</strong> — confirmava a definição de
-        <em>v</em>, não a qualidade da interpolação. Reescrito para medir a curvatura desprezada
-        <em>dentro</em> da hora: 0,006′, dezasseis vezes abaixo do passo de impressão.</li>
-      <li><strong>O gerador etiquetava 25 dias do ano em Lisboa como «sempre-acima».</strong> A Lua
-        em Lisboa não é circumpolar coisa nenhuma — eram dias em que ela saltou o nascer. A exceção
-        <code>SemEvento</code> passou a distinguir <strong>três</strong> causas.</li>
-      <li><strong>O <code>ensaio.py</code> rebentou com <code>UnicodeEncodeError</code> na primeira
-        execução</strong>, por causa de um «Δ» numa consola <code>cp1252</code> — a mesma falha que
-        o <code>PROCESSO.md</code> já registava para o <code>validar.py</code>, repetida.</li>
-      <li>🔴 <strong>Um bloco de código corria, falhava, e imprimia nada — com código de saída
-        <em>zero</em>.</strong> O <code>gerar.py</code> não estava a ser copiado para a pasta
-        temporária onde os blocos correm; o subprocesso rebentava, o bloco imprimia um
-        <code>stdout</code> vazio, e a lição 9 publicava um <code>&lt;samp&gt;</code> em branco que
-        parecia «o programa não disse nada». <strong>Só o <code>tidy</code> deu por isso</strong>,
-        ao avisar de um <code>&lt;samp&gt;</code> vazio. Corrigido em três níveis: o ficheiro passou
-        a ser copiado, o bloco passa a verificar o código de saída do subprocesso, e o gerador das
-        lições passa a <strong>recusar</strong> um bloco cuja saída seja vazia.</li>
-      <li><strong>Três figuras erradas que passaram todas as verificações automáticas.</strong> O
-        mapa do curso tinha o <code>viewBox</code> escrito à mão e as lições 6 a 9 ficavam fora dele;
-        a figura da reta de altura precisou de <strong>três versões</strong> (rótulos sobrepostos, e
-        depois geometria cortada pelo topo); um rótulo do mapa saía truncado a meio de uma palavra.
-        Correções: <code>viewBox</code> calculado do envelope da geometria, rótulos em coluna fixa
-        ordenados pela altura do alvo, e nomes curtos explícitos em vez de cortar o título.</li>
-      <li><strong>A figura da soma de uma consulta discordava do bloco de código da mesma
-        lição</strong> por uma décima de minuto de arco: dizia 8° 59,6′ e o valor é 8° 59,7′.</li>
-      <li>⬜ <strong>A lista de verificação do processo, percorrida:</strong> 11 secções por ordem em
-        todas as lições ✅ · objetivos verificáveis ✅ · fronteira com remissão para o tópico vizinho
-        ✅ · cada pressuposto com consequência ✅ · pré-requisito como lição 0 ✅ · soluções em
-        <code>&lt;details&gt;</code> fechado ✅ · explicação em cada opção de quiz ✅ · código que
-        corre em todas as lições ✅ · <strong>fonte que não é documentação em todas as dez</strong>
-        ✅ — e nas três em que não encontrei nenhuma peça audiovisual citável, está escrito que
-        <em>procurei e não encontrei</em> ✅ · convenções declaradas como convenções ✅.</li>
+      <li>🔴 <strong>A fotometria de uma pilha contava o ruído de Poisson do astro N vezes a
+      mais.</strong> A pilha é uma <em>média</em>: o fluxo lido é o de uma pose, mas os electrões
+      que o produziram foram N vezes mais. O primeiro resultado dizia que 32 poses tinham dado
+      ×1,43 em vez de ×5,66 — 75 % abaixo do previsto — e havia uma explicação plausível já
+      escrita. <strong>A explicação não era falsa; era irrelevante.</strong> Ficou como a lição 9
+      inteira, e como a razão de o <code>projeto.py</code> exigir previsões commitadas.</li>
+      <li><strong>O estimador de FWHM inflacionava com o ruído.</strong> Cortava os valores
+      negativos do fundo antes de pesar, o que transforma ruído simétrico em sinal; e usava janela
+      fixa, onde o peso d² faz as bordas dominarem. Media 12,66 px para uma estrela de 6,0.
+      Passou a janela iterada a 1,5×FWHM, sem corte.</li>
+      <li><strong>A fórmula do ponto médio do esticamento tinha os argumentos trocados.</strong>
+      Dava um <em>m</em> perto de 1, que escurece em vez de esticar — e a imagem saía plausível. Só
+      a tabela «razão estrela/fundo» o denunciou: era 31,5, igual à do linear.</li>
+      <li><strong>O ajuste do gradiente estava enviesado.</strong> Ajustava só aos píxeis abaixo da
+      mediana global, que com um gradiente é quase só o lado escuro: 40 ADU postos saíam como 23.
+      Passou a rejeitar por resíduo, e acerta em 1 %.</li>
+      <li><strong>A calibração dividia por um plano com o nível de zero por tirar.</strong> Deixava
+      6 % de vinhetagem residual, que quem olha atribui à objetiva.</li>
+      <li><strong>O ganho medido saía com +24 % de erro</strong> porque os planos do ensaio estavam
+      expostos acima do topo do conversor. Virou a tabela de saturação da lição 4 — e um aviso
+      dentro do próprio simulador.</li>
+      <li><strong>O MAD subestimava o ruído da pilha.</strong> A fotometria usava o desvio absoluto
+      mediano, que é ótimo para <em>detetar</em> mas é enviesado em dados quantizados: fazia o
+      ganho parecer +8 % acima de √N. Passou a desvio-padrão com rejeição. (E o que ficou
+      <em>mesmo</em> acima de √N — as linhas «bilinear» — é real e está explicado: a interpolação
+      correlaciona o ruído.)</li>
+      <li><strong>A medição da FWHM da pilha estava a ser feita no sítio errado.</strong> A pose de
+      referência do §9 também levava deslocamento, portanto a estrela não estava em (256, 256) na
+      pilha — e medir lá inflacionava a largura por causa da distância ao centro, não por causa do
+      alinhamento. Dava 3,06 px em vez de 2,76.</li>
+      <li><strong>O <code>projeto.py</code> media a transparência nas poses por alinhar</strong>,
+      onde a estrela está em coordenadas diferentes em cada uma: dava «mínimo −0,00, mediana 0,30».
+      Passou a medir nas alinhadas: 0,97 e 0,98.</li>
+      <li>🔴 <strong>Duas figuras que passaram o verificador automático e estavam más.</strong> É a
+      quinta vez que isto aparece no registo de falhas deste repositório, e desta vez o passo
+      automático já existia e continuou a não chegar. As barras de variância da lição 1
+      <strong>não estavam à escala</strong> — a do escuro estava desenhada três vezes maior do que
+      devia, precisamente na figura cuja mensagem é «o escuro não se vê» — e na lição 0 uma seta
+      atravessava o rótulo «× QE». Só apareceram a olhar para os PNG a 400 px.</li>
+      <li><strong>As posições das respostas certas passavam por sorte.</strong> O digest por
+      pergunta tirou o período (a falha registada em 2026-09-16) mas deixou a distribuição ao
+      acaso: 29 de 60 na opção c, ou seja 48 %, a um ponto percentual do limiar do validador. O
+      gerador passou a construir a distribuição <strong>equilibrada</strong> e a baralhá-la com
+      semente fixa: 20/20/20, sem padrão visível.</li>
     </ol>
+    <p><strong>Contra as fontes:</strong> reabertas todas as referências a 2026-09-18. Quatro não
+    se deixaram ler e isso está escrito onde cada uma aparece — o artigo da escala de Bortle (403),
+    os textos integrais de Merline &amp; Howell e de Stetson (PDFs digitalizados), e a ficha de
+    duração de <em>Seeing in the Dark</em>. Consequência declarada: nenhuma delas é usada como
+    autoridade para nenhum número.</p>
+    <p><strong>Cruzamento com os outros tópicos:</strong> as três colisões de vocabulário da Fase 0
+    estão declaradas nas lições 3, 4 e 5, e a fronteira do almanaque passou a remeter para aqui.</p>
+    <p><strong>Validador:</strong> passos 0, 1, 3, 4, 5 e 6 limpos — âncoras e ligações,
+    acessibilidade WCAG A/AA nos dois temas a 400 e 1280 px, geometria das 41 figuras do
+    repositório, ficheiros de fim de tópico, e termos sensíveis. Figuras <strong>vistas</strong> a
+    400 px nos dois temas, e as páginas também.</p>
+    <p>⚠️ <strong>O passo 2 — HTML bem formado — ficou por correr</strong>, e não se apresenta como
+    passado. Não há <code>tidy-html5</code> 5.x nesta máquina; a descarga do binário oficial falha
+    na verificação do certificado, o <code>choco install</code> precisa de privilégios que não se
+    pediram, e a única compilação disponível no npm é de 2015, <em>experimental</em>, e não conhece
+    <code>&lt;main&gt;</code> nem SVG: acusa 14 problemas numa página do almanaque que já tinha
+    passado. 🔴 <strong>Um validador com falsos positivos não se instala.</strong>
+    Em substituição, correu-se um verificador de equilíbrio de etiquetas escrito para o efeito —
+    que não faz o que o <code>tidy</code> faz (não conhece o modelo de conteúdo do HTML5) mas apanha
+    a mesma classe de erro — sobre as 78 páginas do repositório e os três modelos: <strong>zero
+    problemas</strong>, incluindo nas páginas que o <code>tidy</code> já tinha validado noutra
+    máquina. Quem tiver <code>tidy</code> 5.x deve correr <code>./validar.sh</code> antes de
+    confiar nisto.</p>
+    <div class="caixa aviso">
+      <span class="titulo">⚠️ O que este curso ainda não tem</span>
+      <p><strong>Não foi testado com dados reais de uma câmara.</strong> Todo o <em>pipeline</em>
+      foi validado contra um simulador cuja verdade é conhecida — o que é a única forma de medir o
+      erro do método, e é por isso que se fez assim. Mas um simulador só tem os defeitos que quem o
+      escreveu lá pôs. Um sensor real traz amplificadores que aquecem, obturadores que não abrem
+      sempre o mesmo tempo, e ficheiros RAW com pré-processamento não documentado.</p>
+      <p>🔴 <strong>O primeiro sítio onde este curso vai falhar é na leitura de um RAW a sério.</strong>
+      Está dito assim para que, quando falhar, seja uma previsão cumprida e não uma surpresa.</p>
+    </div>
 
-    <h3 id="fase3">Fase 3 — Validar</h3>
-    <p><strong>O que se correu:</strong> todo o código de todas as lições, por construção — o
-    gerador executa cada bloco e cola a saída, por isso um bloco que não corra faz a página não
-    existir. Mais o <code>ensaio.py</code> completo (oito secções) e o <code>gerar.py</code> para um
-    ano inteiro em duas latitudes.</p>
-    <p><strong>Contra que fontes exteriores:</strong></p>
-    <ul>
-      <li><em>Nautical Almanac</em> 2026, página de 20–22 de março: GHA de Áries e do Sol,
-        declinação, colunas da Lua, tabela de nascer/pôr/crepúsculos por latitude, tabela de
-        incrementos (pág. 263), e o ΔT que a própria página declara.</li>
-      <li>Instantes publicados dos <strong>equinócios e solstícios</strong> de 2025 a 2027 —
-        referência independente do livro.</li>
-      <li>Os quatro extremos e as quatro passagens por zero da <strong>equação do tempo</strong>,
-        com data. <strong>Todos batem</strong>, o que são oito coincidências independentes.</li>
-      <li>Instantes publicados de três <strong>luas cheias</strong> de 2026.</li>
-      <li>Duas fórmulas independentes para o tempo sidéreo (IAU 1982 e o Ângulo de Rotação da Terra
-        da IAU 2000), cuja diferença é a precessão acumulada e bate com a expressão dela.</li>
-    </ul>
-    <p><strong>O que isso apanhou:</strong> os treze itens da Fase 2 — nenhum deles teria aparecido
-    a reler. E o resultado final, que é o produto do curso: <strong>as seis colunas de nascer, pôr e
-    crepúsculos batem ao minuto</strong>, o GHA de Áries bate à precisão de impressão do livro, e
-    <strong>quatro das seis colunas tabeladas não batem</strong> — por 0,2′, 0,4′, 2,1′ e 5,7′.</p>
-    <p>⚠️ <strong>O que ficou por validar, dito à letra:</strong></p>
-    <ul>
-      <li><strong>Não há observação real.</strong> Não há sextante; a lição 7 valida a álgebra da
-        fixação com alturas simuladas, e isso valida a álgebra, não a astronomia.</li>
-      <li><strong>Não corri o <code>skyfield</code></strong> — sem rede para o instalar nem para
-        descarregar as efemérides do JPL. A lição 9 descreve o procedimento e não afirma nada sobre
-        os números dele.</li>
-      <li><strong>Duas fontes primárias não abriram</strong> (USNO e a tabela da NOAA). Onde isso
-        afeta uma afirmação, está escrito na própria lição qual foi a reprodução usada e qual foi a
-        medição que a substituiu.</li>
-      <li><strong>As constantes harmónicas da lição 8 são inventadas</strong>, e está dito no código
-        e na prosa.</li>
-      <li><strong>O <code>tidy</code> ficou por correr na primeira passagem</strong> — não estava
-        instalado. Foi apontado a um <code>tidy-html5 5.8</code> e correu: apanhou o
-        <code>&lt;samp&gt;</code> vazio descrito acima, e mais nada.</li>
-      <li><strong>O passo 5 do <code>validar.sh</code> (termos sensíveis) disparou</strong> numa
-        frase do diagnóstico, com razão — ele procura a palavra e pede confirmação humana. A frase
-        foi reescrita, <strong>e não se acrescentou uma exceção ao validador</strong>: a exceção
-        enfraquecia-o para sempre e a frase não perdia nada.</li>
-    </ul>
 
-    <footer class="rodape">
-      <p><a href="../index.html">Todos os tópicos</a> · <a href="../metodo.html">O método</a></p>
-    </footer>
   </main>
 </div>
 

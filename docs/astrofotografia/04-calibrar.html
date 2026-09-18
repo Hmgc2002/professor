@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4 · Calibrar: o que é do céu e o que é da câmara — Astrofotografia</title>
+<meta name="description" content="Bias, dark e flat: o que cada um corrige, como se medem o ganho e o ruído de leitura sem folha de especificações, e os erros que deixam a imagem plausível.">
+<style>
+/* INICIO ESTILO */
+/* ------------------------------------------------------------------
+   professor — estilo base.
+   FONTE ÚNICA: modelo/base.css. Não editar a cópia dentro das páginas;
+   editar aqui e correr  python3 sincronizar.py  (ver DECISOES.md D-005).
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  --fundo:        #fdfcfa;
+  --superficie:   #ffffff;
+  --superficie-2: #f3f1ed;
+  --texto:        #1b1a18;
+  --texto-suave:  #4f4c47;
+  --borda:        #d9d5ce;
+  --borda-forte:  #b4afa6;
+  --acento:       #0a559f;
+  --acento-forte: #073c72;
+  --codigo-fundo: #f3f1ed;
+
+  --aviso-b:   #fdf6e3; --aviso-l:   #a06a00; --aviso-t: #4a3200;
+  --critico-b: #fdeeee; --critico-l: #a3242b; --critico-t: #5d1418;
+  --ok-b:      #ecf7ee; --ok-l:      #1f7a3d; --ok-t:     #10431f;
+  --dica-b:    #eef2fb; --dica-l:    #3a4fa8; --dica-t:   #1f2a5e;
+
+  --largura-texto: 72ch;
+  --raio: 8px;
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fundo:        #15151a;
+    --superficie:   #1d1d23;
+    --superficie-2: #26262e;
+    --texto:        #e9e7e4;
+    --texto-suave:  #b0aca6;
+    --borda:        #34343d;
+    --borda-forte:  #4d4d58;
+    --acento:       #8cc2f5;
+    --acento-forte: #b6d9fa;
+    --codigo-fundo: #23232b;
+
+    --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+    --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+    --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+    --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+  }
+}
+
+:root[data-tema="escuro"] {
+  --fundo:        #15151a;
+  --superficie:   #1d1d23;
+  --superficie-2: #26262e;
+  --texto:        #e9e7e4;
+  --texto-suave:  #b0aca6;
+  --borda:        #34343d;
+  --borda-forte:  #4d4d58;
+  --acento:       #8cc2f5;
+  --acento-forte: #b6d9fa;
+  --codigo-fundo: #23232b;
+
+  --aviso-b:   #2e2513; --aviso-l:   #e0a94b; --aviso-t: #f3dcae;
+  --critico-b: #33181a; --critico-l: #f08d92; --critico-t: #f8cdcf;
+  --ok-b:      #16301f; --ok-l:      #6cc98a; --ok-t:     #c3e9cf;
+  --dica-b:    #1c2140; --dica-l:    #9aabec; --dica-t:   #d3daf7;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+/* ---------- barra de topo ---------- */
+
+.barra {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .55rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+.barra .migalhas { font-size: .9rem; color: var(--texto-suave); margin-right: auto; }
+.barra .migalhas a { color: var(--acento); }
+.barra .migalhas span[aria-hidden] { padding: 0 .3rem; }
+
+.botao {
+  font: inherit; font-size: .9rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao:hover { background: var(--borda); }
+.botao.principal { background: var(--acento); color: var(--superficie); border-color: var(--acento); }
+:root[data-tema="escuro"] .botao.principal,
+:root:not([data-tema="claro"]) .botao.principal { color: #10131a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]) .botao.principal { color: #ffffff; }
+}
+.botao.principal:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
+
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.saltar {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--superficie); color: var(--texto);
+  padding: .6rem 1rem; z-index: 60; border: 2px solid var(--acento);
+}
+.saltar:focus { left: .5rem; top: .5rem; }
+
+/* ---------- disposição ---------- */
+
+.disposicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+@media (min-width: 950px) {
+  .disposicao { grid-template-columns: 15rem minmax(0, 1fr); }
+}
+
+.indice {
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  padding: .9rem 1rem;
+}
+@media (min-width: 950px) {
+  .indice { position: sticky; top: 4.2rem; max-height: calc(100vh - 6rem); overflow-y: auto; }
+}
+.indice[hidden] { display: none; }
+.indice h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--texto-suave); margin: 0 0 .5rem; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { margin: .18rem 0; }
+.indice a { display: block; padding: .15rem 0; color: var(--texto); text-decoration: none; }
+.indice a:hover { color: var(--acento); text-decoration: underline; }
+.indice a[aria-current="true"] { color: var(--acento); font-weight: 600; }
+
+.alternar-indice { display: block; width: 100%; text-align: left; margin-bottom: .75rem; }
+@media (min-width: 950px) { .alternar-indice { display: none; } }
+
+main { min-width: 0; }
+main > * { max-width: var(--largura-texto); }
+main > .larga, main > figure, main > .tabela-rolavel { max-width: none; }
+
+/* ---------- texto ---------- */
+
+h1 { font-size: 1.95rem; line-height: 1.2; margin: .2rem 0 .6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.4rem;  line-height: 1.25; margin: 2.4rem 0 .7rem; padding-top: .3rem;
+     border-top: 1px solid var(--borda); }
+h3 { font-size: 1.12rem; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .4rem; color: var(--texto-suave); }
+@media (max-width: 460px) { h1 { font-size: 1.6rem; } h2 { font-size: 1.22rem; } }
+
+p, li { overflow-wrap: break-word; }
+main p a, main li a, main td a, .caixa a { color: var(--acento); text-decoration: underline; }
+main p a:hover, main li a:hover { color: var(--acento-forte); }
+
+.subtitulo { color: var(--texto-suave); font-size: 1.05rem; margin-top: 0; }
+
+.etiqueta {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--borda-forte); color: var(--texto-suave);
+  background: var(--superficie-2); vertical-align: middle;
+}
+.etiqueta.nucleo   { border-color: var(--ok-l);      color: var(--ok-t);      background: var(--ok-b); }
+.etiqueta.extensao { border-color: var(--dica-l);    color: var(--dica-t);    background: var(--dica-b); }
+.etiqueta.obra     { border-color: var(--aviso-l);   color: var(--aviso-t);   background: var(--aviso-b); }
+
+/* ---------- código ---------- */
+
+code {
+  font-family: var(--fonte-mono); font-size: .875em;
+  background: var(--codigo-fundo); padding: .12em .35em;
+  border-radius: 4px; border: 1px solid var(--borda);
+}
+pre {
+  background: var(--codigo-fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: .85rem 1rem;
+  overflow-x: auto;
+  font-size: .875rem; line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 1em; }
+pre:focus-visible { outline: 3px solid var(--acento); }
+
+/* ---------- caixas ---------- */
+
+.caixa {
+  border: 1px solid var(--borda-forte);
+  border-left: 4px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  padding: .85rem 1rem;
+  margin: 1.2rem 0;
+}
+.caixa > :first-child { margin-top: 0; }
+.caixa > :last-child  { margin-bottom: 0; }
+.caixa .titulo { font-weight: 700; display: block; margin-bottom: .3rem; }
+
+.caixa.aviso   { background: var(--aviso-b);   border-color: var(--aviso-l);   color: var(--aviso-t); }
+.caixa.critico { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.caixa.ok      { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.caixa.dica    { background: var(--dica-b);    border-color: var(--dica-l);    color: var(--dica-t); }
+.caixa.aviso a, .caixa.critico a, .caixa.ok a, .caixa.dica a { color: inherit; }
+.caixa code { background: rgba(127,127,127,.18); border-color: rgba(127,127,127,.35); }
+
+.correcao { background: var(--aviso-b); border-color: var(--aviso-l); color: var(--aviso-t); font-size: .95rem; }
+
+/* ---------- tabelas ---------- */
+
+.tabela-rolavel { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-rolavel:focus-visible { outline: 3px solid var(--acento); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+thead th { background: var(--superficie-2); font-size: .85rem; text-transform: uppercase;
+           letter-spacing: .04em; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- exercícios e soluções ---------- */
+
+.exercicio {
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  background: var(--superficie); padding: .9rem 1rem; margin: 1.1rem 0;
+}
+.exercicio > h3, .exercicio > h4 { margin-top: 0; }
+.dificuldade { float: right; font-size: .8rem; color: var(--texto-suave); letter-spacing: .1em; }
+
+details.solucao { margin-top: .8rem; border-top: 1px dashed var(--borda); padding-top: .6rem; }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--acento);
+  list-style-position: outside; padding: .15rem 0;
+}
+details > summary:hover { color: var(--acento-forte); text-decoration: underline; }
+details[open] > summary { margin-bottom: .5rem; }
+
+/* ---------- quiz ---------- */
+
+.quiz { border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; background: var(--superficie); }
+.quiz ol.perguntas { list-style: none; counter-reset: q; margin: 0; padding: 0; }
+.quiz li.pergunta { counter-increment: q; margin: 0 0 1.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--borda); }
+.quiz li.pergunta:last-child { border-bottom: 0; margin-bottom: .6rem; }
+.quiz .enunciado { font-weight: 600; margin: 0 0 .6rem; }
+.quiz .enunciado::before { content: counter(q) ". "; color: var(--texto-suave); }
+.quiz ul.opcoes { list-style: none; margin: 0; padding: 0; }
+.quiz ul.opcoes > li { margin: .3rem 0; }
+.quiz label { display: flex; gap: .55rem; align-items: flex-start; cursor: pointer;
+              padding: .4rem .55rem; border: 1px solid transparent; border-radius: var(--raio); }
+.quiz label:hover { background: var(--superficie-2); }
+.quiz input[type="radio"] { margin: .35rem 0 0; flex: 0 0 auto; width: 1.05rem; height: 1.05rem; accent-color: var(--acento); }
+.quiz .explicacao {
+  margin: .1rem 0 .5rem 2.1rem; padding: .5rem .7rem; font-size: .92rem;
+  border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie-2);
+}
+.quiz .explicacao[hidden] { display: none; }
+.quiz li.opcao.certa   > label { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > label { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz li.opcao.certa   > .explicacao { background: var(--ok-b);      border-color: var(--ok-l);      color: var(--ok-t); }
+.quiz li.opcao.errada  > .explicacao { background: var(--critico-b); border-color: var(--critico-l); color: var(--critico-t); }
+.quiz .resultado { font-weight: 700; margin: .8rem 0 0; }
+.quiz .accoes { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- respostas abertas ---------- */
+
+.aberta { margin: 1rem 0; }
+.aberta label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.aberta .pista { font-weight: 400; color: var(--texto-suave); font-size: .92rem; display: block; margin-top: .15rem; }
+textarea {
+  width: 100%; min-height: 7rem; font: inherit; font-size: .95rem; line-height: 1.55;
+  padding: .6rem .7rem; border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  background: var(--superficie); color: var(--texto); resize: vertical;
+}
+
+.entrega { border: 1px solid var(--borda-forte); border-radius: var(--raio);
+           background: var(--superficie-2); padding: 1rem; margin: 1.5rem 0; }
+.entrega > :first-child { margin-top: 0; }
+.aviso-copia { font-size: .9rem; color: var(--texto-suave); margin: .5rem 0 0; }
+.aviso-copia[hidden] { display: none; }
+
+/* ---------- figuras ---------- */
+
+figure { margin: 1.5rem 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: .9rem; color: var(--texto-suave); margin-top: .5rem; }
+/* Sem isto, um link dentro de uma legenda fica com a cor por omissão do browser
+   e falha o contraste WCAG AA no tema claro (apanhado pelo axe a 2026-09-16). */
+figcaption a { color: var(--acento); text-decoration: underline; }
+.svg-fundo  { fill: var(--superficie-2); }
+.svg-caixa  { fill: var(--superficie); stroke: var(--borda-forte); stroke-width: 1.5; }
+.svg-traco  { stroke: var(--borda-forte); fill: none; stroke-width: 1.5; }
+.svg-texto  { fill: var(--texto); font-family: var(--fonte); font-size: 13px; }
+.svg-suave  { fill: var(--texto-suave); font-family: var(--fonte); font-size: 11.5px; }
+.svg-realce { fill: var(--dica-b); stroke: var(--dica-l); stroke-width: 2; }
+.svg-mono   { fill: var(--texto); font-family: var(--fonte-mono); font-size: 12px; }
+
+/* Uma frase que é o eixo da secção, para não se perder no meio da prosa.
+   Acrescentada a 2026-09-16 (tópico `almanaque`). Não é decoração: é o sítio
+   onde vive a única afirmação que se leva da secção se só se ler uma. */
+.destaque {
+  border-left: 4px solid var(--acento);
+  background: var(--superficie-2);
+  padding: 0.7rem 1rem;
+  margin: 1.1rem 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+/* Acrescentadas a 2026-09-16 para o tópico `almanaque`, que desenha esferas e
+   curvas calculadas e não caixas com setas. Herdam as variáveis do tema, por
+   isso funcionam nos dois sem uma única cor fixa. */
+.svg-traco-fino   { stroke: var(--borda-forte); fill: none; stroke-width: 0.8; opacity: 0.8; }
+.svg-traco-grosso { stroke: var(--acento); fill: none; stroke-width: 2.4; }
+.svg-realce-traco { stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-dasharray: 7 4; }
+.svg-ponto        { fill: var(--superficie); stroke: var(--texto); stroke-width: 2; }
+.svg-ponto-forte  { fill: var(--acento); stroke: var(--texto); stroke-width: 1.5; }
+.svg-texto-pequeno{ fill: var(--texto-suave); font-family: var(--fonte); font-size: 11px; }
+
+/* ---------- cartões do catálogo ---------- */
+
+.cartoes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+.cartao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); padding: 1rem; }
+.cartao h3 { margin: .2rem 0 .4rem; }
+.cartao h3 a { color: var(--texto); text-decoration: none; }
+.cartao h3 a:hover { color: var(--acento); text-decoration: underline; }
+.cartao p { margin: .4rem 0 0; font-size: .95rem; color: var(--texto-suave); }
+
+/* ---------- resultados de pesquisa ---------- */
+
+[data-resultados][hidden] { display: none; }
+.res-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--texto-suave); margin: 1.4rem 0 .4rem; }
+ul.resultados { list-style: none; margin: 0; padding: 0;
+                border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+ul.resultados li { border-bottom: 1px solid var(--borda); }
+ul.resultados li:last-child { border-bottom: 0; }
+ul.resultados a { display: block; padding: .5rem .8rem .15rem; color: var(--acento);
+                  text-decoration: none; font-weight: 600; }
+ul.resultados a:hover { text-decoration: underline; }
+ul.resultados li:hover { background: var(--superficie-2); }
+.res-pagina { display: block; padding: 0 .8rem .55rem; font-size: .85rem; color: var(--texto-suave); }
+/* Seletor com o `ul.resultados a` lá dentro de propósito: a regra acima põe todos
+   os links em block e tem especificidade (0,1,2) — uma classe sozinha (0,1,0) perde
+   para ela, e cada secção caía numa linha própria com o separador «·» solto. */
+ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
+           color: var(--texto-suave); text-decoration: underline; text-underline-offset: 2px; }
+.res-sec:hover { color: var(--acento); }
+
+.rodape { border-top: 1px solid var(--borda); margin-top: 3rem; padding-top: 1rem;
+          font-size: .88rem; color: var(--texto-suave); }
+
+.fontes li { margin-bottom: .7rem; }
+.verificado { font-size: .85rem; color: var(--texto-suave); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root {
+    --fundo: #fff; --superficie: #fff; --superficie-2: #fff;
+    --texto: #000; --texto-suave: #333; --borda: #999; --borda-forte: #555;
+    --acento: #000; --codigo-fundo: #f2f2f2;
+    --aviso-b: #fff; --critico-b: #fff; --ok-b: #fff; --dica-b: #fff;
+    --aviso-t: #000; --critico-t: #000; --ok-t: #000; --dica-t: #000;
+  }
+  @page { size: A4; margin: 15mm; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .barra, .indice, .alternar-indice, .nao-imprimir, .quiz .accoes { display: none !important; }
+  .disposicao { display: block; max-width: none; padding: 0; }
+  main > * { max-width: none; }
+  h1 { font-size: 17pt; } h2 { font-size: 13pt; break-after: avoid; } h3 { font-size: 11pt; break-after: avoid; }
+  .caixa, .exercicio, table, figure, pre { break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; }
+  details[open] > summary::marker { content: ""; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #444; word-break: break-all; }
+  .tabela-rolavel { overflow: visible; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* FIM ESTILO */
+</style>
+</head>
+<body data-pagina="docs/astrofotografia/04-calibrar.html">
+<a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
+
+<header class="barra">
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Astrofotografia</a> <span aria-hidden="true">›</span> lição 4
+  </p>
+  <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
+</header>
+
+<div class="disposicao">
+  <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
+
+  <nav class="indice" id="indice-pagina" aria-label="Índice da página">
+    <h2>Nesta lição</h2>
+    <ol>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
+    </ol>
+  </nav>
+
+  <main id="conteudo">
+    <p class="etiqueta nucleo">Lição 4 · núcleo</p>
+    <h1>Calibrar: o que é do céu e o que é da câmara</h1>
+    <p class="subtitulo">Três imagens que não têm céu nenhum e que decidem se a tua pilha vale alguma coisa. E o modelo do sinal que diz porque é que a ordem das operações não se troca.</p>
+    <h2 id="objetivo">1. Objetivo</h2>
+<p>No fim desta lição <strong>produzes os três mestres de calibração</strong>
+    a partir das tuas poses, <strong>aplicas o modelo do sinal pela ordem certa</strong> e sabes
+    dizer <strong>porque é que essa ordem não se troca</strong>. E mede-se o ganho e o ruído de
+    leitura da tua câmara sem abrir a folha de especificações de ninguém.</p>
+    <div class="caixa critico"><span class="titulo">🔴 Esta é a primeira lição que precisa de céu</span>
+    <p>Precisa de poses tuas. Mas os <em>bias</em>, os <em>darks</em> e os <em>flats</em> não
+    precisam de noite nenhuma: tira-os hoje, à tarde, com a tampa posta. Na primeira passagem
+    podes fazer tudo com o campo sintético do <code>campo.py</code> — o <em>pipeline</em> fica
+    pronto e a noite boa não se desperdiça a depurar código.</p></div>
+    <h2 id="recuperar">2. Recuperar</h2>
+<p>Responde <strong>antes</strong> de continuar a ler, de memória. Falhar aqui é útil: o esforço de tentar puxar da memória é o que consolida, e é por isso que as respostas estão escondidas.</p><ol>
+  <li>Numa pose de 8 s num céu urbano, qual é a contribuição da corrente escura para a variância total?
+    <details class="solucao"><summary>Resposta</summary><p>Cerca de 0,3 %: 1,3 electrões de σ num total de 34,7. (Lição 1, §3.)</p></details>
+  </li>
+  <li>Porque é que a estrela medida em mais píxeis dá pior SNR?
+    <details class="solucao"><summary>Resposta</summary><p>Porque o céu e a leitura entram por píxel: cada píxel a mais traz a variância inteira deles. (Lição 1.)</p></details>
+  </li>
+  <li>O que é que a escala em ″/px depende, e o que é que ela não depende?
+    <details class="solucao"><summary>Resposta</summary><p>Depende da focal e do passo do píxel. Não depende da abertura, do céu nem da noite. (Lição 3.)</p></details>
+  </li>
+</ol>
+    <h2 id="mecanismo">3. O mecanismo</h2>
+<h3>O modelo do sinal</h3>
+    <p>Aquilo que sai da câmara não é a luz que entrou. É:</p>
+<pre><code>bruto = (luz_do_céu + escuro) × resposta_do_píxel + nível_de_zero + ruído</code></pre>
+    <p>Três termos parasitas, e cada um entra de maneira diferente — o que decide tudo o resto:</p>
+    <ul>
+      <li><strong>Nível de zero (<em>bias</em>)</strong> — um valor somado, posto de propósito pelo
+      fabricante para que o ruído não seja cortado em zero. É <strong>aditivo</strong>, não depende
+      do tempo nem da luz.</li>
+      <li><strong>Corrente escura (<em>dark</em>)</strong> — electrões térmicos. <strong>Aditivo</strong>
+      e proporcional ao tempo.</li>
+      <li><strong>Resposta do píxel (<em>flat</em>)</strong> — vinhetagem, poeiras, diferenças de
+      ganho entre píxeis. É <strong>multiplicativo</strong>.</li>
+    </ul>
+    <p>Resolver para a luz dá a ordem, e a ordem não é convenção:</p>
+<pre><code>calibrada = (bruto − zero − escuro×t) ÷ plano_normalizado</code></pre>
+    <p>🔴 <strong>As subtrações vêm primeiro porque o nível de zero não passou pela ótica.</strong>
+    Se dividires antes de subtrair, estás a dividir o offset pela vinhetagem — e o offset não foi
+    vinhetado, foi somado depois. O resultado fica com um erro que tem a forma exata da
+    vinhetagem, o que é particularmente traiçoeiro: parece vinhetagem mal corrigida.</p>
+
+    <figure>
+      <svg viewBox="0 0 560 200" role="img" aria-labelledby="t-cal d-cal">
+        <title id="t-cal">A ordem das operações de calibração</title>
+        <desc id="d-cal">Da esquerda para a direita: a pose bruta, menos o nível de zero, menos o
+        escuro multiplicado pelo tempo, e só no fim dividida pelo plano normalizado. Por baixo,
+        uma nota diz que as subtrações vêm antes da divisão porque o nível de zero é aditivo.</desc>
+        <rect class="svg-caixa"  x="10"  y="50" width="104" height="46" rx="6"/>
+        <rect class="svg-caixa"  x="146" y="50" width="104" height="46" rx="6"/>
+        <rect class="svg-caixa"  x="282" y="50" width="104" height="46" rx="6"/>
+        <rect class="svg-realce" x="418" y="50" width="124" height="46" rx="6"/>
+        <text class="svg-texto" x="62"  y="79" text-anchor="middle">bruto</text>
+        <text class="svg-texto" x="198" y="79" text-anchor="middle">− zero</text>
+        <text class="svg-texto" x="334" y="79" text-anchor="middle">− escuro×t</text>
+        <text class="svg-texto" x="480" y="79" text-anchor="middle">÷ plano</text>
+        <path class="svg-traco" d="M114 73 H140" marker-end="url(#seta-cal)"/>
+        <path class="svg-traco" d="M250 73 H276" marker-end="url(#seta-cal)"/>
+        <path class="svg-traco" d="M386 73 H412" marker-end="url(#seta-cal)"/>
+        <text class="svg-suave" x="198" y="122" text-anchor="middle">aditivo</text>
+        <text class="svg-suave" x="334" y="122" text-anchor="middle">aditivo</text>
+        <text class="svg-suave" x="480" y="122" text-anchor="middle">multiplicativo</text>
+        <text class="svg-suave" x="270" y="160" text-anchor="middle">as subtrações vêm primeiro: o zero não passou pela ótica</text>
+        <text class="svg-suave" x="270" y="180" text-anchor="middle">dividi-lo pela vinhetagem produz um erro com a forma da vinhetagem</text>
+        <defs>
+          <marker id="seta-cal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>Cada seta corresponde a uma linha de <code>pilha.calibrar</code>.</figcaption>
+    </figure>
+
+    <h3>Medir o ganho e o ruído de leitura, sem confiar em ninguém</h3>
+    <p>Este é o truque mais bonito desta lição, e tem uma ideia só: <strong>num sinal de Poisson,
+    a variância é igual à média — em electrões.</strong> Em níveis do ficheiro (ADU), a média fica
+    dividida pelo ganho e a variância pelo ganho ao quadrado. Logo média ÷ variância <em>é</em> o
+    ganho.</p>
+    <p>Na prática usam-se <strong>dois</strong> planos e a diferença entre eles, porque a diferença
+    cancela tudo o que é fixo (vinhetagem, poeiras, ganho de cada píxel) e deixa só o ruído:</p>
+<pre><code>ganho = [(média F₁ + média F₂) − (média B₁ + média B₂)] ÷ [var(F₁−F₂) − var(B₁−B₂)]
+
+leitura = ganho × √(var(B₁−B₂) / 2)</code></pre>
+<pre><code>  verdade posta no simulador:  ganho 1.000 e⁻/ADU · leitura 3.00 e⁻
+  medido por transferência:    ganho 0.999 e⁻/ADU · leitura 3.01 e⁻
+  erro relativo:               ganho -0.12 % · leitura +0.21 %</code></pre>
+    <p>Um décimo de por cento, com dois pares de imagens. <strong>Mas há uma armadilha</strong>, e
+    é preciso vê-la antes de confiar no método:</p>
+<pre><code>  nível do plano   % de píxeis no topo   ganho medido   erro
+        7000 e⁻                 0.0 %          0.998       -0 %
+       12000 e⁻                 0.0 %          0.997       -0 %
+       16000 e⁻                 0.0 %          0.998       -0 %
+       20000 e⁻                33.3 %          1.627      +63 %
+       30000 e⁻                94.8 %         21.530    +2053 %</code></pre>
+    <p>Quando os píxeis batem no topo da escala, a variância deles é cortada — e
+    <strong>variância a menos aparece como ganho a mais</strong>, sem nenhum aviso. Repara que aos
+    16 000 e⁻ ainda não há saturação nenhuma (a vinhetagem salva a imagem toda) e que a partir daí
+    o erro explode. 🔴 A regra é expor os planos a cerca de <strong>metade da escala do
+    conversor</strong>, e não a metade do poço: são coisas diferentes.</p>
+
+    <h3>O escuro é quase um zero com outro nome</h3>
+<pre><code>  tempo   e⁻ térmicos   σ de leitura   medido (e⁻/px/s)   dispersão das 5
+     8 s           0.4          3.0 e⁻             0.0468             0.0 %
+    30 s           1.5          3.0 e⁻             0.0499             0.0 %
+   120 s           6.0          3.0 e⁻             0.0499             0.0 %
+   600 s          30.0          3.0 e⁻             0.0498             0.0 %</code></pre>
+    <p>Aos 8 s há 0,4 electrões térmicos contra 3 de ruído de leitura. A média sai medível (o erro
+    é de −6 %, por causa da quantização), mas o sinal que estás a subtrair a cada píxel é
+    praticamente nulo. <strong>O que o <em>dark</em> te tira em poses curtas não é o fundo: são os
+    píxeis quentes</strong> — aqueles poucos píxeis com defeitos de rede que geram dezenas de
+    vezes mais do que os vizinhos, e que estão sempre na mesma coordenada.</p>
+
+    <h3>O que cada passo corrige, medido no mesmo sítio</h3>
+<pre><code>  bruta                                centro    605.0   canto    561.0   razão 0.927
+  − zero                               centro     92.9   canto     48.6   razão 0.523
+  − zero − escuro                      centro     92.7   canto     48.2   razão 0.520
+  − zero − escuro ÷ plano              centro     69.2   canto     69.5   razão 1.005
+  … mas com o zero por tirar do plano  centro     70.8   canto     66.8   razão 0.944</code></pre>
+    <p>A razão canto/centro é o indicador: <strong>só chega a 1 depois do plano.</strong> Repara
+    também na linha 2: depois de subtrair o zero, a razão <em>piora</em> (de 0,93 para 0,52).
+    Não é um erro — é o zero a deixar de esconder a vinhetagem, que estava lá o tempo todo
+    diluída num offset grande.</p>
+    <p>E a última linha é o preço de dividir por um plano a que não se tirou o nível de zero:
+    0,944 em vez de 1,005. Uma vinhetagem residual de 6 %, que quem olha atribui à objetiva.</p>
+
+    <h3>Quantas calibrações chegam</h3>
+<pre><code>   N     σ do zero mestre (ADU)   previsto σ₁/√N   acrescenta ao total
+    1                  3.411            3.411              41.4 %
+    4                  2.193            1.705              11.8 %
+    9                  1.883            1.137               5.4 %
+   16                  1.760            0.853               3.1 %
+   32                  1.681            0.603               1.6 %</code></pre>
+    <p>A última coluna é o que interessa: subtrair um mestre feito de <em>N</em> imagens acrescenta
+    √(1 + 1/N) − 1 ao ruído final. Com um único <em>bias</em>, <strong>41 %</strong>. Com 16,
+    3,1 %. Passar de 16 para 32 poupa 1,5 pontos — é aí que deixa de valer a pena.</p>
+    <p>⚠️ E há uma discrepância na tabela que não se deve varrer para debaixo do tapete: a coluna
+    «previsto σ₁/√N» não bate com a medida. É porque os mestres aqui são combinados por
+    <strong>mediana</strong>, que tem ≈1,25 vezes o desvio da média — e porque o σ medido inclui a
+    estrutura de coluna do nível de zero, que é fixa e não desce com N nenhum. A parte que desce
+    com √N é só o ruído.</p>
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+<h3>O problema</h3>
+    <p>Tiraste 40 poses de 8 s. Antes de as empilhares, queres calibrá-las — e queres saber o que
+    ganhaste em vez de esperar que tenha corrido bem.</p>
+
+    <h3>Passo 1 — os <em>bias</em>, que são grátis</h3>
+    <p>Tampa na objetiva, tempo mínimo da câmara (1/4000 s serve), mesmo ISO das luzes. Tira 16.
+    Demora um minuto e não precisa de escuridão nenhuma: o obturador está fechado.</p>
+    <p><strong>Porquê 16 e não 5:</strong> pela tabela acima. Com 16 o custo é 3,1 %; com 5 seria
+    quase 10 %. E porquê não 64: porque de 16 para 32 ganhas 1,5 pontos.</p>
+
+    <h3>Passo 2 — os <em>darks</em>, com o mesmo tempo e a mesma temperatura</h3>
+    <p>Tampa posta, <strong>8 s</strong> (o mesmo das luzes), mesmo ISO. Tira 16. A temperatura
+    importa: tira-os no fim da sessão, ao ar livre, não em casa ao aquecimento.</p>
+    <div class="caixa aviso"><span class="titulo">⚠️ A decisão de não subtrair o zero duas vezes</span>
+    <p>Se os teus <em>darks</em> têm o mesmo tempo das luzes, eles já contêm o nível de zero. O
+    <code>pilha.calibrar</code> trata disto com o parâmetro <code>zero_do_escuro</code>, e o erro
+    de o ignorar mede-se no passo 5.</p></div>
+
+    <h3>Passo 3 — os <em>flats</em>, que são os difíceis</h3>
+    <p>Precisas de uma superfície uniformemente iluminada: o céu ao crepúsculo apontando ao zénite,
+    ou um ecrã branco com dois lençóis à frente. <strong>Não mexas no foco nem no diafragma</strong>
+    entre as luzes e os planos — a vinhetagem e as poeiras mudam com os dois.</p>
+    <p>Expõe a <strong>metade da escala do conversor</strong>: num ficheiro de 14 bits, alveja os
+    8000 ADU. A tabela do §3 mostra o que acontece se exageres.</p>
+
+    <h3>Passo 4 — combinar, e porquê com mediana</h3>
+<pre><code>python3 -c "
+import pilha
+zeros, _ = pilha.carregar('sessao/zero-*.pgm')
+escuros, _ = pilha.carregar('sessao/escuro-*.pgm')
+planos, _ = pilha.carregar('sessao/plano-*.pgm')
+zero_m = pilha.mestre(zeros)          # mediana: um satélite não entra
+escuro_m = pilha.mestre(escuros)
+plano_m = pilha.mestre(planos)
+print(zero_m.mean(), escuro_m.mean(), plano_m.mean())"</code></pre>
+    <p>Mediana e não média: um raio cósmico numa das 16 imagens entra na média e não entra na
+    mediana. O preço é ≈25 % mais ruído, e com 16 imagens esse preço é insignificante.</p>
+    <p>⚠️ <strong>Exceto para medir a corrente escura</strong>, onde a mediana de valores inteiros
+    muito pequenos enviesa o resultado. Aí combina-se por média. É a razão de
+    <code>pilha.mestre</code> ter o parâmetro.</p>
+
+    <h3>Passo 5 — aplicar, e verificar que fez alguma coisa</h3>
+<pre><code>cal = pilha.calibrar(luz, zero_m, escuro_m, plano_m, t_luz=8.0, t_escuro=8.0)</code></pre>
+    <p>E agora a verificação, que é o passo que quase toda a gente salta: compara a mediana do
+    fundo no <strong>centro</strong> e num <strong>canto</strong>. Se a razão não se aproximou de
+    1, o teu plano não está a funcionar, e é melhor saber agora do que depois de empilhar 40
+    imagens.</p>
+    <p>Se em vez disso fizeres a subtração a dobrar:</p>
+<pre><code>  fundo depois da calibração certa:     69.62 ADU
+  fundo depois de subtrair a dobrar:  -442.38 ADU
+  diferença: 512.0 ADU — exatamente o nível de zero (512 ADU).
+  Sintoma: 99.9 % dos píxeis ficam negativos.</code></pre>
+    <p>🔴 <strong>E a imagem continua a parecer bem</strong>, porque o esticamento da lição 6 corta
+    em zero de qualquer maneira. O erro só aparece a medir — que é a razão de todo este curso
+    insistir em medir.</p>
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+<div class="exercicio">
+      <h3>Completa</h3>
+      <p>Tens luzes de 30 s mas só tiraste <em>darks</em> de 10 s (acabou-se a bateria).</p>
+      <ol>
+        <li>Podes usá-los? <strong>______</strong></li>
+        <li>Que fator aplicas ao escuro, e a que parte dele? <strong>______</strong></li>
+        <li>O que é que <em>não</em> se escala, e porquê? <strong>______</strong></li>
+        <li>Que erro cometerias se escalasses o <em>dark</em> inteiro por 3? <strong>______</strong></li>
+        <li>Quanto vale esse erro em ADU, com um nível de zero de 512? <strong>______</strong></li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>1.</strong> Podes, mas só se tiveres <em>bias</em> — sem eles não há como
+        separar as duas partes.</p>
+        <p><strong>2.</strong> ×3 (30/10), e só à parte <strong>térmica</strong>: escuro_térmico =
+        dark − bias.</p>
+        <p><strong>3.</strong> O nível de zero não se escala: é um offset da eletrónica, não
+        depende do tempo de exposição. Escalar um offset por 3 é multiplicar por 3 uma coisa que
+        não cresceu.</p>
+        <p><strong>4.</strong> Subtrairias 3×512 = 1536 ADU de zero em vez de 512: um excesso de
+        <strong>1024 ADU</strong>, que é 15 vezes o fundo do céu do exemplo do §4 (69,6 ADU). A
+        imagem inteira fica negativa.</p>
+        <p><strong>5.</strong> 1024 ADU. Em código, é exatamente a diferença entre estas duas
+        linhas:</p>
+<pre><code># certo
+escuro_termico = escuro_m - zero_m
+cal = luz - zero_m - escuro_termico * (30.0 / 10.0)
+
+# errado
+cal = luz - escuro_m * (30.0 / 10.0)</code></pre>
+        <p>O <code>pilha.calibrar(luz, zero_m, escuro_m, plano_m, t_luz=30, t_escuro=10)</code>
+        faz a versão certa — o <code>zero_do_escuro=True</code> existe precisamente para isto.</p>
+      </details>
+    </div>
+    <h2 id="erros">6. Erros comuns</h2>
+<p>As conceções erradas <strong>típicas deste assunto</strong> — e como se reconhecem quando aparecem.</p><div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
+  <table>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody>
+      <tr><td>«Os <em>darks</em> têm de ser tirados à mesma temperatura, mas o tempo é indiferente.»</td><td>Usar <em>darks</em> de 60 s para luzes de 8 s sem escalar.</td><td>A corrente escura é proporcional ao <strong>tempo</strong> e à temperatura, as duas. Escalar é possível — mas só a parte térmica, nunca o nível de zero, que não depende do tempo.</td></tr>
+      <tr><td>«O <em>flat</em> serve para tirar as poeiras.»</td><td>Tirar planos só quando o sensor está sujo.</td><td>Tira poeiras <em>e</em> vinhetagem <em>e</em> as diferenças de ganho entre píxeis. A vinhetagem é quase sempre o maior dos três: 0,52 de razão canto/centro no exemplo do §3.</td></tr>
+      <tr><td>«O <em>bias</em> pode-se subtrair como um número: 512 e pronto.»</td><td>Subtrair uma constante em vez de uma imagem.</td><td>O nível de zero tem <strong>estrutura de coluna</strong> — cada amplificador do ADC tem o seu desvio. Por isso o mestre é uma imagem, não um escalar. É também a razão de a tabela do §3 nunca descer abaixo de ≈1,7 ADU por muitos que sejam os N.</td></tr>
+      <tr><td>«A imagem calibrada ficou com metade dos píxeis negativos, mas parece bem.»</td><td>Confiar na vista depois de calibrar.</td><td>É o sintoma exato de subtrair o zero duas vezes. O esticamento corta em zero e esconde o problema; a <strong>mediana</strong> da imagem calibrada denuncia-o num segundo, e devia ser positiva e da ordem do fundo do céu.</td></tr>
+      <tr><td>«Quanto mais <em>flats</em> melhor: tiro 100.»</td><td>Sessões de calibração mais longas do que a de céu.</td><td>De 16 para 32 ganhas 1,5 pontos percentuais de ruído; de 32 para 100, menos de um. O tempo está melhor gasto em mais luzes — que é o único sítio onde ele vira sinal.</td></tr>
+    </tbody>
+  </table>
+</div>
+    <h2 id="praticar">7. Praticar</h2>
+<p>Do mais fácil ao mais difícil. Tenta antes de abrir a solução — abrir cedo dá a sensação de perceber sem a aprendizagem.</p><div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — que calibração falta</h3>
+<p>Para cada sintoma, diz qual das três calibrações está em falta ou mal feita:</p>
+         <ol><li>O fundo é claramente mais escuro nos cantos do que no centro.</li>
+         <li>Há pontos brilhantes isolados, sempre nas mesmas coordenadas, em todas as poses.</li>
+         <li>Depois de calibrar, a mediana da imagem é −440 ADU.</li>
+         <li>Há anéis escuros difusos, com uns 30 píxeis de diâmetro, espalhados pela imagem.</li></ol>
+  <details class="solucao"><summary>Solução</summary>
+<p><strong>1.</strong> O <em>flat</em> (vinhetagem). É multiplicativo e nenhuma
+         subtração o corrige.</p>
+         <p><strong>2.</strong> O <em>dark</em> — são píxeis quentes. ⭐ E há uma segunda defesa,
+         que é a lição 5: deslocar o enquadramento entre poses fá-los deixar de coincidir.</p>
+         <p><strong>3.</strong> O zero foi subtraído duas vezes. O valor de −440 e o nível de zero
+         de 512 encaixam: o fundo verdadeiro era ≈70.</p>
+         <p><strong>4.</strong> Também o <em>flat</em>: são sombras de poeiras no sensor,
+         desfocadas porque a poeira não está no plano focal. Se os anéis <em>mudaram</em> entre a
+         sessão e os planos, a poeira mexeu-se — e aí o plano já não serve.</p>
+  </details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — quanto vale calibrar</h3>
+<p>Usa o campo sintético para responder com um número: <strong>quanto melhora o SNR de
+         uma estrela ao calibrar?</strong> Mede-o com e sem calibração, na mesma pose. Escreve a
+         tua previsão antes de correr.</p>
+  <details class="solucao"><summary>Solução</summary>
+<p>Previsão razoável: <em>quase nada</em>, no centro. A calibração corrige erros
+         <strong>sistemáticos</strong>, não ruído — e o SNR de uma estrela no centro do campo,
+         onde a vinhetagem é mínima, quase não muda. O que muda é o canto.</p>
+<pre><code>import numpy as np
+import medir, pilha
+from campo import Camara, Campo, Sessao
+
+cam = Camara()
+ses = Sessao(cam, semente=404)
+campo = Campo(semente=404).povoar(60).acrescentar(256, 256, 1500.0).acrescentar(60, 60, 1500.0)
+zero_m = pilha.mestre([ses.zero_bruto() for _ in range(16)], "media")
+escuro_m = pilha.mestre([ses.escuro_bruto(8.0) for _ in range(16)], "media")
+plano_m = pilha.mestre([ses.plano_bruto(7000.0) for _ in range(16)])
+luz = ses.pose(campo, 8.0, 12.0)
+cal = pilha.calibrar(luz, zero_m, escuro_m, plano_m, 8.0, 8.0)
+
+for nome, x, y in (("centro", 256, 256), ("canto", 60, 60)):
+    a = medir.fotometria(luz, x, y, ganho_e_adu=1.0)
+    b = medir.fotometria(cal, x, y, ganho_e_adu=1.0)
+    print("%-7s bruta: fluxo %8.0f SNR %6.1f | calibrada: fluxo %8.0f SNR %6.1f"
+          % (nome, a["fluxo_adu"], a["snr"], b["fluxo_adu"], b["snr"]))</code></pre>
+         <p>Saída (corrida a 2026-09-18):</p>
+<pre><code>centro  bruta: fluxo    11562 SNR   82.9 | calibrada: fluxo     8618 SNR   75.9
+canto   bruta: fluxo     6956 SNR   62.8 | calibrada: fluxo     8549 SNR   67.5</code></pre>
+         <p><strong>Olha para a coluna do fluxo, que é onde está tudo.</strong> As duas estrelas
+         foram postas no simulador com <em>exatamente</em> o mesmo brilho. A imagem bruta diz que
+         uma tem 11 562 e a outra 6956 — <strong>66 % de diferença</strong>, inteiramente inventada
+         pela vinhetagem. Depois de calibrar dizem 8618 e 8549: <strong>0,8 % de diferença</strong>.</p>
+         <p>🔴 <strong>A lição:</strong> calibrar é para tornar a imagem <em>comparável consigo
+         própria</em>, não para a limpar. Quem espera menos ruído fica desiludido e conclui que
+         não vale a pena.</p>
+         <p>⚠️ E a coluna do SNR, que muda 8 % para baixo no centro e 7 % para cima no canto,
+         merece uma nota em vez de ser varrida: depois de dividir pelo plano, o <strong>ganho
+         efetivo deixa de ser o mesmo em todos os píxeis</strong> — onde o plano dividiu por mais
+         do que 1, cada ADU passa a valer menos electrões. A <code>medir.fotometria</code> usa um
+         ganho global e por isso erra o termo de Poisson do astro nessa proporção. Rastrear o
+         plano local resolve-o e está fora deste curso; o que não se pode é fingir que a diferença
+         não existe.</p>
+  </details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código que corre: mede a tua câmara</h3>
+<p>Mede o ganho e o ruído de leitura da <strong>tua</strong> câmara. Precisas de dois
+         <em>bias</em> e de dois <em>flats</em> expostos a cerca de metade da escala. Converte os
+         RAW para PGM de 16 bits sem interpolar a cor:</p>
+<pre><code>dcraw -D -4 -j -t 0 IMG_0001.CR2      # produz IMG_0001.pgm</code></pre>
+         <p>⚠️ <strong>Este comando não foi corrido nesta sessão</strong> — não há aqui câmara nem
+         ficheiros RAW. As opções estão documentadas no <code>dcraw</code>: <code>-D</code> sem
+         interpolação de cor, <code>-4</code> linear de 16 bits, <code>-j</code> sem esticar
+         píxeis não quadrados, <code>-t 0</code> sem rodar. Confirma-as na tua versão antes de
+         confiar no resultado.</p>
+         <p>Depois, com <code>medir.ganho_e_leitura</code>, imprime o ganho, o ruído de leitura e
+         <strong>o teste de sanidade que diz se os planos estavam saturados</strong>.</p>
+  <details class="solucao"><summary>Solução</summary>
+<pre><code>import sys
+import numpy as np
+from imagem import ler_pgm
+import medir
+
+f1, mx = ler_pgm(sys.argv[1]);  f2, _ = ler_pgm(sys.argv[2])
+b1, _  = ler_pgm(sys.argv[3]);  b2, _ = ler_pgm(sys.argv[4])
+
+# 🔴 Primeiro o teste de sanidade, antes de acreditar em qualquer número.
+for nome, a in (("plano 1", f1), ("plano 2", f2)):
+    topo = 100 * float((a >= mx).mean())
+    print("%s: mediana %8.1f de %d ADU (%.0f %% da escala) · %.2f %% no topo"
+          % (nome, np.median(a), mx, 100 * np.median(a) / mx, topo))
+    if topo > 0.01:
+        print("   ⚠️ há píxeis no topo: o ganho vai sair alto. Reexpõe mais escuro.")
+
+g, r = medir.ganho_e_leitura(f1, f2, b1, b2)
+print("ganho   %.3f e⁻/ADU" % g)
+print("leitura %.2f e⁻  (%.2f ADU)" % (r, r / g))
+print("poço aproximado: %.0f e⁻" % (g * mx))</code></pre>
+         <p>Verificação contra o simulador, que é a única que se pode correr aqui:</p>
+<pre><code>python3 -c "
+import pilha, medir
+from campo import Camara, Sessao
+cam = Camara(); ses = Sessao(cam, semente=1234)
+z = [ses.zero_bruto() for _ in range(2)]
+f = [ses.plano_bruto(7000.0) for _ in range(2)]
+g, r = medir.ganho_e_leitura(f[0], f[1], z[0], z[1])
+print('posto  ', cam.ganho_e_adu, cam.leitura_e)
+print('medido ', round(g,3), round(r,2))"
+posto   1.0 3.0
+medido  1.004 3.02</code></pre>
+         <p><strong>E o que fazer com o resultado.</strong> O ganho diz-te quantos electrões vale
+         um nível — e com ele todas as contas da lição 1 passam a ser sobre a tua câmara em vez de
+         sobre uma hipótese. O ruído de leitura diz-te o limiar da pose mínima. E
+         <code>g × máximo</code> dá-te o poço aproximado, que diz a que magnitude começas a
+         queimar estrelas (exercício E3 da lição 0).</p>
+  </details>
+</div>
+    <h2 id="quiz">8. Quiz</h2>
+<p>Corrige-se aqui, sem rede. Cada opção tem a sua explicação — é aí que está o que faltava perceber, por isso lê-as todas, mesmo quando acertas.</p><div class="quiz" data-quiz="04-calibrar">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Porque é que o <em>flat</em> se aplica <strong>depois</strong> das subtrações?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-1" value="a" data-certa="false"><span class="rotulo">Porque é a convenção dos programas de astrofotografia.</span></label>
+          <p class="explicacao" hidden>Há convenções neste curso e estão assinaladas como tal — esta não é uma delas: é uma consequência de o nível de zero ser aditivo.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-1" value="b" data-certa="true"><span class="rotulo">Porque o nível de zero é somado depois da ótica: dividi-lo pela vinhetagem produz um erro com a forma da vinhetagem.</span></label>
+          <p class="explicacao" hidden>Exato. A luz foi vinhetada; o offset não. Dividir os dois pela mesma coisa aplica a correção a quem não precisa dela.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-1" value="c" data-certa="false"><span class="rotulo">Porque a divisão é mais lenta do que a subtração e convém fazê-la sobre menos dados.</span></label>
+          <p class="explicacao" hidden>As duas operações percorrem a imagem inteira e o custo é idêntico. A razão é física, não computacional.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Mediste o ganho e deu 4,2 e⁻/ADU, quando a folha de especificações diz 1,0. Qual é a primeira hipótese a verificar?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-2" value="a" data-certa="false"><span class="rotulo">A folha de especificações está errada.</span></label>
+          <p class="explicacao" hidden>Pode estar desatualizada ou ser para outro ISO, mas um fator 4 é grande demais para isso ser a primeira hipótese.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-2" value="b" data-certa="true"><span class="rotulo">Os teus <em>flats</em> tinham píxeis saturados, e a variância cortada aparece como ganho a mais.</span></label>
+          <p class="explicacao" hidden>É a primeira coisa a verificar, e mede-se num segundo: contar quantos píxeis estão no topo da escala. Com 33 % saturados o erro medido foi de +63 %.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-2" value="c" data-certa="false"><span class="rotulo">O ruído de leitura da tua câmara é maior do que o declarado.</span></label>
+          <p class="explicacao" hidden>O ruído de leitura entra no cálculo através dos <em>bias</em>, e um erro aí afetaria sobretudo a leitura — não multiplicaria o ganho por quatro.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Numa pose de 8 s com uma câmara a temperatura ambiente, subtrair o <em>dark</em> mestre melhora o fundo em quanto?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-3" value="a" data-certa="false"><span class="rotulo">Cerca de metade, porque a corrente escura é o segundo maior ruído.</span></label>
+          <p class="explicacao" hidden>Na lição 1 a corrente escura valia 0,3 % da variância, a menor das quatro parcelas.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-3" value="b" data-certa="true"><span class="rotulo">Quase nada: 0,4 electrões térmicos contra 3 de ruído de leitura.</span></label>
+          <p class="explicacao" hidden>Exato. O que o <em>dark</em> lá tira mesmo são os píxeis quentes, que são poucos e muito acima do fundo — e esses valem a pena.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-3" value="c" data-certa="false"><span class="rotulo">Depende do ISO, porque a corrente escura é amplificada pelo ganho.</span></label>
+          <p class="explicacao" hidden>O ganho amplifica tudo igualmente, sinal incluído — não muda a razão entre a corrente escura e as outras parcelas.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Tens 4 <em>bias</em> em vez de 16. Quanto ruído é que a calibração acrescenta?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-4" value="a" data-certa="false"><span class="rotulo">O mesmo: o mestre é uma média e a média não tem ruído.</span></label>
+          <p class="explicacao" hidden>Uma média de 4 imagens ruidosas continua a ser ruidosa — metade do ruído de uma, não zero.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-4" value="b" data-certa="false"><span class="rotulo">Quatro vezes mais do que com 16.</span></label>
+          <p class="explicacao" hidden>A relação não é linear: vai com √(1 + 1/N). De 16 para 4 o custo passa de 3,1 % para 11,8 %, que é menos de quatro vezes.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-4" value="c" data-certa="true"><span class="rotulo">11,8 % em vez de 3,1 %.</span></label>
+          <p class="explicacao" hidden>É √(1 + 1/4) − 1 = 11,8 %, contra √(1 + 1/16) − 1 = 3,1 %. A tabela do §3 mede-o.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Depois de calibrar, a mediana da tua imagem é −440 ADU. O que aconteceu?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-5" value="a" data-certa="false"><span class="rotulo">A pose estava sub-exposta e não havia sinal nenhum.</span></label>
+          <p class="explicacao" hidden>Uma pose sub-exposta dá um fundo pequeno mas <strong>positivo</strong>: o nível de zero garante isso. Um valor negativo grande é outra coisa.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-5" value="b" data-certa="true"><span class="rotulo">O nível de zero foi subtraído duas vezes — uma pelo <em>bias</em> e outra dentro do <em>dark</em>.</span></label>
+          <p class="explicacao" hidden>É o diagnóstico, e confirma-se somando o nível de zero: se −440 + 512 dá um fundo plausível, era isso.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-5" value="c" data-certa="false"><span class="rotulo">O <em>flat</em> estava invertido e dividiu em vez de multiplicar.</span></label>
+          <p class="explicacao" hidden>Um <em>flat</em> invertido produziria vinhetagem ao contrário — cantos mais claros do que o centro — e não um deslocamento uniforme para valores negativos.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Qual é a razão de combinar as calibrações por mediana em vez de média?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-6" value="a" data-certa="false"><span class="rotulo">Porque a mediana tem menos ruído do que a média.</span></label>
+          <p class="explicacao" hidden>Tem <strong>mais</strong>: cerca de 1,25 vezes o desvio da média, para amostras normais. A mediana paga ruído para comprar robustez.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-6" value="b" data-certa="false"><span class="rotulo">Porque a mediana é mais rápida de calcular em imagens grandes.</span></label>
+          <p class="explicacao" hidden>É o contrário: a mediana obriga a ordenar, e é sensivelmente mais lenta do que somar e dividir.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="04-calibrar-6" value="c" data-certa="true"><span class="rotulo">Porque um raio cósmico ou um satélite numa das imagens entra na média e não entra na mediana.</span></label>
+          <p class="explicacao" hidden>É a razão, e o preço são ≈25 % mais ruído — que com 16 imagens é insignificante. ⚠️ Exceto para medir a corrente escura, onde a mediana de inteiros pequenos enviesa.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+<p>Explicar em voz alta, sem jargão, expõe os buracos que a leitura esconde. Esta resposta vai para a entrega.</p><div class="aberta">
+  <label for="feynman-1">Explica a alguém que percebe de medição mas não de fotografia porque é que se tiram fotografias com a tampa posta, e o que cada uma delas mede.
+    <span class="pista">Sem usar «bias», «dark» nem «flat» — usa palavras de medição: zero, deriva, resposta.</span>
+  </label>
+  <textarea id="feynman-1" data-pergunta="Explica a alguém que percebe de medição mas não de fotografia porque é que se tiram fotografias com a tampa posta, e o que cada uma delas mede."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as
+  tuas respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção
+  acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/astrofotografia/respostas/AAAA-MM-DD.md</code>
+  e correr <code>/corrigir astrofotografia</code>.</p>
+</div>
+    <h2 id="resumo">10. Resumo</h2>
+<ul><li>bruto = (luz + escuro)×resposta + zero: dois termos aditivos e um multiplicativo.</li><li>A ordem — subtrair, depois dividir — sai daí e não se troca: o zero não passou pela ótica.</li><li>Ganho e ruído de leitura medem-se com dois <em>flats</em> e dois <em>bias</em>, a 0,1 % — mas um plano saturado dá ganho a mais sem aviso.</li><li>Em poses curtas o <em>dark</em> quase não muda o fundo; o que ele tira são os píxeis quentes.</li><li>16 calibrações de cada tipo acrescentam 3,1 % de ruído; uma só acrescenta 41 %.</li></ul>
+    <h2 id="fontes">11. Fontes</h2>
+<ul class="fontes"><li><strong>Livro</strong> — Steve B. Howell, <em>Handbook of CCD Astronomy</em>, 2.ª ed., Cambridge University Press. ISBN 978-0-521-85215-9 (cartonado) e 978-0-521-61762-8 (brochado), confirmados na ficha do editor. <span class="verificado">🌐 Verificado a 2026-09-18</span> <strong>Porquê:</strong> é o texto que trata o sensor como instrumento de medida e não como acessório de fotografia. <strong>O que saltar:</strong> os capítulos 6 e 7 (espetroscopia, CCD no espaço) não servem nada deste curso. ⚠️ Não tenho o exemplar: não se cita página nenhuma.</li><li><strong>Norma industrial</strong> — EMVA 1288, versão 4.0 · <a href="https://www.emva.org/standards-technology/emva-1288/">emva.org</a>. <span class="verificado">🌐 Verificado a 2026-09-18</span> <strong>Porquê:</strong> é a norma que fixa como se medem estas grandezas para que duas câmaras sejam comparáveis. ⚠️ A página pública não descreve o conteúdo do documento e não se lhe atribui aqui mais do que isso.</li><li><strong>Especificação oficial</strong> — <em>FITS Standard 4.0</em> (aprovado a 2018-08-13) · <a href="https://fits.gsfc.nasa.gov/fits_standard.html">fits.gsfc.nasa.gov</a>. <span class="verificado">🌐 Verificado a 2026-09-18</span> <strong>Porquê:</strong> é o formato em que a astronomia guarda imagens desde 1981, e o cabeçalho dele é uma lista do que é preciso saber sobre uma pose. <strong>O que saltar:</strong> tabelas binárias e convenções de WCS, que este curso não usa. ⚠️ A página oficial dá a versão e a data mas <strong>não</strong> os pormenores do bloco de 2880 bytes nem do cartão de 80 caracteres: esses vêm do PDF da norma, e o <code>imagem.py</code> confirma-os a ler e escrever ficheiros reais.</li></ul>
+
+    <footer class="rodape">
+      <p><a href="#conteudo">Voltar ao início</a> · <a href="index.html">Mapa do tópico</a> · <a href="../metodo.html">Porque é que a lição tem esta forma</a></p>
+      <p><a href="03-do-ceu-ao-pixel.html">← Lição 3 · Do céu ao píxel</a> · <a href="05-alinhar-e-empilhar.html">Lição 5 · Alinhar e empilhar →</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* INICIO COMPORTAMENTO */
+/* ------------------------------------------------------------------
+   professor — comportamento base.
+   FONTE ÚNICA: modelo/base.js. Editar aqui e correr  python3 sincronizar.py
+   (ver DECISOES.md D-005). Tudo o que usa localStorage está em try/catch:
+   em modo privado o acesso ATIRA, não devolve null (DECISOES.md D-006).
+   A página tem de funcionar inteira sem JS e sem armazenamento.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var guardar = function (chave, valor) {
+    try { window.localStorage.setItem(chave, valor); } catch (e) { /* sem armazenamento: segue */ }
+  };
+  var ler = function (chave) {
+    try { return window.localStorage.getItem(chave); } catch (e) { return null; }
+  };
+  var hoje = function () { return new Date().toISOString().slice(0, 10); };
+  // O slug sai do caminho da própria página, para o aviso dizer onde colar de
+  // verdade em vez de "<slug>" — que já foi copiado à letra mais do que uma vez.
+  var slug = function () {
+    var m = /docs\/([^/]+)\//.exec(document.body.dataset.pagina || "");
+    return m ? m[1] : "<slug>";
+  };
+
+  /* ---------- tema: sistema -> claro -> escuro -> sistema ---------- */
+
+  var ROTULOS = { sistema: "Tema: sistema", claro: "Tema: claro", escuro: "Tema: escuro" };
+  var SEGUINTE = { sistema: "claro", claro: "escuro", escuro: "sistema" };
+
+  function aplicarTema(tema) {
+    var raiz = document.documentElement;
+    if (tema === "sistema") { raiz.removeAttribute("data-tema"); }
+    else { raiz.setAttribute("data-tema", tema); }
+    var b = document.querySelector("[data-alternar-tema]");
+    if (b) {
+      b.textContent = ROTULOS[tema];
+      b.setAttribute("aria-label", ROTULOS[tema] + ". Carrega para mudar para " + ROTULOS[SEGUINTE[tema]].toLowerCase() + ".");
+    }
+  }
+
+  var temaAtual = ler("professor:tema") || "sistema";
+  if (!ROTULOS[temaAtual]) { temaAtual = "sistema"; }
+  aplicarTema(temaAtual);
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-alternar-tema]");
+    if (!b) { return; }
+    temaAtual = SEGUINTE[temaAtual];
+    aplicarTema(temaAtual);
+    guardar("professor:tema", temaAtual);
+  });
+
+  /* ---------- índice lateral ---------- */
+
+  function prepararIndice() {
+    var botao = document.querySelector(".alternar-indice");
+    var indice = document.querySelector(".indice");
+    if (!botao || !indice) { return; }
+
+    // Sem JS o índice fica aberto (o HTML traz aria-expanded="true"): é a
+    // degradação correta. Só aqui, com JS a correr, é que se colapsa no telemóvel.
+    var estreito = window.matchMedia("(max-width: 949px)");
+    function ajustar() {
+      if (estreito.matches) { indice.hidden = true; botao.setAttribute("aria-expanded", "false"); }
+      else { indice.hidden = false; botao.setAttribute("aria-expanded", "true"); }
+    }
+    ajustar();
+    if (estreito.addEventListener) { estreito.addEventListener("change", ajustar); }
+
+    botao.addEventListener("click", function () {
+      var aberto = botao.getAttribute("aria-expanded") === "true";
+      botao.setAttribute("aria-expanded", String(!aberto));
+      indice.hidden = aberto;
+    });
+    indice.addEventListener("click", function (ev) {
+      if (ev.target.tagName === "A" && estreito.matches) {
+        botao.setAttribute("aria-expanded", "false");
+        indice.hidden = true;
+      }
+    });
+
+    var ligacoes = Array.prototype.slice.call(indice.querySelectorAll('a[href^="#"]'));
+    if (!ligacoes.length || !window.IntersectionObserver) { return; }
+    var porId = {};
+    var alvos = [];
+    ligacoes.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) { porId[el.id] = a; alvos.push(el); }
+    });
+    var visiveis = {};
+    var obs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { visiveis[e.target.id] = e.isIntersecting; });
+      var activo = null;
+      alvos.forEach(function (el) { if (visiveis[el.id] && !activo) { activo = el.id; } });
+      ligacoes.forEach(function (a) { a.removeAttribute("aria-current"); });
+      if (activo && porId[activo]) { porId[activo].setAttribute("aria-current", "true"); }
+    }, { rootMargin: "-70px 0px -65% 0px" });
+    alvos.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---------- blocos roláveis acessíveis por teclado ---------- */
+
+  function prepararRolaveis() {
+    Array.prototype.forEach.call(document.querySelectorAll("pre"), function (pre) {
+      if (pre.scrollWidth > pre.clientWidth + 1 && !pre.hasAttribute("tabindex")) {
+        pre.setAttribute("tabindex", "0");
+        pre.setAttribute("role", "region");
+        pre.setAttribute("aria-label", pre.getAttribute("data-rotulo") || "Bloco de código, rolável na horizontal");
+      }
+    });
+  }
+
+  /* ---------- quiz ---------- */
+
+  function chaveQuiz(quiz) { return "professor:quiz:" + (quiz.dataset.quiz || location.pathname); }
+
+  function corrigirPergunta(pergunta, revelarTudo) {
+    var escolhida = pergunta.querySelector("input[type=radio]:checked");
+    var acertou = false;
+    Array.prototype.forEach.call(pergunta.querySelectorAll("li.opcao"), function (li) {
+      var input = li.querySelector("input[type=radio]");
+      var expl = li.querySelector(".explicacao");
+      var certa = input.dataset.certa === "true";
+      li.classList.remove("certa", "errada");
+      if (expl) { expl.hidden = true; }
+      if (!escolhida) { return; }
+      var foiEsta = input === escolhida;
+      if (certa) { acertou = acertou || foiEsta; }
+      if (foiEsta || certa || revelarTudo) {
+        li.classList.add(certa ? "certa" : "errada");
+        if (expl) { expl.hidden = false; }
+      }
+    });
+    return { respondida: !!escolhida, acertou: acertou,
+             texto: escolhida ? escolhida.parentNode.querySelector(".rotulo").textContent.trim() : null };
+  }
+
+  function prepararQuiz(quiz) {
+    var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+    var saida = quiz.querySelector(".resultado");
+
+    var estado = null;
+    try { estado = JSON.parse(ler(chaveQuiz(quiz)) || "null"); } catch (e) { estado = null; }
+    if (estado) {
+      perguntas.forEach(function (p, i) {
+        var v = estado[i];
+        if (!v) { return; }
+        var input = p.querySelector('input[type=radio][value="' + v + '"]');
+        if (input) { input.checked = true; }
+      });
+    }
+
+    function verificar() {
+      var certas = 0, respondidas = 0, guarda = [];
+      perguntas.forEach(function (p) {
+        var r = corrigirPergunta(p, false);
+        if (r.respondida) { respondidas++; }
+        if (r.acertou) { certas++; }
+        var esc = p.querySelector("input[type=radio]:checked");
+        guarda.push(esc ? esc.value : null);
+      });
+      quiz.dataset.certas = certas;
+      quiz.dataset.total = perguntas.length;
+      if (saida) {
+        saida.textContent = respondidas < perguntas.length
+          ? "Faltam " + (perguntas.length - respondidas) + " de " + perguntas.length + ". Corrigi as que respondeste: " + certas + " certas."
+          : certas + " em " + perguntas.length + " certas." + (certas === perguntas.length
+              ? " Lê à mesma as explicações das opções que não escolheste."
+              : " Lê a explicação de cada opção — é lá que está o que faltava perceber.");
+      }
+      guardar(chaveQuiz(quiz), JSON.stringify(guarda));
+    }
+
+    var bv = quiz.querySelector("[data-verificar]");
+    if (bv) { bv.addEventListener("click", verificar); }
+
+    var bl = quiz.querySelector("[data-limpar]");
+    if (bl) {
+      bl.addEventListener("click", function () {
+        perguntas.forEach(function (p) {
+          Array.prototype.forEach.call(p.querySelectorAll("input[type=radio]"), function (i) { i.checked = false; });
+          Array.prototype.forEach.call(p.querySelectorAll("li.opcao"), function (li) { li.classList.remove("certa", "errada"); });
+          Array.prototype.forEach.call(p.querySelectorAll(".explicacao"), function (e) { e.hidden = true; });
+        });
+        delete quiz.dataset.certas;
+        if (saida) { saida.textContent = ""; }
+        guardar(chaveQuiz(quiz), "null");
+      });
+    }
+  }
+
+  /* ---------- respostas abertas ---------- */
+
+  function prepararAbertas() {
+    Array.prototype.forEach.call(document.querySelectorAll("textarea[data-pergunta]"), function (ta) {
+      var chave = "professor:aberta:" + (document.body.dataset.pagina || location.pathname) + ":" + ta.dataset.pergunta;
+      var antes = ler(chave);
+      if (antes && !ta.value) { ta.value = antes; }
+      ta.addEventListener("input", function () { guardar(chave, ta.value); });
+    });
+  }
+
+  /* ---------- gerar a entrega em Markdown ---------- */
+
+  function construirMarkdown() {
+    var titulo = (document.querySelector("h1") || {}).textContent || document.title;
+    var linhas = ["# " + titulo.trim(), "", "- **Data:** " + hoje(), "- **Página:** `" + (document.body.dataset.pagina || "") + "`", ""];
+
+    var quizzes = Array.prototype.slice.call(document.querySelectorAll(".quiz"));
+    if (quizzes.length) {
+      linhas.push("## Quiz", "");
+      quizzes.forEach(function (quiz) {
+        var perguntas = Array.prototype.slice.call(quiz.querySelectorAll("li.pergunta"));
+        var certas = 0, feito = false;
+        var detalhe = [];
+        perguntas.forEach(function (p, i) {
+          var esc = p.querySelector("input[type=radio]:checked");
+          var enun = (p.querySelector(".enunciado") || {}).textContent || "";
+          if (!esc) { detalhe.push((i + 1) + ". _sem resposta_ — " + enun.trim()); return; }
+          feito = true;
+          var certa = esc.dataset.certa === "true";
+          if (certa) { certas++; }
+          var rotulo = esc.parentNode.querySelector(".rotulo").textContent.trim();
+          detalhe.push((i + 1) + ". " + (certa ? "✅" : "❌") + " escolhi «" + rotulo + "» — " + enun.trim());
+        });
+        linhas.push("**Resultado: " + certas + "/" + perguntas.length + "**" + (feito ? "" : " (por responder)"), "");
+        linhas = linhas.concat(detalhe, [""]);
+      });
+    }
+
+    var abertas = Array.prototype.slice.call(document.querySelectorAll("textarea[data-pergunta]"));
+    if (abertas.length) {
+      linhas.push("## Respostas abertas", "");
+      abertas.forEach(function (ta) {
+        linhas.push("### " + (ta.dataset.pergunta || "Pergunta"), "");
+        var v = ta.value.trim();
+        linhas.push(v || "_(por responder)_", "");
+      });
+    }
+
+    linhas.push("---", "", "> Colar em `topicos/" + slug() + "/respostas/" + hoje() + ".md` e correr `/corrigir " + slug() + "`.", "");
+    return linhas.join("\n");
+  }
+
+  function prepararCopia() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copiar-respostas]"), function (botao) {
+      var aviso = document.querySelector(".aviso-copia");
+      botao.addEventListener("click", function () {
+        var md = construirMarkdown();
+        function falhou() {
+          // Sem clipboard (http, permissão negada): mostra o texto para copiar à mão.
+          var cx = document.querySelector("[data-saida-markdown]");
+          if (cx) {
+            cx.hidden = false;
+            cx.value = md;
+            cx.focus();
+            cx.select();
+          }
+          if (aviso) { aviso.hidden = false; aviso.textContent = "Não consegui usar a área de transferência. O texto está na caixa abaixo — copia-o à mão."; }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(function () {
+            if (aviso) { aviso.hidden = false; aviso.textContent = "Copiado. Cola em topicos/" + slug() + "/respostas/" + hoje() + ".md"; }
+          }, falhou);
+        } else { falhou(); }
+      });
+    });
+  }
+
+  /* ---------- pesquisa do catálogo ---------- */
+
+  function prepararPesquisa() {
+    var campo = document.querySelector("[data-pesquisa]");
+    if (!campo) { return; }
+    var cartoes = Array.prototype.slice.call(document.querySelectorAll("[data-pesquisavel]"));
+    var caixaRes = document.querySelector("[data-resultados]");
+    var contador = document.querySelector("[data-contagem]");
+    var vazio = document.querySelector("[data-sem-resultados]");
+    var indice = window.INDICE_PESQUISA || [];
+    campo.hidden = false;
+
+    // Sem acentos e sem maiúsculas: procurar "indices" tem de encontrar "índices".
+    function normalizar(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    cartoes.forEach(function (el) {
+      el.dataset.chave = normalizar(el.textContent + " " + (el.dataset.pesquisavel || ""));
+    });
+    indice.forEach(function (pag) {
+      pag._t = normalizar(pag.t);
+      pag.s.forEach(function (sec) {
+        sec._h = normalizar(sec.h);
+        sec._d = normalizar(sec.d || "");
+        sec._k = normalizar(sec.k || "");
+      });
+    });
+
+    function escapar(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function procurar(q) {
+      // Todos os termos têm de aparecer (E, não OU): "indice composto" não deve
+      // devolver tudo o que fala de índices.
+      var termos = q.split(/\s+/).filter(Boolean);
+      var achados = [];
+
+      indice.forEach(function (pag) {
+        pag.s.forEach(function (sec) {
+          var pontos = 0, todos = true;
+          for (var i = 0; i < termos.length; i++) {
+            var t = termos[i], p = 0;
+            // Onde o termo aparece vale mais do que quantas vezes aparece:
+            // no título da secção é sobre isso; na prosa é só menção.
+            if (sec._h.indexOf(t) !== -1) { p = 100; }
+            else if (sec._d.indexOf(t) !== -1) { p = 30; }
+            else if (pag._t.indexOf(t) !== -1) { p = 12; }
+            else if (sec._k.indexOf(t) !== -1) { p = 4; }
+            if (!p) { todos = false; break; }
+            pontos += p;
+          }
+          if (todos) { achados.push({ pagina: pag, seccao: sec, pontos: pontos }); }
+        });
+      });
+
+      achados.sort(function (a, b) {
+        if (b.pontos !== a.pontos) { return b.pontos - a.pontos; }
+        return a.pagina.p < b.pagina.p ? -1 : 1;   // empate: por ordem das lições
+      });
+      return achados;
+    }
+
+    function filtrar() {
+      var bruto = campo.value.trim();
+      var q = normalizar(bruto);
+
+      if (!q) {
+        cartoes.forEach(function (el) { el.hidden = false; });
+        if (caixaRes) { caixaRes.hidden = true; caixaRes.innerHTML = ""; }
+        if (vazio) { vazio.hidden = true; }
+        if (contador) {
+          contador.textContent = cartoes.length + (cartoes.length === 1 ? " tópico" : " tópicos");
+        }
+        return;
+      }
+
+      var visiveis = 0;
+      cartoes.forEach(function (el) {
+        var mostra = el.dataset.chave.indexOf(q) !== -1;
+        el.hidden = !mostra;
+        if (mostra) { visiveis++; }
+      });
+
+      var achados = procurar(q);
+      if (caixaRes) {
+        if (achados.length) {
+          // Agrupado por página: onze secções da mesma lição em fila não são
+          // onze resultados, são um resultado com ruído à volta.
+          var porPagina = [], vistas = {};
+          achados.forEach(function (a) {
+            var k = a.pagina.p;
+            if (!vistas[k]) { vistas[k] = { pagina: a.pagina, seccoes: [] }; porPagina.push(vistas[k]); }
+            if (vistas[k].seccoes.length < 3) { vistas[k].seccoes.push(a.seccao); }
+          });
+
+          var html = ['<h3 class="res-titulo">Dentro das lições</h3><ul class="resultados">'];
+          porPagina.slice(0, 6).forEach(function (g) {
+            html.push('<li><a href="' + escapar(g.pagina.p) + "#" + escapar(g.seccoes[0].id) + '">' +
+                      escapar(g.pagina.t) + "</a><span class=\"res-pagina\">" +
+                      g.seccoes.map(function (s) {
+                        return '<a class="res-sec" href="' + escapar(g.pagina.p) + "#" +
+                               escapar(s.id) + '">' + escapar(s.h) + "</a>";
+                      }).join(" · ") + "</span></li>");
+          });
+          html.push("</ul>");
+          if (porPagina.length > 6) {
+            html.push('<p class="verificado">e mais ' + (porPagina.length - 6) +
+                      " páginas — afina a pesquisa com uma segunda palavra.</p>");
+          }
+          caixaRes.innerHTML = html.join("");
+          caixaRes.hidden = false;
+          caixaRes.dataset.paginas = porPagina.length;
+        } else {
+          caixaRes.hidden = true;
+          caixaRes.innerHTML = "";
+          caixaRes.dataset.paginas = 0;
+        }
+      }
+
+      if (contador) {
+        var partes = [];
+        if (visiveis) { partes.push(visiveis + (visiveis === 1 ? " tópico" : " tópicos")); }
+        var np = caixaRes ? Number(caixaRes.dataset.paginas || 0) : 0;
+        if (np) { partes.push(np + (np === 1 ? " página" : " páginas") + " com " +
+                              achados.length + (achados.length === 1 ? " secção" : " secções")); }
+        contador.textContent = partes.length ? partes.join(" · ") : "nada encontrado";
+      }
+      if (vazio) { vazio.hidden = !(visiveis === 0 && achados.length === 0); }
+    }
+
+    campo.addEventListener("input", filtrar);
+    filtrar();
+  }
+
+  /* ---------- arranque ---------- */
+
+  function arrancar() {
+    prepararIndice();
+    prepararRolaveis();
+    Array.prototype.forEach.call(document.querySelectorAll(".quiz"), prepararQuiz);
+    prepararAbertas();
+    prepararCopia();
+    prepararPesquisa();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", arrancar); }
+  else { arrancar(); }
+})();
+/* FIM COMPORTAMENTO */
+</script>
+</body>
+</html>

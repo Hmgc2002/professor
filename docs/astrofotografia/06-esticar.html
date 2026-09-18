@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>O almanaque — professor</title>
-<meta name="description" content="Curso sobre o almanaque: da tábua de 1088 ao almanaque do GPS, e a construção de um almanaque náutico próprio medido contra o Nautical Almanac oficial.">
+<title>6 · Esticar: do linear ao visível — Astrofotografia</title>
+<meta name="description" content="Porque é que multiplicar não serve, o que fazem o asinh e a função de meios-tons, e onde se põe o ponto preto.">
 <style>
 /* INICIO ESTILO */
 /* ------------------------------------------------------------------
@@ -413,11 +413,14 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
 /* FIM ESTILO */
 </style>
 </head>
-<body data-pagina="docs/almanaque/index.html">
+<body data-pagina="docs/astrofotografia/06-esticar.html">
 <a class="saltar" href="#conteudo">Saltar para o conteúdo</a>
 
 <header class="barra">
-  <p class="migalhas"><a href="../index.html">professor</a> <span aria-hidden="true">›</span> O almanaque</p>
+  <p class="migalhas">
+    <a href="../index.html">professor</a> <span aria-hidden="true">›</span>
+    <a href="index.html">Astrofotografia</a> <span aria-hidden="true">›</span> lição 6
+  </p>
   <button class="botao" type="button" data-alternar-tema>Tema: sistema</button>
 </header>
 
@@ -425,338 +428,461 @@ ul.resultados a.res-sec { display: inline; padding: 0; font-weight: 400;
   <button class="botao alternar-indice" type="button" aria-expanded="true" aria-controls="indice-pagina">Índice da página</button>
 
   <nav class="indice" id="indice-pagina" aria-label="Índice da página">
-    <h2>Nesta página</h2>
+    <h2>Nesta lição</h2>
     <ol>
-      <li><a href="#conseguir">O que vais conseguir fazer</a></li>
-      <li><a href="#nao-e">O que este curso não é</a></li>
-      <li><a href="#assumi">O que assumi</a></li>
-      <li><a href="#mapa">O mapa</a></li>
-      <li><a href="#plano">O plano no tempo</a></li>
-      <li><a href="#fases">Nota das fases</a></li>
+      <li><a href="#objetivo">1. Objetivo</a></li>
+      <li><a href="#recuperar">2. Recuperar</a></li>
+      <li><a href="#mecanismo">3. O mecanismo</a></li>
+      <li><a href="#trabalhado">4. Exemplo trabalhado</a></li>
+      <li><a href="#lacunas">5. Exemplo com lacunas</a></li>
+      <li><a href="#erros">6. Erros comuns</a></li>
+      <li><a href="#praticar">7. Praticar</a></li>
+      <li><a href="#quiz">8. Quiz</a></li>
+      <li><a href="#feynman">9. Explica por palavras tuas</a></li>
+      <li><a href="#resumo">10. Resumo</a></li>
+      <li><a href="#fontes">11. Fontes</a></li>
     </ol>
   </nav>
 
   <main id="conteudo">
-    <p class="etiqueta nucleo">pronto</p>
-    <h1>O almanaque</h1>
-    <p class="subtitulo">Do <em>Almanaque de Azarquiel</em> de 1088 ao almanaque que o satélite de
-    GPS te transmite: a mesma decisão de engenharia, oito séculos separados. E, no fim, o teu —
-    gerado por ti, medido contra o <em>Nautical Almanac</em> oficial, com a tolerância declarada
-    antes de comparar.</p>
+    <p class="etiqueta nucleo">Lição 6 · núcleo</p>
+    <h1>Esticar: do linear ao visível</h1>
+    <p class="subtitulo">Metade da tua imagem está em 0,4 % da escala. Esticar é escolher a função que a leva ao ecrã — e é a única operação deste curso que destrói informação.</p>
+    <h2 id="objetivo">1. Objetivo</h2>
+<p>No fim desta lição <strong>escreves as três funções de esticamento</strong>,
+    escolhes o ponto preto com um critério que sabes defender, e explicas <strong>porque é que
+    multiplicar a imagem não faz o mesmo</strong>. E sabes dizer o que cada escolha destrói.</p>
+    <h2 id="recuperar">2. Recuperar</h2>
+<p>Responde <strong>antes</strong> de continuar a ler, de memória. Falhar aqui é útil: o esforço de tentar puxar da memória é o que consolida, e é por isso que as respostas estão escondidas.</p><ol>
+  <li>Porque é que a interpolação no alinhamento faz o SNR medido parecer melhor do que é?
+    <details class="solucao"><summary>Resposta</summary><p>Porque mistura píxeis vizinhos: o ruído deixa de ser independente e o desvio medido no anel sai menor do que o verdadeiro. (Lição 5, §3.)</p></details>
+  </li>
+  <li>Depois de calibrar, a mediana da imagem devia ser que valor, aproximadamente?
+    <details class="solucao"><summary>Resposta</summary><p>Positiva e da ordem do fundo do céu — uns 70 ADU no exemplo do curso. Negativa é sintoma de subtrair o zero duas vezes. (Lição 4.)</p></details>
+  </li>
+</ol>
+    <h2 id="mecanismo">3. O mecanismo</h2>
+<h3>O problema, em números</h3>
+    <p>Uma pose calibrada é <strong>linear</strong>: o número no ficheiro é proporcional aos
+    fotões. É isso que a torna mensurável — e é isso que a torna invisível.</p>
+<pre><code>  percentil  50.0:      69.7 ADU  →    0.43 % da escala de 14 bits
+  percentil  90.0:      81.8 ADU  →    0.50 % da escala de 14 bits
+  percentil  99.0:      94.5 ADU  →    0.58 % da escala de 14 bits
+  percentil  99.9:     369.2 ADU  →    2.25 % da escala de 14 bits
+  percentil 100.0:    3184.5 ADU  →   19.44 % da escala de 14 bits</code></pre>
+    <p>Noventa e nove por cento da imagem vive abaixo de 0,6 % da escala. Um ecrã mostra isso como
+    preto. O único píxel que se vê é o da estrela mais brilhante, e mesmo esse só chega a 19 %.</p>
 
-    <h2 id="conseguir">O que vais conseguir fazer no fim</h2>
-    <ul>
-      <li><strong>Implementar</strong>, só com a biblioteca padrão, a posição do Sol e da Lua, o
-        tempo sidéreo, o nascer, o pôr e os crepúsculos, e a redução de uma altura de sextante.</li>
-      <li><strong>Reproduzir</strong> as colunas de uma página diária real do <em>Nautical
-        Almanac</em> e <strong>dizer com um número</strong> quais é que batem e quais não.</li>
-      <li><strong>Fazer uma consulta completa</strong> numa página do livro — hora inteira,
-        incremento, correções <em>v</em> e <em>d</em>, com os sinais certos — sem consultar.</li>
-      <li><strong>Explicar</strong> porque é que o almanaque nasceu em 1088 como mudança de
-        <em>formato</em> e não de astronomia, e porque é que continua a ser publicado.</li>
-      <li><strong>Diagnosticar</strong>, dado um resultado errado por décimas de minuto de arco,
-        qual dos cinco relógios ou qual das cinco correções é que foi trocada.</li>
-      <li><strong>Declarar uma tolerância antes de medir</strong> — e perceber porque é que a ordem
-        dessas duas coisas é a diferença entre medir e justificar.</li>
-    </ul>
+    <h3>Porque é que multiplicar não resolve</h3>
+    <p>O reflexo é «aumentar o brilho», ou seja multiplicar. Mas multiplicar é uma transformação
+    <em>linear</em>, e a razão entre a estrela e o fundo não muda com ela:</p>
+<pre><code>  fator   fundo na escala   píxeis saturados
+  ×1             0.43 %            0.000 %
+  ×4             1.70 %            0.000 %
+  ×16            6.81 %            0.026 %
+  ×64           27.24 %            0.161 %
+  ×256         108.96 %           73.875 %</code></pre>
+    <p>Para o fundo chegar a um cinzento visível (27 %) é preciso ×64 — e nessa altura já há
+    píxeis a queimar. Aos ×256, o fundo passa o topo da escala e <strong>74 % da imagem
+    satura</strong>. 🔴 <strong>O problema não é o nível: é a razão.</strong> E uma multiplicação
+    não muda razões.</p>
 
-    <h2 id="nao-e">O que este curso não é</h2>
-    <ul>
-      <li><strong>Não é astronomia observacional</strong>: não há telescópios nem fotografia do
-        céu. ⚠️ <em>Corrigido a 2026-09-18 — esta linha dizia só «não há fotografia do céu» e não
-        remetia para lado nenhum, porque em 2026-09-16 não havia para onde. Agora há:
-        <a href="../astrofotografia/index.html">Astrofotografia</a> é o tópico que apanha
-        precisamente o que este recusou, e usa a esfera celeste daqui como pré-requisito.</em></li>
-      <li><strong>Não é mecânica celeste</strong>: ninguém integra órbitas aqui. Usam-se séries
-        ajustadas e publicadas, e diz-se de onde vêm e quanto erram.</li>
-      <li>🔴 <strong>Não substitui o <em>Nautical Almanac</em> a bordo.</strong> O curso ensina a
-        lê-lo, a reproduzi-lo com tolerância declarada, e — sobretudo — a saber quando a reprodução
-        não serve. Quatro das seis colunas tabeladas <em>não</em> chegam à precisão do livro, e
-        isso está medido e escrito.</li>
-      <li><strong>Não é um curso de navegação prática.</strong> Não há sextante, não há horizonte do
-        mar, não há observação real. A lição 7 reduz alturas <em>dadas</em>.</li>
-      <li><strong>Não repete a interpolação de picos de FFT</strong> — isso é do tópico
-        <a href="../cassete-captura/00-espetro.html">Digitalizar cassetes</a>. A palavra
-        «interpolação» aparece nos dois e os mecanismos são diferentes; a fronteira está declarada
-        nas lições 6 e 8.</li>
-    </ul>
+    <h3>O que é preciso é uma função que comprima</h3>
+    <p>Uma função monótona que suba depressa perto de zero e devagar em cima. Duas escolhas com
+    fundamento:</p>
+    <p><strong>asinh</strong> — o arco-seno hiperbólico, proposto por Lupton e colegas em 2004
+    exatamente para isto. Perto de zero, asinh(u) ≈ u: <strong>o fundo continua linear</strong>,
+    e portanto continua a parecer o que é. Longe de zero, asinh(u) ≈ ln(2u): as estrelas
+    brilhantes são comprimidas em vez de saturarem. O artigo diz-o assim: «allows us to show
+    faint objects while simultaneously preserving the structure of brighter objects in the field,
+    such as the spiral arms of large galaxies».</p>
+    <p><strong>MTF</strong> — a função de transferência de meios-tons, com um parâmetro só:</p>
+<pre><code>y = ((m − 1)·x) / ((2m − 1)·x − m)</code></pre>
+    <p>Leva 0 a 0, 1 a 1, e <em>m</em> a 0,5. É monótona e invertível: nada do que ela faz troca a
+    ordem entre dois píxeis. É a forma que os programas de astrofotografia usam no esticamento
+    automático.</p>
+<pre><code>função          fundo (0-1)  estrela de teste  razão estrela/fundo
+--------------  -----------  ----------------  -------------------
+linear          0.0066       0.2051            31.1
+asinh β=0,01    0.1168       0.7011            6.0
+MTF automático  0.1200       0.8132            6.8</code></pre>
+    <p>O linear mantém a razão em 31:1 e por isso o fundo fica preto. As outras duas comprimem-na
+    para 6:1 e 6,8:1, que é o que um ecrã de 8 bits consegue mostrar ao mesmo tempo.</p>
+    <div class="caixa aviso"><span class="titulo">⚠️ Um erro que quase passou, e que só a medição apanhou</span>
+    <p>A primeira versão do <code>esticar.automatico</code> resolvia o ponto médio com a fórmula
+    <em>com os argumentos trocados</em> — <code>a(1−b)/(a+b−2ab)</code> em vez de
+    <code>b(1−a)/(a+b−2ab)</code>. Isso dava um <em>m</em> perto de 1, que <strong>escurece</strong>
+    em vez de esticar. A imagem saía plausível, e a tabela acima foi o que o denunciou: a razão
+    estrela/fundo do «MTF automático» era 31,5, ou seja exatamente a mesma do linear. Se a coluna
+    não estivesse lá, ninguém reparava.</p></div>
 
-    <h2 id="assumi">O que assumi</h2>
-    <p>Do <a href="../../topicos/almanaque/DIAGNOSTICO.md">diagnóstico</a>. Cada pressuposto traz
-    <strong>o que muda se estiver errado</strong>.</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Pressupostos do curso e o que muda se estiverem errados, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>Assumi que…</th><th>De onde veio</th><th>Se estiver errado…</th></tr></thead>
-    <tbody><tr><td>Não tens sextante nem horizonte do mar</td><td>Não foi perguntado e não foi mencionado</td><td>A lição 7 ganha uma segunda metade com observação real. Como está, reduz <strong>alturas dadas</strong> — o mecanismo é o mesmo, falta o instrumento</td></tr><tr><td>Todo o código é biblioteca padrão</td><td>«Calcular eu próprio» era um dos objetivos</td><td>Nada muda: é uma decisão, não um pressuposto sobre ti. Um almanaque feito sobre <code>skyfield</code> funcionava e não ensinava. Ele aparece só na lição 9</td></tr><tr><td>A posição de exemplo pode ser pública e arbitrária</td><td>Decisão de privacidade (D-001)</td><td>Muda-se uma constante em <code>gerar.py</code>. Nenhum mecanismo depende do sítio</td></tr><tr><td>Interessa a época atual (1950–2050)</td><td>«Gerar um almanaque meu» lê-se como «para o ano que vem»</td><td>As séries usadas estão declaradas para 1950–2050. Fora disso parte primeiro o ΔT, que é medido e não calculado — e o curso passaria a precisar de uma lição sobre calendários históricos e a reforma gregoriana</td></tr><tr><td>Inglês técnico lê-se sem atrito</td><td>Todas as fontes primárias estão em inglês</td><td>O curso teria de traduzir as páginas do <em>Nautical Almanac</em> em vez de as usar</td></tr></tbody>
-  </table>
-</div>
+    <h3>O ponto preto: a decisão que destrói</h3>
+    <p>Todas as funções acima começam por normalizar: escolhe-se um valor abaixo do qual tudo vai
+    a zero. <strong>O que vai a zero não volta.</strong></p>
+<pre><code>  corte em mediana-3 σ →   0.11 % dos píxeis foram a zero
+  corte em mediana-1 σ →  15.46 % dos píxeis foram a zero
+  corte em mediana+0 σ →  50.06 % dos píxeis foram a zero
+  corte em mediana+1 σ →  83.53 % dos píxeis foram a zero
+  corte em mediana+2 σ →  96.72 % dos píxeis foram a zero</code></pre>
+    <p>Cortar na mediana põe metade da imagem a zero. Tudo o que for mais fraco do que o céu — que
+    é onde vivem as partes exteriores das nebulosas — desaparece nesse instante.</p>
+    <div class="caixa critico"><span class="titulo">🔴 E, no entanto, o contraste melhora ao cortar na mediana</span>
+    <p>O exercício E2 mede-o: para um objeto que está <em>acima</em> do céu, o contraste depois de
+    esticar é <strong>máximo</strong> com o corte na mediana, e piora se o puseres abaixo. Ou
+    seja, a regra «põe o ponto preto abaixo da mediana» <strong>não é uma regra sobre
+    contraste</strong>: é uma regra sobre <em>informação</em>.</p>
+    <p>O que se ganha em pôr o corte abaixo é ficar com o ruído do fundo visível e simétrico — e,
+    com ele, tudo o que estava enterrado nele. O que se perde é contraste aparente. As duas coisas
+    são reais e estão medidas; escolher é teu, mas agora é uma escolha e não um hábito.</p></div>
 
-    <div class="caixa aviso">
-      <span class="titulo">⚠️ A tensão que o diagnóstico encontrou, e como se resolveu</span>
-      <p>Pediste as três coisas: <strong>usar um almanaque náutico a sério</strong>,
-      <strong>perceber o objeto histórico</strong> e <strong>calcular tu próprio</strong>. As
-      primeira e terceira quase se contradizem: as séries que cabem numa lição dão o Sol a cerca de
-      0,4′ e o livro publica a 0,1′.</p>
-      <p>A resolução não foi escolher uma — foi tornar a diferença <strong>o assunto</strong>. Todas
-      as lições declaram o que a sua aproximação custa, em minutos de arco e em milhas náuticas, e a
-      lição 9 junta tudo num orçamento de erro. É o eixo do curso.</p>
+    <h3>A ordem que não se troca</h3>
+    <p>🔴 <strong>Mede primeiro, estica depois, e guarda a linear.</strong> Todas as medições deste
+    curso — SNR, FWHM, brilho do céu, fluxo — assumem linearidade. Depois de esticar, o número no
+    ficheiro deixa de ser proporcional aos fotões e nenhuma delas significa o que dizia.</p>
+    <h2 id="trabalhado">4. Exemplo trabalhado</h2>
+<h3>O problema</h3>
+    <p>Tens a pilha linear de 32 poses. Queres uma imagem que se veja, sem mentir sobre o que lá
+    está.</p>
+
+    <h3>Passo 1 — medir, antes de mexer</h3>
+<pre><code>med, sig = pilha.fundo_e_ruido(empilhada)     # 69.7 ADU, 9.05 ADU</code></pre>
+    <p>Porquê primeiro: porque a seguir a imagem deixa de servir para isto. E porque os dois
+    números são os parâmetros de tudo o que vem a seguir.</p>
+
+    <h3>Passo 2 — o ponto preto, com um critério</h3>
+    <p>2,8 σ abaixo da mediana: 69,7 − 2,8×9,05 = <strong>44,4 ADU</strong>. A esse nível,
+    0,2 % dos píxeis vão a zero — praticamente nada.</p>
+    <p>Porquê 2,8 e não 3, ou 2: é <strong>convenção</strong>, e vale a pena dizê-lo. O que não é
+    convenção é o raciocínio: quer-se que a cauda de baixo do ruído do fundo continue visível,
+    porque é nela que está o sinal mais fraco. Qualquer valor entre 2 e 4 serve.</p>
+
+    <h3>Passo 3 — escolher o alvo para o fundo</h3>
+    <p>Onde é que o céu deve ficar no ecrã? Se ficar muito escuro, não se vê o que está perto
+    dele; se ficar muito claro, a imagem parece lavada. Doze por cento (0,12) é o valor que o
+    <code>esticar.automatico</code> usa, e também é convenção — desta vez uma convenção herdada
+    dos programas de astrofotografia.</p>
+
+    <h3>Passo 4 — resolver o ponto médio</h3>
+    <p>Com o ponto preto escolhido, a mediana normalizada é <em>b</em>. Quer-se
+    <code>mtf(b) = 0,12</code>. Resolve-se:</p>
+<pre><code>m = b(1 − a) / (a + b − 2ab)      com a = 0,12</code></pre>
+<pre><code>python3 -c "
+import numpy as np, esticar, pilha
+from campo import Camara, Campo, Sessao
+cam = Camara(); ses = Sessao(cam, semente=66)
+campo = Campo(semente=66).povoar(100).acrescentar(256, 256, 900.0)
+zm = pilha.mestre([ses.zero_bruto() for _ in range(8)], 'media')
+pm = pilha.mestre([ses.plano_bruto(7000.0) for _ in range(8)])
+img = pilha.calibrar(ses.pose(campo, 8.0, 12.0), zm, None, pm, 8.0, 8.0)
+y, par = esticar.automatico(img)
+print(par)"
+{'ponto_preto': 44.36…, 'ponto_medio': 0.0563…, 'mediana_do_fundo': 69.7…, 'sigma_do_fundo': 9.05…}</code></pre>
+
+    <h3>Passo 5 — verificar que fez o que devia</h3>
+    <p>A verificação não é olhar: é medir a razão estrela/fundo antes e depois. De 31:1 para
+    6,8:1. Se esse número não tivesse mudado, o esticamento não tinha feito nada — e foi
+    exatamente assim que o erro da fórmula apareceu.</p>
+    <h2 id="lacunas">5. Exemplo com lacunas</h2>
+<div class="exercicio">
+      <h3>Completa</h3>
+      <p>A tua pilha tem mediana 480 ADU e σ do fundo 22 ADU, e o máximo é 12 000 ADU.</p>
+      <ol>
+        <li>Ponto preto a 2,8 σ abaixo da mediana: <strong>______</strong></li>
+        <li>Mediana normalizada <em>b</em> = (480 − preto) / (12 000 − preto):
+        <strong>______</strong></li>
+        <li>Ponto médio <em>m</em> para levar o fundo a 0,12: <strong>______</strong></li>
+        <li>Que fração da escala ocupa a estrela mais brilhante <em>depois</em> de esticar?
+        <strong>______</strong></li>
+        <li>Se em vez de 2,8 σ cortasses na mediana, quanto da imagem ia a zero?
+        <strong>______</strong></li>
+      </ol>
+      <details class="solucao"><summary>Ver os passos em falta</summary>
+        <p><strong>1.</strong> 480 − 2,8×22 = <strong>418,4 ADU</strong>.</p>
+        <p><strong>2.</strong> b = (480 − 418,4)/(12 000 − 418,4) = 61,6/11 581,6 =
+        <strong>0,00532</strong>.</p>
+        <p><strong>3.</strong> m = 0,00532 × 0,88 / (0,12 + 0,00532 − 2×0,12×0,00532) =
+        0,004682/0,12404 = <strong>0,03775</strong>.</p>
+        <p><strong>4.</strong> O máximo normalizado é 1 por construção, e mtf(1) = 1: a estrela
+        mais brilhante ocupa <strong>a escala toda</strong>. É o que se quer — e é também a razão
+        pela qual o esticamento por MTF queima sempre a estrela mais brilhante do campo. O asinh
+        não faz isso, e é a sua vantagem.</p>
+        <p><strong>5.</strong> Cerca de <strong>50 %</strong>, por definição de mediana. Confere:</p>
+<pre><code>python3 -c "
+import esticar
+print(esticar.mtf(__import__('numpy').array([[480.0]]), 0.03775, 418.4))"
+[[0.12000…]]</code></pre>
+      </details>
     </div>
-
-    <h2 id="mapa">O mapa</h2>
-    <p>🔴 O diagnóstico registou «astronomia esférica: nenhuma». Por isso a esfera celeste é a
-    <strong>lição 0</strong>, com onze secções como qualquer outra, e não uma caixa de recordação no
-    meio da lição 3.</p>
-<figure>
-  <svg viewBox="0 0 1034 278" role="img" aria-labelledby="t-mapa d-mapa">
-    <title id="t-mapa">Mapa das dez lições e das suas dependências</title>
-    <desc id="d-mapa">As lições 0 e 1 não dependem de nada e alimentam a 2. A 2 alimenta a 3, que é o eixo do curso. Da 3 saem a 4 e a 5, que convergem na 6; a 6 alimenta a 7 e a 7 alimenta a 9, que é o projeto. A lição 8, sobre marés, sai da 5 e é extensão. A mesma informação está na tabela do plano, logo a seguir.</desc>
-    <defs><marker id="seta-mapa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: currentColor"/></marker></defs>
-    <rect class="svg-realce" x="24" y="88" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="24" y="158" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="192" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="360" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="528" y="53" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="528" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="696" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-caixa" x="864" y="123" width="146" height="44" rx="6"/>
-    <rect class="svg-fundo" x="696" y="200" width="146" height="44" rx="6"/>
-    <rect class="svg-realce" x="864" y="46" width="146" height="44" rx="6"/>
-    <path class="svg-traco-grosso" d="M 170 110 C 184 110 178 145 186 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 170 180 C 184 180 178 145 186 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 338 145 H 354" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 506 145 C 520 145 514 75 522 75" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 506 145 H 522" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 75 C 688 75 682 145 690 145" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 145 H 690" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 842 145 H 858" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 937 167 C 937 191 937 114 937 90" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 674 145 C 688 145 682 222 690 222" marker-end="url(#seta-mapa)"/>
-    <path class="svg-traco-grosso" d="M 842 222 C 856 222 850 68 858 68" marker-end="url(#seta-mapa)"/>
-    <text class="svg-texto-pequeno" x="97" y="107" text-anchor="middle">0 · A esfera celeste</text>
-    <text class="svg-texto-pequeno" x="97" y="123" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="97" y="177" text-anchor="middle">1 · O que é um almanaque</text>
-    <text class="svg-texto-pequeno" x="97" y="193" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="265" y="142" text-anchor="middle">2 · O tempo</text>
-    <text class="svg-texto-pequeno" x="265" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="433" y="142" text-anchor="middle">3 · O Sol</text>
-    <text class="svg-texto-pequeno" x="433" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="601" y="72" text-anchor="middle">4 · Nascer e pôr</text>
-    <text class="svg-texto-pequeno" x="601" y="88" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="601" y="142" text-anchor="middle">5 · A Lua</text>
-    <text class="svg-texto-pequeno" x="601" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="769" y="142" text-anchor="middle">6 · Ler as tábuas</text>
-    <text class="svg-texto-pequeno" x="769" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="937" y="142" text-anchor="middle">7 · Reduzir uma altura</text>
-    <text class="svg-texto-pequeno" x="937" y="158" text-anchor="middle">núcleo</text>
-    <text class="svg-texto-pequeno" x="769" y="219" text-anchor="middle">8 · As marés</text>
-    <text class="svg-texto-pequeno" x="769" y="235" text-anchor="middle">extensão</text>
-    <text class="svg-texto-pequeno" x="937" y="65" text-anchor="middle">9 · O teu almanaque</text>
-    <text class="svg-texto-pequeno" x="937" y="81" text-anchor="middle">núcleo</text>
-  </svg>
-  <figcaption>As caixas destacadas são o princípio (lição 0) e o fim (o projeto). A lição 8 é <strong>extensão</strong>: serve o objetivo histórico e não o critério de sucesso. O mesmo está em texto na tabela seguinte.</figcaption>
-</figure>
-
-    <h2 id="plano">O plano no tempo</h2>
-    <p>Distribuído pelas <strong>6 horas ou mais por semana</strong> que o diagnóstico registou. Sem
-    prazo: se forem 8 horas, são 8 semanas. A lição 8 é <strong>extensão</strong> — faz-se quando
-    apetecer, ou nunca.</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Plano das lições no tempo, tabela rolável na horizontal">
+    <h2 id="erros">6. Erros comuns</h2>
+<p>As conceções erradas <strong>típicas deste assunto</strong> — e como se reconhecem quando aparecem.</p><div class="tabela-rolavel" tabindex="0" role="region" aria-label="Erros comuns, tabela rolável na horizontal">
   <table>
-    <thead><tr><th>Semana</th><th>Lição</th><th>Depende de</th><th>O que lá está</th><th>Estado</th></tr></thead>
-    <tbody><tr><td>1</td><td><a href="00-esfera-celeste.html">0 · A esfera celeste</a></td><td>—</td><td>Coordenadas, ponto subastral, triângulo de posição. O pré-requisito em falta.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>2</td><td><a href="01-o-que-e-um-almanaque.html">1 · O que é um almanaque</a></td><td>—</td><td>História e mecanismo: um resultado publicado, não um método. O almanaque do GPS.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>3</td><td><a href="02-o-tempo.html">2 · O tempo</a></td><td>lição 0</td><td>Dia juliano, TT/UT1/UTC, ΔT medido, tempo sidéreo médio e aparente.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>4</td><td><a href="03-o-sol.html">3 · O Sol</a></td><td>lições 0 e 2</td><td>A pilha de correções, a equação do tempo, e o orçamento de erro do curso.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>5</td><td><a href="04-nascer-e-por.html">4 · Nascer, pôr e crepúsculos</a></td><td>lição 3</td><td>−0° 50′, bisseção, e os dois casos em que não há resposta.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>6</td><td><a href="05-a-lua.html">5 · A Lua</a></td><td>lição 3</td><td>Paralaxe, fases, o ciclo de 18,6 anos. Onde as aproximações do Sol caem.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>7</td><td><a href="06-ler-as-tabuas.html">6 · Ler as tábuas</a></td><td>lições 3 e 5</td><td>v, d, incrementos. Um formato é uma máquina de evitar um erro.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>8</td><td><a href="07-reduzir-uma-altura.html">7 · Reduzir uma altura</a></td><td>lições 0 e 6</td><td>As cinco correções e Marcq St Hilaire. De um ângulo a uma linha no mapa.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr><tr><td>—</td><td><a href="08-mares.html">8 · As marés</a></td><td>lição 5</td><td>O almanaque que se identifica em vez de se calcular.</td><td><span class="etiqueta extensao">extensão</span></td></tr><tr><td>10</td><td><a href="09-o-teu-almanaque.html">9 · O teu almanaque</a></td><td>lições 3 a 7</td><td>O projeto: declarar a tolerância antes, gerar, comparar, relatar.</td><td><span class="etiqueta nucleo">núcleo</span></td></tr></tbody>
+    <thead><tr><th>A ideia errada</th><th>Como se reconhece</th><th>O que é mesmo</th></tr></thead>
+    <tbody>
+      <tr><td>«Esticar melhora a imagem.»</td><td>Esticar antes de medir, e medir na imagem esticada.</td><td>Esticar <strong>destrói</strong> informação: corta o que está abaixo do ponto preto e quebra a linearidade. Melhora a <em>visibilidade</em>, que é outra coisa. Mede primeiro, estica depois, e guarda a linear.</td></tr>
+      <tr><td>«Se ficar escuro, aumento o brilho.»</td><td>Multiplicar a imagem por um fator.</td><td>Multiplicar não muda a razão entre a estrela e o fundo, que é o problema. Para o fundo ficar visível é preciso ×64, e aos ×256 <strong>74 % da imagem satura</strong>.</td></tr>
+      <tr><td>«O ponto preto põe-se onde o histograma começa.»</td><td>Arrastar o cursor até «encostar» ao histograma.</td><td>O histograma «começa» na cauda de baixo do ruído do fundo — que é precisamente onde vive o sinal mais fraco. Encostar ali deita fora o que custou mais a apanhar.</td></tr>
+      <tr><td>«Quanto mais contraste, melhor.»</td><td>Ponto preto subido até a imagem «saltar».</td><td>O contraste é máximo com o corte na mediana, e aí 50 % dos píxeis estão a zero. ⚠️ Não é que esteja errado — é que é uma <strong>troca</strong>, e tem de ser feita a saber o que se está a dar.</td></tr>
+    </tbody>
   </table>
 </div>
-
-    <h3>O código</h3>
-    <p>Quatro ficheiros, todos de biblioteca padrão, que são a fonte de tudo o que as lições
-    mostram:</p>
-    <ul>
-      <li><a href="codigo/almanaque.py"><code>almanaque.py</code></a> — o motor. Cada função traz no
-        <em>docstring</em> de onde veio a fórmula e <strong>quanto erra</strong>.</li>
-      <li><a href="codigo/ensaio.py"><code>ensaio.py</code></a> — o que prova que está certo. Oito
-        secções, todas contra fontes exteriores e datadas.</li>
-      <li><a href="codigo/gerar.py"><code>gerar.py</code></a> — o projeto: gera o teu almanaque
-        anual.</li>
-      <li><a href="codigo/comparar.py"><code>comparar.py</code></a> — lê o PDF oficial e mede a
-        diferença, coluna a coluna.</li>
-    </ul>
-
-    <h3>O orçamento de erro, medido</h3>
-    <p>Contra a página diária de 20 de março de 2026 do <em>Nautical Almanac</em>:</p>
-<div class="tabela-rolavel" tabindex="0" role="region" aria-label="Orçamento de erro medido contra a página oficial, tabela rolável na horizontal">
-  <table>
-    <thead><tr><th>O que se publica</th><th>Erro medido</th><th>O livro imprime a</th><th>Passa?</th></tr></thead>
-    <tbody><tr><td>GHA de Áries</td><td>0,053′</td><td>0,1′</td><td>✅</td></tr><tr><td>Paralaxe da Lua</td><td>0,077′</td><td>0,1′</td><td>✅</td></tr><tr><td>Dec do Sol</td><td>0,195′</td><td>0,1′</td><td>❌</td></tr><tr><td>GHA do Sol</td><td>0,415′</td><td>0,1′</td><td>❌</td></tr><tr><td>Dec da Lua</td><td>2,1′</td><td>0,1′</td><td>❌</td></tr><tr><td>GHA da Lua</td><td>5,7′</td><td>0,1′</td><td>❌</td></tr><tr><td>Nascer, pôr e crepúsculos</td><td>0 min nas seis colunas</td><td>1 min</td><td>✅</td></tr><tr><td>Nascer e ocaso da Lua</td><td>≤ 1 min</td><td>1 min</td><td>✅</td></tr></tbody>
-  </table>
+    <h2 id="praticar">7. Praticar</h2>
+<p>Do mais fácil ao mais difícil. Tenta antes de abrir a solução — abrir cedo dá a sensação de perceber sem a aprendizagem.</p><div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 1 em 3">●○○</span>
+  <h3>E1 — por que ordem</h3>
+<p>Tens de fazer estas cinco coisas a uma sessão. Põe-nas por ordem e justifica cada
+         posição: (a) medir a FWHM, (b) esticar, (c) empilhar, (d) calibrar, (e) medir o SNR.</p>
+  <details class="solucao"><summary>Solução</summary>
+<p><strong>d, c, a, e, b.</strong></p>
+         <p>Calibrar primeiro, porque tudo o que vem a seguir assume que o sinal é proporcional
+         à luz. Empilhar a seguir, porque é a operação que melhora o que se vai medir. As duas
+         medições depois — e a ordem entre elas é indiferente, desde que sejam
+         <strong>antes</strong> de esticar. Esticar por último, sempre, porque é a única operação
+         que não se desfaz.</p>
+         <p>⭐ Nota: medir a FWHM <em>também</em> nas poses individuais, antes de empilhar, é útil
+         para diagnosticar (lição 5, E1) — mas a FWHM que vai no relatório é a da pilha.</p>
+  </details>
 </div>
-    <p>🔴 <strong>Quatro das seis colunas tabeladas não passam</strong>, e isso é o resultado do
-    curso e não o seu fracasso: sabes quais, por quanto, e o que seria preciso para as corrigir.</p>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 2 em 3">●●○</span>
+  <h3>E2 — o preço do ponto preto, medido</h3>
+<p>Injeta uma «nebulosa» ténue — 8 % acima do céu — num campo sintético, e mede o
+         contraste dela depois de esticar, para cinco pontos pretos diferentes. Escreve a tua
+         previsão primeiro: onde é que esperas o melhor contraste?</p>
+  <details class="solucao"><summary>Solução</summary>
+<pre><code>import numpy as np
+import esticar, pilha
+from campo import Camara, Campo, Sessao
 
-    <h3>No fim</h3>
-    <ul>
-      <li><a href="bibliografia.html">Bibliografia</a> — o percurso, por onde começar.</li>
-      <li><a href="folha.html">Folha de consulta</a> — imprimível, só o que se consulta.</li>
-      <li><a href="teste.html">Teste de domínio</a> — intercalado, sem soluções à vista.</li>
-      <li><a href="flashcards.csv">Flashcards</a> (CSV para o Anki) e
-        <a href="revisao.ics">calendário de revisão</a> (.ics).</li>
-    </ul>
+cam = Camara(); ses = Sessao(cam, semente=606)
+campo = Campo(semente=606).povoar(60)
+zm = pilha.mestre([ses.zero_bruto() for _ in range(8)], "media")
+pm = pilha.mestre([ses.plano_bruto(7000.0) for _ in range(8)])
 
-    <h2 id="fases">Nota das fases</h2>
-    <p>O que cada fase encontrou. É isto que distingue um curso que passou pelo processo de um que
-    só parece ter passado.</p>
+gy, gx = np.mgrid[0:512, 0:512]
+neb = 0.08 * 12.0 * np.exp(-(((gx - 300) / 70.0) ** 2 + ((gy - 220) / 50.0) ** 2))
+img = pilha.calibrar(ses.pose(campo, 8.0, 12.0 + neb), zm, None, pm, 8.0, 8.0)
 
-    <h3 id="fase0">Fase 0 — Verificar</h3>
-    <p><strong>O que se procurou</strong> (tudo registado em
-    <a href="../../topicos/almanaque/DIAGNOSTICO.md">DIAGNOSTICO.md</a>):</p>
-    <ul>
-      <li><code>grep -ri</code> em <code>docs/</code> e <code>topicos/</code> por <em>almanaque,
-        almanac, efeméride, astronom, juliano, sextante, latitude, longitude, declinação, tempo
-        sidéreo, órbita, maré, navegação</em> — <strong>0 ficheiros em todos</strong>.</li>
-      <li>Por sintoma e por verbo: <em>tabela pré-calculada, pré-calcul, lookup, memoiz, consulta em
-        tabela, data e hora, segundos intercalares, esfera, trigonom</em> — 0 em todos.</li>
-      <li><em>calendário</em> deu 8 ficheiros, <strong>todos</strong> sobre o <code>revisao.ics</code>
-        da revisão espaçada. <em>fuso</em> deu 10, quase todos falsos — apanha
-        <strong>parafuso</strong> em <code>cassete-captura</code>.</li>
-      <li><code>git log -S</code> para nove termos: <strong>nada</strong>. Nunca existiu e nunca foi
-        removido.</li>
-    </ul>
-    <p><strong>O que se encontrou:</strong> tópico novo, sem pré-requisitos no repositório. Um
-    <strong>vizinho a declarar</strong> — a interpolação parabólica de picos de FFT em
-    <a href="../cassete-captura/00-espetro.html">cassete-captura</a>, mecanismo diferente com o
-    mesmo nome — e uma <strong>analogia a aproveitar</strong>: o <em>cache</em>, que aparece em 14
-    ficheiros em sentido informático e estrutura a lição 1.</p>
-    <p><strong>Fontes primárias localizadas:</strong> o <em>Nautical Almanac</em> em PDF gratuito
-    (1911–2030), as fórmulas de baixa precisão do <em>Astronomical Almanac</em>, o NOAA Solar
-    Calculator, as constituintes de maré. ⚠️ <strong>Duas não abriram:</strong> o sítio do USNO
-    recusou a ligação e a tabela da NOAA é desenhada por JavaScript — está dito em cada lição onde
-    isso afeta uma afirmação.</p>
+med, sig = pilha.fundo_e_ruido(img)
+r = np.hypot((gx - 300) / 70.0, (gy - 220) / 50.0)
+dentro, fora = r < 1.0, r > 2.5
+print("fundo %.2f ADU, sigma %.2f ADU" % (med, sig))
+print("nebulosa: %.2f ADU acima do fundo (%.2f sigma por pixel)"
+      % (img[dentro].mean() - img[fora].mean(),
+         (img[dentro].mean() - img[fora].mean()) / sig))
+print("  ponto preto        contraste nebulosa/fundo depois de esticar")
+for k in (-3, -1, 0, 0.5, 1):
+    y = esticar.mtf(img, 0.05, med + k * sig)
+    a, b = y[dentro].mean(), y[fora].mean()
+    print("  mediana%+4.1f sigma   %.4f vs %.4f  ->  razao %.3f"
+          % (k, a, b, a / max(b, 1e-9)))</code></pre>
+         <p>Saída (corrida a 2026-09-18):</p>
+<pre><code>fundo 69.85 ADU, sigma 9.06 ADU
+nebulosa: 2.70 ADU acima do fundo (0.30 sigma por pixel)
+  ponto preto        contraste nebulosa/fundo depois de esticar
+  mediana-3.0 sigma   0.1742 vs 0.1580  ->  razao 1.103
+  mediana-1.0 sigma   0.0790 vs 0.0632  ->  razao 1.251
+  mediana+0.0 sigma   0.0334 vs 0.0255  ->  razao 1.309
+  mediana+0.5 sigma   0.0175 vs 0.0140  ->  razao 1.251
+  mediana+1.0 sigma   0.0077 vs 0.0071  ->  razao 1.089</code></pre>
+         <p>🔴 <strong>O contraste é máximo na mediana</strong>, não abaixo dela. Se a tua previsão
+         era «quanto mais baixo o ponto preto, melhor», estava errada — e a razão da regra é
+         outra: preservar informação, não maximizar contraste.</p>
+         <p>Repara também na linha de cima: a nebulosa vale <strong>0,30 σ por píxel</strong>.
+         Nenhum píxel dela é visível sozinho; ela só aparece porque tem milhares de píxeis e o
+         olho integra. É a mesma aritmética de √N da lição 1, aplicada ao espaço em vez do tempo —
+         e é por isso que objetos extensos ténues aparecem em imagens onde uma estrela do mesmo
+         brilho de superfície não apareceria.</p>
+  </details>
+</div>
+<div class="exercicio">
+  <span class="dificuldade" aria-label="Dificuldade: 3 em 3">●●●</span>
+  <h3>E3 — código que corre: o teu esticamento, invertido</h3>
+<p>Escreve <code>mtf_inversa(y, m)</code> e verifica, com o código, que
+         <code>mtf_inversa(mtf(x, m), m) == x</code> a menos do erro de vírgula flutuante.
+         Depois responde: <strong>se o esticamento é invertível, porque é que se diz que destrói
+         informação?</strong></p>
+  <details class="solucao"><summary>Solução</summary>
+<p>A inversa sai de resolver a mesma equação em ordem a <em>x</em>:</p>
+<pre><code>import numpy as np
+import esticar
 
-    <h3 id="fase1">Fase 1 — Criar</h3>
-    <p>Dez lições, quatro ficheiros de código, e uma decisão que estruturou tudo: <strong>nenhuma
-    saída de código foi escrita à mão</strong>. Cada bloco das lições foi executado numa pasta
-    temporária e a saída colada de uma execução real — o mecanismo que o registo de falhas do
-    <code>PROCESSO.md</code> exigiu depois de duas sessões em que os números foram escritos primeiro
-    e corridos depois.</p>
-    <p>Decisões tomadas durante a escrita: biblioteca padrão só (o <code>skyfield</code> só aparece
-    na lição 9, como padrão de comparação); longitude <strong>leste-positiva</strong>, contra a
-    convenção náutica clássica, porque é a de todo o código moderno — declarado em caixa de aviso na
-    lição 0; e o PDF oficial <strong>não entra no repositório</strong>, por direitos de autor,
-    ficando só o extrator.</p>
+def mtf_inversa(y, m):
+    return (m * y) / ((2 * m - 1) * y - m + 1)
 
-    <h3 id="fase2">Fase 2 — Aprofundar</h3>
-    <p><strong>O que a Fase 1 errou</strong>, item a item, tudo apanhado a correr o que estava
-    escrito:</p>
-    <ol>
-      <li>🔴 <strong>O bug maior: <code>gha()</code> usava o tempo sidéreo MÉDIO.</strong> O
-        <em>Nautical Almanac</em> publica o <strong>aparente</strong>. O erro sistemático contra a
-        página de 20 de março de 2026 era de −0,09′ no GHA de Áries; com o GAST desce para +0,004′,
-        que é o arredondamento do próprio livro. Virou a secção «Erros comuns» da lição 2.</li>
-      <li><strong>O ensaio do dia sidéreo media a taxa com passo de 1 segundo</strong> e dava
-        86164,56 s em vez de 86164,09 s — cancelamento catastrófico. Não era da fórmula: com passo
-        de 1 hora dá certo. Virou caixa de aviso na lição 2.</li>
-      <li><strong>O ensaio da obliquidade comparava a verdadeira com a constante da média</strong> e
-        falhava por 5,4″ — que é exatamente a nutação em obliquidade. Erro do <em>ensaio</em>, não
-        do código.</li>
-      <li><strong>Escrevi «a tabela pesa centenas de vezes mais do que o código»</strong> na lição 1.
-        Medido: <strong>30 vezes</strong>. Corrigido para o que o bloco imprime.</li>
-      <li><strong>Escrevi que a equação dos equinócios vale 0,29′.</strong> Medida sobre 20 anos:
-        <strong>0,263′</strong>. Corrigida em quatro sítios, incluindo dois <em>docstrings</em>.</li>
-      <li><strong>Um comentário no <code>almanaque.py</code> dizia que trocar UT1 por TT custa
-        0,29′.</strong> Custa 0,0008′ no Sol e <strong>17,25′</strong> na rotação da Terra — a mesma
-        quantidade de tempo vale coisas diferentes conforme o que indexa. O comentário passou a
-        dizer as três.</li>
-      <li><strong>O detetor de luas novas da lição 5 dava um mês sinódico de 30,48 dias</strong>,
-        fora do intervalo publicado (29,26–29,80). Era bug do detetor — saltava quase um mês e
-        bissectava na lunação errada. Reescrito para varrer dia a dia: 29,29 a 29,81.</li>
-      <li><strong>O intercepto do exemplo trabalhado da lição 7 dava 178 milhas náuticas</strong>,
-        porque inventei a altura do sextante. Passou a ser obtida <em>por inversão</em> a partir de
-        uma posição real: 18,4 milhas.</li>
-      <li><strong>Escrevi que a fixação recuperava a posição «a menos de um milésimo de milha».</strong>
-        Mede 0,264 milhas à primeira, e cai para 0,00001 à segunda iteração. O resíduo virou a parte
-        mais interessante do exercício: Marcq St Hilaire é uma linearização, e comporta-se como um
-        passo de Newton.</li>
-      <li><strong>O <code>round()</code> do Python arredonda ao par e o livro não.</strong> A minha
-        reconstrução da tabela de incrementos dava 0,1 onde a página imprime 0,2. Virou entrada na
-        tabela de erros comuns da lição 6.</li>
-      <li><strong>O E2 da lição 6 media uma tautologia</strong> — confirmava a definição de
-        <em>v</em>, não a qualidade da interpolação. Reescrito para medir a curvatura desprezada
-        <em>dentro</em> da hora: 0,006′, dezasseis vezes abaixo do passo de impressão.</li>
-      <li><strong>O gerador etiquetava 25 dias do ano em Lisboa como «sempre-acima».</strong> A Lua
-        em Lisboa não é circumpolar coisa nenhuma — eram dias em que ela saltou o nascer. A exceção
-        <code>SemEvento</code> passou a distinguir <strong>três</strong> causas.</li>
-      <li><strong>O <code>ensaio.py</code> rebentou com <code>UnicodeEncodeError</code> na primeira
-        execução</strong>, por causa de um «Δ» numa consola <code>cp1252</code> — a mesma falha que
-        o <code>PROCESSO.md</code> já registava para o <code>validar.py</code>, repetida.</li>
-      <li>🔴 <strong>Um bloco de código corria, falhava, e imprimia nada — com código de saída
-        <em>zero</em>.</strong> O <code>gerar.py</code> não estava a ser copiado para a pasta
-        temporária onde os blocos correm; o subprocesso rebentava, o bloco imprimia um
-        <code>stdout</code> vazio, e a lição 9 publicava um <code>&lt;samp&gt;</code> em branco que
-        parecia «o programa não disse nada». <strong>Só o <code>tidy</code> deu por isso</strong>,
-        ao avisar de um <code>&lt;samp&gt;</code> vazio. Corrigido em três níveis: o ficheiro passou
-        a ser copiado, o bloco passa a verificar o código de saída do subprocesso, e o gerador das
-        lições passa a <strong>recusar</strong> um bloco cuja saída seja vazia.</li>
-      <li><strong>Três figuras erradas que passaram todas as verificações automáticas.</strong> O
-        mapa do curso tinha o <code>viewBox</code> escrito à mão e as lições 6 a 9 ficavam fora dele;
-        a figura da reta de altura precisou de <strong>três versões</strong> (rótulos sobrepostos, e
-        depois geometria cortada pelo topo); um rótulo do mapa saía truncado a meio de uma palavra.
-        Correções: <code>viewBox</code> calculado do envelope da geometria, rótulos em coluna fixa
-        ordenados pela altura do alvo, e nomes curtos explícitos em vez de cortar o título.</li>
-      <li><strong>A figura da soma de uma consulta discordava do bloco de código da mesma
-        lição</strong> por uma décima de minuto de arco: dizia 8° 59,6′ e o valor é 8° 59,7′.</li>
-      <li>⬜ <strong>A lista de verificação do processo, percorrida:</strong> 11 secções por ordem em
-        todas as lições ✅ · objetivos verificáveis ✅ · fronteira com remissão para o tópico vizinho
-        ✅ · cada pressuposto com consequência ✅ · pré-requisito como lição 0 ✅ · soluções em
-        <code>&lt;details&gt;</code> fechado ✅ · explicação em cada opção de quiz ✅ · código que
-        corre em todas as lições ✅ · <strong>fonte que não é documentação em todas as dez</strong>
-        ✅ — e nas três em que não encontrei nenhuma peça audiovisual citável, está escrito que
-        <em>procurei e não encontrei</em> ✅ · convenções declaradas como convenções ✅.</li>
-    </ol>
+x = np.linspace(0.0, 1.0, 9)
+for m in (0.05, 0.25, 0.8):
+    y = ((m - 1) * x) / ((2 * m - 1) * x - m)
+    volta = mtf_inversa(y, m)
+    print("m=%.2f  erro maximo da ida e volta: %.2e" % (m, np.abs(volta - x).max()))
 
-    <h3 id="fase3">Fase 3 — Validar</h3>
-    <p><strong>O que se correu:</strong> todo o código de todas as lições, por construção — o
-    gerador executa cada bloco e cola a saída, por isso um bloco que não corra faz a página não
-    existir. Mais o <code>ensaio.py</code> completo (oito secções) e o <code>gerar.py</code> para um
-    ano inteiro em duas latitudes.</p>
-    <p><strong>Contra que fontes exteriores:</strong></p>
-    <ul>
-      <li><em>Nautical Almanac</em> 2026, página de 20–22 de março: GHA de Áries e do Sol,
-        declinação, colunas da Lua, tabela de nascer/pôr/crepúsculos por latitude, tabela de
-        incrementos (pág. 263), e o ΔT que a própria página declara.</li>
-      <li>Instantes publicados dos <strong>equinócios e solstícios</strong> de 2025 a 2027 —
-        referência independente do livro.</li>
-      <li>Os quatro extremos e as quatro passagens por zero da <strong>equação do tempo</strong>,
-        com data. <strong>Todos batem</strong>, o que são oito coincidências independentes.</li>
-      <li>Instantes publicados de três <strong>luas cheias</strong> de 2026.</li>
-      <li>Duas fórmulas independentes para o tempo sidéreo (IAU 1982 e o Ângulo de Rotação da Terra
-        da IAU 2000), cuja diferença é a precessão acumulada e bate com a expressão dela.</li>
-    </ul>
-    <p><strong>O que isso apanhou:</strong> os treze itens da Fase 2 — nenhum deles teria aparecido
-    a reler. E o resultado final, que é o produto do curso: <strong>as seis colunas de nascer, pôr e
-    crepúsculos batem ao minuto</strong>, o GHA de Áries bate à precisão de impressão do livro, e
-    <strong>quatro das seis colunas tabeladas não batem</strong> — por 0,2′, 0,4′, 2,1′ e 5,7′.</p>
-    <p>⚠️ <strong>O que ficou por validar, dito à letra:</strong></p>
-    <ul>
-      <li><strong>Não há observação real.</strong> Não há sextante; a lição 7 valida a álgebra da
-        fixação com alturas simuladas, e isso valida a álgebra, não a astronomia.</li>
-      <li><strong>Não corri o <code>skyfield</code></strong> — sem rede para o instalar nem para
-        descarregar as efemérides do JPL. A lição 9 descreve o procedimento e não afirma nada sobre
-        os números dele.</li>
-      <li><strong>Duas fontes primárias não abriram</strong> (USNO e a tabela da NOAA). Onde isso
-        afeta uma afirmação, está escrito na própria lição qual foi a reprodução usada e qual foi a
-        medição que a substituiu.</li>
-      <li><strong>As constantes harmónicas da lição 8 são inventadas</strong>, e está dito no código
-        e na prosa.</li>
-      <li><strong>O <code>tidy</code> ficou por correr na primeira passagem</strong> — não estava
-        instalado. Foi apontado a um <code>tidy-html5 5.8</code> e correu: apanhou o
-        <code>&lt;samp&gt;</code> vazio descrito acima, e mais nada.</li>
-      <li><strong>O passo 5 do <code>validar.sh</code> (termos sensíveis) disparou</strong> numa
-        frase do diagnóstico, com razão — ele procura a palavra e pede confirmação humana. A frase
-        foi reescrita, <strong>e não se acrescentou uma exceção ao validador</strong>: a exceção
-        enfraquecia-o para sempre e a frase não perdia nada.</li>
-    </ul>
+# e agora a parte que interessa
+img = np.array([[10.0, 40.0, 41.0, 300.0]])
+y8 = np.rint(esticar.para_8bits(esticar.mtf(img, 0.05, 44.0)))
+print("valores de entrada:", img[0])
+print("depois de esticar e guardar em 8 bits:", y8[0])</code></pre>
+         <p>Saída (corrida a 2026-09-18):</p>
+<pre><code>m=0.05  erro maximo da ida e volta: 1.67e-15
+m=0.25  erro maximo da ida e volta: 2.22e-16
+m=0.80  erro maximo da ida e volta: 1.11e-16
+valores de entrada: [ 10.  40.  41. 300.]
+depois de esticar e guardar em 8 bits: [  0.   0.   0. 255.]</code></pre>
+         <p><strong>A resposta:</strong> a função é perfeitamente invertível — o erro máximo é de
+         10⁻¹⁵, que é precisão de vírgula flutuante e não perda de informação.
+         O que destrói informação são as <strong>duas coisas à volta dela</strong>:</p>
+         <ul>
+           <li>o <strong>corte no ponto preto</strong>: 10, 40 e 41 ADU estavam todos abaixo dos
+           44 e ficaram todos em 0. Três valores diferentes, um só valor de saída;</li>
+           <li>a <strong>quantização a 8 bits</strong>: 256 níveis para representar o que tinha
+           16 384. (E, neste exemplo, os 300 ADU foram parar a 255 porque eram o máximo da
+           amostra: a normalização leva sempre o maior valor ao topo.)</li>
+         </ul>
+         <p>⭐ É exatamente a mesma distinção dos tópicos da cassete: a curva é reversível, o corte
+         e a quantização não são. E é por isso que a regra prática — <strong>guarda a
+         linear</strong> — resolve o problema todo: podes esticar outra vez, de outra maneira,
+         amanhã.</p>
+  </details>
+</div>
+    <h2 id="quiz">8. Quiz</h2>
+<p>Corrige-se aqui, sem rede. Cada opção tem a sua explicação — é aí que está o que faltava perceber, por isso lê-as todas, mesmo quando acertas.</p><div class="quiz" data-quiz="06-esticar">
+  <ol class="perguntas">
+    <li class="pergunta">
+      <p class="enunciado">Porque é que multiplicar a imagem por 64 não substitui um esticamento?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-1" value="a" data-certa="false"><span class="rotulo">Porque 64 é pouco: é preciso multiplicar por mais.</span></label>
+          <p class="explicacao" hidden>Por mais satura: aos ×256, 74 % da imagem passa o topo da escala. O problema não é o fator.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-1" value="b" data-certa="true"><span class="rotulo">Porque a multiplicação é linear e não muda a razão entre a estrela e o fundo, que é o problema.</span></label>
+          <p class="explicacao" hidden>Exato. O que é preciso é uma função que comprima a gama — que suba depressa perto de zero e devagar em cima.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-1" value="c" data-certa="false"><span class="rotulo">Porque a multiplicação introduz ruído.</span></label>
+          <p class="explicacao" hidden>Multiplicar não introduz ruído nenhum: multiplica o sinal e o ruído pelo mesmo fator, e o SNR fica igual.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">O que é que o asinh faz que o MTF não faz?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-2" value="a" data-certa="false"><span class="rotulo">É mais rápido de calcular.</span></label>
+          <p class="explicacao" hidden>É mais lento: envolve um logaritmo. O MTF é duas multiplicações e uma divisão.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-2" value="b" data-certa="false"><span class="rotulo">Não precisa de ponto preto.</span></label>
+          <p class="explicacao" hidden>Precisa: a implementação deste curso normaliza antes de aplicar a função, tal como o MTF. O ponto preto é uma decisão anterior à escolha da curva.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-2" value="c" data-certa="true"><span class="rotulo">Mantém o fundo linear, porque asinh(u) ≈ u perto de zero.</span></label>
+          <p class="explicacao" hidden>É a propriedade pela qual Lupton e colegas o propuseram: o fundo continua a parecer o que é, e as estrelas brilhantes comprimem-se em vez de saturarem.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Cortar o ponto preto na mediana do fundo faz o quê?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-3" value="a" data-certa="false"><span class="rotulo">Melhora a imagem sem custo nenhum.</span></label>
+          <p class="explicacao" hidden>Tudo o que fica abaixo do corte vai a zero e não volta — e é aí que vivem as partes exteriores das nebulosas.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-3" value="b" data-certa="true"><span class="rotulo">Põe metade dos píxeis a zero, e maximiza o contraste do que está acima do céu.</span></label>
+          <p class="explicacao" hidden>As duas coisas ao mesmo tempo, e é por isso que é uma troca e não um erro: medido, 50,06 % dos píxeis a zero e o contraste máximo da tabela.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-3" value="c" data-certa="false"><span class="rotulo">Não faz diferença, porque o fundo não interessa.</span></label>
+          <p class="explicacao" hidden>O fundo interessa muito: é a régua de tudo o que se mede, e a cauda de baixo dele é onde está o sinal mais fraco.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Mediste o SNR na imagem esticada e deu um valor ótimo. O que vale essa medição?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-4" value="a" data-certa="true"><span class="rotulo">Nada: o esticamento quebra a linearidade, e todas as medições deste curso a assumem.</span></label>
+          <p class="explicacao" hidden>Exato. Depois de esticar, o número no ficheiro já não é proporcional aos fotões, e razões entre valores deixam de significar razões entre fluxos.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-4" value="b" data-certa="false"><span class="rotulo">Vale, desde que o esticamento tenha sido monótono.</span></label>
+          <p class="explicacao" hidden>Monotonia garante que a ordem dos píxeis se mantém — não garante nada sobre proporções, e o SNR é uma proporção.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-4" value="c" data-certa="false"><span class="rotulo">Vale se compensares dividindo pelo ponto médio.</span></label>
+          <p class="explicacao" hidden>A transformação não é uma escala: é uma curva. Nenhuma divisão por uma constante a desfaz.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">A tua nebulosa vale 0,3 σ por píxel. Como é que ela aparece na imagem?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-5" value="a" data-certa="true"><span class="rotulo">Porque tem milhares de píxeis, e a média de N píxeis tem √N menos ruído — é o mesmo argumento da lição 1, aplicado ao espaço.</span></label>
+          <p class="explicacao" hidden>Exato, e é o que explica porque é que objetos extensos ténues aparecem onde uma estrela do mesmo brilho de superfície não apareceria.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-5" value="b" data-certa="false"><span class="rotulo">Não aparece: está abaixo do ruído.</span></label>
+          <p class="explicacao" hidden>Cada píxel está abaixo do ruído. Mas a nebulosa tem milhares de píxeis, e a média deles tem muito menos ruído do que cada um.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-5" value="c" data-certa="false"><span class="rotulo">Porque o esticamento amplifica o sinal mais do que o ruído.</span></label>
+          <p class="explicacao" hidden>O esticamento aplica a mesma curva aos dois: não distingue sinal de ruído, nem tem como.</p>
+        </li>
+      </ul>
+    </li>
+    <li class="pergunta">
+      <p class="enunciado">Qual é a regra que resolve a maior parte dos problemas desta lição?</p>
+      <ul class="opcoes">
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-6" value="a" data-certa="true"><span class="rotulo">Guardar a imagem linear e esticar sempre a partir dela.</span></label>
+          <p class="explicacao" hidden>É isso: o esticamento é a única operação irreversível do pipeline, e guardar a linear torna-a reversível na prática — podes voltar atrás amanhã.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-6" value="b" data-certa="false"><span class="rotulo">Usar sempre asinh em vez de MTF.</span></label>
+          <p class="explicacao" hidden>As duas são defensáveis e servem para coisas diferentes. Nenhuma delas te protege de ter deitado fora a imagem linear.</p>
+        </li>
+        <li class="opcao">
+          <label><input type="radio" name="06-esticar-6" value="c" data-certa="false"><span class="rotulo">Nunca cortar o ponto preto acima da mediana.</span></label>
+          <p class="explicacao" hidden>É uma boa regra prática, mas depende do que queres, e o E2 mostra a troca. A regra que não tem contrapartida é outra.</p>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <p class="accoes nao-imprimir">
+    <button class="botao principal" type="button" data-verificar>Verificar</button>
+    <button class="botao" type="button" data-limpar>Limpar</button>
+  </p>
+  <p class="resultado" role="status" aria-live="polite"></p>
+</div>
+    <h2 id="feynman">9. Explica por palavras tuas</h2>
+<p>Explicar em voz alta, sem jargão, expõe os buracos que a leitura esconde. Esta resposta vai para a entrega.</p><div class="aberta">
+  <label for="feynman-1">Explica a alguém que trabalha com imagens digitais mas nunca viu uma imagem astronómica porque é que «aumentar o brilho» não funciona, e o que funciona.
+    <span class="pista">Sem usar «linear», «gama» nem «histograma».</span>
+  </label>
+  <textarea id="feynman-1" data-pergunta="Explica a alguém que trabalha com imagens digitais mas nunca viu uma imagem astronómica porque é que «aumentar o brilho» não funciona, e o que funciona."></textarea>
+</div>
+<div class="entrega nao-imprimir">
+  <h3>Entregar</h3>
+  <p>O site não tem backend e nenhuma sessão lê o teu browser. O botão gera o Markdown com as
+  tuas respostas abertas e o resultado do quiz; colas o ficheiro no repositório e a correção
+  acontece aí.</p>
+  <p class="accoes">
+    <button class="botao principal" type="button" data-copiar-respostas>Copiar as minhas respostas</button>
+  </p>
+  <p class="aviso-copia" role="status" aria-live="polite" hidden></p>
+  <label class="pista" for="saida-md">Texto da entrega (só aparece se a cópia automática falhar)</label>
+  <textarea id="saida-md" data-saida-markdown readonly hidden aria-label="Markdown da entrega, para copiar à mão"></textarea>
+  <p class="aviso-copia">Guardar em <code>topicos/astrofotografia/respostas/AAAA-MM-DD.md</code>
+  e correr <code>/corrigir astrofotografia</code>.</p>
+</div>
+    <h2 id="resumo">10. Resumo</h2>
+<ul><li>Uma pose calibrada é linear e por isso invisível: 99 % dela vive abaixo de 0,6 % da escala.</li><li>Multiplicar não serve — não muda a razão estrela/fundo, e satura antes de o fundo aparecer.</li><li>asinh mantém o fundo linear e comprime as estrelas; MTF é monótona, invertível e tem um parâmetro só.</li><li>O ponto preto é a decisão que destrói: cortar na mediana maximiza o contraste <strong>e</strong> apaga metade da imagem.</li><li>🔴 Mede primeiro, estica depois, e <strong>guarda a linear</strong>.</li></ul>
+    <h2 id="fontes">11. Fontes</h2>
+<ul class="fontes"><li><strong>Artigo original</strong> — R. Lupton, M. R. Blanton, G. Fekete, D. W. Hogg, W. O’Mullane, A. Szalay, N. Wherry (2004), <em>Preparing Red-Green-Blue Images from CCD Data</em>, PASP <strong>116</strong>(816), 133 · DOI <a href="https://doi.org/10.1086/382245">10.1086/382245</a> · pré-publicação em <a href="https://arxiv.org/abs/astro-ph/0312483">arXiv:astro-ph/0312483</a>. <span class="verificado">🌐 Verificado a 2026-09-18</span> — resumo lido à letra no arXiv, volume e página confirmados no IOPscience. <strong>Porquê:</strong> é a origem do esticamento <code>asinh</code> e explica-o em duas páginas. <strong>O que saltar:</strong> a parte sobre compor três bandas em cor, que este curso não faz.</li><li><strong>Livro</strong> — Steve B. Howell, <em>Handbook of CCD Astronomy</em>, 2.ª ed., Cambridge University Press. ISBN 978-0-521-85215-9 (cartonado) e 978-0-521-61762-8 (brochado), confirmados na ficha do editor. <span class="verificado">🌐 Verificado a 2026-09-18</span> <strong>Porquê:</strong> é o texto que trata o sensor como instrumento de medida e não como acessório de fotografia. <strong>O que saltar:</strong> os capítulos 6 e 7 (espetroscopia, CCD no espaço) não servem nada deste curso. ⚠️ Não tenho o exemplar: não se cita página nenhuma.</li><li><strong>Tópico vizinho deste repositório</strong> — <a href="../cassete-dados/00-som-numero-ficheiro.html">A cassete como memória, lição 0</a>. <strong>Porquê:</strong> a distinção entre «a curva é reversível» e «o corte e a quantização não são» é exatamente a mesma que lá se faz para o som, e ver o mesmo argumento em dois domínios fixa-o melhor do que vê-lo duas vezes no mesmo.</li></ul>
 
     <footer class="rodape">
-      <p><a href="../index.html">Todos os tópicos</a> · <a href="../metodo.html">O método</a></p>
+      <p><a href="#conteudo">Voltar ao início</a> · <a href="index.html">Mapa do tópico</a> · <a href="../metodo.html">Porque é que a lição tem esta forma</a></p>
+      <p><a href="05-alinhar-e-empilhar.html">← Lição 5 · Alinhar e empilhar</a> · <a href="07-o-ceu-que-atrapalha.html">Lição 7 · O céu que atrapalha →</a></p>
     </footer>
   </main>
 </div>

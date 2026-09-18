@@ -1,0 +1,48 @@
+frente;verso;etiqueta
+O que é que o ISO muda num sensor digital?;O ganho: quantos electrões vale um nível do ficheiro. Não muda os electrões recolhidos.;luz
+Passar de f/4 para f/2 multiplica a luz recolhida por quanto?;Por 4. O diâmetro duplica e a área vai com o quadrado.;luz
+Cinco magnitudes correspondem a que fator no fluxo?;Exatamente 100. É a definição da escala.;luz
+Como entra a extinção atmosférica na conta?;Soma-se à magnitude, porque magnitude é logaritmo de fluxo.;luz
+Escala em segundos de arco por píxel?;206,265 × passo (µm) ÷ focal (mm).;pixel
+Porque é que a variância de uma contagem de fotões é igual à média?;Porque os fotões chegam ao acaso e independentes: é um processo de Poisson.;ruido
+Como se somam duas fontes de ruído independentes?;Em quadratura: √(σ₁² + σ₂²). Somam-se variâncias, nunca desvios.;ruido
+Fórmula do SNR de uma estrela medida em n píxeis?;sinal / √(sinal + n·(céu + escuro + leitura²)).;ruido
+Empilhar N poses melhora o SNR por que fator?;√N. Logo o dobro de SNR custa quatro vezes o tempo.;ruido
+Qual dos quatro ruídos manda numa pose de 8 s num céu urbano?;O céu: 77 % da variância. Leitura 6,5 %, escuro 0,3 %.;ruido
+Como se escolhe a pose mínima útil?;Onde o céu passa a mandar sobre a leitura: t = σ_leitura² / (céu em e⁻/px/s). Urbano 0,68 s · escuro 6,8 s.;ruido
+Velocidade sideral no equador celeste?;15,0411 ″/s, multiplicada por cos δ fora do equador.;terra
+Traço de uma estrela, em píxeis?;15,0411 × t × cos δ ÷ escala.;terra
+Porque é que a regra dos 500 é, por baixo, uma regra sobre o passo do píxel?;Porque a focal cancela-se: traço = 15,04×500 ÷ (206,265×p). Com p=4 µm dá sempre 9,12 px.;terra
+Dividir 64 s em 8 poses de 8 s custa quanto em SNR, e porquê?;2,9 %, e só por causa do ruído de leitura repetido: (n−1)·n_px·σ².;terra
+Quem decide a largura das estrelas com uma objetiva de 50 mm?;As aberrações da objetiva e o próprio píxel. Difração e seeing valem décimas de píxel.;pixel
+Qual é o piso de FWHM imposto pela grelha de píxeis?;2,3548 × √(1/12) = 0,68 px. Soma-se em quadratura à largura verdadeira.;pixel
+O que significa uma FWHM de 0,9 px?;Sub-amostrado: a forma não cabe na grelha. A posição ainda se mede, e é o que o alinhamento precisa.;pixel
+Porque é que a patente de Bayer põe o dobro de píxeis verdes?;Porque a acuidade do sistema visual humano é maior no verde — a amostragem foi ajustada a ela.;pixel
+Modelo do sinal de uma pose bruta?;(luz + escuro) × resposta_do_píxel + nível_de_zero + ruído.;calibrar
+Porque é que se subtrai antes de dividir pelo plano?;Porque o nível de zero é somado depois da ótica: dividi-lo pela vinhetagem produz um erro com a forma da vinhetagem.;calibrar
+Como se mede o ganho sem folha de especificações?;Com dois planos e dois zeros: ganho = [(F₁+F₂)−(B₁+B₂)] / [var(F₁−F₂)−var(B₁−B₂)].;calibrar
+O que acontece ao ganho medido se os planos estiverem saturados?;Sai alto, sem aviso: o conversor corta a variância, e variância a menos parece ganho a mais.;calibrar
+Quantas calibrações de cada tipo, e porquê?;16. Acrescentam √(1+1/N)−1 ao ruído: 3,1 % com 16, 41 % com 1, e de 16 para 32 poupa só 1,5 pontos.;calibrar
+Sintoma de subtrair o nível de zero duas vezes?;Mediana da imagem calibrada negativa — e a imagem parece bem, porque o esticamento corta em zero.;calibrar
+Em poses curtas, o que é que o dark master tira mesmo?;Os píxeis quentes. O fundo térmico é desprezável: 0,4 e⁻ contra 3 de ruído de leitura em 8 s.;calibrar
+Porque é que alinhar é um problema de listas de pontos e não de imagens?;Porque 99,9 % dos píxeis são fundo sem informação de posição, e cada estrela dá uma posição a centésimos de píxel.;empilhar
+Média, mediana ou sigma-clip?;Sigma-clip por omissão: quase o ruído da média com quase a robustez da mediana. A mediana custa ≈10 % de SNR.;empilhar
+O que significa um ganho de SNR acima de √N?;Que a medição está contaminada — nunca sucesso. Causas: interpolação no alinhamento, ou n_poses errado na fotometria.;empilhar
+Porque é que o sigma-clip não tira um píxel quente sem dither?;Porque ele está em todas as amostras: é o consenso, e a rejeição rejeita quem se afasta do consenso.;empilhar
+Diferença entre o dither daqui e o das cassetes?;A ideia é a mesma (erro sistemático vira aleatório) — a mecânica não: lá soma-se ruído antes de quantizar, aqui move-se a câmara entre poses.;empilhar
+Com transparência variável, o ganho da pilha segue que expressão aproximada?;√N × transparência média — e o valor medido fica acima dela, porque parte do ruído vem do próprio astro e também desce.;empilhar
+Porque é que multiplicar a imagem não substitui esticar?;Porque é linear e não muda a razão estrela/fundo, que é o problema. Para o fundo aparecer é preciso ×64, e aos ×256 satura 74 % da imagem.;esticar
+O que faz o asinh que o MTF não faz?;Mantém o fundo linear (asinh(u) ≈ u perto de zero) e comprime as estrelas em vez de as saturar.;esticar
+O que é o ponto preto e o que ele custa?;O valor abaixo do qual tudo vai a zero. Cortar na mediana maximiza o contraste e apaga metade da imagem.;esticar
+A regra de ouro do esticamento?;Mede primeiro, estica depois, e guarda a imagem linear.;esticar
+Como se mede o brilho do céu, e que desvio sistemático tem?;Invertendo a conta dos fotões a partir do fundo em ADU. Tem +0,35 mag de desvio da normalização do plano à mediana.;ceu
+Um filtro de banda larga que corta 50 % faz o quê ao tempo necessário?;Duplica-o: corta o céu e o sinal na mesma proporção, e o ruído só cai com a raiz.;ceu
+Tirar o gradiente melhora o quê?;A vista, não o SNR: os fotões da cidade já chegaram e a raiz deles fica. σ passou de 13,8 para 10,1 e não para os 9,05 da noite limpa.;ceu
+De 19 para 21,5 mag/arcsec² o tempo cai por que fator, e porquê não 10?;Por 5. Aos 21,5 o céu já não domina (10,6 e⁻ contra σ²=9 de leitura).;ceu
+Massa de ar e extinção?;X = 1/sen(h) acima de ≈15° · extinção = k·X magnitudes, com k ≈ 0,20 num sítio limpo.;planear
+Altura máxima de um alvo?;90° − |latitude − declinação|.;planear
+Vale a pena esperar pelo trânsito?;Para um alvo acima de 60°, não: a diferença é ≈2 % e cada minuto de espera custa um minuto de integração. Só compensa para alvos baixos.;planear
+Como se mede o coeficiente de extinção do teu sítio?;Reta de Bouguer: a mesma estrela a várias alturas, magnitude instrumental contra massa de ar, e o declive é k. Só vale se a transparência estiver estável.;planear
+Porque é que a previsão tem de ser commitada antes de medir?;Porque uma previsão escrita depois é uma justificação, e justificações plausíveis há sempre. O commit é a prova.;projeto
+Por que ordem se escreve o relatório?;O que limitou (com o número) primeiro, previsto contra medido a seguir, imagem no fim.;projeto
+Para que serve comparar com o Siril ou o DeepSkyStacker?;Para detetar um erro grosseiro no teu pipeline — nunca para afinar o teu código até bater com o deles.;projeto

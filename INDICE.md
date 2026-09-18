@@ -330,6 +330,183 @@ o que já está escrito.
   - [Três perguntas abertas](docs/almanaque/teste.html#abertas)
   - [Depois do teste](docs/almanaque/teste.html#depois)
 
+## `docs/astrofotografia/00-a-luz-como-contagem.html` — 0 · A luz como contagem — Astrofotografia
+
+  - [1. Objetivo](docs/astrofotografia/00-a-luz-como-contagem.html#objetivo)
+  - [2. Recuperar](docs/astrofotografia/00-a-luz-como-contagem.html#recuperar)
+  - [3. O mecanismo](docs/astrofotografia/00-a-luz-como-contagem.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/astrofotografia/00-a-luz-como-contagem.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/astrofotografia/00-a-luz-como-contagem.html#lacunas)
+  - [6. Erros comuns](docs/astrofotografia/00-a-luz-como-contagem.html#erros)
+  - [7. Praticar](docs/astrofotografia/00-a-luz-como-contagem.html#praticar)
+  - [8. Quiz](docs/astrofotografia/00-a-luz-como-contagem.html#quiz)
+  - [9. Explica por palavras tuas](docs/astrofotografia/00-a-luz-como-contagem.html#feynman)
+  - [10. Resumo](docs/astrofotografia/00-a-luz-como-contagem.html#resumo)
+  - [11. Fontes](docs/astrofotografia/00-a-luz-como-contagem.html#fontes)
+
+## `docs/astrofotografia/01-o-ruido.html` — 1 · O ruído, e porque é que empilhar resolve — Astrofotografia
+
+  - [1. Objetivo](docs/astrofotografia/01-o-ruido.html#objetivo)
+  - [2. Recuperar](docs/astrofotografia/01-o-ruido.html#recuperar)
+  - [3. O mecanismo](docs/astrofotografia/01-o-ruido.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/astrofotografia/01-o-ruido.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/astrofotografia/01-o-ruido.html#lacunas)
+  - [6. Erros comuns](docs/astrofotografia/01-o-ruido.html#erros)
+  - [7. Praticar](docs/astrofotografia/01-o-ruido.html#praticar)
+  - [8. Quiz](docs/astrofotografia/01-o-ruido.html#quiz)
+  - [9. Explica por palavras tuas](docs/astrofotografia/01-o-ruido.html#feynman)
+  - [10. Resumo](docs/astrofotografia/01-o-ruido.html#resumo)
+  - [11. Fontes](docs/astrofotografia/01-o-ruido.html#fontes)
+
+## `docs/astrofotografia/02-a-terra-roda.html` — 2 · A Terra roda — Astrofotografia
+
+  - [1. Objetivo](docs/astrofotografia/02-a-terra-roda.html#objetivo)
+  - [2. Recuperar](docs/astrofotografia/02-a-terra-roda.html#recuperar)
+  - [3. O mecanismo](docs/astrofotografia/02-a-terra-roda.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/astrofotografia/02-a-terra-roda.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/astrofotografia/02-a-terra-roda.html#lacunas)
+  - [6. Erros comuns](docs/astrofotografia/02-a-terra-roda.html#erros)
+  - [7. Praticar](docs/astrofotografia/02-a-terra-roda.html#praticar)
+  - [8. Quiz](docs/astrofotografia/02-a-terra-roda.html#quiz)
+  - [9. Explica por palavras tuas](docs/astrofotografia/02-a-terra-roda.html#feynman)
+  - [10. Resumo](docs/astrofotografia/02-a-terra-roda.html#resumo)
+  - [11. Fontes](docs/astrofotografia/02-a-terra-roda.html#fontes)
+
+## `docs/astrofotografia/03-do-ceu-ao-pixel.html` — 3 · Do céu ao píxel — Astrofotografia
+
+  - [1. Objetivo](docs/astrofotografia/03-do-ceu-ao-pixel.html#objetivo)
+  - [2. Recuperar](docs/astrofotografia/03-do-ceu-ao-pixel.html#recuperar)
+  - [3. O mecanismo](docs/astrofotografia/03-do-ceu-ao-pixel.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/astrofotografia/03-do-ceu-ao-pixel.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/astrofotografia/03-do-ceu-ao-pixel.html#lacunas)
+  - [6. Erros comuns](docs/astrofotografia/03-do-ceu-ao-pixel.html#erros)
+  - [7. Praticar](docs/astrofotografia/03-do-ceu-ao-pixel.html#praticar)
+  - [8. Quiz](docs/astrofotografia/03-do-ceu-ao-pixel.html#quiz)
+  - [9. Explica por palavras tuas](docs/astrofotografia/03-do-ceu-ao-pixel.html#feynman)
+  - [10. Resumo](docs/astrofotografia/03-do-ceu-ao-pixel.html#resumo)
+  - [11. Fontes](docs/astrofotografia/03-do-ceu-ao-pixel.html#fontes)
+
+## `docs/astrofotografia/04-calibrar.html` — 4 · Calibrar: o que é do céu e o que é da câmara — Astrofotografia
+
+  - [1. Objetivo](docs/astrofotografia/04-calibrar.html#objetivo)
+  - [2. Recuperar](docs/astrofotografia/04-calibrar.html#recuperar)
+  - [3. O mecanismo](docs/astrofotografia/04-calibrar.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/astrofotografia/04-calibrar.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/astrofotografia/04-calibrar.html#lacunas)
+  - [6. Erros comuns](docs/astrofotografia/04-calibrar.html#erros)
+  - [7. Praticar](docs/astrofotografia/04-calibrar.html#praticar)
+  - [8. Quiz](docs/astrofotografia/04-calibrar.html#quiz)
+  - [9. Explica por palavras tuas](docs/astrofotografia/04-calibrar.html#feynman)
+  - [10. Resumo](docs/astrofotografia/04-calibrar.html#resumo)
+  - [11. Fontes](docs/astrofotografia/04-calibrar.html#fontes)
+
+## `docs/astrofotografia/05-alinhar-e-empilhar.html` — 5 · Alinhar e empilhar — Astrofotografia
+
+  - [1. Objetivo](docs/astrofotografia/05-alinhar-e-empilhar.html#objetivo)
+  - [2. Recuperar](docs/astrofotografia/05-alinhar-e-empilhar.html#recuperar)
+  - [3. O mecanismo](docs/astrofotografia/05-alinhar-e-empilhar.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/astrofotografia/05-alinhar-e-empilhar.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/astrofotografia/05-alinhar-e-empilhar.html#lacunas)
+  - [6. Erros comuns](docs/astrofotografia/05-alinhar-e-empilhar.html#erros)
+  - [7. Praticar](docs/astrofotografia/05-alinhar-e-empilhar.html#praticar)
+  - [8. Quiz](docs/astrofotografia/05-alinhar-e-empilhar.html#quiz)
+  - [9. Explica por palavras tuas](docs/astrofotografia/05-alinhar-e-empilhar.html#feynman)
+  - [10. Resumo](docs/astrofotografia/05-alinhar-e-empilhar.html#resumo)
+  - [11. Fontes](docs/astrofotografia/05-alinhar-e-empilhar.html#fontes)
+
+## `docs/astrofotografia/06-esticar.html` — 6 · Esticar: do linear ao visível — Astrofotografia
+
+  - [1. Objetivo](docs/astrofotografia/06-esticar.html#objetivo)
+  - [2. Recuperar](docs/astrofotografia/06-esticar.html#recuperar)
+  - [3. O mecanismo](docs/astrofotografia/06-esticar.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/astrofotografia/06-esticar.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/astrofotografia/06-esticar.html#lacunas)
+  - [6. Erros comuns](docs/astrofotografia/06-esticar.html#erros)
+  - [7. Praticar](docs/astrofotografia/06-esticar.html#praticar)
+  - [8. Quiz](docs/astrofotografia/06-esticar.html#quiz)
+  - [9. Explica por palavras tuas](docs/astrofotografia/06-esticar.html#feynman)
+  - [10. Resumo](docs/astrofotografia/06-esticar.html#resumo)
+  - [11. Fontes](docs/astrofotografia/06-esticar.html#fontes)
+
+## `docs/astrofotografia/07-o-ceu-que-atrapalha.html` — 7 · O céu que atrapalha — Astrofotografia
+
+  - [1. Objetivo](docs/astrofotografia/07-o-ceu-que-atrapalha.html#objetivo)
+  - [2. Recuperar](docs/astrofotografia/07-o-ceu-que-atrapalha.html#recuperar)
+  - [3. O mecanismo](docs/astrofotografia/07-o-ceu-que-atrapalha.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/astrofotografia/07-o-ceu-que-atrapalha.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/astrofotografia/07-o-ceu-que-atrapalha.html#lacunas)
+  - [6. Erros comuns](docs/astrofotografia/07-o-ceu-que-atrapalha.html#erros)
+  - [7. Praticar](docs/astrofotografia/07-o-ceu-que-atrapalha.html#praticar)
+  - [8. Quiz](docs/astrofotografia/07-o-ceu-que-atrapalha.html#quiz)
+  - [9. Explica por palavras tuas](docs/astrofotografia/07-o-ceu-que-atrapalha.html#feynman)
+  - [10. Resumo](docs/astrofotografia/07-o-ceu-que-atrapalha.html#resumo)
+  - [11. Fontes](docs/astrofotografia/07-o-ceu-que-atrapalha.html#fontes)
+
+## `docs/astrofotografia/08-planear-a-sessao.html` — 8 · Planear a sessão — Astrofotografia
+
+  - [1. Objetivo](docs/astrofotografia/08-planear-a-sessao.html#objetivo)
+  - [2. Recuperar](docs/astrofotografia/08-planear-a-sessao.html#recuperar)
+  - [3. O mecanismo](docs/astrofotografia/08-planear-a-sessao.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/astrofotografia/08-planear-a-sessao.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/astrofotografia/08-planear-a-sessao.html#lacunas)
+  - [6. Erros comuns](docs/astrofotografia/08-planear-a-sessao.html#erros)
+  - [7. Praticar](docs/astrofotografia/08-planear-a-sessao.html#praticar)
+  - [8. Quiz](docs/astrofotografia/08-planear-a-sessao.html#quiz)
+  - [9. Explica por palavras tuas](docs/astrofotografia/08-planear-a-sessao.html#feynman)
+  - [10. Resumo](docs/astrofotografia/08-planear-a-sessao.html#resumo)
+  - [11. Fontes](docs/astrofotografia/08-planear-a-sessao.html#fontes)
+
+## `docs/astrofotografia/09-o-teu-relatorio.html` — 9 · A tua imagem, com relatório — Astrofotografia
+
+  - [1. Objetivo](docs/astrofotografia/09-o-teu-relatorio.html#objetivo)
+  - [2. Recuperar](docs/astrofotografia/09-o-teu-relatorio.html#recuperar)
+  - [3. O mecanismo](docs/astrofotografia/09-o-teu-relatorio.html#mecanismo)
+  - [4. Exemplo trabalhado](docs/astrofotografia/09-o-teu-relatorio.html#trabalhado)
+  - [5. Exemplo com lacunas](docs/astrofotografia/09-o-teu-relatorio.html#lacunas)
+  - [6. Erros comuns](docs/astrofotografia/09-o-teu-relatorio.html#erros)
+  - [7. Praticar](docs/astrofotografia/09-o-teu-relatorio.html#praticar)
+  - [8. Quiz](docs/astrofotografia/09-o-teu-relatorio.html#quiz)
+  - [9. Explica por palavras tuas](docs/astrofotografia/09-o-teu-relatorio.html#feynman)
+  - [10. Resumo](docs/astrofotografia/09-o-teu-relatorio.html#resumo)
+  - [11. Fontes](docs/astrofotografia/09-o-teu-relatorio.html#fontes)
+
+## `docs/astrofotografia/bibliografia.html` — Bibliografia — Astrofotografia
+
+  - [1. Por onde começar, se só leres uma coisa](docs/astrofotografia/bibliografia.html#primeiro)
+  - [2. Os livros](docs/astrofotografia/bibliografia.html#livros)
+  - [3. Os artigos originais](docs/astrofotografia/bibliografia.html#artigos)
+  - [4. As especificações e as patentes](docs/astrofotografia/bibliografia.html#especificacoes)
+  - [5. As regras práticas, e de onde vêm](docs/astrofotografia/bibliografia.html#regras)
+  - [6. As fontes secundárias, ditas como tal](docs/astrofotografia/bibliografia.html#secundarias)
+  - [7. Dentro deste repositório](docs/astrofotografia/bibliografia.html#vizinhos)
+  - [8. O que se procurou e não se encontrou](docs/astrofotografia/bibliografia.html#procurado)
+
+## `docs/astrofotografia/folha.html` — Folha de consulta — Astrofotografia
+
+  - [A luz](docs/astrofotografia/folha.html#luz)
+  - [O ruído](docs/astrofotografia/folha.html#ruido)
+  - [A Terra roda](docs/astrofotografia/folha.html#terra)
+  - [O píxel](docs/astrofotografia/folha.html#pixel)
+  - [Calibrar](docs/astrofotografia/folha.html#calibrar)
+  - [Empilhar](docs/astrofotografia/folha.html#empilhar)
+  - [Esticar](docs/astrofotografia/folha.html#esticar)
+  - [O céu](docs/astrofotografia/folha.html#ceu)
+  - [Planear](docs/astrofotografia/folha.html#planear)
+  - [A ordem, que não se troca](docs/astrofotografia/folha.html#ordem)
+
+## `docs/astrofotografia/index.html` — Astrofotografia — professor
+
+  - [O que vais conseguir fazer no fim](docs/astrofotografia/index.html#conseguir)
+  - [O que este curso não é](docs/astrofotografia/index.html#nao-e)
+  - [O que assumi](docs/astrofotografia/index.html#assumi)
+  - [O mapa](docs/astrofotografia/index.html#mapa)
+  - [O plano no tempo](docs/astrofotografia/index.html#plano)
+  - [Nota das fases](docs/astrofotografia/index.html#fases)
+
+## `docs/astrofotografia/teste.html` — Teste de domínio — Astrofotografia
+
+_(sem cabeçalhos com id)_
+
 ## `docs/cassete-captura/00-espetro.html` — 0 · Ver as frequências de um sinal — Digitalizar cassetes
 
   - [1. Objetivo](docs/cassete-captura/00-espetro.html#objetivo)

@@ -1,0 +1,72 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//professor//astrofotografia//PT
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Astrofotografia — revisão espaçada
+BEGIN:VEVENT
+UID:6beadeefc02291833fe4e952@professor.local
+DTSTAMP:20260918T120000Z
+DTSTART;VALUE=DATE:20261128
+DTEND;VALUE=DATE:20261129
+SUMMARY:Revisão +1 — a luz e o ruído
+DESCRIPTION:As duas lições de fundação, que é onde estão os mecanismos que todas as outras usam.\n\n- Refaz de cabeça: quantos electrões dá uma estrela V=10 em 10 s com 50 mm a f/2?\n- Diz, sem consultar, a fórmula da variância e porque é que a leitura entra ao quadrado.\n- Explica em voz alta porque é que o ISO não recolhe luz.\n- Lições: docs/astrofotografia/00-a-luz-como-contagem.html e 01-o-ruido.html
+BEGIN:VALARM
+TRIGGER:-PT10H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +1 — a luz e o ruído
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:db1457b2416e6740bb0fdf0c@professor.local
+DTSTAMP:20260918T120000Z
+DTSTART;VALUE=DATE:20261130
+DTEND;VALUE=DATE:20261201
+SUMMARY:Revisão +3 — a Terra e o píxel
+DESCRIPTION:O limite que define o curso, e a geometria que o traduz em píxeis.\n\n- Calcula a pose máxima para a tua objetiva com tolerância de 1,3 px, a δ = 0°.\n- Mostra a álgebra pela qual a regra dos 500 é uma regra sobre o passo do píxel.\n- Diz quem decide a largura das tuas estrelas, e porque é que não é o seeing.\n- Lições: 02-a-terra-roda.html e 03-do-ceu-ao-pixel.html
+BEGIN:VALARM
+TRIGGER:-PT10H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +3 — a Terra e o píxel
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:fd17ef976eef60491409774b@professor.local
+DTSTAMP:20260918T120000Z
+DTSTART;VALUE=DATE:20261204
+DTEND;VALUE=DATE:20261205
+SUMMARY:Revisão +7 — calibrar e empilhar
+DESCRIPTION:As duas lições de pipeline. É aqui que os erros silenciosos vivem.\n\n- Escreve o modelo do sinal e justifica a ordem das operações.\n- Mede o ganho e o ruído de leitura outra vez, com dois planos e dois zeros novos.\n- Diz as duas causas conhecidas de um ganho de SNR acima de √N.\n- Lições: 04-calibrar.html e 05-alinhar-e-empilhar.html
+BEGIN:VALARM
+TRIGGER:-PT10H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +7 — calibrar e empilhar
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:77cdb5b9a611e009599aacf7@professor.local
+DTSTAMP:20260918T120000Z
+DTSTART;VALUE=DATE:20261218
+DTEND;VALUE=DATE:20261219
+SUMMARY:Revisão +21 — esticar, o céu, planear
+DESCRIPTION:As três lições de decisão: o que se destrói, o que se mede e o que se escolhe.\n\n- Explica porque é que o esticamento é irreversível se a função é invertível.\n- Mede o brilho do céu da tua última sessão e compara com a anterior.\n- Escolhe um alvo para a próxima semana e justifica com a altura máxima.\n- Lições: 06-esticar.html, 07-o-ceu-que-atrapalha.html e 08-planear-a-sessao.html
+BEGIN:VALARM
+TRIGGER:-PT10H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +21 — esticar, o céu, planear
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:df9328ddcf917cb9781fc31a@professor.local
+DTSTAMP:20260918T120000Z
+DTSTART;VALUE=DATE:20270126
+DTEND;VALUE=DATE:20270127
+SUMMARY:Revisão +60 — o teste de domínio
+DESCRIPTION:Intercalado e sem consultar. É a única medição do curso inteiro.\n\n- Duas horas, sem lições e sem código.\n- Entrega em topicos/astrofotografia/respostas/AAAA-MM-DD-teste.md\n- Corre /corrigir astrofotografia\n- Teste: docs/astrofotografia/teste.html
+BEGIN:VALARM
+TRIGGER:-PT10H
+ACTION:DISPLAY
+DESCRIPTION:Revisão +60 — o teste de domínio
+END:VALARM
+END:VEVENT
+END:VCALENDAR
